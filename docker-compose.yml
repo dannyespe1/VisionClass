@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: vision_user
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: vision_system
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  backend:
+    build: ./backend
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - db
+  frontend:
+    build: ./frontend
+    command: npm run dev
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+  ml:
+    build: ./ml
+    command: python ml_service.py
+    volumes:
+      - ./ml:/app
+    ports:
+      - "9000:9000"
+    depends_on:
+      - backend
+volumes:
+  pg_data:

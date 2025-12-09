@@ -1,0 +1,11 @@
+opencv-python
+mediapipe
+numpy
+pandas
+scikit-learn
+xgboost
+fastapi
+uvicorn
+joblib
+httpx
+python-multipart

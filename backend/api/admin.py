@@ -1,0 +1,68 @@
+from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+
+from .models import (
+    User,
+    Course,
+    Enrollment,
+    Session,
+    AttentionEvent,
+    ContentView,
+    D2RResult,
+    QuizAttempt,
+)
+
+
+@admin.register(User)
+class UserAdmin(BaseUserAdmin):
+    fieldsets = BaseUserAdmin.fieldsets + (
+        ('Rol', {'fields': ('role',)}),
+    )
+    list_display = ('username', 'email', 'role', 'is_staff', 'is_active')
+    list_filter = ('role', 'is_staff')
+
+
+@admin.register(Course)
+class CourseAdmin(admin.ModelAdmin):
+    list_display = ('title', 'owner', 'is_active', 'created_at')
+    list_filter = ('is_active',)
+    search_fields = ('title', 'owner__username')
+
+
+@admin.register(Enrollment)
+class EnrollmentAdmin(admin.ModelAdmin):
+    list_display = ('user', 'course', 'status', 'created_at')
+    list_filter = ('status',)
+    search_fields = ('user__username', 'course__title')
+
+
+@admin.register(Session)
+class SessionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'course', 'student', 'started_at', 'ended_at', 'attention_score', 'distracted_count')
+    search_fields = ('course__title', 'student__username')
+
+
+@admin.register(AttentionEvent)
+class AttentionEventAdmin(admin.ModelAdmin):
+    list_display = ('id', 'session', 'user', 'timestamp', 'value', 'label')
+    search_fields = ('session__id', 'user__username', 'label')
+
+
+@admin.register(ContentView)
+class ContentViewAdmin(admin.ModelAdmin):
+    list_display = ('user', 'session', 'content_type', 'content_id', 'duration_seconds', 'started_at')
+    list_filter = ('content_type',)
+    search_fields = ('content_id', 'user__username', 'session__id')
+
+
+@admin.register(D2RResult)
+class D2RResultAdmin(admin.ModelAdmin):
+    list_display = ('user', 'session', 'raw_score', 'processing_speed', 'attention_span', 'errors', 'created_at')
+    search_fields = ('user__username', 'session__id')
+
+
+@admin.register(QuizAttempt)
+class QuizAttemptAdmin(admin.ModelAdmin):
+    list_display = ('user', 'session', 'difficulty', 'score', 'created_at')
+    list_filter = ('difficulty',)
+    search_fields = ('user__username', 'session__id')

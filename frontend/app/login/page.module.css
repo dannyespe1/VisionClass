@@ -1,0 +1,62 @@
+.page {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  min-height: calc(100vh - 80px);
+  background: #f8fafc;
+}
+
+.left {
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.right {
+  position: relative;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #e0f2fe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+}
+
+.overlay {
+  max-width: 360px;
+  display: grid;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(6px);
+}
+
+.logo {
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.form {
+  margin-top: 10px;
+  display: grid;
+  gap: 12px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.backLink {
+  margin-bottom: 6px;
+}
+
+.tokenBox {
+  border: 1px dashed var(--border);
+  padding: 10px;
+  border-radius: 12px;
+  background: #fff;
+}

@@ -3,6 +3,11 @@ from rest_framework import viewsets, permissions, mixins, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import action
+import random
+import os
+import json
+from google import genai
+from google.genai import types
 
 from .models import (
     Course,
@@ -222,3 +227,98 @@ class RecommendDifficultyView(APIView):
             "frame_count": session.frame_count,
             "last_score": session.last_score,
         })
+
+
+class GenerateTestView(APIView):
+    """
+    Genera una prueba de hasta 20 preguntas. Si existe OPENAI_API_KEY usa OpenAI; si no, devuelve mock.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        course_id = request.data.get('course_id')
+        difficulty = request.data.get('difficulty', 'media')
+        num_questions = min(int(request.data.get('num_questions', 20)), 20)
+        context = request.data.get('context', '')
+
+        if not course_id:
+            return Response({"detail": "course_id es requerido"}, status=400)
+
+        gemini_key = os.environ.get("GOOGLE_API_KEY", "")
+        questions = []
+
+        # 1) Intentar con Gemini si existe key
+        fallback_detail = None
+        if gemini_key:
+            try:
+                client = genai.Client(api_key=gemini_key)
+                system_prompt = (
+                    "Eres un generador de examenes. Responde SOLO en JSON con la clave 'questions' "
+                    "como lista de objetos: id, question, options (lista de 4), answer, difficulty. "
+                    "No incluyas texto fuera del JSON."
+                )
+                user_prompt = (
+                    f"Genera {num_questions} preguntas de dificultad {difficulty} para el curso {course_id}. "
+                    f"Contexto/Notas: {context}. Ajusta la dificultad segun la atencion reportada."
+                )
+                resp = client.models.generate_content(
+                    model="gemini-2.5-flash",
+                    contents=[system_prompt, user_prompt],
+                    config=types.GenerateContentConfig(
+                        temperature=0.6,
+                        response_mime_type="application/json",
+                    ),
+                )
+                # Extraer texto de respuesta
+                text_payload = ""
+                if getattr(resp, "text", None):
+                    text_payload = resp.text
+                elif getattr(resp, "candidates", None):
+                    parts = []
+                    for cand in resp.candidates:
+                        if getattr(cand, "content", None) and getattr(cand.content, "parts", None):
+                            for part in cand.content.parts:
+                                if getattr(part, "text", None):
+                                    parts.append(part.text)
+                    text_payload = "\n".join(parts)
+                if text_payload:
+                    parsed = json.loads(text_payload)
+                    questions = parsed.get("questions") or parsed.get("preguntas") or []
+            except Exception as exc:
+                fallback_detail = f"Gemini fallback: {exc}"
+                pass
+
+        # 3) Mock final
+        if not questions:
+            questions = self._mock_questions(num_questions, difficulty, course_id, context)
+
+        return Response(
+            {
+                "course_id": course_id,
+                "difficulty": difficulty,
+                "num_questions": num_questions,
+                "questions": questions,
+                "detail": fallback_detail,
+            }
+        )
+
+    def _mock_questions(self, num_questions, difficulty, course_id, context):
+        difficulties = ["baja", "media", "alta"]
+        out = []
+        for i in range(num_questions):
+            d = difficulty if difficulty in difficulties else random.choice(difficulties)
+            out.append(
+                {
+                    "id": i + 1,
+                    "question": f"[{d}] Pregunta generada #{i+1} sobre el curso {course_id}. Contexto: {context[:60]}...",
+                    "options": [
+                        f"Opcion A ({d})",
+                        f"Opcion B ({d})",
+                        f"Opcion C ({d})",
+                        f"Opcion D ({d})",
+                    ],
+                    "answer": "Opcion A",
+                    "difficulty": d,
+                }
+            )
+        return out

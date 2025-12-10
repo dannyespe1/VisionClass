@@ -21,4 +21,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('me/', views.MeView.as_view(), name='me'),
     path('recommendations/difficulty/', views.RecommendDifficultyView.as_view(), name='recommend_difficulty'),
+    path('ai/generate-test/', views.GenerateTestView.as_view(), name='generate_test'),
 ]

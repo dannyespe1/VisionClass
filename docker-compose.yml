@@ -33,6 +33,10 @@ services:
   ml:
     build: ./ml
     command: python ml_service.py
+    environment:
+      - BACKEND_URL=http://backend:8000
+      - BACKEND_TOKEN=${ML_BACKEND_TOKEN:-}
+      - SEQUENCE_LENGTH=16
     volumes:
       - ./ml:/app
     ports:

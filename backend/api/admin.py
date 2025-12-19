@@ -4,6 +4,9 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import (
     User,
     Course,
+    CourseModule,
+    CourseLesson,
+    CourseMaterial,
     Enrollment,
     Session,
     AttentionEvent,
@@ -27,6 +30,27 @@ class CourseAdmin(admin.ModelAdmin):
     list_display = ('title', 'owner', 'is_active', 'created_at')
     list_filter = ('is_active',)
     search_fields = ('title', 'owner__username')
+
+
+@admin.register(CourseModule)
+class CourseModuleAdmin(admin.ModelAdmin):
+    list_display = ('title', 'course', 'order', 'duration_hours', 'created_at')
+    list_filter = ('course',)
+    search_fields = ('title', 'course__title')
+
+
+@admin.register(CourseLesson)
+class CourseLessonAdmin(admin.ModelAdmin):
+    list_display = ('title', 'module', 'order', 'created_at')
+    list_filter = ('module',)
+    search_fields = ('title', 'module__title')
+
+
+@admin.register(CourseMaterial)
+class CourseMaterialAdmin(admin.ModelAdmin):
+    list_display = ('title', 'material_type', 'lesson', 'created_at')
+    list_filter = ('material_type',)
+    search_fields = ('title', 'lesson__title')
 
 
 @admin.register(Enrollment)

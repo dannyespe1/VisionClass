@@ -31,7 +31,7 @@ export default function StudentPage() {
   const [contentId, setContentId] = useState("");
   const [contentType, setContentType] = useState("pdf");
   const [selectedCourse, setSelectedCourse] = useState("");
-  const [testMode, setTestMode] = useState(true); // permite usar la camara sin curso
+  const [testMode, setTestMode] = useState(false); // modo prueba desactivado por defecto
 
   const { token } = useAuth();
 
@@ -71,7 +71,7 @@ export default function StudentPage() {
       return;
     }
     if (!selectedCourse && !testMode) {
-      setStatus("Selecciona un curso o activa modo prueba para usar la camara");
+      setStatus("Selecciona un curso para usar la camara");
       return;
     }
     if (!sessionId) setSessionId("1");
@@ -169,29 +169,10 @@ export default function StudentPage() {
                 <h1 className="text-2xl font-semibold text-slate-900">Bienvenido de nuevo</h1>
                 <p className="text-sm text-slate-500">Continua con tu aprendizaje donde lo dejaste.</p>
               </div>
-
-              <label className="flex items-center gap-2 text-xs text-slate-600 bg-white border border-slate-200 rounded-full px-3 py-1 shadow-sm">
-                <input
-                  type="checkbox"
-                  className="rounded border-slate-300"
-                  checked={testMode}
-                  onChange={(e) => setTestMode(e.target.checked)}
-                />
-                <span>Modo prueba (usar camara sin curso)</span>
-              </label>
             </div>
           </header>
         ) : (
           <div className="flex justify-end">
-            <label className="flex items-center gap-2 text-xs text-slate-600 bg-white border border-slate-200 rounded-full px-3 py-1 shadow-sm">
-              <input
-                type="checkbox"
-                className="rounded border-slate-300"
-                checked={testMode}
-                onChange={(e) => setTestMode(e.target.checked)}
-              />
-              <span>Modo prueba (usar camara sin curso)</span>
-            </label>
           </div>
         )}
 
@@ -258,7 +239,6 @@ export default function StudentPage() {
             </section>
 
             <section className="space-y-3 mt-4">
-              <h2 className="text-lg font-semibold text-slate-900">Mis Cursos</h2>
               <InicioSection
                 onCourseSelect={(title) => {
                   setContentId(title);
@@ -285,143 +265,7 @@ export default function StudentPage() {
 
         {/* Estadisticas */}
         {activeTab === "estadisticas" && (
-          <section className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm px-4 py-4 transition transform hover:-translate-y-1 hover:shadow-lg">
-                <p className="text-xs text-slate-500">Atencion promedio</p>
-                <p className="mt-1 text-xl font-semibold text-slate-900">
-                  {score !== null ? `${(score * 100).toFixed(0)}%` : "--"}
-                </p>
-              </div>
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm px-4 py-4 transition transform hover:-translate-y-1 hover:shadow-lg">
-                <p className="text-xs text-slate-500">Ultimo frame</p>
-                <p className="mt-1 text-xl font-semibold text-slate-900">
-                  {frameScore !== null ? frameScore.toFixed(2) : "--"}
-                </p>
-              </div>
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm px-4 py-4 transition transform hover:-translate-y-1 hover:shadow-lg">
-                <p className="text-xs text-slate-500">Sesion</p>
-                <p className="mt-1 text-xl font-semibold text-slate-900">{sessionId || "--"}</p>
-              </div>
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm px-4 py-4 transition transform hover:-translate-y-1 hover:shadow-lg">
-                <p className="text-xs text-slate-500">Curso seleccionado</p>
-                <p className="mt-1 text-sm font-semibold text-slate-900">
-                  {selectedCourse || (testMode ? "Modo prueba" : "--")}
-                </p>
-              </div>
-            </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div className="bg-white rounded-3xl border border-slate-200 shadow-lg p-6 space-y-4 transition transform hover:-translate-y-1">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-base font-semibold text-slate-900">Seguimiento en vivo</h3>
-                    <p className="text-xs text-slate-500">Activa la camara y envia frames al servicio ML.</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={running ? stopStream : startStream}
-                    className={`text-xs font-semibold rounded-xl px-3 py-1.5 ${
-                      running
-                        ? "bg-slate-100 text-slate-700"
-                        : "bg-sky-600 text-white shadow-sm hover:bg-sky-700"
-                    }`}
-                  >
-                    {running ? "Detener" : "Iniciar camara"}
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-slate-700 text-xs">Session ID</label>
-                    <input
-                      value={sessionId}
-                      onChange={(e) => setSessionId(e.target.value)}
-                      placeholder="Ej: 1"
-                      className="rounded-lg border border-slate-300 bg-slate-50 px-3 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-slate-700 text-xs">User ID</label>
-                    <input
-                      value={userId}
-                      onChange={(e) => setUserId(e.target.value)}
-                      placeholder="Ej: 2"
-                      className="rounded-lg border border-slate-300 bg-slate-50 px-3 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={sendFrame}
-                    disabled={!running}
-                    className="text-xs rounded-xl border border-slate-200 px-3 py-1.5 text-slate-700 hover:bg-slate-50 disabled:opacity-60 disabled:cursor-not-allowed"
-                  >
-                    Enviar frame ahora
-                  </button>
-                  {!token && (
-                    <p className="text-[11px] text-slate-400">Inicia sesion en /login para registrar en backend.</p>
-                  )}
-                </div>
-
-                <p className="text-xs text-slate-500">Estado: {status || "Listo"}</p>
-
-                <div className="grid grid-cols-2 gap-3 text-xs mt-2">
-                  <div className="rounded-xl bg-slate-50 px-3 py-2">
-                    <p className="text-[11px] text-slate-500">Score secuencial</p>
-                    <p className="text-sm font-semibold text-slate-900">
-                      {score !== null ? score.toFixed(3) : "--"}
-                    </p>
-                  </div>
-                  <div className="rounded-xl bg-slate-50 px-3 py-2">
-                    <p className="text-[11px] text-slate-500">Score frame</p>
-                    <p className="text-sm font-semibold text-slate-900">
-                      {frameScore !== null ? frameScore.toFixed(3) : "--"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-3xl border border-slate-200 shadow-lg p-6 space-y-4 transition transform hover:-translate-y-1">
-                <div>
-                  <h3 className="text-base font-semibold text-slate-900">Registrar vista de contenido</h3>
-                  <p className="text-xs text-slate-500">Asocia tu sesion con un recurso (PDF, video, quiz).</p>
-                </div>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-slate-700 text-xs">Tipo</label>
-                    <select
-                      value={contentType}
-                      onChange={(e) => setContentType(e.target.value)}
-                      className="rounded-lg border border-slate-300 bg-slate-50 px-3 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                    >
-                      <option value="pdf">PDF</option>
-                      <option value="video">Video</option>
-                      <option value="quiz">Quiz</option>
-                    </select>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-slate-700 text-xs">Contenido ID</label>
-                    <input
-                      value={contentId}
-                      onChange={(e) => setContentId(e.target.value)}
-                      placeholder="slug o id de contenido"
-                      className="rounded-lg border border-slate-300 bg-slate-50 px-3 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                    />
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={sendContentView}
-                  className="inline-flex items-center justify-center rounded-xl bg-slate-900 text-white px-4 py-2 text-sm font-semibold shadow hover:bg-black"
-                >
-                  Guardar vista
-                </button>
-              </div>
-            </div>
-
+          <section className="space-y-4">
             <EstadisticasSection />
           </section>
         )}

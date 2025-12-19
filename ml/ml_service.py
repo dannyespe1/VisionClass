@@ -7,6 +7,7 @@ import cv2
 import numpy as np
 import httpx
 import mediapipe as mp
+import onnxruntime as ort
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
@@ -16,18 +17,38 @@ import uvicorn
 BACKEND_URL = os.environ.get("BACKEND_URL", "http://backend:8000")
 BACKEND_TOKEN = os.environ.get("BACKEND_TOKEN", "")
 SEQUENCE_LENGTH = int(os.environ.get("SEQUENCE_LENGTH", "16"))
+MODEL_PATH = os.environ.get("MODEL_PATH", "checkpoints/cnn_lstm.onnx")
+MODEL_IMG_SIZE = int(os.environ.get("MODEL_IMG_SIZE", "224"))
 
 app = FastAPI(title="ML Attention Service", version="0.1.0")
 
-mp_face_mesh = mp.solutions.face_mesh
-face_mesh = mp_face_mesh.FaceMesh(
-    max_num_faces=1,
-    refine_landmarks=True,
-    min_detection_confidence=0.5,
-    min_tracking_confidence=0.5,
-)
+try:
+    mp_face_mesh = mp.solutions.face_mesh
+except AttributeError:
+    try:
+        from mediapipe.python import solutions as mp_solutions
+        mp_face_mesh = mp_solutions.face_mesh
+    except Exception:
+        mp_face_mesh = None
+
+if mp_face_mesh is not None:
+    face_mesh = mp_face_mesh.FaceMesh(
+        max_num_faces=1,
+        refine_landmarks=True,
+        min_detection_confidence=0.5,
+        min_tracking_confidence=0.5,
+    )
+else:
+    face_mesh = None
 
 session_sequences: Dict[int, deque] = defaultdict(lambda: deque(maxlen=SEQUENCE_LENGTH))
+session_frame_buffers: Dict[int, deque] = defaultdict(lambda: deque(maxlen=SEQUENCE_LENGTH))
+
+# Cargar modelo ONNX (opcional, fallback si no existe)
+try:
+    ort_session = ort.InferenceSession(MODEL_PATH, providers=["CPUExecutionProvider"])
+except Exception:
+    ort_session = None
 
 
 class AttentionEventPayload(BaseModel):
@@ -47,15 +68,23 @@ def compute_attention_score(image: np.ndarray) -> Dict[str, Any]:
     - Apertura de ojos (EAR)
     - Desviación del gaze (iris) respecto al centro
     """
+    if face_mesh is None:
+        return {"value": None, "label": "no_face", "data": {"face": False}}
+
     h, w, _ = image.shape
     rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     result = face_mesh.process(rgb)
 
     if not result.multi_face_landmarks:
-        return {"value": 0.0, "label": "attention_score", "data": {"face": False}}
+        return {"value": None, "label": "no_face", "data": {"face": False}}
 
     face = result.multi_face_landmarks[0]
     landmarks = [(lm.x * w, lm.y * h, lm.z) for lm in face.landmark]
+    xs = [p[0] for p in landmarks]
+    ys = [p[1] for p in landmarks]
+    x0, x1 = max(min(xs), 0), min(max(xs), w)
+    y0, y1 = max(min(ys), 0), min(max(ys), h)
+    bbox = [x0, y0, x1, y1]
 
     # Índices de ojos (MediaPipe Face Mesh)
     left_eye_idx = [33, 160, 158, 133, 153, 144]  # borde ojo izquierdo
@@ -100,6 +129,8 @@ def compute_attention_score(image: np.ndarray) -> Dict[str, Any]:
 
     score = float(np.clip(0.5 * eyes_open + 0.4 * gaze_center + 0.1 * presence, 0, 1))
 
+    gaze_deviation = float(gaze_deviation)
+
     return {
         "value": score,
         "label": "attention_score",
@@ -109,6 +140,8 @@ def compute_attention_score(image: np.ndarray) -> Dict[str, Any]:
             "eyes_open": eyes_open,
             "gaze_center": gaze_center,
             "gaze_offset": norm_offset.tolist(),
+            "gaze_deviation": gaze_deviation,
+            "bbox": bbox,
         },
     }
 
@@ -131,9 +164,9 @@ def aggregate_temporal_score(session_id: int, frame_result: Dict[str, Any]) -> D
     eyes = np.array([x["eyes_open"] for x in seq])
     gaze = np.array([x["gaze_center"] for x in seq])
 
-    temporal_score = float(np.mean(scores))
-    eyes_score = float(np.mean(eyes))
-    gaze_score = float(np.mean(gaze))
+    temporal_score = float(np.mean(scores)) if len(scores) else 0.0
+    eyes_score = float(np.mean(eyes)) if len(eyes) else 0.0
+    gaze_score = float(np.mean(gaze)) if len(gaze) else 0.0
 
     combined = float(np.clip(0.6 * temporal_score + 0.2 * eyes_score + 0.2 * gaze_score, 0, 1))
 
@@ -181,6 +214,10 @@ async def analyze_frame(
     file: UploadFile = File(...),
     session_id: int = Form(...),
     user_id: int = Form(...),
+    phase: int = Form(0),
+    time_left: float = Form(0),
+    spinning: int = Form(0),
+    test_name: str = Form("D2R"),
 ):
     """
     Recibe un frame (image/jpeg o png), calcula score y reenvía al backend.
@@ -195,14 +232,77 @@ async def analyze_frame(
     result = compute_attention_score(image)
     temporal = aggregate_temporal_score(session_id, result)
 
+    # Opcional: guardar frame para dataset (no es video, solo imágenes sueltas)
+    frame_path = None
+    if os.environ.get("SAVE_FRAMES", "0") == "1":
+        base_dir = Path(os.environ.get("FRAMES_DIR", "data/frames"))
+        target_dir = base_dir / str(session_id)
+        target_dir.mkdir(parents=True, exist_ok=True)
+        fname = f"{datetime.utcnow().strftime('%Y%m%dT%H%M%S%f')}_p{phase}.jpg"
+        fpath = target_dir / fname
+        try:
+            with open(fpath, "wb") as f:
+                f.write(content)
+            frame_path = str(fpath)
+        except Exception:
+            frame_path = None
+    if frame_path:
+        result.setdefault("data", {})["frame_path"] = frame_path
+
+    # buffer de frames para modelo CNN-LSTM
+    model_score = None
+    if result.get("data", {}).get("face", False):
+        bbox = result["data"].get("bbox")
+        try:
+            if bbox:
+                x0, y0, x1, y1 = map(int, bbox)
+                x0 = max(x0 - int(0.1 * (x1 - x0)), 0)
+                y0 = max(y0 - int(0.1 * (y1 - y0)), 0)
+                x1 = min(x1 + int(0.1 * (x1 - x0)), image.shape[1])
+                y1 = min(y1 + int(0.1 * (y1 - y0)), image.shape[0])
+                crop = image[y0:y1, x0:x1]
+            else:
+                crop = image
+            crop = cv2.cvtColor(crop, cv2.COLOR_BGR2RGB)
+            crop = cv2.resize(crop, (MODEL_IMG_SIZE, MODEL_IMG_SIZE))
+            crop = crop.astype("float32") / 255.0
+            crop = np.transpose(crop, (2, 0, 1))  # C,H,W
+            session_frame_buffers[session_id].append(crop)
+        except Exception:
+            pass
+
+        if ort_session and len(session_frame_buffers[session_id]) >= SEQUENCE_LENGTH and int(spinning) == 0:
+            try:
+                seq = list(session_frame_buffers[session_id])[-SEQUENCE_LENGTH:]
+                arr = np.stack(seq, axis=0)[None, ...]  # 1,T,C,H,W
+                ort_out = ort_session.run(None, {"frames": arr, "mask": None})
+                if ort_out:
+                    model_score = float(np.clip(np.ravel(ort_out[0])[0], 0.0, 1.0))
+            except Exception:
+                model_score = None
+
+    label = "attention_model" if model_score is not None else (
+        temporal.get("label", "attention_sequence_score") if result["value"] is not None else "no_face"
+    )
+    value = model_score if model_score is not None else (temporal.get("value") if result["value"] is not None else None)
+
     payload = AttentionEventPayload(
         session_id=session_id,
         user_id=user_id,
-        value=temporal["value"],
-        label=temporal.get("label", "attention_sequence_score"),
+        value=value,
+        label=label,
         data={
+            "context": {
+                "test": test_name or "D2R",
+                "phase": phase,
+                "spinning": int(spinning),
+                "time_left": time_left,
+            },
+            "state": "no_face" if not result.get("data", {}).get("face", False) else "ok",
             "temporal": temporal.get("data", {}),
             "frame": result.get("data", {}),
+            "score_model": model_score,
+            "score_baseline": result.get("value"),
         },
     )
     await post_event_to_backend(payload)

@@ -9,14 +9,15 @@ const LETTERS = ["d", "p"];
 function generateRow(size: number, targetProbability: number): Cell[] {
   return Array.from({ length: size }).map((_, idx) => {
     const letter = LETTERS[Math.floor(Math.random() * LETTERS.length)];
-    const dashes = Math.floor(Math.random() * 3) + 1; // 1–3
-    const target = letter === "d" && dashes === 2 && Math.random() < targetProbability;
+    const randomDashes = Math.floor(Math.random() * 3) + 1; // 1..3
+    const forceTwo = Math.random() < targetProbability;
+    const dashes = forceTwo ? 2 : randomDashes;
+    const target = letter === "d" && dashes === 2;
     const text = `${letter}${"-".repeat(dashes)}`;
     return { id: idx, text, target };
   });
 }
 
-// Celda tipo “tragamonedas”: mientras spinning=true muestra una rueda vertical
 function ReelCell() {
   const baseItems = ["d-", "p--", "d--", "q-", "b--", "p-"];
   const items = [...baseItems, ...baseItems];
@@ -44,13 +45,21 @@ export default function D2RWidget({
   phase = 1,
   totalPhases = 14,
   onFinish,
+  onTick,
+  onPhaseStart,
+  onPhaseEnd,
+  onClickEvent,
 }: {
   durationSeconds?: number;
   rowSize?: number;
   targetProbability?: number;
   phase?: number;
   totalPhases?: number;
-  onFinish: (results: { hits: number; errors: number; omissions: number }) => void;
+  onFinish: (phaseNumber: number, results: { hits: number; errors: number; omissions: number }) => void;
+  onTick?: (data: { phase: number; timeLeft: number; spinning: boolean }) => void;
+  onPhaseStart?: (data: { phase: number; startedAt: number; spinningEndsAt?: number }) => void;
+  onPhaseEnd?: (data: { phase: number; endedAt: number; hits: number; errors: number; omissions: number; targetCount: number }) => void;
+  onClickEvent?: (data: { phase: number; ts: number; cellId: number; isTarget: boolean }) => void;
 }) {
   const [timeLeft, setTimeLeft] = useState(durationSeconds);
   const [active, setActive] = useState(false);
@@ -60,6 +69,9 @@ export default function D2RWidget({
   const [errors, setErrors] = useState(0);
   const [clickedIds, setClickedIds] = useState<Set<number>>(new Set());
   const spinTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const finishedPhaseRef = useRef(false);
+  const phaseStartRef = useRef<number | null>(null);
+  const spinEndRef = useRef<number | null>(null);
 
   const startPhase = useCallback(() => {
     setActive(false);
@@ -68,6 +80,7 @@ export default function D2RWidget({
     setErrors(0);
     setClickedIds(new Set());
     setTimeLeft(durationSeconds);
+    finishedPhaseRef.current = false;
 
     if (spinTimeoutRef.current) clearTimeout(spinTimeoutRef.current);
 
@@ -75,15 +88,36 @@ export default function D2RWidget({
       setRow(generateRow(rowSize, targetProbability));
       setSpinning(false);
       setActive(true);
+      const spinEndsAt = Date.now();
+      spinEndRef.current = spinEndsAt;
+      if (onPhaseStart) {
+        const startedAt = phaseStartRef.current ?? Date.now();
+        onPhaseStart({ phase, startedAt, spinningEndsAt: spinEndsAt });
+      }
     }, 900);
-  }, [durationSeconds, rowSize, targetProbability]);
+    phaseStartRef.current = Date.now();
+  }, [durationSeconds, rowSize, targetProbability, phase, onPhaseStart]);
 
   const finish = useCallback(() => {
+    if (finishedPhaseRef.current) return;
+    finishedPhaseRef.current = true;
     setActive(false);
     const targetCount = row.filter((c) => c.target).length;
     const omissions = Math.max(targetCount - hits, 0);
-    onFinish({ hits, errors, omissions });
-  }, [errors, hits, onFinish, row]);
+    setTimeout(() => {
+      onFinish(phase, { hits, errors, omissions });
+      if (onPhaseEnd) {
+        onPhaseEnd({
+          phase,
+          endedAt: Date.now(),
+          hits,
+          errors,
+          omissions,
+          targetCount,
+        });
+      }
+    }, 0);
+  }, [errors, hits, onFinish, onPhaseEnd, phase, row]);
 
   useEffect(() => {
     startPhase();
@@ -102,6 +136,9 @@ export default function D2RWidget({
 
     if (cell.target) setHits((h) => h + 1);
     else setErrors((e) => e + 1);
+    if (onClickEvent) {
+      onClickEvent({ phase, ts: Date.now(), cellId: cell.id, isTarget: cell.target });
+    }
   };
 
   useEffect(() => {
@@ -110,20 +147,26 @@ export default function D2RWidget({
       timer = setInterval(() => {
         setTimeLeft((t) => {
           const next = t - 1;
-          if (next <= 0) {
-            finish();
-            return 0;
+          const value = next <= 0 ? 0 : next;
+          if (onTick) {
+            onTick({ phase, timeLeft: value, spinning });
           }
-          return next;
+          return value;
         });
       }, 1000);
+    } else {
+      if (onTick) onTick({ phase, timeLeft, spinning });
     }
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [active, spinning, finish]);
+  }, [active, spinning, onTick, phase, timeLeft]);
 
-  const targetCount = useMemo(() => row.filter((c) => c.target).length, [row]);
+  useEffect(() => {
+    if (active && !spinning && timeLeft <= 0) {
+      finish();
+    }
+  }, [timeLeft, active, spinning, finish]);
 
   const progressPercent = useMemo(
     () => ((durationSeconds - timeLeft) / durationSeconds) * 100,
@@ -132,12 +175,11 @@ export default function D2RWidget({
 
   return (
     <div className="space-y-6">
-      {/* Header tipo Insightful */}
       <div className="w-full bg-white border border-slate-200 rounded-2xl shadow-sm px-6 py-4 flex flex-col gap-3">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-sky-100 flex items-center justify-center">
-              <span className="text-sky-600 text-xl">👁️</span>
+              <span className="text-sky-600 text-xl">D2R</span>
             </div>
             <div>
               <p className="text-sm font-semibold text-slate-900">Test D2R</p>
@@ -173,40 +215,30 @@ export default function D2RWidget({
         </div>
       </div>
 
-      {/* Card principal centrada */}
       <div className="w-full bg-white border border-slate-200 rounded-3xl shadow-sm px-6 sm:px-10 py-8 flex flex-col gap-6 items-center">
-        {/* Instrucciones como frase central */}
         <p className="text-center text-sm sm:text-base text-slate-700 max-w-xl font-medium">
-          Marca únicamente las letras{" "}
-          <span className="font-semibold text-sky-600">“d”</span> que tengan{" "}
+          Marca únicamente las letras <span className="font-semibold text-sky-600">"d"</span> que tengan{" "}
           <span className="font-semibold text-sky-600">exactamente dos guiones</span>.
         </p>
 
-        {/* Matriz o tragamonedas */}
         <div className="mt-4 flex justify-center">
           <div className="grid grid-cols-12 gap-2 sm:gap-3">
             {spinning
               ? Array.from({ length: rowSize }).map((_, idx) => <ReelCell key={idx} />)
               : row.map((cell) => {
                   const clicked = clickedIds.has(cell.id);
-                  const isTarget = cell.target;
 
                   const base =
                     "h-11 w-11 sm:h-12 sm:w-12 rounded-2xl border text-sm sm:text-base font-semibold flex items-center justify-center transition-all select-none";
                   const idle = "bg-slate-50 border-slate-200 hover:bg-slate-100";
-                  const success = "bg-emerald-50 border-emerald-300";
-                  const error = "bg-rose-50 border-rose-300";
+                  const neutralPressed = "bg-slate-200 border-slate-300";
 
                   return (
                     <button
                       key={cell.id}
                       type="button"
                       onClick={() => clickCell(cell)}
-                      className={[
-                        base,
-                        clicked ? (isTarget ? success : error) : idle,
-                        "text-slate-800",
-                      ]
+                      className={[base, clicked ? neutralPressed : idle, "text-slate-800"]
                         .filter(Boolean)
                         .join(" ")}
                     >
@@ -217,40 +249,10 @@ export default function D2RWidget({
           </div>
         </div>
 
-        {/* Pie tipo test */}
         <div className="mt-6 flex flex-col items-center gap-3 text-xs text-slate-500">
           <p>
-            Fase {phase} de {totalPhases} •{" "}
-            {spinning ? "Preparando matriz..." : `${timeLeft} segundos restantes`}
+            Fase {phase} de {totalPhases} • {spinning ? "Preparando matriz..." : `${timeLeft} segundos restantes`}
           </p>
-
-          <button
-            type="button"
-            onClick={startPhase}
-            disabled={spinning}
-            className="inline-flex items-center justify-center rounded-full px-4 py-1.5 text-[11px] font-semibold border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {spinning ? "Cargando fase..." : "Repetir esta fase"}
-          </button>
-
-          {!spinning && (
-            <div className="grid grid-cols-2 gap-6 text-xs text-slate-600 mt-2">
-              <div className="flex flex-col items-center">
-                <span className="font-medium">Aciertos</span>
-                <span className="text-lg font-semibold text-slate-900">{hits}</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="font-medium">Errores</span>
-                <span className="text-lg font-semibold text-slate-900">{errors}</span>
-              </div>
-            </div>
-          )}
-
-          {!spinning && (
-            <p className="text-[11px] text-center text-slate-400">
-              Objetivos en esta fase: {targetCount}
-            </p>
-          )}
         </div>
       </div>
     </div>

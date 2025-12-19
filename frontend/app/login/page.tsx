@@ -19,7 +19,8 @@ export default function LoginPage() {
     } else if (u.includes("prof") || u.includes("docente") || u.startsWith("teacher")) {
       router.push("/instructor");
     } else {
-      router.push("/student");
+      // Estudiante: primero pasa por pantalla D2R / consentimiento de cámara
+      router.push("/d2r");
     }
   };
 

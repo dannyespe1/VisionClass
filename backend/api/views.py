@@ -11,6 +11,9 @@ from google.genai import types
 
 from .models import (
     Course,
+    CourseModule,
+    CourseLesson,
+    CourseMaterial,
     Enrollment,
     Session,
     AttentionEvent,
@@ -23,6 +26,9 @@ from .serializers import (
     UserSerializer,
     RegisterSerializer,
     CourseSerializer,
+    CourseModuleSerializer,
+    CourseLessonSerializer,
+    CourseMaterialSerializer,
     EnrollmentSerializer,
     SessionSerializer,
     AttentionEventSerializer,
@@ -65,6 +71,60 @@ class CourseViewSet(viewsets.ModelViewSet):
         serializer.save(owner=self.request.user)
 
 
+class CourseModuleViewSet(viewsets.ModelViewSet):
+    serializer_class = CourseModuleSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == User.ROLE_ADMIN:
+            return CourseModule.objects.all()
+        if user.role == User.ROLE_TEACHER:
+            return CourseModule.objects.filter(course__owner=user)
+        return CourseModule.objects.filter(course__enrollments__user=user).distinct()
+
+    def perform_create(self, serializer):
+        if self.request.user.role not in [User.ROLE_TEACHER, User.ROLE_ADMIN]:
+            raise permissions.PermissionDenied("Solo docentes o administradores pueden crear modulos.")
+        serializer.save()
+
+
+class CourseLessonViewSet(viewsets.ModelViewSet):
+    serializer_class = CourseLessonSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == User.ROLE_ADMIN:
+            return CourseLesson.objects.all()
+        if user.role == User.ROLE_TEACHER:
+            return CourseLesson.objects.filter(module__course__owner=user)
+        return CourseLesson.objects.filter(module__course__enrollments__user=user).distinct()
+
+    def perform_create(self, serializer):
+        if self.request.user.role not in [User.ROLE_TEACHER, User.ROLE_ADMIN]:
+            raise permissions.PermissionDenied("Solo docentes o administradores pueden crear lecciones.")
+        serializer.save()
+
+
+class CourseMaterialViewSet(viewsets.ModelViewSet):
+    serializer_class = CourseMaterialSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == User.ROLE_ADMIN:
+            return CourseMaterial.objects.all()
+        if user.role == User.ROLE_TEACHER:
+            return CourseMaterial.objects.filter(lesson__module__course__owner=user)
+        return CourseMaterial.objects.filter(lesson__module__course__enrollments__user=user).distinct()
+
+    def perform_create(self, serializer):
+        if self.request.user.role not in [User.ROLE_TEACHER, User.ROLE_ADMIN]:
+            raise permissions.PermissionDenied("Solo docentes o administradores pueden crear materiales.")
+        serializer.save()
+
+
 class EnrollmentViewSet(viewsets.ModelViewSet):
     serializer_class = EnrollmentSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -94,9 +154,9 @@ class SessionViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         user = self.request.user
-        if user.role not in [User.ROLE_TEACHER, User.ROLE_ADMIN]:
-            raise permissions.PermissionDenied("Solo profesores o administradores pueden crear sesiones.")
-        serializer.save(created_by=user)
+        # Si no se envía estudiante y es rol student, se asigna automáticamente
+        student = serializer.validated_data.get('student') or (user if user.role == User.ROLE_STUDENT else None)
+        serializer.save(created_by=user, student=student)
 
 
 class AttentionEventViewSet(viewsets.ModelViewSet):

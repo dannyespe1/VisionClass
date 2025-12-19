@@ -1,54 +1,143 @@
-import { useState } from "react";
-import { Grid, List, CheckCircle2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Grid, List, CheckCircle2, BookOpen } from "lucide-react";
 import { Button } from "../ui/button";
 import { Progress } from "../ui/progress";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
+import { apiFetch } from "../lib/api";
+import { useAuth } from "../context/AuthContext";
+import { parseCourseMeta } from "../lib/courseMeta";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
 
 interface InicioSectionProps {
   onCourseSelect: (courseTitle: string) => void;
 }
 
+type EnrolledCourse = {
+  id: number;
+  title: string;
+  instructor: string;
+  progress: number;
+  totalLessons: number;
+  completedLessons: number;
+  nextLesson: string;
+  image: string;
+  category: string;
+  attentionLevel: number;
+};
+
+type ModuleItem = {
+  id: number;
+  order: number;
+  courseId: number;
+};
+
+type LessonItem = {
+  id: number;
+  title: string;
+  order: number;
+  moduleId: number;
+  courseId: number;
+  moduleOrder: number;
+};
+
 export function InicioSection({ onCourseSelect }: InicioSectionProps) {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [courses, setCourses] = useState<EnrolledCourse[]>([]);
+  const [moduleData, setModuleData] = useState<ModuleItem[]>([]);
+  const [lessonData, setLessonData] = useState<LessonItem[]>([]);
+  const [syllabusOpen, setSyllabusOpen] = useState(false);
+  const [syllabusCourseId, setSyllabusCourseId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { token } = useAuth();
 
-  const enrolledCourses = [
-    {
-      id: 1,
-      title: "Introduccion a Python",
-      instructor: "Dr. Carlos Martinez",
-      progress: 65,
-      totalLessons: 24,
-      completedLessons: 16,
-      nextLesson: "Funciones y Modulos",
-      image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
-      category: "Programacion",
-      attentionLevel: 85,
-    },
-    {
-      id: 2,
-      title: "Machine Learning Basico",
-      instructor: "Dra. Ana Rodriguez",
-      progress: 42,
-      totalLessons: 30,
-      completedLessons: 13,
-      nextLesson: "Regresion Lineal",
-      image: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800",
-      category: "Inteligencia Artificial",
-      attentionLevel: 78,
-    },
-    {
-      id: 3,
-      title: "Diseno UX/UI",
-      instructor: "Prof. Laura Gomez",
-      progress: 88,
-      totalLessons: 18,
-      completedLessons: 16,
-      nextLesson: "Prototipado Avanzado",
-      image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800",
-      category: "Diseno",
-      attentionLevel: 92,
-    },
-  ];
+  useEffect(() => {
+    const load = async () => {
+      if (!token) return;
+      setLoading(true);
+      setError(null);
+      try {
+        const [enrollments, modulesData, lessonsData] = await Promise.all([
+          apiFetch<any[]>("/api/enrollments/", {}, token),
+          apiFetch<any[]>("/api/course-modules/", {}, token),
+          apiFetch<any[]>("/api/course-lessons/", {}, token),
+        ]);
+        const filtered = (enrollments || []).filter((e) => {
+          const title = (e.course?.title || "").toLowerCase();
+          return title && title !== "baseline d2r";
+        });
+        const modules: ModuleItem[] = (modulesData || [])
+          .filter((m) => (m.course?.title || "").toLowerCase() !== "baseline d2r")
+          .map((m) => ({
+            id: m.id,
+            order: m.order || 0,
+            courseId: m.course?.id,
+          }));
+        const lessons: LessonItem[] = (lessonsData || [])
+          .filter((l) => (l.module?.course?.title || "").toLowerCase() !== "baseline d2r")
+          .map((l) => {
+            const moduleOrder = modules.find((m) => m.id === l.module?.id)?.order || 0;
+            return {
+              id: l.id,
+              title: l.title || "Leccion",
+              order: l.order || 0,
+              moduleId: l.module?.id,
+              courseId: l.module?.course?.id,
+              moduleOrder,
+            };
+          });
+        setModuleData(modules);
+        setLessonData(lessons);
+        const mapped = filtered.map((enrollment) => {
+          const course = enrollment.course || {};
+          const { meta } = parseCourseMeta(course.description);
+          const courseLessons = lessons
+            .filter((l) => l.courseId === course.id)
+            .sort((a, b) => (a.moduleOrder - b.moduleOrder) || (a.order - b.order));
+          const totalLessons = courseLessons.length || (meta.modules || []).reduce((acc, m) => acc + (m.lessons || 0), 0);
+          const completedLessons = 0;
+          const progress = totalLessons ? Math.round((completedLessons / totalLessons) * 100) : 0;
+          const nextLesson = courseLessons[0]?.title || meta.modules?.[0]?.name || "Contenido inicial";
+          return {
+            id: course.id,
+            title: course.title || "Curso",
+            instructor: course.owner?.username || "Profesor",
+            progress,
+            totalLessons,
+            completedLessons,
+            nextLesson,
+            image: meta.thumbnail || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
+            category: "Programacion",
+            attentionLevel: 85,
+          } as EnrolledCourse;
+        });
+        setCourses(mapped);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "No se pudieron cargar los cursos";
+        setError(msg);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [token]);
+
+  const hasCourses = courses.length > 0;
+  const coursesView = useMemo(() => courses, [courses]);
+  const syllabusCourse = coursesView.find((c) => c.id === syllabusCourseId) || null;
+  const syllabusModules = useMemo(() => {
+    if (!syllabusCourseId) return [];
+    const modules = moduleData
+      .filter((m) => m.courseId === syllabusCourseId)
+      .sort((a, b) => a.order - b.order);
+    return modules.map((m, idx) => ({
+      id: m.id,
+      title: `Modulo ${idx + 1}`,
+      lessons: lessonData
+        .filter((l) => l.moduleId === m.id)
+        .sort((a, b) => (a.moduleOrder - b.moduleOrder) || (a.order - b.order)),
+    }));
+  }, [moduleData, lessonData, syllabusCourseId]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-6">
@@ -74,9 +163,20 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
         </div>
       </div>
 
-      {viewMode === "grid" ? (
+      {loading && <p className="text-sm text-slate-500">Cargando cursos...</p>}
+      {error && <p className="text-sm text-red-600">{error}</p>}
+
+      {!hasCourses && !loading && (
+        <div className="text-center py-12 bg-white rounded-2xl border border-slate-100">
+          <BookOpen className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+          <h3 className="text-lg font-semibold text-slate-900">Aun no tienes cursos inscritos</h3>
+          <p className="text-sm text-slate-500">Explora la pestana de cursos para inscribirte.</p>
+        </div>
+      )}
+
+      {hasCourses && viewMode === "grid" && (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {enrolledCourses.map((course) => (
+          {coursesView.map((course) => (
             <div
               key={course.id}
               className="bg-white rounded-xl overflow-hidden shadow-sm transition transform hover:-translate-y-1 hover:shadow-xl"
@@ -118,13 +218,25 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
                 <Button className="w-full" onClick={() => onCourseSelect(course.title)}>
                   Continuar
                 </Button>
+                <Button
+                  variant="outline"
+                  className="w-full mt-2"
+                  onClick={() => {
+                    setSyllabusCourseId(course.id);
+                    setSyllabusOpen(true);
+                  }}
+                >
+                  Ver temario
+                </Button>
               </div>
             </div>
           ))}
         </div>
-      ) : (
+      )}
+
+      {hasCourses && viewMode === "list" && (
         <div className="space-y-4">
-          {enrolledCourses.map((course) => (
+          {coursesView.map((course) => (
             <div
               key={course.id}
               className="bg-white rounded-xl p-6 shadow-sm transition transform hover:-translate-y-1 hover:shadow-xl"
@@ -166,7 +278,18 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
                     <div className="text-sm text-gray-600">
                       Siguiente: <span className="text-gray-900">{course.nextLesson}</span>
                     </div>
-                    <Button onClick={() => onCourseSelect(course.title)}>Continuar</Button>
+                    <div className="flex items-center gap-2">
+                      <Button onClick={() => onCourseSelect(course.title)}>Continuar</Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setSyllabusCourseId(course.id);
+                          setSyllabusOpen(true);
+                        }}
+                      >
+                        Ver temario
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -174,6 +297,34 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
           ))}
         </div>
       )}
+
+      <Dialog open={syllabusOpen} onOpenChange={setSyllabusOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Temario del curso</DialogTitle>
+            <DialogDescription>{syllabusCourse?.title || "Curso"}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 max-h-[60vh] overflow-auto pr-2">
+            {syllabusModules.length === 0 && (
+              <p className="text-sm text-slate-500">Este curso aun no tiene temario cargado.</p>
+            )}
+            {syllabusModules.map((module) => (
+              <div key={module.id} className="border border-slate-200 rounded-lg p-3 bg-slate-50">
+                <div className="font-semibold text-slate-900">{module.title}</div>
+                <div className="mt-2 space-y-1 text-sm text-slate-700">
+                  {module.lessons.length === 0 && <p className="text-xs text-slate-500">Sin lecciones.</p>}
+                  {module.lessons.map((lesson) => (
+                    <div key={lesson.id} className="flex items-center justify-between">
+                      <span>{lesson.title}</span>
+                      <span className="text-xs text-slate-500">Leccion {lesson.order}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

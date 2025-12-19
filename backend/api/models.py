@@ -29,6 +29,62 @@ class Course(models.Model):
         return self.title
 
 
+class CourseModule(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='modules')
+    title = models.CharField(max_length=255)
+    order = models.PositiveIntegerField(default=0)
+    duration_hours = models.FloatField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', 'id']
+
+    def __str__(self):
+        return f"{self.course} - {self.title}"
+
+
+class CourseLesson(models.Model):
+    module = models.ForeignKey(CourseModule, on_delete=models.CASCADE, related_name='lessons')
+    title = models.CharField(max_length=255)
+    order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', 'id']
+
+    def __str__(self):
+        return f"{self.module} - {self.title}"
+
+
+class CourseMaterial(models.Model):
+    TYPE_PDF = 'pdf'
+    TYPE_VIDEO = 'video'
+    TYPE_TEST = 'test'
+    TYPE_CHOICES = [
+        (TYPE_PDF, 'PDF'),
+        (TYPE_VIDEO, 'Video'),
+        (TYPE_TEST, 'Test'),
+    ]
+
+    lesson = models.ForeignKey(CourseLesson, on_delete=models.CASCADE, related_name='materials')
+    material_type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    url = models.TextField(blank=True)
+    file_name = models.CharField(max_length=255, blank=True)
+    file_content_type = models.CharField(max_length=100, blank=True)
+    file_size = models.PositiveIntegerField(default=0)
+    file_bytes = models.BinaryField(blank=True, null=True)
+    metadata = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at', 'id']
+
+    def __str__(self):
+        return f"{self.lesson} - {self.title}"
+
+
 class Enrollment(models.Model):
     STATUS_ACTIVE = 'active'
     STATUS_COMPLETED = 'completed'
@@ -42,6 +98,7 @@ class Enrollment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='enrollments')
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='enrollments')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_ACTIVE)
+    enrollment_data = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -122,6 +179,7 @@ class D2RResult(models.Model):
     processing_speed = models.FloatField(help_text="Índice de velocidad/procesamiento")
     attention_span = models.FloatField(help_text="Indicador de atención")
     errors = models.IntegerField(default=0)
+    phase_data = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

@@ -24,7 +24,19 @@ export async function apiFetch<T>(
     const text = await res.text();
     throw new Error(text || res.statusText);
   }
-  return res.json() as Promise<T>;
+  if (res.status === 204) {
+    return undefined as T;
+  }
+  const contentType = res.headers.get("content-type") || "";
+  if (!contentType.includes("application/json")) {
+    const text = await res.text();
+    return (text as unknown) as T;
+  }
+  const text = await res.text();
+  if (!text) {
+    return undefined as T;
+  }
+  return JSON.parse(text) as T;
 }
 
 export async function postFrameToML(form: FormData) {

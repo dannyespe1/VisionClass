@@ -1,5 +1,16 @@
-import { useState } from "react";
-import { Upload, FileText, Video, ClipboardList, Plus, Trash2, Download, Link } from "lucide-react";
+
+import { useEffect, useMemo, useState } from "react";
+import {
+  Upload,
+  FileText,
+  Video,
+  ClipboardList,
+  Plus,
+  Trash2,
+  Download,
+  ArrowUp,
+  ArrowDown,
+} from "lucide-react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { Label } from "../../ui/label";
@@ -8,117 +19,509 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { apiFetch } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext";
 
+const BASELINE_TITLE = "baseline d2r";
+
 type MaterialType = "pdf" | "video" | "test";
 
-interface Material {
+type MaterialForm = {
+  title: string;
+  description: string;
+  type: MaterialType;
+  url: string;
+  courseId: string;
+  moduleId: string;
+  lessonId: string;
+};
+
+type CourseMeta = {
+  thumbnail: string;
+  level: string;
+  field: string;
+  modules: ModuleBlock[];
+  totalLessons: number;
+  totalDurationHours: number;
+};
+
+type CourseItem = {
   id: number;
   title: string;
-  type: MaterialType;
-  course: string;
-  uploadDate: string;
-  size?: string;
-  duration?: string;
-  url?: string;
-}
+  description?: string;
+  meta?: CourseMeta;
+};
+
+type ModuleBlock = {
+  id: string;
+  name: string;
+  lessons: number;
+  tests: number;
+  durationMinutes: number;
+};
+
+type CourseModule = {
+  id: number;
+  title: string;
+  order: number;
+  durationMinutes: number;
+  courseId: number;
+  courseTitle: string;
+};
+
+type CourseLesson = {
+  id: number;
+  title: string;
+  order: number;
+  moduleId: number;
+  moduleTitle: string;
+  courseId: number;
+};
+
+type CourseMaterial = {
+  id: number;
+  title: string;
+  description: string;
+  materialType: MaterialType;
+  url: string;
+  metadata: Record<string, any>;
+  lessonId: number;
+  lessonTitle: string;
+  moduleId: number;
+  moduleTitle: string;
+  courseId: number;
+  courseTitle: string;
+  createdAt: string;
+};
 
 export function MaterialesSection() {
-  const [showUploadModal, setShowUploadModal] = useState(false);
-  const [selectedCourse, setSelectedCourse] = useState("all");
+  const { token } = useAuth();
+  const [showMaterialModal, setShowMaterialModal] = useState(false);
+  const [selectedCourseId, setSelectedCourseId] = useState("all");
   const [selectedType, setSelectedType] = useState<MaterialType | "all">("all");
+  const [manageCourseId, setManageCourseId] = useState("");
   const [youtubePreview, setYoutubePreview] = useState("");
+  const [status, setStatus] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiQuestions, setAiQuestions] = useState<any[]>([]);
   const [aiDifficulty, setAiDifficulty] = useState("media");
   const [aiNumQuestions, setAiNumQuestions] = useState(20);
   const [aiContext, setAiContext] = useState("");
-  const { token } = useAuth();
+  const [aiTargetCourseId, setAiTargetCourseId] = useState("");
+  const [aiTargetModuleId, setAiTargetModuleId] = useState("");
+  const [aiTargetLessonId, setAiTargetLessonId] = useState("");
 
-  const [materials, setMaterials] = useState<Material[]>([
-    {
-      id: 1,
-      title: "Introduccion a Variables y Tipos de Datos",
-      type: "pdf",
-      course: "Introduccion a Python",
-      uploadDate: "15 Nov 2024",
-      size: "2.4 MB",
-    },
-    {
-      id: 2,
-      title: "Tutorial: Estructuras de Control",
-      type: "video",
-      course: "Introduccion a Python",
-      uploadDate: "14 Nov 2024",
-      duration: "45 min",
-      url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-    },
-    {
-      id: 3,
-      title: "Evaluacion: Modulo 1",
-      type: "test",
-      course: "Introduccion a Python",
-      uploadDate: "13 Nov 2024",
-    },
-    {
-      id: 4,
-      title: "Fundamentos de Redes Neuronales",
-      type: "pdf",
-      course: "Machine Learning Basico",
-      uploadDate: "12 Nov 2024",
-      size: "3.1 MB",
-    },
-    {
-      id: 5,
-      title: "Demo: Regresion Lineal en Python",
-      type: "video",
-      course: "Machine Learning Basico",
-      uploadDate: "11 Nov 2024",
-      duration: "32 min",
-      url: "https://www.youtube.com/watch?v=oHg5SJYRHA0",
-    },
+  const [courses, setCourses] = useState<CourseItem[]>([]);
+  const [courseModules, setCourseModules] = useState<CourseModule[]>([]);
+  const [courseLessons, setCourseLessons] = useState<CourseLesson[]>([]);
+  const [materials, setMaterials] = useState<CourseMaterial[]>([]);
+
+  const [newCourseTitle, setNewCourseTitle] = useState("");
+  const [newCourseDesc, setNewCourseDesc] = useState("");
+  const [newCourseThumb, setNewCourseThumb] = useState("");
+  const [newCourseField, setNewCourseField] = useState("");
+  const [newCourseLevel, setNewCourseLevel] = useState("Basico");
+  const [modulesDraft, setModulesDraft] = useState<ModuleBlock[]>([
+    { id: crypto.randomUUID(), name: "Modulo 1", lessons: 4, tests: 1, durationMinutes: 120 },
   ]);
 
-  const courses = ["Introduccion a Python", "Machine Learning Basico", "Estructuras de Datos"];
-
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<MaterialForm>({
     title: "",
     description: "",
-    type: "pdf" as MaterialType,
+    type: "pdf",
     url: "",
-    course: courses[0],
+    courseId: "",
+    moduleId: "",
+    lessonId: "",
   });
   const [filePdf, setFilePdf] = useState<File | null>(null);
+  const [fileBase64, setFileBase64] = useState<string>("");
+  const [editingMaterial, setEditingMaterial] = useState<CourseMaterial | null>(null);
+
+  const totalLessons = useMemo(
+    () => modulesDraft.reduce((acc, m) => acc + (m.lessons || 0), 0),
+    [modulesDraft]
+  );
+  const totalDuration = useMemo(
+    () => modulesDraft.reduce((acc, m) => acc + (m.durationMinutes || 0), 0),
+    [modulesDraft]
+  );
+  const refreshData = async () => {
+    if (!token) return;
+    try {
+      const [coursesData, modulesData, lessonsData, materialsData] = await Promise.all([
+        apiFetch<CourseItem[]>("/api/courses/", {}, token),
+        apiFetch<any[]>("/api/course-modules/", {}, token),
+        apiFetch<any[]>("/api/course-lessons/", {}, token),
+        apiFetch<any[]>("/api/course-materials/", {}, token),
+      ]);
+
+      const filteredCourses = (coursesData || []).filter(
+        (c) => (c.title || "").toLowerCase() !== BASELINE_TITLE
+      );
+
+      const mappedModules: CourseModule[] = (modulesData || [])
+        .filter((m) => (m.course?.title || "").toLowerCase() !== BASELINE_TITLE)
+        .map((m) => ({
+          id: m.id,
+          title: m.title,
+          order: m.order || 0,
+          durationMinutes: Math.round((m.duration_hours || 0) * 60),
+          courseId: m.course?.id,
+          courseTitle: m.course?.title || "Curso",
+        }));
+
+      const mappedLessons: CourseLesson[] = (lessonsData || [])
+        .filter((l) => (l.module?.course?.title || "").toLowerCase() !== BASELINE_TITLE)
+        .map((l) => ({
+          id: l.id,
+          title: l.title,
+          order: l.order || 0,
+          moduleId: l.module?.id,
+          moduleTitle: l.module?.title || "Modulo",
+          courseId: l.module?.course?.id,
+        }));
+
+      const mappedMaterials: CourseMaterial[] = (materialsData || [])
+        .filter((mat) => (mat.lesson?.module?.course?.title || "").toLowerCase() !== BASELINE_TITLE)
+        .map((mat) => ({
+          id: mat.id,
+          title: mat.title,
+          description: mat.description || "",
+          materialType: mat.material_type as MaterialType,
+          url: mat.url || "",
+          metadata: mat.metadata || {},
+          lessonId: mat.lesson?.id,
+          lessonTitle: mat.lesson?.title || "Leccion",
+          moduleId: mat.lesson?.module?.id,
+          moduleTitle: mat.lesson?.module?.title || "Modulo",
+          courseId: mat.lesson?.module?.course?.id,
+          courseTitle: mat.lesson?.module?.course?.title || "Curso",
+          createdAt: mat.created_at || "",
+        }));
+
+      setCourses(filteredCourses);
+      setCourseModules(mappedModules);
+      setCourseLessons(mappedLessons);
+      setMaterials(mappedMaterials);
+
+      if (!formData.courseId && filteredCourses.length) {
+        setFormData((prev) => ({ ...prev, courseId: String(filteredCourses[0].id) }));
+      }
+      if (!aiTargetCourseId && filteredCourses.length) {
+        setAiTargetCourseId(String(filteredCourses[0].id));
+      }
+      if (!manageCourseId && filteredCourses.length) {
+        setManageCourseId(String(filteredCourses[0].id));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    refreshData();
+  }, [token]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = window.localStorage.getItem("instructor_material_course_id");
+    if (saved) {
+      setManageCourseId(saved);
+      setSelectedCourseId(saved);
+      setFormData((prev) => ({ ...prev, courseId: saved }));
+    }
+  }, []);
+
+  const moduleOptions = useMemo(() => {
+    if (!formData.courseId) return [];
+    return courseModules
+      .filter((m) => String(m.courseId) === formData.courseId)
+      .map((m) => ({ id: String(m.id), label: m.title }));
+  }, [courseModules, formData.courseId]);
+
+  const lessonOptions = useMemo(() => {
+    if (!formData.moduleId) return [];
+    return courseLessons
+      .filter((l) => String(l.moduleId) === formData.moduleId)
+      .map((l) => ({ id: String(l.id), label: l.title }));
+  }, [courseLessons, formData.moduleId]);
+
+  const aiModuleOptions = useMemo(() => {
+    if (!aiTargetCourseId) return [];
+    return courseModules
+      .filter((m) => String(m.courseId) === aiTargetCourseId)
+      .map((m) => ({ id: String(m.id), label: m.title }));
+  }, [courseModules, aiTargetCourseId]);
+
+  const aiLessonOptions = useMemo(() => {
+    if (!aiTargetModuleId) return [];
+    return courseLessons
+      .filter((l) => String(l.moduleId) === aiTargetModuleId)
+      .map((l) => ({ id: String(l.id), label: l.title }));
+  }, [courseLessons, aiTargetModuleId]);
+
+  useEffect(() => {
+    if (moduleOptions.length && !formData.moduleId) {
+      setFormData((prev) => ({ ...prev, moduleId: moduleOptions[0].id }));
+    }
+  }, [moduleOptions, formData.moduleId]);
+
+  useEffect(() => {
+    if (lessonOptions.length && !formData.lessonId) {
+      setFormData((prev) => ({ ...prev, lessonId: lessonOptions[0].id }));
+    }
+  }, [lessonOptions, formData.lessonId]);
+
+  useEffect(() => {
+    if (aiModuleOptions.length && !aiTargetModuleId) {
+      setAiTargetModuleId(aiModuleOptions[0].id);
+    }
+  }, [aiModuleOptions, aiTargetModuleId]);
+
+  useEffect(() => {
+    if (aiLessonOptions.length && !aiTargetLessonId) {
+      setAiTargetLessonId(aiLessonOptions[0].id);
+    }
+  }, [aiLessonOptions, aiTargetLessonId]);
+
+  const addModuleDraft = () => {
+    setModulesDraft((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), name: `Modulo ${prev.length + 1}`, lessons: 3, tests: 1, durationMinutes: 90 },
+    ]);
+  };
+
+  const updateModuleDraft = (id: string, field: keyof Omit<ModuleBlock, "id">, value: string | number) => {
+    setModulesDraft((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, [field]: typeof value === "string" ? value : Number(value) } : m))
+    );
+  };
+
+  const removeModuleDraft = (id: string) => {
+    setModulesDraft((prev) => prev.filter((m) => m.id !== id));
+  };
+
+  const moveModuleDraft = (id: string, dir: "up" | "down") => {
+    setModulesDraft((prev) => {
+      const idx = prev.findIndex((m) => m.id === id);
+      if (idx === -1) return prev;
+      const swapWith = dir === "up" ? idx - 1 : idx + 1;
+      if (swapWith < 0 || swapWith >= prev.length) return prev;
+      const copy = [...prev];
+      [copy[idx], copy[swapWith]] = [copy[swapWith], copy[idx]];
+      return copy;
+    });
+  };
+  const createCourse = async () => {
+    if (!newCourseTitle.trim()) {
+      setStatus("Agrega un titulo de curso");
+      return;
+    }
+    if (!token) {
+      setStatus("Debes iniciar sesion");
+      return;
+    }
+    try {
+      setStatus("Creando curso...");
+      const meta: CourseMeta = {
+        thumbnail: newCourseThumb,
+        level: newCourseLevel,
+        field: newCourseField,
+        modules: modulesDraft,
+        totalLessons,
+        totalDurationHours: totalDuration,
+      };
+      const created = await apiFetch<CourseItem>(
+        "/api/courses/",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            title: newCourseTitle,
+            description: `${newCourseDesc}\n\n[meta]: ${JSON.stringify(meta)}`,
+            is_active: true,
+          }),
+        },
+        token
+      );
+
+      for (let i = 0; i < modulesDraft.length; i += 1) {
+        const moduleDraft = modulesDraft[i];
+        const moduleRes = await apiFetch<any>(
+          "/api/course-modules/",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              course_id: created.id,
+              title: moduleDraft.name,
+              order: i + 1,
+              duration_hours: (moduleDraft.durationMinutes || 0) / 60,
+            }),
+          },
+          token
+        );
+        const lessonsToCreate = Math.max(1, Number(moduleDraft.lessons) || 0);
+        for (let j = 0; j < lessonsToCreate; j += 1) {
+          await apiFetch(
+            "/api/course-lessons/",
+            {
+              method: "POST",
+              body: JSON.stringify({
+                module_id: moduleRes.id,
+                title: `Leccion ${j + 1}`,
+                order: j + 1,
+              }),
+            },
+            token
+          );
+        }
+      }
+
+      setNewCourseTitle("");
+      setNewCourseDesc("");
+      setNewCourseThumb("");
+      setNewCourseField("");
+      setNewCourseLevel("Basico");
+      setModulesDraft([{ id: crypto.randomUUID(), name: "Modulo 1", lessons: 4, tests: 1, durationMinutes: 120 }]);
+      setStatus("Curso creado");
+      await refreshData();
+    } catch (err) {
+      console.error(err);
+      const msg = err instanceof Error ? err.message : "Error creando curso";
+      setStatus(msg);
+    }
+  };
 
   const filteredMaterials = materials.filter((material) => {
-    const matchesCourse = selectedCourse === "all" || material.course === selectedCourse;
-    const matchesType = selectedType === "all" || material.type === selectedType;
+    const matchesCourse = selectedCourseId === "all" || String(material.courseId) === selectedCourseId;
+    const matchesType = selectedType === "all" || material.materialType === selectedType;
     return matchesCourse && matchesType;
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    let finalUrl = formData.url;
-    if (formData.type === "pdf" && filePdf) {
-      finalUrl = URL.createObjectURL(filePdf);
-    }
-    const newMaterial: Material = {
-      id: Date.now(),
-      title: formData.title,
-      type: formData.type,
-      course: formData.course,
-      uploadDate: new Date().toLocaleDateString(),
-      size: formData.type === "pdf" ? "2 MB" : undefined,
-      duration: formData.type === "video" ? "10 min" : undefined,
-      url: finalUrl,
-    };
-    setMaterials([newMaterial, ...materials]);
-    setFormData({ title: "", description: "", type: "pdf", url: "", course: courses[0] });
-    setYoutubePreview("");
+  const openNewMaterial = () => {
+    setEditingMaterial(null);
+    setFormData({
+      title: "",
+      description: "",
+      type: "pdf",
+      url: "",
+      courseId: formData.courseId || (courses[0] ? String(courses[0].id) : ""),
+      moduleId: moduleOptions[0]?.id || "",
+      lessonId: lessonOptions[0]?.id || "",
+    });
     setFilePdf(null);
-      setShowUploadModal(false);
+    setFileBase64("");
+    setYoutubePreview("");
+    setShowMaterialModal(true);
   };
 
-  const handleDelete = (id: number) => {
-    setMaterials(materials.filter((m) => m.id !== id));
+  const openEditMaterial = (material: CourseMaterial) => {
+    setEditingMaterial(material);
+    setFormData({
+      title: material.title,
+      description: material.description,
+      type: material.materialType,
+      url: material.url,
+      courseId: String(material.courseId),
+      moduleId: String(material.moduleId),
+      lessonId: String(material.lessonId),
+    });
+    setFilePdf(null);
+    setFileBase64("");
+    setYoutubePreview(material.materialType === "video" && material.url ? material.url.replace("watch?v=", "embed/") : "");
+    setShowMaterialModal(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!token) return;
+    if (!formData.lessonId) {
+      setStatus("Selecciona una leccion");
+      return;
+    }
+    let finalUrl = formData.url;
+    const metadata: Record<string, any> = {};
+    if (formData.type === "pdf" && filePdf) {
+      metadata.file_name = filePdf.name;
+      metadata.file_size = filePdf.size;
+      metadata.file_type = filePdf.type;
+      finalUrl = finalUrl || "";
+    }
+
+    try {
+      if (editingMaterial) {
+        await apiFetch(
+          `/api/course-materials/${editingMaterial.id}/`,
+          {
+            method: "PATCH",
+            body: JSON.stringify({
+              lesson_id: Number(formData.lessonId),
+              material_type: formData.type,
+              title: formData.title,
+              description: formData.description,
+              url: finalUrl,
+              metadata,
+              file_name: filePdf?.name || "",
+              file_content_type: filePdf?.type || "",
+              file_size: filePdf?.size || 0,
+              file_base64: fileBase64 || "",
+            }),
+          },
+          token
+        );
+        setStatus("Material actualizado");
+        await refreshData();
+      } else {
+        await apiFetch(
+          "/api/course-materials/",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              lesson_id: Number(formData.lessonId),
+              material_type: formData.type,
+              title: formData.title,
+              description: formData.description,
+              url: finalUrl,
+              metadata,
+              file_name: filePdf?.name || "",
+              file_content_type: filePdf?.type || "",
+              file_size: filePdf?.size || 0,
+              file_base64: fileBase64 || "",
+            }),
+          },
+          token
+        );
+        setStatus("Material guardado");
+        await refreshData();
+      }
+      setShowMaterialModal(false);
+    } catch (err) {
+      console.error(err);
+      const msg = err instanceof Error ? err.message : "Error guardando material";
+      setStatus(msg);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!token) return;
+    try {
+      await apiFetch(`/api/course-materials/${id}/`, { method: "DELETE" }, token);
+      setMaterials((prev) => prev.filter((m) => m.id !== id));
+      setStatus("Material eliminado");
+    } catch (err) {
+      console.error(err);
+      const msg = err instanceof Error ? err.message : "Error eliminando material";
+      setStatus(msg);
+    }
+  };
+
+  const handleDeleteCourse = async (courseId: number) => {
+    if (!token) return;
+    try {
+      await apiFetch(`/api/courses/${courseId}/`, { method: "DELETE" }, token);
+      setStatus("Curso eliminado");
+      await refreshData();
+    } catch (err) {
+      console.error(err);
+      setStatus("Error eliminando curso");
+    }
   };
 
   const handleYoutubePreview = (url: string) => {
@@ -131,31 +534,419 @@ export function MaterialesSection() {
     }
   };
 
+  const saveModule = async (module: CourseModule) => {
+    if (!token) return;
+    try {
+      await apiFetch(
+        `/api/course-modules/${module.id}/`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({
+            title: module.title,
+            order: module.order,
+              duration_hours: (module.durationMinutes || 0) / 60,
+            }),
+          },
+          token
+        );
+      setStatus("Modulo actualizado");
+    } catch (err) {
+      console.error(err);
+      setStatus("Error actualizando modulo");
+    }
+  };
+
+  const moveModule = async (moduleId: number, dir: "up" | "down") => {
+    const courseModulesForCourse = courseModules
+      .filter((m) => String(m.courseId) === manageCourseId)
+      .sort((a, b) => a.order - b.order);
+    const idx = courseModulesForCourse.findIndex((m) => m.id === moduleId);
+    const swapIdx = dir === "up" ? idx - 1 : idx + 1;
+    if (idx === -1 || swapIdx < 0 || swapIdx >= courseModulesForCourse.length) return;
+    const current = courseModulesForCourse[idx];
+    const target = courseModulesForCourse[swapIdx];
+    const updated = courseModules.map((m) => {
+      if (m.id === current.id) return { ...m, order: target.order };
+      if (m.id === target.id) return { ...m, order: current.order };
+      return m;
+    });
+    setCourseModules(updated);
+    await saveModule({ ...current, order: target.order });
+    await saveModule({ ...target, order: current.order });
+  };
+
+  const addModuleToCourse = async () => {
+    if (!token || !manageCourseId) return;
+    const courseId = Number(manageCourseId);
+    const count = courseModules.filter((m) => m.courseId === courseId).length;
+    try {
+      const moduleRes = await apiFetch<any>(
+        "/api/course-modules/",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            course_id: courseId,
+            title: `Modulo ${count + 1}`,
+            order: count + 1,
+            duration_hours: 1,
+          }),
+        },
+        token
+      );
+      await apiFetch(
+        "/api/course-lessons/",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            module_id: moduleRes.id,
+            title: "Leccion 1",
+            order: 1,
+          }),
+        },
+        token
+      );
+      setStatus("Modulo creado");
+      await refreshData();
+    } catch (err) {
+      console.error(err);
+      setStatus("Error creando modulo");
+    }
+  };
+
+  const addLesson = async (moduleId: number) => {
+    if (!token) return;
+    const lessonsForModule = courseLessons.filter((l) => l.moduleId === moduleId);
+    const nextOrder = lessonsForModule.length + 1;
+    try {
+      await apiFetch(
+        "/api/course-lessons/",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            module_id: moduleId,
+            title: `Leccion ${nextOrder}`,
+            order: nextOrder,
+          }),
+        },
+        token
+      );
+      setStatus("Leccion creada");
+      await refreshData();
+    } catch (err) {
+      console.error(err);
+      setStatus("Error creando leccion");
+    }
+  };
+
+  const saveLesson = async (lesson: CourseLesson) => {
+    if (!token) return;
+    try {
+      await apiFetch(
+        `/api/course-lessons/${lesson.id}/`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({
+            title: lesson.title,
+            order: lesson.order,
+          }),
+        },
+        token
+      );
+      setStatus("Leccion actualizada");
+    } catch (err) {
+      console.error(err);
+      setStatus("Error actualizando leccion");
+    }
+  };
+
+  const moveLesson = async (lessonId: number, dir: "up" | "down") => {
+    const lesson = courseLessons.find((l) => l.id === lessonId);
+    if (!lesson) return;
+    const lessonsForModule = courseLessons
+      .filter((l) => l.moduleId === lesson.moduleId)
+      .sort((a, b) => a.order - b.order);
+    const idx = lessonsForModule.findIndex((l) => l.id === lessonId);
+    const swapIdx = dir === "up" ? idx - 1 : idx + 1;
+    if (idx === -1 || swapIdx < 0 || swapIdx >= lessonsForModule.length) return;
+    const current = lessonsForModule[idx];
+    const target = lessonsForModule[swapIdx];
+    const updated = courseLessons.map((l) => {
+      if (l.id === current.id) return { ...l, order: target.order };
+      if (l.id === target.id) return { ...l, order: current.order };
+      return l;
+    });
+    setCourseLessons(updated);
+    await saveLesson({ ...current, order: target.order });
+    await saveLesson({ ...target, order: current.order });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-slate-900">Materiales</h3>
-          <p className="text-sm text-slate-500">Sube PDFs, videos o tests y gestiona tus cursos.</p>
+          <p className="text-sm text-slate-500">Crea cursos, organiza modulos y sube recursos.</p>
+          {status && <p className="text-xs text-slate-500 mt-1">{status}</p>}
         </div>
-        <Button onClick={() => setShowUploadModal(true)}>
+        <Button onClick={openNewMaterial}>
           <Plus className="w-4 h-4 mr-2" />
           Nuevo material
         </Button>
       </div>
 
+      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-semibold text-slate-900">Crear curso</h3>
+            <p className="text-xs text-slate-500">Define nivel, campo, modulos y tiempos estimados.</p>
+          </div>
+          <Button onClick={createCourse} className="text-sm">
+            Crear curso
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <Input placeholder="Titulo del curso" value={newCourseTitle} onChange={(e) => setNewCourseTitle(e.target.value)} />
+          <Input placeholder="Descripcion" value={newCourseDesc} onChange={(e) => setNewCourseDesc(e.target.value)} />
+          <Input placeholder="Campo (Informatica, Economia, etc)" value={newCourseField} onChange={(e) => setNewCourseField(e.target.value)} />
+          <Select value={newCourseLevel} onValueChange={(v) => setNewCourseLevel(v)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Nivel" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Basico">Basico</SelectItem>
+              <SelectItem value="Intermedio">Intermedio</SelectItem>
+              <SelectItem value="Avanzado">Avanzado</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <Input placeholder="URL miniatura (opcional)" value={newCourseThumb} onChange={(e) => setNewCourseThumb(e.target.value)} />
+          <div className="rounded-lg border border-slate-200 p-3 bg-slate-50 text-sm">
+            <p className="text-xs text-slate-500 mb-1">Resumen</p>
+            <p className="font-semibold text-slate-900">{newCourseTitle || "Sin titulo"}</p>
+            <p className="text-xs text-slate-500">Nivel: {newCourseLevel} | Campo: {newCourseField || "Sin campo"}</p>
+            <p className="text-xs text-slate-500 mt-1">
+              Modulos: {modulesDraft.length} | Lecciones: {totalLessons} | Duracion: {totalDuration} min
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-semibold text-slate-900">Modulos</h4>
+            <Button variant="outline" size="sm" onClick={addModuleDraft}>
+              <Plus className="w-4 h-4 mr-1" /> Agregar modulo
+            </Button>
+          </div>
+          <div className="space-y-2">
+            {modulesDraft.map((m, idx) => (
+              <div
+                key={m.id}
+                className="border border-slate-200 rounded-lg p-3 bg-slate-50 flex flex-col md:flex-row md:items-center gap-3"
+              >
+                <div className="flex-1 space-y-2">
+                  <Input value={m.name} onChange={(e) => updateModuleDraft(m.id, "name", e.target.value)} placeholder={`Modulo ${idx + 1}`} />
+                  <div className="grid grid-cols-3 gap-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Label className="text-xs text-slate-600">Lecciones</Label>
+                      <Input type="number" min={0} value={m.lessons} onChange={(e) => updateModuleDraft(m.id, "lessons", Number(e.target.value))} />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Label className="text-xs text-slate-600">Pruebas</Label>
+                      <Input type="number" min={0} value={m.tests} onChange={(e) => updateModuleDraft(m.id, "tests", Number(e.target.value))} />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Label className="text-xs text-slate-600">Duracion (min)</Label>
+                      <Input type="number" min={0} value={m.durationMinutes} onChange={(e) => updateModuleDraft(m.id, "durationMinutes", Number(e.target.value))} />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="icon" onClick={() => moveModuleDraft(m.id, "up")} disabled={idx === 0}>
+                    <ArrowUp className="w-4 h-4" />
+                  </Button>
+                  <Button variant="outline" size="icon" onClick={() => moveModuleDraft(m.id, "down")} disabled={idx === modulesDraft.length - 1}>
+                    <ArrowDown className="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => removeModuleDraft(m.id)} disabled={modulesDraft.length <= 1}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-semibold text-slate-900">Gestion de modulos y lecciones</h3>
+            <p className="text-xs text-slate-500">Edita nombres, orden y agrega nuevas lecciones.</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={addModuleToCourse} disabled={!manageCourseId}>
+              + Modulo
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Curso</Label>
+            <Select
+              value={manageCourseId}
+              onValueChange={(value) => {
+                setManageCourseId(value);
+                if (typeof window !== "undefined") {
+                  window.localStorage.setItem("instructor_material_course_id", value);
+                }
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecciona curso" />
+              </SelectTrigger>
+              <SelectContent>
+                {courses.map((course) => (
+                  <SelectItem key={course.id} value={String(course.id)}>
+                    {course.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-end gap-2">
+            <Button
+              className="bg-red-600 text-white hover:bg-red-700"
+              onClick={() => {
+                if (!manageCourseId) return;
+                if (!window.confirm("Seguro que deseas eliminar este curso?")) return;
+                handleDeleteCourse(Number(manageCourseId));
+              }}
+            >
+              Eliminar curso
+            </Button>
+          </div>
+        </div>
+
+        {!manageCourseId && (
+          <p className="text-xs text-slate-500">Selecciona un curso para administrar sus modulos.</p>
+        )}
+
+        {manageCourseId &&
+          courseModules
+            .filter((m) => String(m.courseId) === manageCourseId)
+            .sort((a, b) => a.order - b.order)
+            .map((module, idx) => (
+              <div key={module.id} className="border border-slate-200 rounded-lg p-3 bg-slate-50 space-y-3">
+                <div className="flex flex-col md:flex-row md:items-center gap-3">
+                  <div className="flex-1 space-y-2">
+                    <Input
+                      value={module.title}
+                      onChange={(e) =>
+                        setCourseModules((prev) =>
+                          prev.map((m) => (m.id === module.id ? { ...m, title: e.target.value } : m))
+                        )
+                      }
+                    />
+                    <div className="flex flex-wrap gap-3 text-xs text-slate-500">
+                      <div className="flex items-center gap-2">
+                      <Label className="text-xs text-slate-600">Duracion (min)</Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        value={module.durationMinutes}
+                        onChange={(e) =>
+                          setCourseModules((prev) =>
+                            prev.map((m) =>
+                              m.id === module.id ? { ...m, durationMinutes: Number(e.target.value) } : m
+                            )
+                          )
+                        }
+                      />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="icon" onClick={() => moveModule(module.id, "up")} disabled={idx === 0}>
+                      <ArrowUp className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => moveModule(module.id, "down")}
+                      disabled={idx === courseModules.filter((m) => String(m.courseId) === manageCourseId).length - 1}
+                    >
+                      <ArrowDown className="w-4 h-4" />
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => saveModule(module)}>
+                      Guardar
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => addLesson(module.id)}>
+                      + Leccion
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  {courseLessons
+                    .filter((lesson) => lesson.moduleId === module.id)
+                    .sort((a, b) => a.order - b.order)
+                    .map((lesson, lessonIdx) => (
+                      <div key={lesson.id} className="flex flex-col md:flex-row md:items-center gap-2">
+                        <Input
+                          value={lesson.title}
+                          onChange={(e) =>
+                            setCourseLessons((prev) =>
+                              prev.map((l) => (l.id === lesson.id ? { ...l, title: e.target.value } : l))
+                            )
+                          }
+                        />
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => moveLesson(lesson.id, "up")}
+                            disabled={lessonIdx === 0}
+                          >
+                            <ArrowUp className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => moveLesson(lesson.id, "down")}
+                            disabled={
+                              lessonIdx ===
+                              courseLessons.filter((l) => l.moduleId === module.id).length - 1
+                            }
+                          >
+                            <ArrowDown className="w-4 h-4" />
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => saveLesson(lesson)}>
+                            Guardar
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            ))}
+      </div>
+
       <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label>Curso</Label>
-          <Select value={selectedCourse} onValueChange={(value) => setSelectedCourse(value)}>
+          <Select value={selectedCourseId} onValueChange={(value) => setSelectedCourseId(value)}>
             <SelectTrigger>
               <SelectValue placeholder="Curso" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos</SelectItem>
               {courses.map((course) => (
-                <SelectItem key={course} value={course}>
-                  {course}
+                <SelectItem key={course.id} value={String(course.id)}>
+                  {course.title}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -177,32 +968,27 @@ export function MaterialesSection() {
           </Select>
         </div>
       </div>
-
-      {/* AI test generation */}
       <div className="bg-white rounded-2xl shadow-sm p-6 border border-slate-100">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-lg font-semibold text-slate-900">Generar prueba con IA</h3>
-            <p className="text-sm text-slate-500">
-              Genera hasta 20 preguntas (mock) basadas en el curso y dificultad. Proxima iteracion: OpenAI real.
-            </p>
+            <p className="text-sm text-slate-500">Genera preguntas y exporta al modulo y leccion deseada.</p>
           </div>
-          <span className="text-xs px-3 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
-            Borrador
-          </span>
+          <span className="text-xs px-3 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">Borrador</span>
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>Curso</Label>
-            <Select value={selectedCourse === "all" ? courses[0] : selectedCourse} onValueChange={(v) => setSelectedCourse(v)}>
+            <Select value={aiTargetCourseId} onValueChange={(v) => setAiTargetCourseId(v)}>
               <SelectTrigger>
                 <SelectValue placeholder="Curso" />
               </SelectTrigger>
               <SelectContent>
-                {courses.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {c}
+                {!courses.length && <SelectItem value="nocourse">Sin cursos</SelectItem>}
+                {courses.map((course) => (
+                  <SelectItem key={course.id} value={String(course.id)}>
+                    {course.title}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -223,63 +1009,121 @@ export function MaterialesSection() {
           </div>
           <div className="space-y-2">
             <Label>Numero de preguntas (max 20)</Label>
-            <Input
-              type="number"
-              min={1}
-              max={20}
-              value={aiNumQuestions}
-              onChange={(e) => setAiNumQuestions(Number(e.target.value))}
-            />
+            <Input type="number" min={1} max={20} value={aiNumQuestions} onChange={(e) => setAiNumQuestions(Number(e.target.value))} />
           </div>
           <div className="space-y-2">
             <Label>Contexto / notas</Label>
-            <Textarea
-              value={aiContext}
-              onChange={(e) => setAiContext(e.target.value)}
-              placeholder="Resumen del contenido, objetivos, temas clave..."
-              rows={3}
-            />
+            <Textarea value={aiContext} onChange={(e) => setAiContext(e.target.value)} placeholder="Resumen del contenido, objetivos, temas clave..." rows={3} />
           </div>
         </div>
 
-        <div className="flex justify-end mt-4">
-          <Button
-            onClick={async () => {
-              if (!token) {
-                alert("Inicia sesión para usar IA.");
-                return;
-              }
-              try {
-                setAiLoading(true);
-                const res = await apiFetch<{ questions: any[] }>(
-                  "/api/ai/generate-test/",
-                  {
-                    method: "POST",
-                    body: JSON.stringify({
-                      course_id: selectedCourse === "all" ? courses[0] : selectedCourse,
-                      difficulty: aiDifficulty,
-                      num_questions: aiNumQuestions,
-                      context: aiContext,
-                    }),
-                  },
-                  token
-                );
-                setAiQuestions(res.questions || []);
-              } catch (err: any) {
-                alert(err?.message || "Error generando prueba");
-              } finally {
-                setAiLoading(false);
-              }
-            }}
-            disabled={aiLoading}
-          >
-            {aiLoading ? "Generando..." : "Generar prueba IA"}
-          </Button>
+        <div className="grid sm:grid-cols-3 gap-4 mt-4">
+          <div className="space-y-2">
+            <Label>Modulo destino</Label>
+            <Select value={aiTargetModuleId} onValueChange={(v) => setAiTargetModuleId(v)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Modulo" />
+              </SelectTrigger>
+              <SelectContent>
+                {aiModuleOptions.map((m) => (
+                  <SelectItem key={m.id} value={m.id}>
+                    {m.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Leccion destino</Label>
+            <Select value={aiTargetLessonId} onValueChange={(v) => setAiTargetLessonId(v)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Leccion" />
+              </SelectTrigger>
+              <SelectContent>
+                {aiLessonOptions.map((l) => (
+                  <SelectItem key={l.id} value={l.id}>
+                    {l.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-end">
+            <Button
+              onClick={async () => {
+                if (!token) {
+                  alert("Inicia sesion para usar IA.");
+                  return;
+                }
+                try {
+                  setAiLoading(true);
+                  const res = await apiFetch<{ questions: any[] }>(
+                    "/api/ai/generate-test/",
+                    {
+                      method: "POST",
+                      body: JSON.stringify({
+                        course_id: aiTargetCourseId,
+                        difficulty: aiDifficulty,
+                        num_questions: aiNumQuestions,
+                        context: aiContext,
+                      }),
+                    },
+                    token
+                  );
+                  setAiQuestions(res.questions || []);
+                } catch (err: any) {
+                  alert(err?.message || "Error generando prueba");
+                } finally {
+                  setAiLoading(false);
+                }
+              }}
+              disabled={aiLoading}
+              className="w-full"
+            >
+              {aiLoading ? "Generando..." : "Generar prueba IA"}
+            </Button>
+          </div>
         </div>
 
         {aiQuestions.length > 0 && (
           <div className="mt-6 space-y-3">
-            <h4 className="text-sm font-semibold text-slate-900">Preguntas generadas ({aiQuestions.length})</h4>
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-semibold text-slate-900">Preguntas generadas ({aiQuestions.length})</h4>
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  if (!token || !aiTargetLessonId) return;
+                  try {
+                    await apiFetch(
+                      "/api/course-materials/",
+                      {
+                        method: "POST",
+                        body: JSON.stringify({
+                          lesson_id: Number(aiTargetLessonId),
+                          material_type: "test",
+                          title: "Test IA",
+                          description: "Prueba generada automaticamente",
+                          url: "",
+                          metadata: {
+                            questions: aiQuestions,
+                            difficulty: aiDifficulty,
+                            num_questions: aiNumQuestions,
+                          },
+                        }),
+                      },
+                      token
+                    );
+                    setStatus("Prueba exportada al curso");
+                    await refreshData();
+                  } catch (err) {
+                    console.error(err);
+                    setStatus("No se pudo exportar la prueba");
+                  }
+                }}
+              >
+                Exportar al curso
+              </Button>
+            </div>
             <div className="space-y-2 max-h-80 overflow-auto pr-2">
               {aiQuestions.map((q, idx) => (
                 <div key={idx} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
@@ -302,23 +1146,16 @@ export function MaterialesSection() {
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredMaterials.map((material) => (
-          <div
-            key={material.id}
-            className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col gap-3 transition transform hover:-translate-y-1 hover:shadow-lg"
-          >
+          <div key={material.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col gap-3 transition transform hover:-translate-y-1 hover:shadow-lg">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                {material.type === "pdf" && <FileText className="w-4 h-4 text-sky-600" />}
-                {material.type === "video" && <Video className="w-4 h-4 text-violet-600" />}
-                {material.type === "test" && <ClipboardList className="w-4 h-4 text-emerald-600" />}
+                {material.materialType === "pdf" && <FileText className="w-4 h-4 text-sky-600" />}
+                {material.materialType === "video" && <Video className="w-4 h-4 text-violet-600" />}
+                {material.materialType === "test" && <ClipboardList className="w-4 h-4 text-emerald-600" />}
                 <p className="text-sm font-semibold text-slate-900">{material.title}</p>
               </div>
               <div className="flex gap-2">
-                <button
-                  className="p-1 rounded-full hover:bg-slate-100"
-                  title="Descargar / abrir"
-                  onClick={() => window.open(material.url || "#", "_blank")}
-                >
+                <button className="p-1 rounded-full hover:bg-slate-100" title="Descargar / abrir" onClick={() => window.open(material.url || "#", "_blank")}>
                   <Download className="w-4 h-4 text-slate-500" />
                 </button>
                 <button className="p-1 rounded-full hover:bg-slate-100" title="Eliminar" onClick={() => handleDelete(material.id)}>
@@ -326,12 +1163,13 @@ export function MaterialesSection() {
                 </button>
               </div>
             </div>
-            <p className="text-xs text-slate-500">{material.course}</p>
+            <p className="text-xs text-slate-500">{material.courseTitle}</p>
+            <p className="text-xs text-slate-500">{material.moduleTitle} - {material.lessonTitle}</p>
             <div className="flex items-center justify-between text-xs text-slate-500">
-              <span>{material.uploadDate}</span>
-              <span>{material.size || material.duration || "—"}</span>
+              <span>{material.createdAt ? new Date(material.createdAt).toLocaleDateString() : ""}</span>
+              <Button variant="outline" size="sm" onClick={() => openEditMaterial(material)}>Editar</Button>
             </div>
-            {material.type === "video" && material.url && (
+            {material.materialType === "video" && material.url && (
               <div className="rounded-lg overflow-hidden border border-slate-100">
                 <iframe
                   src={material.url.replace("watch?v=", "embed/")}
@@ -345,44 +1183,41 @@ export function MaterialesSection() {
           </div>
         ))}
       </div>
-
-      {showUploadModal && (
+      {showMaterialModal && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/50">
           <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-xl space-y-5 border border-slate-100">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-slate-900">Nuevo material</h3>
+                <h3 className="text-lg font-semibold text-slate-900">
+                  {editingMaterial ? "Editar material" : "Nuevo material"}
+                </h3>
                 <p className="text-sm text-slate-500">Sube un PDF, video de YouTube o un test.</p>
               </div>
-              <Button variant="ghost" onClick={() => setShowUploadModal(false)}>
+              <Button variant="ghost" onClick={() => setShowMaterialModal(false)}>
                 Cerrar
               </Button>
             </div>
 
             <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="space-y-2">
-                <Label>Título</Label>
+                <Label>Titulo</Label>
                 <Input value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required />
               </div>
               <div className="space-y-2">
-                <Label>Descripción</Label>
-                <Textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Detalles del material"
-                />
+                <Label>Descripcion</Label>
+                <Textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Detalles del material" />
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Curso</Label>
-                  <Select value={formData.course} onValueChange={(value) => setFormData({ ...formData, course: value })}>
+                  <Select value={formData.courseId} onValueChange={(value) => setFormData({ ...formData, courseId: value })}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar curso" />
                     </SelectTrigger>
                     <SelectContent>
                       {courses.map((course) => (
-                        <SelectItem key={course} value={course}>
-                          {course}
+                        <SelectItem key={course.id} value={String(course.id)}>
+                          {course.title}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -390,10 +1225,7 @@ export function MaterialesSection() {
                 </div>
                 <div className="space-y-2">
                   <Label>Tipo</Label>
-                  <Select
-                    value={formData.type}
-                    onValueChange={(value) => setFormData({ ...formData, type: value as MaterialType })}
-                  >
+                  <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value as MaterialType })}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar tipo" />
                     </SelectTrigger>
@@ -406,13 +1238,44 @@ export function MaterialesSection() {
                 </div>
               </div>
 
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Modulo</Label>
+                  <Select value={formData.moduleId} onValueChange={(value) => setFormData({ ...formData, moduleId: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar modulo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {moduleOptions.map((m) => (
+                        <SelectItem key={m.id} value={m.id}>
+                          {m.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Leccion</Label>
+                  <Select value={formData.lessonId} onValueChange={(value) => setFormData({ ...formData, lessonId: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar leccion" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {lessonOptions.map((l) => (
+                        <SelectItem key={l.id} value={l.id}>
+                          {l.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label>URL / recurso</Label>
                 <Input
                   value={formData.url}
-                  onChange={(e) =>
-                    formData.type === "video" ? handleYoutubePreview(e.target.value) : setFormData({ ...formData, url: e.target.value })
-                  }
+                  onChange={(e) => (formData.type === "video" ? handleYoutubePreview(e.target.value) : setFormData({ ...formData, url: e.target.value }))}
                   placeholder={formData.type === "video" ? "https://... (YouTube)" : "https://... (opcional si subes PDF)"}
                   required={formData.type !== "pdf"}
                 />
@@ -424,26 +1287,23 @@ export function MaterialesSection() {
                   <Input
                     type="file"
                     accept="application/pdf"
-                    onChange={(e) => setFilePdf(e.target.files?.[0] || null)}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0] || null;
+                      setFilePdf(file);
+                      setFileBase64("");
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        const result = typeof reader.result === "string" ? reader.result : "";
+                        const base64 = result.includes(",") ? result.split(",")[1] : result;
+                        setFileBase64(base64 || "");
+                      };
+                      reader.readAsDataURL(file);
+                    }}
                   />
                   <p className="text-xs text-slate-500">Si adjuntas un PDF local, la URL es opcional.</p>
                 </div>
               )}
-
-              <div className="flex flex-wrap gap-2 text-xs text-slate-500">
-                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-slate-100 border border-slate-200">
-                  <FileText className="w-3 h-3" />
-                  PDF
-                </span>
-                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-slate-100 border border-slate-200">
-                  <Video className="w-3 h-3" />
-                  Video YouTube
-                </span>
-                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-slate-100 border border-slate-200">
-                  <ClipboardList className="w-3 h-3" />
-                  Test
-                </span>
-              </div>
 
               {youtubePreview && formData.type === "video" && (
                 <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm">
@@ -458,7 +1318,7 @@ export function MaterialesSection() {
               )}
 
               <div className="flex gap-2 justify-end">
-                <Button type="button" variant="outline" onClick={() => setShowUploadModal(false)}>
+                <Button type="button" variant="outline" onClick={() => setShowMaterialModal(false)}>
                   Cancelar
                 </Button>
                 <Button type="submit">

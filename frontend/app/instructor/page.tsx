@@ -22,6 +22,27 @@ export default function InstructorPage() {
     }
   }, [token, router]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const syncFromHash = () => {
+      const hash = window.location.hash.replace("#", "");
+      if (hash === "inicio" || hash === "materiales" || hash === "estadisticas") {
+        setActiveTab(hash);
+      }
+    };
+    syncFromHash();
+    window.addEventListener("hashchange", syncFromHash);
+    return () => window.removeEventListener("hashchange", syncFromHash);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const current = window.location.hash.replace("#", "");
+    if (current !== activeTab) {
+      window.location.hash = activeTab;
+    }
+  }, [activeTab]);
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
       <InstructorNavbar activeTab={activeTab} onTabChange={setActiveTab} />
@@ -35,7 +56,7 @@ export default function InstructorPage() {
                 Gestiona tus cursos, revisa la atencion de tus estudiantes y ajusta el contenido en segundos.
               </p>
             </div>
-            <InicioProfesor />
+            <InicioProfesor onTabChange={setActiveTab} />
           </div>
         )}
 

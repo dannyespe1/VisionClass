@@ -40,13 +40,19 @@ export async function apiFetch<T>(
 }
 
 export async function postFrameToML(form: FormData) {
-  const res = await fetch(`${ML_URL}/analyze/frame`, {
-    method: "POST",
-    body: form,
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || res.statusText);
+  try {
+    const res = await fetch(`${ML_URL}/analyze/frame`, {
+      method: "POST",
+      body: form,
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      return { ok: false, error: text || res.statusText };
+    }
+    const data = await res.json().catch(() => ({}));
+    return { ok: true, ...data };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to fetch";
+    return { ok: false, error: message };
   }
-  return res.json();
 }

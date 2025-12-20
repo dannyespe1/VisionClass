@@ -106,12 +106,14 @@ export function MaterialesSection() {
   const [aiContext, setAiContext] = useState("");
   const [aiTargetCourseId, setAiTargetCourseId] = useState("");
   const [aiTargetModuleId, setAiTargetModuleId] = useState("");
-  const [aiTargetLessonId, setAiTargetLessonId] = useState("");
+  const [aiTargetTestId, setAiTargetTestId] = useState("");
 
   const [courses, setCourses] = useState<CourseItem[]>([]);
   const [courseModules, setCourseModules] = useState<CourseModule[]>([]);
   const [courseLessons, setCourseLessons] = useState<CourseLesson[]>([]);
   const [materials, setMaterials] = useState<CourseMaterial[]>([]);
+  const [moduleTestDrafts, setModuleTestDrafts] = useState<Record<number, number>>({});
+  const [finalExamEnabled, setFinalExamEnabled] = useState(false);
 
   const [newCourseTitle, setNewCourseTitle] = useState("");
   const [newCourseDesc, setNewCourseDesc] = useState("");
@@ -251,12 +253,43 @@ export function MaterialesSection() {
       .map((m) => ({ id: String(m.id), label: m.title }));
   }, [courseModules, aiTargetCourseId]);
 
-  const aiLessonOptions = useMemo(() => {
-    if (!aiTargetModuleId) return [];
+  const isModuleTestLesson = (title: string) => {
+    const normalized = (title || "").toLowerCase();
+    return normalized.startsWith("prueba ") || normalized.startsWith("test ");
+  };
+
+  const isFinalExamLesson = (title: string) => (title || "").toLowerCase().includes("examen final");
+
+  const getModuleTestLessons = (moduleId: number) => {
     return courseLessons
-      .filter((l) => String(l.moduleId) === aiTargetModuleId)
-      .map((l) => ({ id: String(l.id), label: l.title }));
-  }, [courseLessons, aiTargetModuleId]);
+      .filter((l) => l.moduleId === moduleId && isModuleTestLesson(l.title))
+      .sort((a, b) => a.order - b.order);
+  };
+
+  const getCourseFinalExamLesson = (courseId: number) => {
+    return courseLessons.find((l) => l.courseId === courseId && isFinalExamLesson(l.title));
+  };
+
+  const aiTestOptions = useMemo(() => {
+    if (!aiTargetModuleId) return [];
+    const moduleId = Number(aiTargetModuleId);
+    const tests = getModuleTestLessons(moduleId);
+    const options = tests.map((t, idx) => ({
+      id: `module:${moduleId}:test:${idx + 1}`,
+      label: t.title || `Prueba ${idx + 1}`,
+      lessonId: t.id,
+    }));
+    const courseId = Number(aiTargetCourseId || 0);
+    const finalExam = courseId ? getCourseFinalExamLesson(courseId) : null;
+    if (finalExam) {
+      options.push({
+        id: `final:${finalExam.id}`,
+        label: finalExam.title || "Examen final",
+        lessonId: finalExam.id,
+      });
+    }
+    return options;
+  }, [aiTargetModuleId, aiTargetCourseId, courseLessons]);
 
   useEffect(() => {
     if (moduleOptions.length && !formData.moduleId) {
@@ -277,10 +310,22 @@ export function MaterialesSection() {
   }, [aiModuleOptions, aiTargetModuleId]);
 
   useEffect(() => {
-    if (aiLessonOptions.length && !aiTargetLessonId) {
-      setAiTargetLessonId(aiLessonOptions[0].id);
+    if (aiTestOptions.length && !aiTargetTestId) {
+      setAiTargetTestId(aiTestOptions[0].id);
     }
-  }, [aiLessonOptions, aiTargetLessonId]);
+  }, [aiTestOptions, aiTargetTestId]);
+
+  useEffect(() => {
+    if (!manageCourseId) return;
+    const courseId = Number(manageCourseId);
+    const courseModuleIds = courseModules.filter((m) => m.courseId === courseId).map((m) => m.id);
+    const draft: Record<number, number> = {};
+    courseModuleIds.forEach((id) => {
+      draft[id] = getModuleTestLessons(id).length;
+    });
+    setModuleTestDrafts(draft);
+    setFinalExamEnabled(Boolean(getCourseFinalExamLesson(courseId)));
+  }, [manageCourseId, courseModules, courseLessons]);
 
   const addModuleDraft = () => {
     setModulesDraft((prev) => [
@@ -367,6 +412,35 @@ export function MaterialesSection() {
                 module_id: moduleRes.id,
                 title: `Leccion ${j + 1}`,
                 order: j + 1,
+              }),
+            },
+            token
+          );
+        }
+        const testsToCreate = Math.max(0, Number(moduleDraft.tests) || 0);
+        for (let t = 0; t < testsToCreate; t += 1) {
+          await apiFetch(
+            "/api/course-lessons/",
+            {
+              method: "POST",
+              body: JSON.stringify({
+                module_id: moduleRes.id,
+                title: `Prueba ${t + 1}`,
+                order: lessonsToCreate + t + 1,
+              }),
+            },
+            token
+          );
+        }
+        if (i === modulesDraft.length - 1) {
+          await apiFetch(
+            "/api/course-lessons/",
+            {
+              method: "POST",
+              body: JSON.stringify({
+                module_id: moduleRes.id,
+                title: "Examen final",
+                order: lessonsToCreate + testsToCreate + 1,
               }),
             },
             token
@@ -638,6 +712,81 @@ export function MaterialesSection() {
     }
   };
 
+  const syncModuleTests = async (moduleId: number, desiredCount: number) => {
+    if (!token) return;
+    const existing = getModuleTestLessons(moduleId);
+    const safeCount = Math.max(0, Math.floor(desiredCount));
+    try {
+      if (safeCount > existing.length) {
+        const lessonsForModule = courseLessons.filter((l) => l.moduleId === moduleId);
+        let nextOrder = lessonsForModule.length + 1;
+        for (let i = existing.length; i < safeCount; i += 1) {
+          await apiFetch(
+            "/api/course-lessons/",
+            {
+              method: "POST",
+              body: JSON.stringify({
+                module_id: moduleId,
+                title: `Prueba ${i + 1}`,
+                order: nextOrder,
+              }),
+            },
+            token
+          );
+          nextOrder += 1;
+        }
+      } else if (safeCount < existing.length) {
+        const toRemove = existing.slice(safeCount);
+        for (const lesson of toRemove) {
+          await apiFetch(`/api/course-lessons/${lesson.id}/`, { method: "DELETE" }, token);
+        }
+      }
+      setStatus("Pruebas por modulo actualizadas");
+      await refreshData();
+    } catch (err) {
+      console.error(err);
+      setStatus("Error actualizando pruebas");
+    }
+  };
+
+  const toggleFinalExam = async (enabled: boolean) => {
+    if (!token || !manageCourseId) return;
+    const courseId = Number(manageCourseId);
+    const finalLesson = getCourseFinalExamLesson(courseId);
+    const modulesForCourse = courseModules
+      .filter((m) => m.courseId === courseId)
+      .sort((a, b) => a.order - b.order);
+    const lastModule = modulesForCourse[modulesForCourse.length - 1];
+    if (!lastModule) return;
+    try {
+      if (enabled && !finalLesson) {
+        const lessonsForModule = courseLessons.filter((l) => l.moduleId === lastModule.id);
+        const nextOrder = lessonsForModule.length + 1;
+        await apiFetch(
+          "/api/course-lessons/",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              module_id: lastModule.id,
+              title: "Examen final",
+              order: nextOrder,
+            }),
+          },
+          token
+        );
+      }
+      if (!enabled && finalLesson) {
+        await apiFetch(`/api/course-lessons/${finalLesson.id}/`, { method: "DELETE" }, token);
+      }
+      setFinalExamEnabled(enabled);
+      setStatus("Examen final actualizado");
+      await refreshData();
+    } catch (err) {
+      console.error(err);
+      setStatus("Error actualizando examen final");
+    }
+  };
+
   const saveLesson = async (lesson: CourseLesson) => {
     if (!token) return;
     try {
@@ -754,7 +903,7 @@ export function MaterialesSection() {
                       <Input type="number" min={0} value={m.lessons} onChange={(e) => updateModuleDraft(m.id, "lessons", Number(e.target.value))} />
                     </div>
                     <div className="flex items-center gap-2">
-                      <Label className="text-xs text-slate-600">Pruebas</Label>
+                      <Label className="text-xs text-slate-600">Pruebas por modulo</Label>
                       <Input type="number" min={0} value={m.tests} onChange={(e) => updateModuleDraft(m.id, "tests", Number(e.target.value))} />
                     </div>
                     <div className="flex items-center gap-2">
@@ -784,7 +933,7 @@ export function MaterialesSection() {
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-sm font-semibold text-slate-900">Gestion de modulos y lecciones</h3>
-            <p className="text-xs text-slate-500">Edita nombres, orden y agrega nuevas lecciones.</p>
+            <p className="text-xs text-slate-500">Edita nombres, orden, pruebas por modulo y examen final.</p>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={addModuleToCourse} disabled={!manageCourseId}>
@@ -831,6 +980,22 @@ export function MaterialesSection() {
           </div>
         </div>
 
+        {manageCourseId && (
+          <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+            <div>
+              <p className="text-sm font-semibold text-slate-900">Examen final del curso</p>
+              <p className="text-xs text-slate-500">Habilita o elimina el examen final en el ultimo modulo.</p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => toggleFinalExam(!finalExamEnabled)}
+            >
+              {finalExamEnabled ? "Quitar examen final" : "Crear examen final"}
+            </Button>
+          </div>
+        )}
+
         {!manageCourseId && (
           <p className="text-xs text-slate-500">Selecciona un curso para administrar sus modulos.</p>
         )}
@@ -866,6 +1031,27 @@ export function MaterialesSection() {
                           )
                         }
                       />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Label className="text-xs text-slate-600">Pruebas del modulo</Label>
+                        <Input
+                          type="number"
+                          min={0}
+                          value={moduleTestDrafts[module.id] ?? 0}
+                          onChange={(e) =>
+                            setModuleTestDrafts((prev) => ({
+                              ...prev,
+                              [module.id]: Number(e.target.value),
+                            }))
+                          }
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => syncModuleTests(module.id, moduleTestDrafts[module.id] ?? 0)}
+                        >
+                          Actualizar
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -972,7 +1158,7 @@ export function MaterialesSection() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-lg font-semibold text-slate-900">Generar prueba con IA</h3>
-            <p className="text-sm text-slate-500">Genera preguntas y exporta al modulo y leccion deseada.</p>
+            <p className="text-sm text-slate-500">Genera preguntas y exporta a una prueba del modulo o examen final.</p>
           </div>
           <span className="text-xs px-3 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">Borrador</span>
         </div>
@@ -1034,15 +1220,15 @@ export function MaterialesSection() {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>Leccion destino</Label>
-            <Select value={aiTargetLessonId} onValueChange={(v) => setAiTargetLessonId(v)}>
+            <Label>Prueba destino</Label>
+            <Select value={aiTargetTestId} onValueChange={(v) => setAiTargetTestId(v)}>
               <SelectTrigger>
-                <SelectValue placeholder="Leccion" />
+                <SelectValue placeholder="Prueba" />
               </SelectTrigger>
               <SelectContent>
-                {aiLessonOptions.map((l) => (
-                  <SelectItem key={l.id} value={l.id}>
-                    {l.label}
+                {aiTestOptions.map((t) => (
+                  <SelectItem key={t.id} value={t.id}>
+                    {t.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -1092,16 +1278,47 @@ export function MaterialesSection() {
               <Button
                 variant="outline"
                 onClick={async () => {
-                  if (!token || !aiTargetLessonId) return;
+                  if (!token || !aiTargetTestId) return;
                   try {
+                    let lessonId: number | null = null;
+                    if (aiTargetTestId.startsWith("final:")) {
+                      const finalId = Number(aiTargetTestId.split(":")[1]);
+                      lessonId = Number.isNaN(finalId) ? null : finalId;
+                    } else if (aiTargetTestId.startsWith("module:")) {
+                      const parts = aiTargetTestId.split(":");
+                      const moduleId = Number(parts[1]);
+                      const testIndex = Number(parts[3]);
+                      const existing = getModuleTestLessons(moduleId);
+                      const target = existing[testIndex - 1];
+                      if (target?.id) {
+                        lessonId = target.id;
+                      } else {
+                        const lessonsForModule = courseLessons.filter((l) => l.moduleId === moduleId);
+                        const nextOrder = lessonsForModule.length + 1;
+                        const created = await apiFetch<any>(
+                          "/api/course-lessons/",
+                          {
+                            method: "POST",
+                            body: JSON.stringify({
+                              module_id: moduleId,
+                              title: `Prueba ${testIndex}`,
+                              order: nextOrder,
+                            }),
+                          },
+                          token
+                        );
+                        lessonId = created?.id || null;
+                      }
+                    }
+                    if (!lessonId) return;
                     await apiFetch(
                       "/api/course-materials/",
                       {
                         method: "POST",
                         body: JSON.stringify({
-                          lesson_id: Number(aiTargetLessonId),
+                          lesson_id: Number(lessonId),
                           material_type: "test",
-                          title: "Test IA",
+                          title: "Prueba IA",
                           description: "Prueba generada automaticamente",
                           url: "",
                           metadata: {

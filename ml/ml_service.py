@@ -2,6 +2,7 @@ import os
 from datetime import datetime
 from typing import Optional, Dict, Any
 from collections import deque, defaultdict
+from pathlib import Path
 
 import cv2
 import numpy as np
@@ -9,6 +10,7 @@ import httpx
 import mediapipe as mp
 import onnxruntime as ort
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 import uvicorn
@@ -21,6 +23,18 @@ MODEL_PATH = os.environ.get("MODEL_PATH", "checkpoints/cnn_lstm.onnx")
 MODEL_IMG_SIZE = int(os.environ.get("MODEL_IMG_SIZE", "224"))
 
 app = FastAPI(title="ML Attention Service", version="0.1.0")
+
+allowed_origins = [origin.strip() for origin in os.environ.get("CORS_ORIGINS", "").split(",") if origin.strip()]
+if not allowed_origins:
+    allowed_origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 try:
     mp_face_mesh = mp.solutions.face_mesh
@@ -152,21 +166,22 @@ def aggregate_temporal_score(session_id: int, frame_result: Dict[str, Any]) -> D
     y calculamos un score temporal. Sustituir por inferencia real de modelo secuencial.
     """
     seq = session_sequences[session_id]
+    score_val = frame_result.get("value")
     seq.append(
         {
-            "score": frame_result["value"],
+            "score": score_val,
             "eyes_open": frame_result["data"].get("eyes_open", 0),
             "gaze_center": frame_result["data"].get("gaze_center", 0),
             "ear": frame_result["data"].get("ear", 0),
         }
     )
-    scores = np.array([x["score"] for x in seq])
-    eyes = np.array([x["eyes_open"] for x in seq])
-    gaze = np.array([x["gaze_center"] for x in seq])
+    scores = [x["score"] for x in seq if x.get("score") is not None]
+    eyes = [x["eyes_open"] for x in seq]
+    gaze = [x["gaze_center"] for x in seq]
 
-    temporal_score = float(np.mean(scores)) if len(scores) else 0.0
-    eyes_score = float(np.mean(eyes)) if len(eyes) else 0.0
-    gaze_score = float(np.mean(gaze)) if len(gaze) else 0.0
+    temporal_score = float(np.mean(scores)) if scores else 0.0
+    eyes_score = float(np.mean(eyes)) if eyes else 0.0
+    gaze_score = float(np.mean(gaze)) if gaze else 0.0
 
     combined = float(np.clip(0.6 * temporal_score + 0.2 * eyes_score + 0.2 * gaze_score, 0, 1))
 
@@ -175,7 +190,7 @@ def aggregate_temporal_score(session_id: int, frame_result: Dict[str, Any]) -> D
         "label": "attention_sequence_score",
         "data": {
             "sequence_len": len(seq),
-            "frame_score": frame_result["value"],
+            "frame_score": score_val,
             "temporal_mean": temporal_score,
             "eyes_mean": eyes_score,
             "gaze_mean": gaze_score,
@@ -284,7 +299,7 @@ async def analyze_frame(
     label = "attention_model" if model_score is not None else (
         temporal.get("label", "attention_sequence_score") if result["value"] is not None else "no_face"
     )
-    value = model_score if model_score is not None else (temporal.get("value") if result["value"] is not None else None)
+    value = model_score if model_score is not None else float(temporal.get("value", 0.0))
 
     payload = AttentionEventPayload(
         session_id=session_id,

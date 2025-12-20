@@ -1,8 +1,10 @@
 from django.contrib.auth import get_user_model
 from rest_framework import viewsets, permissions, mixins, status
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import action
+from django.http import HttpResponse, HttpResponseRedirect
 import random
 import os
 import json
@@ -85,7 +87,7 @@ class CourseModuleViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if self.request.user.role not in [User.ROLE_TEACHER, User.ROLE_ADMIN]:
-            raise permissions.PermissionDenied("Solo docentes o administradores pueden crear modulos.")
+            raise PermissionDenied("Solo docentes o administradores pueden crear modulos.")
         serializer.save()
 
 
@@ -103,7 +105,7 @@ class CourseLessonViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if self.request.user.role not in [User.ROLE_TEACHER, User.ROLE_ADMIN]:
-            raise permissions.PermissionDenied("Solo docentes o administradores pueden crear lecciones.")
+            raise PermissionDenied("Solo docentes o administradores pueden crear lecciones.")
         serializer.save()
 
 
@@ -121,8 +123,21 @@ class CourseMaterialViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if self.request.user.role not in [User.ROLE_TEACHER, User.ROLE_ADMIN]:
-            raise permissions.PermissionDenied("Solo docentes o administradores pueden crear materiales.")
+            raise PermissionDenied("Solo docentes o administradores pueden crear materiales.")
         serializer.save()
+
+    @action(detail=True, methods=['get'])
+    def download(self, request, pk=None):
+        material = self.get_object()
+        if material.file_bytes:
+            content_type = material.file_content_type or "application/octet-stream"
+            filename = material.file_name or f"material_{material.id}.bin"
+            response = HttpResponse(material.file_bytes, content_type=content_type)
+            response["Content-Disposition"] = f'attachment; filename="{filename}"'
+            return response
+        if material.url:
+            return HttpResponseRedirect(material.url)
+        return Response({"detail": "No hay archivo disponible"}, status=404)
 
 
 class EnrollmentViewSet(viewsets.ModelViewSet):

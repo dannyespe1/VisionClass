@@ -11,7 +11,7 @@ import { Textarea } from "../ui/textarea";
 import { parseCourseMeta } from "../lib/courseMeta";
 
 interface CursosSectionProps {
-  onCourseSelect: (courseTitle: string) => void;
+  onCourseSelect: (courseId: number) => void;
 }
 
 type CourseCard = {
@@ -149,7 +149,7 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
   const openEnroll = (course: CourseCard) => {
     if (!token) return;
     if (enrolledIds.has(course.id)) {
-      onCourseSelect(course.title);
+      onCourseSelect(course.id);
       return;
     }
     const fullName = `${me?.first_name || ""} ${me?.last_name || ""}`.trim();
@@ -396,7 +396,7 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
                   );
                   setEnrolledIds((prev) => new Set(prev).add(enrollCourse.id));
                   setEnrollOpen(false);
-                  onCourseSelect(enrollCourse.title);
+                  onCourseSelect(enrollCourse.id);
                 } catch (err: unknown) {
                   const msg = err instanceof Error ? err.message : "No se pudo inscribir";
                   setError(msg);

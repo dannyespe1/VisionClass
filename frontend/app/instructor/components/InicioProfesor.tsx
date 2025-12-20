@@ -63,7 +63,18 @@ function extractMeta(description?: string) {
   }
 }
 
-export function InicioProfesor() {
+function stripMeta(description?: string) {
+  if (!description) return "";
+  return description.replace(/\s*\[meta\]:\s*\{.*\}\s*/s, "").trim();
+}
+
+type TabId = "inicio" | "materiales" | "estadisticas";
+
+type InicioProfesorProps = {
+  onTabChange?: (tab: TabId) => void;
+};
+
+export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
   const { token } = useAuth();
   const [courses, setCourses] = useState<CourseItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -92,7 +103,7 @@ export function InicioProfesor() {
             return {
               id: c.id,
               title: c.title || `Curso ${idx + 1}`,
-              description: c.description || "",
+              description: stripMeta(c.description || ""),
               is_active: c.is_active ?? true,
               image:
                 meta?.thumbnail ||
@@ -157,6 +168,13 @@ export function InicioProfesor() {
         course.id === courseId ? { ...course, is_active: !course.is_active } : course
       )
     );
+  };
+
+  const goToTab = (tab: TabId) => {
+    onTabChange?.(tab);
+    if (typeof window !== "undefined") {
+      window.location.hash = tab;
+    }
   };
 
   const activeCourses = useMemo(() => courses.filter((c) => c.is_active).length, [courses]);
@@ -327,16 +345,19 @@ export function InicioProfesor() {
                       onClick={() => {
                         if (typeof window !== "undefined") {
                           window.localStorage.setItem("instructor_material_course_id", String(course.id));
-                          window.location.hash = "materiales";
                         }
                         setSelectedDetails(course);
+                        goToTab("materiales");
                       }}
                     >
                       Subir Material
                     </button>
                     <button
                       className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
-                      onClick={() => setSelectedDetails(course)}
+                      onClick={() => {
+                        setSelectedDetails(course);
+                        goToTab("estadisticas");
+                      }}
                     >
                       Estadisticas
                     </button>
@@ -384,7 +405,9 @@ export function InicioProfesor() {
                   <div key={module.id} className="border border-slate-200 rounded-lg p-3 bg-slate-50">
                     <div className="flex items-center justify-between">
                       <div className="font-semibold text-slate-900">{module.title}</div>
-                      <div className="text-xs text-slate-500">Duracion: {module.durationHours}h</div>
+                      <div className="text-xs text-slate-500">
+                        Duracion: {Math.max(1, Math.round(module.durationHours * 60))} min
+                      </div>
                     </div>
                     <div className="mt-2 space-y-2">
                       {module.lessons.length === 0 && (
@@ -429,9 +452,9 @@ export function InicioProfesor() {
                   onClick={() => {
                     if (typeof window !== "undefined") {
                       window.localStorage.setItem("instructor_material_course_id", String(selectedDetails.id));
-                      window.location.hash = "materiales";
                     }
                     setSelectedDetails(selectedDetails);
+                    goToTab("materiales");
                   }}
                 >
                   Subir material
@@ -448,17 +471,26 @@ export function InicioProfesor() {
       <div className="bg-blue-50 rounded-xl p-6">
         <h3 className="mb-4">Acciones Rapidas</h3>
         <div className="grid md:grid-cols-3 gap-4">
-          <button className="bg-white p-4 rounded-lg hover:shadow-md transition-shadow text-left">
+          <button
+            className="bg-white p-4 rounded-lg hover:shadow-md transition-shadow text-left"
+            onClick={() => goToTab("materiales")}
+          >
             <BookOpen className="w-8 h-8 text-blue-600 mb-2" />
             <div className="mb-1">Crear Nuevo Curso</div>
             <p className="text-sm text-gray-600">Configura un nuevo curso</p>
           </button>
-          <button className="bg-white p-4 rounded-lg hover:shadow-md transition-shadow text-left">
+          <button
+            className="bg-white p-4 rounded-lg hover:shadow-md transition-shadow text-left"
+            onClick={() => goToTab("estadisticas")}
+          >
             <Users className="w-8 h-8 text-green-600 mb-2" />
             <div className="mb-1">Ver Estudiantes</div>
             <p className="text-sm text-gray-600">Lista de todos los estudiantes</p>
           </button>
-          <button className="bg-white p-4 rounded-lg hover:shadow-md transition-shadow text-left">
+          <button
+            className="bg-white p-4 rounded-lg hover:shadow-md transition-shadow text-left"
+            onClick={() => goToTab("estadisticas")}
+          >
             <Eye className="w-8 h-8 text-purple-600 mb-2" />
             <div className="mb-1">Reportes de Atencion</div>
             <p className="text-sm text-gray-600">Analisis detallados</p>

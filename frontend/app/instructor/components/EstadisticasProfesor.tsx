@@ -1,4 +1,7 @@
-import { Users, Eye, TrendingUp, AlertTriangle, Lightbulb, BookOpen } from "lucide-react";
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { Users, Eye, TrendingUp, BookOpen } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -13,133 +16,217 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import { apiFetch } from "../../lib/api";
+import { useAuth } from "../../context/AuthContext";
+
+const BASELINE_TITLE = "baseline d2r";
+
+type Course = {
+  id: number;
+  title: string;
+};
+
+type Enrollment = {
+  id: number;
+  course?: { id: number; title: string };
+  user?: { id: number; username: string; first_name?: string; last_name?: string };
+  enrollment_data?: {
+    attention_avg?: number;
+    attention_last?: number;
+    progress?: number;
+    last_attention_at?: string;
+  };
+};
+
+type Session = {
+  id: number;
+  created_at?: string;
+  mean_attention?: number;
+  last_score?: number;
+  attention_score?: number;
+};
+
+type QuizAttempt = {
+  id: number;
+  score?: number;
+  session?: { course?: { id: number } };
+};
+
+const COLORS = ["#10b981", "#3b82f6", "#f59e0b", "#ef4444"];
+
+const avg = (values: number[]) => {
+  if (!values.length) return 0;
+  const sum = values.reduce((acc, val) => acc + val, 0);
+  return Math.round(sum / values.length);
+};
+
+const normalizeNumber = (value?: number) => {
+  if (typeof value !== "number" || Number.isNaN(value)) return 0;
+  return value;
+};
+
+const formatWeek = (date: Date) => {
+  const week = Math.ceil((date.getDate() + 6 - date.getDay()) / 7);
+  return `S${week}`;
+};
 
 export function EstadisticasProfesor() {
-  const courseStats = [
-    {
-      course: "Python",
-      students: 45,
-      avgAttention: 85,
-      completion: 72,
-      avgGrade: 88,
-    },
-    {
-      course: "ML Básico",
-      students: 32,
-      avgAttention: 78,
-      completion: 65,
-      avgGrade: 82,
-    },
-    {
-      course: "Est. Datos",
-      students: 38,
-      avgAttention: 82,
-      completion: 58,
-      avgGrade: 85,
-    },
-  ];
+  const { token } = useAuth();
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [quizAttempts, setQuizAttempts] = useState<QuizAttempt[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const attentionTrend = [
-    { week: "S1", python: 80, ml: 75, estructuras: 78 },
-    { week: "S2", python: 82, ml: 76, estructuras: 80 },
-    { week: "S3", python: 84, ml: 77, estructuras: 81 },
-    { week: "S4", python: 85, ml: 78, estructuras: 82 },
-  ];
+  useEffect(() => {
+    const load = async () => {
+      if (!token) return;
+      setLoading(true);
+      setError(null);
+      try {
+        const [courseData, enrollmentData, sessionData, quizData] = await Promise.all([
+          apiFetch<any[]>("/api/courses/", {}, token),
+          apiFetch<any[]>("/api/enrollments/", {}, token),
+          apiFetch<any[]>("/api/sessions/", {}, token),
+          apiFetch<any[]>("/api/quiz-attempts/", {}, token),
+        ]);
+        setCourses(
+          (courseData || []).filter(
+            (course) => (course.title || "").toLowerCase() !== BASELINE_TITLE
+          )
+        );
+        setEnrollments(enrollmentData || []);
+        setSessions(sessionData || []);
+        setQuizAttempts(quizData || []);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "No se pudieron cargar las estadisticas";
+        setError(msg);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [token]);
 
-  const lessonsAttention = [
-    { lesson: "L1", attention: 88 },
-    { lesson: "L2", attention: 85 },
-    { lesson: "L3", attention: 72 },
-    { lesson: "L4", attention: 90 },
-    { lesson: "L5", attention: 78 },
-    { lesson: "L6", attention: 86 },
-  ];
+  const courseStats = useMemo(() => {
+    return courses.map((course) => {
+      const courseEnrollments = enrollments.filter((enroll) => enroll.course?.id === course.id);
+      const attentionValues = courseEnrollments.map((enroll) =>
+        normalizeNumber(enroll.enrollment_data?.attention_avg ?? enroll.enrollment_data?.attention_last)
+      );
+      const completionValues = courseEnrollments.map((enroll) =>
+        normalizeNumber(enroll.enrollment_data?.progress)
+      );
+      const courseQuizScores = quizAttempts
+        .filter((attempt) => attempt.session?.course?.id === course.id)
+        .map((attempt) => normalizeNumber(attempt.score));
+      return {
+        course: course.title,
+        students: courseEnrollments.length,
+        avgAttention: avg(attentionValues),
+        completion: avg(completionValues),
+        avgGrade: avg(courseQuizScores) || 0,
+      };
+    });
+  }, [courses, enrollments, quizAttempts]);
 
-  const studentDistribution = [
-    { name: "Excelente (90-100)", value: 35 },
-    { name: "Bueno (80-89)", value: 40 },
-    { name: "Regular (70-79)", value: 20 },
-    { name: "Necesita Apoyo (<70)", value: 5 },
-  ];
+  const overallStats = useMemo(() => {
+    const attentionValues = enrollments.map((enroll) =>
+      normalizeNumber(enroll.enrollment_data?.attention_avg ?? enroll.enrollment_data?.attention_last)
+    );
+    const completionValues = enrollments.map((enroll) =>
+      normalizeNumber(enroll.enrollment_data?.progress)
+    );
+    const gradeValues = quizAttempts.map((attempt) => normalizeNumber(attempt.score));
+    return {
+      students: enrollments.length,
+      avgAttention: avg(attentionValues),
+      avgCompletion: avg(completionValues),
+      avgGrade: avg(gradeValues),
+    };
+  }, [enrollments, quizAttempts]);
 
-  const COLORS = ["#10b981", "#3b82f6", "#f59e0b", "#ef4444"];
-
-  const suggestions = [
-    {
-      icon: AlertTriangle,
-      type: "warning",
-      title: "Atención baja en Lección 3",
-      description:
-        "La lección sobre 'Estructuras de Control' tiene un promedio de atención del 72%. Considera dividirla en sesiones más cortas o agregar elementos interactivos.",
-      course: "Introducción a Python",
-    },
-    {
-      icon: Lightbulb,
-      type: "tip",
-      title: "Momento ideal para evaluación",
-      description:
-        "El nivel de atención de los estudiantes está en su punto más alto (90%). Es un buen momento para aplicar una evaluación del módulo actual.",
-      course: "Machine Learning Básico",
-    },
-    {
-      icon: TrendingUp,
-      type: "success",
-      title: "Mejora en participación",
-      description:
-        "La atención promedio ha aumentado un 12% en las últimas 3 semanas. Los estudiantes están más comprometidos con el material.",
-      course: "Estructuras de Datos",
-    },
-    {
-      icon: Users,
-      type: "info",
-      title: "Estudiantes en riesgo",
-      description:
-        "5 estudiantes (11%) muestran niveles de atención consistentemente bajos. Considera una sesión de tutoría personalizada.",
-      course: "Introducción a Python",
-    },
-  ];
-
-  const getSuggestionColor = (type: string) => {
-    switch (type) {
-      case "warning":
-        return "bg-yellow-50 border-yellow-200";
-      case "tip":
-        return "bg-blue-50 border-blue-200";
-      case "success":
-        return "bg-green-50 border-green-200";
-      case "info":
-        return "bg-purple-50 border-purple-200";
-      default:
-        return "bg-gray-50 border-gray-200";
+  const attentionTrend = useMemo(() => {
+    const grouped = new Map<string, number[]>();
+    sessions.forEach((session) => {
+      if (!session.created_at) return;
+      const value = normalizeNumber(
+        session.mean_attention ?? session.attention_score ?? session.last_score
+      );
+      if (!value) return;
+      const date = new Date(session.created_at);
+      const key = formatWeek(date);
+      if (!grouped.has(key)) grouped.set(key, []);
+      grouped.get(key)?.push(value);
+    });
+    if (!grouped.size) {
+      enrollments.forEach((enroll) => {
+        const timestamp =
+          enroll.enrollment_data?.attention_updated_at ||
+          enroll.enrollment_data?.last_attention_at ||
+          enroll.enrollment_data?.last_update_at;
+        if (!timestamp) return;
+        const value = normalizeNumber(
+          enroll.enrollment_data?.attention_avg ?? enroll.enrollment_data?.attention_last
+        );
+        if (!value) return;
+        const date = new Date(timestamp);
+        const key = formatWeek(date);
+        if (!grouped.has(key)) grouped.set(key, []);
+        grouped.get(key)?.push(value);
+      });
     }
-  };
+    return Array.from(grouped.entries())
+      .map(([week, values]) => ({
+        week,
+        attention: avg(values),
+      }))
+      .sort((a, b) => a.week.localeCompare(b.week));
+  }, [sessions, enrollments]);
 
-  const getSuggestionIconColor = (type: string) => {
-    switch (type) {
-      case "warning":
-        return "text-yellow-600";
-      case "tip":
-        return "text-blue-600";
-      case "success":
-        return "text-green-600";
-      case "info":
-        return "text-purple-600";
-      default:
-        return "text-gray-600";
-    }
-  };
+  const attentionDistribution = useMemo(() => {
+    const buckets = { excelente: 0, bueno: 0, regular: 0, bajo: 0 };
+    enrollments.forEach((enroll) => {
+      const value = normalizeNumber(
+        enroll.enrollment_data?.attention_avg ?? enroll.enrollment_data?.attention_last
+      );
+      if (!value) return;
+      if (value >= 90) buckets.excelente += 1;
+      else if (value >= 80) buckets.bueno += 1;
+      else if (value >= 70) buckets.regular += 1;
+      else buckets.bajo += 1;
+    });
+    return [
+      { name: "Excelente (90-100)", value: buckets.excelente },
+      { name: "Bueno (80-89)", value: buckets.bueno },
+      { name: "Regular (70-79)", value: buckets.regular },
+      { name: "Necesita Apoyo (<70)", value: buckets.bajo },
+    ];
+  }, [enrollments]);
+
+  const attentionByCourse = useMemo(() => {
+    return courseStats.map((course) => ({
+      course: course.course,
+      attention: course.avgAttention,
+    }));
+  }, [courseStats]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl mb-2">Estadísticas del Profesor</h1>
+        <h1 className="text-3xl mb-2">Estadisticas del profesor</h1>
         <p className="text-gray-600">
-          Análisis del rendimiento y atención de tus estudiantes
+          Analisis del rendimiento y la atencion basada en actividad real de los estudiantes.
         </p>
       </div>
 
-      {/* Overall Stats */}
+      {error && (
+        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
+
       <div className="grid md:grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
@@ -148,8 +235,8 @@ export function EstadisticasProfesor() {
             </div>
             <TrendingUp className="w-5 h-5 text-green-600" />
           </div>
-          <div className="text-2xl mb-1">115</div>
-          <div className="text-sm text-gray-600">Estudiantes Totales</div>
+          <div className="text-2xl mb-1">{overallStats.students}</div>
+          <div className="text-sm text-gray-600">Estudiantes totales</div>
         </div>
 
         <div className="bg-white rounded-xl p-6 shadow-sm">
@@ -159,8 +246,8 @@ export function EstadisticasProfesor() {
             </div>
             <TrendingUp className="w-5 h-5 text-green-600" />
           </div>
-          <div className="text-2xl mb-1">82%</div>
-          <div className="text-sm text-gray-600">Atención Promedio</div>
+          <div className="text-2xl mb-1">{overallStats.avgAttention}%</div>
+          <div className="text-sm text-gray-600">Atencion promedio</div>
         </div>
 
         <div className="bg-white rounded-xl p-6 shadow-sm">
@@ -170,8 +257,8 @@ export function EstadisticasProfesor() {
             </div>
             <TrendingUp className="w-5 h-5 text-green-600" />
           </div>
-          <div className="text-2xl mb-1">65%</div>
-          <div className="text-sm text-gray-600">Progreso Promedio</div>
+          <div className="text-2xl mb-1">{overallStats.avgCompletion}%</div>
+          <div className="text-sm text-gray-600">Progreso promedio</div>
         </div>
 
         <div className="bg-white rounded-xl p-6 shadow-sm">
@@ -181,15 +268,14 @@ export function EstadisticasProfesor() {
             </div>
             <TrendingUp className="w-5 h-5 text-green-600" />
           </div>
-          <div className="text-2xl mb-1">85</div>
-          <div className="text-sm text-gray-600">Calificación Promedio</div>
+          <div className="text-2xl mb-1">{overallStats.avgGrade || "--"}</div>
+          <div className="text-sm text-gray-600">Calificacion promedio</div>
         </div>
       </div>
 
-      {/* Course Performance Table */}
       <div className="bg-white rounded-xl shadow-sm mb-8 overflow-hidden">
         <div className="p-6 border-b border-gray-200">
-          <h3 className="text-xl">Rendimiento por Curso</h3>
+          <h3 className="text-xl">Rendimiento por curso</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -197,9 +283,9 @@ export function EstadisticasProfesor() {
               <tr>
                 <th className="text-left py-4 px-6">Curso</th>
                 <th className="text-left py-4 px-6">Estudiantes</th>
-                <th className="text-left py-4 px-6">Atención Prom.</th>
-                <th className="text-left py-4 px-6">Completado</th>
-                <th className="text-left py-4 px-6">Calificación</th>
+                <th className="text-left py-4 px-6">Atencion prom.</th>
+                <th className="text-left py-4 px-6">Progreso</th>
+                <th className="text-left py-4 px-6">Calificacion</th>
               </tr>
             </thead>
             <tbody>
@@ -229,59 +315,46 @@ export function EstadisticasProfesor() {
                   <td className="py-4 px-6">{stat.completion}%</td>
                   <td className="py-4 px-6">
                     <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
-                      {stat.avgGrade}
+                      {stat.avgGrade || "--"}
                     </span>
                   </td>
                 </tr>
               ))}
+              {!courseStats.length && !loading && (
+                <tr>
+                  <td className="py-6 px-6 text-sm text-gray-500" colSpan={5}>
+                    No hay cursos con estudiantes inscritos.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Charts */}
       <div className="grid lg:grid-cols-2 gap-6 mb-8">
-        {/* Attention Trend */}
         <div className="bg-white rounded-xl p-6 shadow-sm">
-          <h3 className="text-xl mb-6">Tendencia de Atención por Curso</h3>
+          <h3 className="text-xl mb-6">Tendencia semanal de atencion</h3>
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={attentionTrend}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="week" stroke="#6b7280" />
               <YAxis stroke="#6b7280" />
               <Tooltip />
-              <Line
-                type="monotone"
-                dataKey="python"
-                stroke="#3b82f6"
-                strokeWidth={2}
-                name="Python"
-              />
-              <Line
-                type="monotone"
-                dataKey="ml"
-                stroke="#8b5cf6"
-                strokeWidth={2}
-                name="ML"
-              />
-              <Line
-                type="monotone"
-                dataKey="estructuras"
-                stroke="#10b981"
-                strokeWidth={2}
-                name="Est. Datos"
-              />
+              <Line type="monotone" dataKey="attention" stroke="#3b82f6" strokeWidth={2} />
             </LineChart>
           </ResponsiveContainer>
+          {!attentionTrend.length && (
+            <p className="text-sm text-gray-500 mt-4">Aun no hay sesiones para graficar tendencia.</p>
+          )}
         </div>
 
-        {/* Student Distribution */}
         <div className="bg-white rounded-xl p-6 shadow-sm">
-          <h3 className="text-xl mb-6">Distribución de Estudiantes</h3>
+          <h3 className="text-xl mb-6">Distribucion de estudiantes</h3>
           <ResponsiveContainer width="100%" height={200}>
             <PieChart>
               <Pie
-                data={studentDistribution}
+                data={attentionDistribution}
                 cx="50%"
                 cy="50%"
                 innerRadius={60}
@@ -290,7 +363,7 @@ export function EstadisticasProfesor() {
                 dataKey="value"
                 label
               >
-                {studentDistribution.map((entry, index) => (
+                {attentionDistribution.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
@@ -298,12 +371,9 @@ export function EstadisticasProfesor() {
             </PieChart>
           </ResponsiveContainer>
           <div className="grid grid-cols-2 gap-2 mt-4">
-            {studentDistribution.map((item, index) => (
+            {attentionDistribution.map((item, index) => (
               <div key={index} className="flex items-center gap-2 text-sm">
-                <div
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: COLORS[index] }}
-                ></div>
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index] }} />
                 <span className="text-gray-600">{item.name}</span>
               </div>
             ))}
@@ -311,57 +381,20 @@ export function EstadisticasProfesor() {
         </div>
       </div>
 
-      {/* Attention by Lesson */}
-      <div className="bg-white rounded-xl p-6 shadow-sm mb-8">
-        <h3 className="text-xl mb-6">Atención por Lección (Python)</h3>
+      <div className="bg-white rounded-xl p-6 shadow-sm">
+        <h3 className="text-xl mb-6">Atencion promedio por curso</h3>
         <ResponsiveContainer width="100%" height={250}>
-          <BarChart data={lessonsAttention}>
+          <BarChart data={attentionByCourse}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis dataKey="lesson" stroke="#6b7280" />
+            <XAxis dataKey="course" stroke="#6b7280" />
             <YAxis stroke="#6b7280" />
             <Tooltip />
             <Bar dataKey="attention" fill="#3b82f6" radius={[8, 8, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
-      </div>
-
-      {/* Suggestions Section */}
-      <div>
-        <h3 className="text-xl mb-6">Sugerencias y Recomendaciones</h3>
-        <div className="grid md:grid-cols-2 gap-6">
-          {suggestions.map((suggestion, index) => {
-            const Icon = suggestion.icon;
-            return (
-              <div
-                key={index}
-                className={`rounded-xl p-6 border-2 ${getSuggestionColor(suggestion.type)}`}
-              >
-                <div className="flex items-start gap-4">
-                  <div
-                    className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                      suggestion.type === "warning"
-                        ? "bg-yellow-100"
-                        : suggestion.type === "tip"
-                        ? "bg-blue-100"
-                        : suggestion.type === "success"
-                        ? "bg-green-100"
-                        : "bg-purple-100"
-                    }`}
-                  >
-                    <Icon className={`w-6 h-6 ${getSuggestionIconColor(suggestion.type)}`} />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="mb-2">{suggestion.title}</h4>
-                    <p className="text-sm text-gray-600 mb-3">{suggestion.description}</p>
-                    <div className="text-sm text-gray-500">
-                      Curso: <span className="text-gray-900">{suggestion.course}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        {!attentionByCourse.length && (
+          <p className="text-sm text-gray-500 mt-4">No hay cursos para graficar atencion.</p>
+        )}
       </div>
     </div>
   );

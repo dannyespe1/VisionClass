@@ -18,10 +18,10 @@ export function Footer() {
   ];
 
   const legal = [
-    { label: "Privacidad", href: "#" },
-    { label: "Terminos de uso", href: "#" },
-    { label: "Seguridad", href: "#" },
-    { label: "Documentacion", href: "#" },
+    { label: "Privacidad", href: "/privacidad" },
+    { label: "Terminos de uso", href: "/terminos" },
+    { label: "Seguridad", href: "/seguridad" },
+    { label: "Documentacion", href: "/documentacion" },
   ];
 
   return (

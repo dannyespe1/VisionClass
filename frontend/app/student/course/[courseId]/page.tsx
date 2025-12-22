@@ -104,6 +104,12 @@ export default function CoursePage() {
     count: 0,
     lastSent: 0,
   });
+  const contentViewRef = useRef<{
+    id: number | null;
+    startedAt: number;
+    contentType: "pdf" | "video" | "quiz";
+    contentId: string;
+  } | null>(null);
 
   const [courseTitle, setCourseTitle] = useState("Curso");
   const [modules, setModules] = useState<CourseModule[]>([]);
@@ -378,6 +384,81 @@ export default function CoursePage() {
       return () => clearInterval(interval);
     }
   }, [currentMaterial]);
+
+  const persistContentView = async (reason: "switch" | "exit" | "complete") => {
+    if (!token || !contentViewRef.current?.id) return;
+    const durationSeconds = Math.max(1, Math.round((Date.now() - contentViewRef.current.startedAt) / 1000));
+    const payload = {
+      ended_at: new Date().toISOString(),
+      duration_seconds: durationSeconds,
+    };
+    try {
+      await fetch(`${BACKEND_URL}/api/content-views/${contentViewRef.current.id}/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+        keepalive: true,
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      contentViewRef.current = null;
+    }
+  };
+
+  const startContentView = async () => {
+    if (!token || !sessionId || !userId || !currentMaterial) return;
+    const contentType =
+      currentMaterial.materialType === "test" ? "quiz" : currentMaterial.materialType;
+    const contentId = `material:${currentMaterial.id}`;
+    try {
+      const view = await apiFetch<{ id: number }>(
+        "/api/content-views/",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            session_id: sessionId,
+            user_id: userId,
+            content_type: contentType,
+            content_id: contentId,
+          }),
+        },
+        token
+      );
+      contentViewRef.current = {
+        id: view?.id ?? null,
+        startedAt: Date.now(),
+        contentType,
+        contentId,
+      };
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (permissionOpen) return;
+    if (!currentMaterial) return;
+
+    startContentView().catch((err) => console.error(err));
+
+    return () => {
+      if (contentViewRef.current?.id) {
+        persistContentView("switch").catch((err) => console.error(err));
+      }
+    };
+  }, [currentMaterial?.id, permissionOpen]);
+
+  useEffect(() => {
+    return () => {
+      if (contentViewRef.current?.id) {
+        persistContentView("exit").catch((err) => console.error(err));
+      }
+    };
+  }, []);
 
   const stopCamera = () => {
     if (frameTimerRef.current) {

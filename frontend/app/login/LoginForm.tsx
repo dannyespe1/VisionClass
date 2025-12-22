@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from "@/app/ui/alert";
 import { useAuth } from "../context/AuthContext";
 
 interface LoginFormProps {
-  onSuccess?: (username: string) => void;
+  onSuccess?: (token: string) => void;
 }
 
 export function LoginForm({ onSuccess }: LoginFormProps) {
@@ -26,13 +26,13 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
     e.preventDefault();
     setError("");
     if (!username || !password) {
-      setError("Completa usuario y contraseña");
+      setError("Completa correo y contraseña");
       return;
     }
     setIsLoading(true);
     try {
-      await login(username, password);
-      if (onSuccess) onSuccess(username);
+      const accessToken = await login(username, password);
+      if (onSuccess) onSuccess(accessToken);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Error de login";
       setError(msg);
@@ -51,11 +51,11 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
       )}
 
       <div className="space-y-2">
-        <Label htmlFor="username">Usuario</Label>
+        <Label htmlFor="username">Correo</Label>
         <Input
           id="username"
-          type="text"
-          placeholder="estudiante1 o profesor1"
+          type="email"
+          placeholder="usuario@universidad.edu"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           required

@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Eye, Menu, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/app/ui/button";
 
 interface NavbarProps {
@@ -10,6 +11,7 @@ interface NavbarProps {
 export function Navbar({ onNavigateToLogin }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,7 +33,10 @@ export function Navbar({ onNavigateToLogin }: NavbarProps) {
         behavior: "smooth",
       });
       setIsMobileMenuOpen(false);
+      return;
     }
+    router.push(`/#${id}`);
+    setIsMobileMenuOpen(false);
   };
 
   return (
@@ -45,9 +50,9 @@ export function Navbar({ onNavigateToLogin }: NavbarProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => scrollToSection("inicio")}>
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-              <Eye className="w-6 h-6 text-white" />
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => scrollToSection("inicio")}>
+            <div className="w-12 h-12 rounded-lg bg-white p-1 flex items-center justify-center">
+              <img src="/LOGO1.png" alt="VisionClass" className="h-full w-full object-contain" />
             </div>
             <span className="text-xl text-gray-900">VisionClass</span>
           </div>

@@ -39,8 +39,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     'rest_framework',
     'rest_framework.authtoken',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
     'corsheaders',
     'api',
 ]
@@ -52,6 +59,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -133,6 +141,12 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'api.User'
+SITE_ID = int(os.environ.get('SITE_ID', '1'))
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+)
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -150,3 +164,36 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=int(os.environ.get("REFRESH_TOKEN_DAYS", "7"))),
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
+
+REST_USE_JWT = True
+
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_ADAPTER = "api.adapters.VisionClassAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "api.adapters.VisionClassSocialAccountAdapter"
+
+SOCIALACCOUNT_EMAIL_REQUIRED = True
+SOCIALACCOUNT_QUERY_EMAIL = True
+
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "APP": {
+            "client_id": os.environ.get("GOOGLE_OAUTH_CLIENT_ID", ""),
+            "secret": os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET", ""),
+            "key": "",
+        }
+    }
+}
+
+GOOGLE_OAUTH_CALLBACK_URL = os.environ.get(
+    "GOOGLE_OAUTH_CALLBACK_URL",
+    "http://localhost:3000/login",
+)
+
+MAILGUN_API_KEY = os.environ.get("MAILGUN_API_KEY", "")
+MAILGUN_DOMAIN = os.environ.get("MAILGUN_DOMAIN", "")
+MAILGUN_BASE_URL = os.environ.get("MAILGUN_BASE_URL", "https://api.mailgun.net")
+MAILGUN_FROM_EMAIL = os.environ.get("MAILGUN_FROM_EMAIL", "VisionClass <noreply@visionclass.local>")

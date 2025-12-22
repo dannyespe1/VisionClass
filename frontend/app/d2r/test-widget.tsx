@@ -2,35 +2,66 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-type Cell = { id: number; text: string; target: boolean };
+type Cell = {
+  id: number;
+  letter: "d" | "p";
+  dashesTop: number;
+  dashesBottom: number;
+  target: boolean;
+};
 
-const LETTERS = ["d", "p"];
+const LETTERS: Array<Cell["letter"]> = ["d", "p"];
 
 function generateRow(size: number, targetProbability: number): Cell[] {
   return Array.from({ length: size }).map((_, idx) => {
     const letter = LETTERS[Math.floor(Math.random() * LETTERS.length)];
     const randomDashes = Math.floor(Math.random() * 3) + 1; // 1..3
     const forceTwo = Math.random() < targetProbability;
-    const dashes = forceTwo ? 2 : randomDashes;
-    const target = letter === "d" && dashes === 2;
-    const text = `${letter}${"-".repeat(dashes)}`;
-    return { id: idx, text, target };
+    const totalDashes = forceTwo ? 2 : randomDashes;
+    const dashesTop = Math.floor(Math.random() * (totalDashes + 1));
+    const dashesBottom = totalDashes - dashesTop;
+    const target = letter === "d" && totalDashes === 2;
+    return { id: idx, letter, dashesTop, dashesBottom, target };
   });
 }
 
+function DashRow({ count }: { count: number }) {
+  return (
+    <div className="flex items-center justify-center gap-0.5 min-h-2">
+      {Array.from({ length: count }).map((_, idx) => (
+        <span key={idx} className="h-2.5 w-0.5 rounded-full bg-slate-500" />
+      ))}
+    </div>
+  );
+}
+
+function CellGlyph({ letter, dashesTop, dashesBottom }: Omit<Cell, "id" | "target">) {
+  return (
+    <div className="flex flex-col items-center justify-center leading-none">
+      <DashRow count={dashesTop} />
+      <div className="text-sm sm:text-base font-semibold text-slate-800">{letter}</div>
+      <DashRow count={dashesBottom} />
+    </div>
+  );
+}
+
 function ReelCell() {
-  const baseItems = ["d-", "p--", "d--", "q-", "b--", "p-"];
+  const baseItems = [
+    { letter: "d", dashesTop: 2, dashesBottom: 0 },
+    { letter: "p", dashesTop: 1, dashesBottom: 1 },
+    { letter: "d", dashesTop: 0, dashesBottom: 2 },
+    { letter: "p", dashesTop: 0, dashesBottom: 1 },
+    { letter: "d", dashesTop: 1, dashesBottom: 2 },
+    { letter: "p", dashesTop: 2, dashesBottom: 1 },
+  ];
   const items = [...baseItems, ...baseItems];
 
   return (
     <div className="h-11 w-11 sm:h-12 sm:w-12 overflow-hidden rounded-2xl bg-white border border-slate-200">
       <div className="flex flex-col animate-reel-fast">
-        {items.map((text, idx) => (
-          <div
-            key={`${text}-${idx}`}
-            className="h-11 sm:h-12 flex items-center justify-center text-sm sm:text-base font-semibold text-slate-700"
-          >
-            {text}
+        {items.map((item, idx) => (
+          <div key={`${item.letter}-${idx}`} className="h-11 sm:h-12 flex items-center justify-center">
+            <CellGlyph letter={item.letter} dashesTop={item.dashesTop} dashesBottom={item.dashesBottom} />
           </div>
         ))}
       </div>
@@ -40,7 +71,6 @@ function ReelCell() {
 
 export default function D2RWidget({
   durationSeconds = 20,
-  rowSize = 12,
   targetProbability = 0.4,
   phase = 1,
   totalPhases = 14,
@@ -51,7 +81,6 @@ export default function D2RWidget({
   onClickEvent,
 }: {
   durationSeconds?: number;
-  rowSize?: number;
   targetProbability?: number;
   phase?: number;
   totalPhases?: number;
@@ -64,7 +93,8 @@ export default function D2RWidget({
   const [timeLeft, setTimeLeft] = useState(durationSeconds);
   const [active, setActive] = useState(false);
   const [spinning, setSpinning] = useState(true);
-  const [row, setRow] = useState<Cell[]>(() => generateRow(rowSize, targetProbability));
+  const ROW_SIZE = 47;
+  const [row, setRow] = useState<Cell[]>(() => generateRow(ROW_SIZE, targetProbability));
   const [hits, setHits] = useState(0);
   const [errors, setErrors] = useState(0);
   const [clickedIds, setClickedIds] = useState<Set<number>>(new Set());
@@ -85,7 +115,7 @@ export default function D2RWidget({
     if (spinTimeoutRef.current) clearTimeout(spinTimeoutRef.current);
 
     spinTimeoutRef.current = setTimeout(() => {
-      setRow(generateRow(rowSize, targetProbability));
+      setRow(generateRow(ROW_SIZE, targetProbability));
       setSpinning(false);
       setActive(true);
       const spinEndsAt = Date.now();
@@ -96,7 +126,7 @@ export default function D2RWidget({
       }
     }, 900);
     phaseStartRef.current = Date.now();
-  }, [durationSeconds, rowSize, targetProbability, phase, onPhaseStart]);
+  }, [durationSeconds, targetProbability, phase, onPhaseStart]);
 
   const finish = useCallback(() => {
     if (finishedPhaseRef.current) return;
@@ -217,14 +247,14 @@ export default function D2RWidget({
 
       <div className="w-full bg-white border border-slate-200 rounded-3xl shadow-sm px-6 sm:px-10 py-8 flex flex-col gap-6 items-center">
         <p className="text-center text-sm sm:text-base text-slate-700 max-w-xl font-medium">
-          Marca únicamente las letras <span className="font-semibold text-sky-600">"d"</span> que tengan{" "}
-          <span className="font-semibold text-sky-600">exactamente dos guiones</span>.
+          Marca unicamente las letras <span className="font-semibold text-sky-600">"d"</span> que tengan{" "}
+          <span className="font-semibold text-sky-600">exactamente dos rayitas</span>, arriba, abajo o divididas.
         </p>
 
         <div className="mt-4 flex justify-center">
-          <div className="grid grid-cols-12 gap-2 sm:gap-3">
+          <div className="grid grid-cols-6 sm:grid-cols-12 gap-2 sm:gap-3">
             {spinning
-              ? Array.from({ length: rowSize }).map((_, idx) => <ReelCell key={idx} />)
+              ? Array.from({ length: ROW_SIZE }).map((_, idx) => <ReelCell key={idx} />)
               : row.map((cell) => {
                   const clicked = clickedIds.has(cell.id);
 
@@ -242,7 +272,11 @@ export default function D2RWidget({
                         .filter(Boolean)
                         .join(" ")}
                     >
-                      <span className="leading-none">{cell.text}</span>
+                      <CellGlyph
+                        letter={cell.letter}
+                        dashesTop={cell.dashesTop}
+                        dashesBottom={cell.dashesBottom}
+                      />
                     </button>
                   );
                 })}

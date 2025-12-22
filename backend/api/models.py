@@ -13,6 +13,7 @@ class User(AbstractUser):
     ]
 
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=ROLE_STUDENT)
+    profile_image = models.TextField(blank=True, default="")
 
     def __str__(self):
         return f"{self.username} ({self.role})"
@@ -21,6 +22,7 @@ class User(AbstractUser):
 class Course(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
+    category = models.CharField(max_length=120, blank=True, default="General")
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='courses')
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -203,3 +205,76 @@ class QuizAttempt(models.Model):
 
     def __str__(self):
         return f"Quiz {self.difficulty} - {self.user}"
+
+
+class D2RSchedule(models.Model):
+    STATUS_PENDING = 'pending'
+    STATUS_COMPLETED = 'completed'
+    STATUS_CANCELLED = 'cancelled'
+    STATUS_CHOICES = [
+        (STATUS_PENDING, 'Pendiente'),
+        (STATUS_COMPLETED, 'Completado'),
+        (STATUS_CANCELLED, 'Cancelado'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='d2r_schedules')
+    scheduled_for = models.DateTimeField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['scheduled_for', 'id']
+
+    def __str__(self):
+        return f"D2R {self.user} {self.scheduled_for} ({self.status})"
+
+
+class StudentReport(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reports')
+    payload = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at', 'id']
+
+    def __str__(self):
+        return f"Reporte {self.user} {self.created_at}"
+
+
+class ResearchAccessRequest(models.Model):
+    STATUS_PENDING = 'pending'
+    STATUS_APPROVED = 'approved'
+    STATUS_REJECTED = 'rejected'
+    STATUS_CHOICES = [
+        (STATUS_PENDING, 'Pendiente'),
+        (STATUS_APPROVED, 'Aprobado'),
+        (STATUS_REJECTED, 'Rechazado'),
+    ]
+
+    researcher = models.CharField(max_length=255)
+    institution = models.CharField(max_length=255)
+    project = models.CharField(max_length=255)
+    data_requested = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    ethics_approval = models.BooleanField(default=False)
+    requested_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-requested_at', 'id']
+
+    def __str__(self):
+        return f"{self.project} ({self.status})"
+
+
+class PrivacyPolicySetting(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    current_value = models.CharField(max_length=255)
+    options = models.JSONField(default=list, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['name', 'id']
+
+    def __str__(self):
+        return self.name

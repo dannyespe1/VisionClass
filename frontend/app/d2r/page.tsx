@@ -59,11 +59,7 @@ export default function D2RPage() {
         const me = await apiFetch<{ id: number }>("/api/me/", {}, token);
         setUserId(String(me.id));
 
-        const prior = await apiFetch<any[]>("/api/d2r-results/", {}, token);
-        if (prior && prior.length > 0) {
-          router.push("/student");
-          return;
-        }
+        await apiFetch<any[]>("/api/d2r-results/", {}, token);
 
         let course: { id: number; title: string } | null = null;
         try {
@@ -423,7 +419,6 @@ export default function D2RPage() {
             <div className="w-full max-w-4xl bg-white rounded-3xl shadow-lg border border-slate-100 p-4">
               <D2RWidget
                 durationSeconds={durationSeconds}
-                rowSize={12}
                 targetProbability={0.4}
                 phase={phase}
                 totalPhases={totalPhases}

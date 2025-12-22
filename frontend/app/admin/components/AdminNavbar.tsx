@@ -4,21 +4,20 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LogOut, Menu } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
-
-type TabId = "panel" | "usuarios" | "cursos" | "analytics";
+import type { AdminView } from "../types";
 
 type Props = {
-  activeTab: TabId;
-  onTabChange: (tab: TabId) => void;
+  currentView: AdminView;
+  onViewChange: (view: AdminView) => void;
 };
 
-export function AdminNavbar({ activeTab, onTabChange }: Props) {
+export function AdminNavbar({ currentView, onViewChange }: Props) {
   const { logout } = useAuth();
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
-  const tabs: { id: TabId; label: string }[] = [
-    { id: "panel", label: "Panel" },
+  const tabs: { id: AdminView; label: string }[] = [
+    { id: "inicio", label: "Inicio" },
     { id: "usuarios", label: "Usuarios" },
     { id: "cursos", label: "Cursos" },
     { id: "analytics", label: "Analytics" },
@@ -35,19 +34,18 @@ export function AdminNavbar({ activeTab, onTabChange }: Props) {
         <div className="flex items-center gap-3">
           <button
             className="md:hidden p-2 rounded-lg border border-slate-200"
-            onClick={() => setOpen((v) => !v)}
+            onClick={() => setOpen((value) => !value)}
             aria-label="Abrir menu"
           >
             <Menu className="w-5 h-5 text-slate-700" />
           </button>
-          <div className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-xl bg-slate-900 text-white flex items-center justify-center text-sm font-semibold">
-              VC
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 rounded-lg bg-white p-1 flex items-center justify-center">
+              <img src="/LOGO1.png" alt="VisionClass" className="h-full w-full object-contain" />
             </div>
-            <div>
-              <p className="text-sm font-semibold text-slate-900">VisionClass</p>
-              <p className="text-[11px] text-slate-500">Panel admin</p>
-            </div>
+            <span className="text-sm font-semibold text-slate-900">VisionClass</span>
+            <div className="h-8 w-px bg-slate-300" aria-hidden="true" />
+            <span className="text-sm font-semibold text-slate-900">Administrador</span>
           </div>
         </div>
 
@@ -57,13 +55,13 @@ export function AdminNavbar({ activeTab, onTabChange }: Props) {
           } md:flex items-center gap-2 bg-slate-50 md:bg-transparent px-2 md:px-0 py-2 md:py-0 rounded-2xl`}
         >
           {tabs.map((tab) => {
-            const isActive = activeTab === tab.id;
+            const isActive = currentView === tab.id;
             return (
               <button
                 key={tab.id}
                 type="button"
                 onClick={() => {
-                  onTabChange(tab.id);
+                  onViewChange(tab.id);
                   setOpen(false);
                 }}
                 className={`px-4 py-2 text-sm rounded-full transition-all ${
@@ -82,7 +80,7 @@ export function AdminNavbar({ activeTab, onTabChange }: Props) {
           className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-slate-900 to-indigo-700 text-white text-sm font-semibold px-3 py-2 shadow hover:shadow-lg transition-transform hover:-translate-y-0.5"
         >
           <LogOut className="w-4 h-4" />
-          Cerrar sesión
+          Cerrar sesion
         </button>
       </div>
     </header>

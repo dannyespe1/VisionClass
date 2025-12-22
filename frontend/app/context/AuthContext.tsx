@@ -6,7 +6,8 @@ import { apiFetch } from "../lib/api";
 type AuthContextType = {
   token: string | null;
   loading: boolean;
-  login: (username: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<string>;
+  setTokenValue: (accessToken: string) => void;
   logout: () => void;
 };
 
@@ -26,9 +27,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       method: "POST",
       body: JSON.stringify({ username, password }),
     });
-    setToken(data.access);
+    setTokenValue(data.access);
+    return data.access;
+  };
+
+  const setTokenValue = (accessToken: string) => {
+    setToken(accessToken);
     if (typeof window !== "undefined") {
-      localStorage.setItem(STORAGE_KEY, data.access);
+      localStorage.setItem(STORAGE_KEY, accessToken);
     }
   };
 
@@ -40,7 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ token, loading, login, logout }}>
+    <AuthContext.Provider value={{ token, loading, login, setTokenValue, logout }}>
       {children}
     </AuthContext.Provider>
   );

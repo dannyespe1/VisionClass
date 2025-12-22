@@ -7,3 +7,9 @@ sqlparse==0.5.3
 tzdata==2025.2
 django-cors-headers==4.3.1
 djangorestframework-simplejwt==5.3.1
+openpyxl==3.1.5
+reportlab==4.2.5
+django-allauth==0.63.6
+dj-rest-auth==6.0.0
+requests==2.32.3
+cryptography==42.0.8

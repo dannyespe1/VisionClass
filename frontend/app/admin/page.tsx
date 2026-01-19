@@ -8,6 +8,28 @@ import { AdminPanelOverview } from "./components/AdminPanelOverview";
 import { AdminUsersSection } from "./components/AdminUsersSection";
 import { AdminCoursesSection } from "./components/AdminCoursesSection";
 import { AdminAnalyticsSection } from "./components/AdminAnalyticsSection";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { apiFetch } from "../lib/api";
 import type { AdminAnalyticsData, AdminCourse, AdminUser, AdminView } from "./types";
 
@@ -16,6 +38,25 @@ export default function AdminPage() {
   const router = useRouter();
   const [currentView, setCurrentView] = useState<AdminView>("inicio");
   const [searchQuery, setSearchQuery] = useState("");
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [activeUser, setActiveUser] = useState<AdminUser | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [createForm, setCreateForm] = useState({
+    name: "",
+    email: "",
+    role: "estudiante" as AdminUser["role"],
+    status: "active" as AdminUser["status"],
+    password: "",
+  });
+  const [editForm, setEditForm] = useState({
+    name: "",
+    email: "",
+    role: "estudiante" as AdminUser["role"],
+    status: "active" as AdminUser["status"],
+    password: "",
+  });
   const [overview, setOverview] = useState({
     totalUsers: 0,
     totalStudents: 0,
@@ -99,13 +140,17 @@ export default function AdminPage() {
     runSearch();
   }, [currentView, searchQuery, token]);
 
-  const deleteUser = (id: number) => {
-    if (!token) return;
-    if (!confirm("Estas seguro de que quieres eliminar este usuario?")) return;
-    apiFetch(`/api/admin/users/${id}/`, { method: "DELETE" }, token)
-      .then(() => setUsers((prev) => prev.filter((u) => u.id !== id)))
-      .then(() => loadOverview(token))
-      .catch((err) => console.warn("No se pudo eliminar usuario", err));
+  const deleteUser = async () => {
+    if (!token || !activeUser) return;
+    try {
+      await apiFetch(`/api/admin/users/${activeUser.id}/`, { method: "DELETE" }, token);
+      setUsers((prev) => prev.filter((u) => u.id !== activeUser.id));
+      loadOverview(token);
+      setDeleteOpen(false);
+      setActiveUser(null);
+    } catch (err) {
+      console.warn("No se pudo eliminar usuario", err);
+    }
   };
 
   const deleteCourse = (id: number) => {
@@ -157,27 +202,96 @@ export default function AdminPage() {
     privacy_policies: [],
   });
 
-  const handleCreateUser = async () => {
+  const openCreateModal = () => {
+    setFormError(null);
+    setCreateForm({
+      name: "",
+      email: "",
+      role: "estudiante",
+      status: "active",
+      password: "",
+    });
+    setCreateOpen(true);
+  };
+
+  const openEditModal = (user: AdminUser) => {
+    setFormError(null);
+    setActiveUser(user);
+    setEditForm({
+      name: user.name || "",
+      email: user.email || "",
+      role: user.role,
+      status: user.status,
+      password: "",
+    });
+    setEditOpen(true);
+  };
+
+  const openDeleteModal = (user: AdminUser) => {
+    setActiveUser(user);
+    setDeleteOpen(true);
+  };
+
+  const handleCreateSubmit = async () => {
     if (!token) return;
-    const name = prompt("Nombre completo del usuario:");
-    if (!name) return;
-    const email = prompt("Email del usuario:");
-    if (!email) return;
-    const rawRole = (prompt("Rol (estudiante/profesor):", "estudiante") || "estudiante").toLowerCase();
-    const role = ["estudiante", "profesor", "admin"].includes(rawRole) ? rawRole : "estudiante";
+    if (!createForm.name.trim() || !createForm.email.trim() || !createForm.password.trim()) {
+      setFormError("Nombre, email y contraseña son obligatorios.");
+      return;
+    }
     try {
       const created = await apiFetch<AdminUser>(
         "/api/admin/users/",
         {
           method: "POST",
-          body: JSON.stringify({ name, email, role, status: "active" }),
+          body: JSON.stringify({
+            name: createForm.name.trim(),
+            email: createForm.email.trim(),
+            role: createForm.role,
+            status: createForm.status,
+            password: createForm.password,
+          }),
         },
         token
       );
       setUsers((prev) => [created, ...prev]);
       loadOverview(token);
+      setCreateOpen(false);
     } catch (err) {
       console.warn("No se pudo crear usuario", err);
+      setFormError("No se pudo crear el usuario.");
+    }
+  };
+
+  const handleEditSubmit = async () => {
+    if (!token || !activeUser) return;
+    if (!editForm.name.trim() || !editForm.email.trim()) {
+      setFormError("Nombre y email son obligatorios.");
+      return;
+    }
+    const payload: Record<string, unknown> = {
+      name: editForm.name.trim(),
+      email: editForm.email.trim(),
+      role: editForm.role,
+      status: editForm.status,
+    };
+    if (editForm.password.trim()) {
+      payload.password = editForm.password;
+    }
+    try {
+      const updated = await apiFetch<AdminUser>(
+        `/api/admin/users/${activeUser.id}/`,
+        {
+          method: "PATCH",
+          body: JSON.stringify(payload),
+        },
+        token
+      );
+      setUsers((prev) => prev.map((item) => (item.id === activeUser.id ? { ...item, ...updated } : item)));
+      setEditOpen(false);
+      setActiveUser(null);
+    } catch (err) {
+      console.warn("No se pudo actualizar el usuario", err);
+      setFormError("No se pudo actualizar el usuario.");
     }
   };
 
@@ -266,8 +380,9 @@ export default function AdminPage() {
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             onToggleStatus={toggleUserStatus}
-            onDelete={deleteUser}
-            onCreate={handleCreateUser}
+            onDeleteRequest={openDeleteModal}
+            onCreateRequest={openCreateModal}
+            onEditRequest={openEditModal}
           />
         )}
 
@@ -290,6 +405,183 @@ export default function AdminPage() {
           />
         )}
       </div>
+
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Crear nuevo usuario</DialogTitle>
+            <DialogDescription>Completa los datos del usuario y asigna su rol.</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="create-name">Nombre completo</Label>
+              <Input
+                id="create-name"
+                value={createForm.name}
+                onChange={(e) => setCreateForm((prev) => ({ ...prev, name: e.target.value }))}
+                placeholder="Nombre y apellido"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="create-email">Email</Label>
+              <Input
+                id="create-email"
+                type="email"
+                value={createForm.email}
+                onChange={(e) => setCreateForm((prev) => ({ ...prev, email: e.target.value }))}
+                placeholder="correo@institucion.edu"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label>Rol</Label>
+              <Select
+                value={createForm.role}
+                onValueChange={(value) =>
+                  setCreateForm((prev) => ({ ...prev, role: value as AdminUser["role"] }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecciona un rol" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="estudiante">Estudiante</SelectItem>
+                  <SelectItem value="profesor">Profesor</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label>Estado</Label>
+              <Select
+                value={createForm.status}
+                onValueChange={(value) =>
+                  setCreateForm((prev) => ({ ...prev, status: value as AdminUser["status"] }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecciona un estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Activo</SelectItem>
+                  <SelectItem value="inactive">Inactivo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="create-password">Contraseña</Label>
+              <Input
+                id="create-password"
+                type="password"
+                value={createForm.password}
+                onChange={(e) => setCreateForm((prev) => ({ ...prev, password: e.target.value }))}
+                placeholder="Minimo 8 caracteres"
+              />
+            </div>
+            {formError && <p className="text-sm text-red-600">{formError}</p>}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCreateOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleCreateSubmit}>Crear usuario</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar usuario</DialogTitle>
+            <DialogDescription>Actualiza los datos, rol o contraseña del usuario.</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="edit-name">Nombre completo</Label>
+              <Input
+                id="edit-name"
+                value={editForm.name}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-email">Email</Label>
+              <Input
+                id="edit-email"
+                type="email"
+                value={editForm.email}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, email: e.target.value }))}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label>Rol</Label>
+              <Select
+                value={editForm.role}
+                onValueChange={(value) =>
+                  setEditForm((prev) => ({ ...prev, role: value as AdminUser["role"] }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecciona un rol" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="estudiante">Estudiante</SelectItem>
+                  <SelectItem value="profesor">Profesor</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label>Estado</Label>
+              <Select
+                value={editForm.status}
+                onValueChange={(value) =>
+                  setEditForm((prev) => ({ ...prev, status: value as AdminUser["status"] }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecciona un estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Activo</SelectItem>
+                  <SelectItem value="inactive">Inactivo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-password">Nueva contraseña (opcional)</Label>
+              <Input
+                id="edit-password"
+                type="password"
+                value={editForm.password}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, password: e.target.value }))}
+                placeholder="Dejar en blanco para conservar"
+              />
+            </div>
+            {formError && <p className="text-sm text-red-600">{formError}</p>}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleEditSubmit}>Guardar cambios</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminar usuario</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta accion eliminara al usuario {activeUser?.name || activeUser?.email}. No se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={deleteUser}>Eliminar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 }

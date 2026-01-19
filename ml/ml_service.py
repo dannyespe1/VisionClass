@@ -12,7 +12,7 @@ import onnxruntime as ort
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 import uvicorn
 
 
@@ -66,12 +66,19 @@ except Exception:
 
 
 class AttentionEventPayload(BaseModel):
-    session_id: int
+    session_id: Optional[int] = None
+    d2r_session_id: Optional[int] = None
     user_id: int
     timestamp: Optional[datetime] = Field(default_factory=datetime.utcnow)
     value: float = Field(..., description="Attention score between 0 and 1")
     label: Optional[str] = "attention_score"
     data: Dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def ensure_session_present(self):
+        if not self.session_id and not self.d2r_session_id:
+            raise ValueError("session_id o d2r_session_id requerido")
+        return self
 
 
 def compute_attention_score(image: np.ndarray) -> Dict[str, Any]:
@@ -198,10 +205,17 @@ def aggregate_temporal_score(session_id: int, frame_result: Dict[str, Any]) -> D
     }
 
 
-async def post_event_to_backend(payload: AttentionEventPayload) -> None:
+async def post_event_to_backend(payload: AttentionEventPayload, test_name: str = "D2R") -> None:
     if not BACKEND_TOKEN:
         return
-    url = f"{BACKEND_URL}/api/attention-events/"
+    normalized_test = (test_name or "").upper()
+    is_d2r = normalized_test == "D2R" or (normalized_test == "" and payload.d2r_session_id is not None)
+    if is_d2r and not payload.d2r_session_id:
+        raise HTTPException(status_code=400, detail="d2r_session_id requerido")
+    if not is_d2r and not payload.session_id:
+        raise HTTPException(status_code=400, detail="session_id requerido")
+    endpoint = "/api/d2r-attention-events/" if is_d2r else "/api/attention-events/"
+    url = f"{BACKEND_URL}{endpoint}"
     headers = {"Authorization": f"Bearer {BACKEND_TOKEN}"}
     async with httpx.AsyncClient(timeout=10) as client:
         resp = await client.post(url, json=payload.model_dump())
@@ -220,14 +234,16 @@ async def receive_event(payload: AttentionEventPayload):
     Endpoint para recibir eventos de atención ya calculados
     (por ejemplo, desde otro proceso ML).
     """
-    await post_event_to_backend(payload)
+    test_name = "D2R" if payload.d2r_session_id is not None else "COURSE"
+    await post_event_to_backend(payload, test_name=test_name)
     return {"ok": True, "forwarded": bool(BACKEND_TOKEN)}
 
 
 @app.post("/analyze/frame")
 async def analyze_frame(
     file: UploadFile = File(...),
-    session_id: int = Form(...),
+    d2r_session_id: Optional[int] = Form(None),
+    session_id: Optional[int] = Form(None),
     user_id: int = Form(...),
     phase: int = Form(0),
     time_left: float = Form(0),
@@ -238,6 +254,10 @@ async def analyze_frame(
     Recibe un frame (image/jpeg o png), calcula score y reenvía al backend.
     Pensado para ser llamado desde el frontend (captura de cámara).
     """
+    if not d2r_session_id and not session_id:
+        raise HTTPException(status_code=422, detail="session_id o d2r_session_id requerido")
+    session_key = d2r_session_id if d2r_session_id is not None else session_id
+
     content = await file.read()
     np_arr = np.frombuffer(content, np.uint8)
     image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
@@ -245,13 +265,13 @@ async def analyze_frame(
         raise HTTPException(status_code=400, detail="No se pudo decodificar la imagen")
 
     result = compute_attention_score(image)
-    temporal = aggregate_temporal_score(session_id, result)
+    temporal = aggregate_temporal_score(session_key, result)
 
     # Opcional: guardar frame para dataset (no es video, solo imágenes sueltas)
     frame_path = None
     if os.environ.get("SAVE_FRAMES", "0") == "1":
         base_dir = Path(os.environ.get("FRAMES_DIR", "data/frames"))
-        target_dir = base_dir / str(session_id)
+        target_dir = base_dir / str(session_key)
         target_dir.mkdir(parents=True, exist_ok=True)
         fname = f"{datetime.utcnow().strftime('%Y%m%dT%H%M%S%f')}_p{phase}.jpg"
         fpath = target_dir / fname
@@ -282,13 +302,13 @@ async def analyze_frame(
             crop = cv2.resize(crop, (MODEL_IMG_SIZE, MODEL_IMG_SIZE))
             crop = crop.astype("float32") / 255.0
             crop = np.transpose(crop, (2, 0, 1))  # C,H,W
-            session_frame_buffers[session_id].append(crop)
+            session_frame_buffers[session_key].append(crop)
         except Exception:
             pass
 
-        if ort_session and len(session_frame_buffers[session_id]) >= SEQUENCE_LENGTH and int(spinning) == 0:
+        if ort_session and len(session_frame_buffers[session_key]) >= SEQUENCE_LENGTH and int(spinning) == 0:
             try:
-                seq = list(session_frame_buffers[session_id])[-SEQUENCE_LENGTH:]
+                seq = list(session_frame_buffers[session_key])[-SEQUENCE_LENGTH:]
                 arr = np.stack(seq, axis=0)[None, ...]  # 1,T,C,H,W
                 ort_out = ort_session.run(None, {"frames": arr, "mask": None})
                 if ort_out:
@@ -301,14 +321,17 @@ async def analyze_frame(
     )
     value = model_score if model_score is not None else float(temporal.get("value", 0.0))
 
+    normalized_test = (test_name or "").upper()
+    is_d2r = normalized_test == "D2R" or (normalized_test == "" and d2r_session_id is not None)
     payload = AttentionEventPayload(
-        session_id=session_id,
+        d2r_session_id=session_key if is_d2r else None,
+        session_id=None if is_d2r else session_key,
         user_id=user_id,
         value=value,
         label=label,
         data={
             "context": {
-                "test": test_name or "D2R",
+                "test": test_name or ("D2R" if is_d2r else "COURSE"),
                 "phase": phase,
                 "spinning": int(spinning),
                 "time_left": time_left,
@@ -320,7 +343,7 @@ async def analyze_frame(
             "score_baseline": result.get("value"),
         },
     )
-    await post_event_to_backend(payload)
+    await post_event_to_backend(payload, test_name=(test_name or ("D2R" if is_d2r else "COURSE")))
     return JSONResponse({"ok": True, "score": temporal, "frame_score": result})
 
 

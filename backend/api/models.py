@@ -152,6 +152,45 @@ class AttentionEvent(models.Model):
         return f"Evento {self.id} sesion {self.session_id}"
 
 
+class D2RSession(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='d2r_sessions')
+    started_at = models.DateTimeField(null=True, blank=True)
+    ended_at = models.DateTimeField(null=True, blank=True)
+    attention_score = models.FloatField(null=True, blank=True)
+    mean_attention = models.FloatField(default=0)
+    low_attention_ratio = models.FloatField(default=0)
+    frame_count = models.PositiveIntegerField(default=0)
+    last_score = models.FloatField(null=True, blank=True)
+    raw_metrics = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['user']),
+        ]
+
+    def __str__(self):
+        return f"D2R sesion {self.id} - {self.user}"
+
+
+class D2RAttentionEvent(models.Model):
+    d2r_session = models.ForeignKey(D2RSession, on_delete=models.CASCADE, related_name='events')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='d2r_attention_events')
+    timestamp = models.DateTimeField()
+    value = models.FloatField()
+    label = models.CharField(max_length=100, blank=True)
+    data = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['d2r_session', 'timestamp']),
+        ]
+
+    def __str__(self):
+        return f"D2R evento {self.id} sesion {self.d2r_session_id}"
+
+
 class ContentView(models.Model):
     TYPE_PDF = 'pdf'
     TYPE_VIDEO = 'video'
@@ -175,7 +214,7 @@ class ContentView(models.Model):
 
 
 class D2RResult(models.Model):
-    session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='d2r_results')
+    d2r_session = models.ForeignKey(D2RSession, on_delete=models.CASCADE, related_name='results')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='d2r_results')
     raw_score = models.IntegerField()
     processing_speed = models.FloatField(help_text="Índice de velocidad/procesamiento")
@@ -185,7 +224,7 @@ class D2RResult(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"D2R {self.user} sesion {self.session_id}"
+        return f"D2R {self.user} sesion {self.d2r_session_id}"
 
 
 class QuizAttempt(models.Model):

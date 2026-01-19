@@ -6,13 +6,12 @@ import { apiFetch } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import D2RWidget from "./test-widget";
 
-type PhaseResult = { hits: number; errors: number; omissions: number; targetCount?: number };
-type Enrollment = { id: number; course: { id: number; title: string } };
+type PhaseResult = { TR: number; TA: number; O: number; C: number; CON: number; targetCount?: number };
 type PhaseEvent = { phase: number; ts: number; cellId: number; isTarget: boolean };
 
 export default function D2RPage() {
   const totalPhases = 14;
-  const durationSeconds = 20;
+  const durationSeconds = 15;
 
   const router = useRouter();
   const { token } = useAuth();
@@ -24,7 +23,6 @@ export default function D2RPage() {
 
   const [sessionId, setSessionId] = useState("");
   const [userId, setUserId] = useState("");
-  const [courseId, setCourseId] = useState<number | null>(null);
 
   const [rawScore, setRawScore] = useState("0");
   const [processing, setProcessing] = useState("0");
@@ -41,8 +39,8 @@ export default function D2RPage() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const phaseRef = useRef<number>(phase);
   const timeLeftRef = useRef<number>(durationSeconds);
-  const spinningRef = useRef<boolean>(true);
-  const phaseTimingRef = useRef<Record<number, { start?: number; spinEnd?: number; end?: number; summary?: PhaseResult }>>({});
+  const spinningRef = useRef<boolean>(false);
+  const phaseTimingRef = useRef<Record<number, { start?: number; end?: number; summary?: PhaseResult }>>({});
   const phaseEventsRef = useRef<PhaseEvent[]>([]);
 
   const completedPhases = useMemo(() => phaseResults.filter((r) => r !== null).length, [phaseResults]);
@@ -61,45 +59,16 @@ export default function D2RPage() {
 
         await apiFetch<any[]>("/api/d2r-results/", {}, token);
 
-        let course: { id: number; title: string } | null = null;
-        try {
-          const enrollments = await apiFetch<Enrollment[]>("/api/enrollments/", {}, token);
-          course = enrollments?.[0]?.course || null;
-        } catch (_) {
-          course = null;
-        }
-
-        if (!course) {
-          const allCourses = await apiFetch<{ id: number; title: string }[]>("/api/courses/", {}, token);
-          const baseline = allCourses.find(
-            (c) => (c.title || "").toLowerCase() === "baseline d2r"
-          );
-          if (baseline) {
-            course = baseline;
-          } else {
-            course = await apiFetch<{ id: number; title: string }>("/api/courses/", {
-              method: "POST",
-              body: JSON.stringify({
-                title: "Baseline D2R",
-                description: "Curso base para perfil atencional inicial",
-                is_active: false,
-              }),
-            }, token);
-          }
-        }
-
-        if (course?.id) {
-          setCourseId(course.id);
-          const session = await apiFetch<{ id: number }>("/api/sessions/", {
-            method: "POST",
-            body: JSON.stringify({ course_id: course.id, student_id: me.id }),
-          }, token);
-          if (session?.id) {
-            setSessionId(String(session.id));
-            setStatus("Sesión creada automáticamente");
-          }
+        const session = await apiFetch<{ id: number }>(
+          "/api/d2r-sessions/",
+          { method: "POST", body: JSON.stringify({}) },
+          token
+        );
+        if (session?.id) {
+          setSessionId(String(session.id));
+          setStatus("Sesion creada automaticamente");
         } else {
-          setStatus("No se pudo crear sesión ni curso base.");
+          setStatus("No se pudo crear sesion para el test D2R.");
         }
 
         await requestCamera();
@@ -124,19 +93,25 @@ export default function D2RPage() {
         const totals = copy.reduce(
           (acc, r) => {
             if (!r) return acc;
-            acc.hits += r.hits;
-            acc.errors += r.errors;
-            acc.omissions += r.omissions;
+            acc.TR += r.TR;
+            acc.TA += r.TA;
+            acc.O += r.O;
+            acc.C += r.C;
+            acc.CON += r.CON;
             return acc;
           },
-          { hits: 0, errors: 0, omissions: 0 }
+          { TR: 0, TA: 0, O: 0, C: 0, CON: 0 }
         );
 
         const totalTime = totalPhases * durationSeconds;
-        setRawScore(String(totals.hits));
-        setErrors(String(totals.errors));
-        setAttention(String(Math.max(totals.hits - totals.errors - totals.omissions, 0)));
-        setProcessing((totals.hits / totalTime).toFixed(2));
+        // Mantener compatibilidad de campos actuales:
+        // raw_score = TA (aciertos)
+        // errors = C (comisiones)
+        // attention_span = CON (TA - C)
+        setRawScore(String(totals.TA));
+        setErrors(String(totals.C));
+        setAttention(String(Math.max(totals.CON, 0)));
+        setProcessing((totals.TA / totalTime).toFixed(2));
         setStatus("Test completado. Guardaremos este resultado como línea base.");
         stopCamera();
         setFinished(true);
@@ -154,8 +129,8 @@ export default function D2RPage() {
   }, [phase]);
 
   const submit = async () => {
-    if (!sessionId || !userId || !courseId) {
-      setStatus("No hay session_id, user_id o course_id autoasignados.");
+    if (!sessionId || !userId) {
+      setStatus("No hay session_id o user_id autoasignados.");
       return;
     }
     if (!token) {
@@ -168,7 +143,7 @@ export default function D2RPage() {
         {
           method: "POST",
           body: JSON.stringify({
-            session_id: Number(sessionId),
+            d2r_session_id: Number(sessionId),
             user_id: Number(userId),
             raw_score: Number(rawScore),
             processing_speed: Number(processing),
@@ -180,7 +155,6 @@ export default function D2RPage() {
               phases: Object.entries(phaseTimingRef.current).map(([k, v]) => ({
                 phase: Number(k),
                 start: v?.start,
-                spinEnd: v?.spinEnd,
                 end: v?.end,
                 summary: v?.summary,
               })),
@@ -243,12 +217,13 @@ export default function D2RPage() {
           if (!blob || cancelled) return;
           const form = new FormData();
           form.append("file", blob, "frame.jpg");
-          form.append("session_id", sessionId);
+          form.append("d2r_session_id", sessionId);
           form.append("user_id", userId);
           form.append("test_name", "D2R");
           form.append("phase", String(phaseRef.current));
           form.append("time_left", String(timeLeftRef.current ?? 0));
-          form.append("spinning", String(spinningRef.current ?? false));
+          // d2-R no incluye estímulos dinámicos; mantener el campo por compatibilidad backend.
+          form.append("spinning", "false");
           const start = phaseTimingRef.current[phaseRef.current]?.start;
           if (start) form.append("t_in_phase_ms", String(Math.max(Date.now() - start, 0)));
           if (phaseEventsRef.current.length) {
@@ -257,6 +232,7 @@ export default function D2RPage() {
           try {
             await fetch("/api/attention-proxy", {
               method: "POST",
+              headers: token ? { Authorization: `Bearer ${token}` } : undefined,
               body: form,
             });
           } catch (_) {
@@ -275,7 +251,7 @@ export default function D2RPage() {
       cancelled = true;
       clearInterval(interval);
     };
-  }, [started, finished, cameraStatus, sessionId, userId]);
+  }, [started, finished, cameraStatus, sessionId, userId, token]);
 
   useEffect(() => {
     return () => {
@@ -321,7 +297,7 @@ export default function D2RPage() {
               <ol className="list-decimal list-inside text-slate-700 space-y-1">
                 <li>Se presentarán filas de letras "d" y "p" con diferentes números de guiones.</li>
                 <li>Marca únicamente las "d" con exactamente dos guiones (uno arriba y uno abajo).</li>
-                <li>Tienes 20 segundos por fila. Trabaja rápido y preciso.</li>
+                <li>Tienes 15 segundos por fila. Trabaja rápido y preciso.</li>
                 <li>La cámara se usará para monitorear atención (no guardamos video).</li>
               </ol>
             </div>
@@ -419,27 +395,26 @@ export default function D2RPage() {
             <div className="w-full max-w-4xl bg-white rounded-3xl shadow-lg border border-slate-100 p-4">
               <D2RWidget
                 durationSeconds={durationSeconds}
-                targetProbability={0.4}
                 phase={phase}
                 totalPhases={totalPhases}
                 onFinish={handlePhaseFinish}
-                onTick={({ phase: ph, timeLeft, spinning }) => {
+                onTick={({ phase: ph, timeLeft }) => {
                   phaseRef.current = ph;
                   timeLeftRef.current = timeLeft;
-                  spinningRef.current = spinning;
+                  spinningRef.current = false;
                 }}
-                onPhaseStart={({ phase: ph, startedAt, spinningEndsAt }) => {
+                onPhaseStart={({ phase: ph, startedAt }) => {
                   phaseRef.current = ph;
                   timeLeftRef.current = durationSeconds;
-                  spinningRef.current = true;
-                  phaseTimingRef.current[ph] = { ...(phaseTimingRef.current[ph] || {}), start: startedAt, spinEnd: spinningEndsAt };
+                  spinningRef.current = false;
+                  phaseTimingRef.current[ph] = { ...(phaseTimingRef.current[ph] || {}), start: startedAt };
                   phaseEventsRef.current = [];
                 }}
-                onPhaseEnd={({ phase: ph, endedAt, hits, errors, omissions, targetCount }) => {
+                onPhaseEnd={({ phase: ph, endedAt, TR, TA, O, C, CON, targetCount }) => {
                   phaseTimingRef.current[ph] = {
                     ...(phaseTimingRef.current[ph] || {}),
                     end: endedAt,
-                    summary: { hits, errors, omissions, targetCount },
+                    summary: { TR, TA, O, C, CON, targetCount },
                   };
                 }}
                 onClickEvent={({ phase: ph, ts, cellId, isTarget }) => {

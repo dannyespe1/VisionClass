@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { D2R_ROWS, D2R_ROW_SIZE } from "./d2r-rows";
 
 type Cell = {
   id: number;
@@ -9,21 +10,6 @@ type Cell = {
   dashesBottom: number;
   target: boolean;
 };
-
-const LETTERS: Array<Cell["letter"]> = ["d", "p"];
-
-function generateRow(size: number, targetProbability: number): Cell[] {
-  return Array.from({ length: size }).map((_, idx) => {
-    const letter = LETTERS[Math.floor(Math.random() * LETTERS.length)];
-    const randomDashes = Math.floor(Math.random() * 3) + 1; // 1..3
-    const forceTwo = Math.random() < targetProbability;
-    const totalDashes = forceTwo ? 2 : randomDashes;
-    const dashesTop = Math.floor(Math.random() * (totalDashes + 1));
-    const dashesBottom = totalDashes - dashesTop;
-    const target = letter === "d" && totalDashes === 2;
-    return { id: idx, letter, dashesTop, dashesBottom, target };
-  });
-}
 
 function DashRow({ count }: { count: number }) {
   return (
@@ -45,33 +31,8 @@ function CellGlyph({ letter, dashesTop, dashesBottom }: Omit<Cell, "id" | "targe
   );
 }
 
-function ReelCell() {
-  const baseItems = [
-    { letter: "d", dashesTop: 2, dashesBottom: 0 },
-    { letter: "p", dashesTop: 1, dashesBottom: 1 },
-    { letter: "d", dashesTop: 0, dashesBottom: 2 },
-    { letter: "p", dashesTop: 0, dashesBottom: 1 },
-    { letter: "d", dashesTop: 1, dashesBottom: 2 },
-    { letter: "p", dashesTop: 2, dashesBottom: 1 },
-  ];
-  const items = [...baseItems, ...baseItems];
-
-  return (
-    <div className="h-11 w-11 sm:h-12 sm:w-12 overflow-hidden rounded-2xl bg-white border border-slate-200">
-      <div className="flex flex-col animate-reel-fast">
-        {items.map((item, idx) => (
-          <div key={`${item.letter}-${idx}`} className="h-11 sm:h-12 flex items-center justify-center">
-            <CellGlyph letter={item.letter} dashesTop={item.dashesTop} dashesBottom={item.dashesBottom} />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 export default function D2RWidget({
-  durationSeconds = 20,
-  targetProbability = 0.4,
+  durationSeconds = 15,
   phase = 1,
   totalPhases = 14,
   onFinish,
@@ -81,91 +42,85 @@ export default function D2RWidget({
   onClickEvent,
 }: {
   durationSeconds?: number;
-  targetProbability?: number;
   phase?: number;
   totalPhases?: number;
-  onFinish: (phaseNumber: number, results: { hits: number; errors: number; omissions: number }) => void;
-  onTick?: (data: { phase: number; timeLeft: number; spinning: boolean }) => void;
-  onPhaseStart?: (data: { phase: number; startedAt: number; spinningEndsAt?: number }) => void;
-  onPhaseEnd?: (data: { phase: number; endedAt: number; hits: number; errors: number; omissions: number; targetCount: number }) => void;
+  onFinish: (phaseNumber: number, results: { TR: number; TA: number; O: number; C: number; CON: number }) => void;
+  onTick?: (data: { phase: number; timeLeft: number }) => void;
+  onPhaseStart?: (data: { phase: number; startedAt: number }) => void;
+  onPhaseEnd?: (data: { phase: number; endedAt: number; TR: number; TA: number; O: number; C: number; CON: number; targetCount: number }) => void;
   onClickEvent?: (data: { phase: number; ts: number; cellId: number; isTarget: boolean }) => void;
 }) {
   const [timeLeft, setTimeLeft] = useState(durationSeconds);
   const [active, setActive] = useState(false);
-  const [spinning, setSpinning] = useState(true);
-  const ROW_SIZE = 47;
-  const [row, setRow] = useState<Cell[]>(() => generateRow(ROW_SIZE, targetProbability));
-  const [hits, setHits] = useState(0);
-  const [errors, setErrors] = useState(0);
+  const ROW_SIZE = D2R_ROW_SIZE;
+  const [row, setRow] = useState<Cell[]>(() => D2R_ROWS[0] ?? []);
+  const [TA, setTA] = useState(0); // aciertos
+  const [C, setC] = useState(0);   // comisiones
   const [clickedIds, setClickedIds] = useState<Set<number>>(new Set());
-  const spinTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const finishedPhaseRef = useRef(false);
   const phaseStartRef = useRef<number | null>(null);
-  const spinEndRef = useRef<number | null>(null);
+  const lastTouchedIndexRef = useRef<number>(-1);
 
   const startPhase = useCallback(() => {
     setActive(false);
-    setSpinning(true);
-    setHits(0);
-    setErrors(0);
+    setTA(0);
+    setC(0);
     setClickedIds(new Set());
     setTimeLeft(durationSeconds);
     finishedPhaseRef.current = false;
+    lastTouchedIndexRef.current = -1;
 
-    if (spinTimeoutRef.current) clearTimeout(spinTimeoutRef.current);
-
-    spinTimeoutRef.current = setTimeout(() => {
-      setRow(generateRow(ROW_SIZE, targetProbability));
-      setSpinning(false);
-      setActive(true);
-      const spinEndsAt = Date.now();
-      spinEndRef.current = spinEndsAt;
-      if (onPhaseStart) {
-        const startedAt = phaseStartRef.current ?? Date.now();
-        onPhaseStart({ phase, startedAt, spinningEndsAt: spinEndsAt });
-      }
-    }, 900);
+    // d2-R (Versión A) requiere filas fijas y estímulo estático desde el inicio de la fase
+    const nextRow = D2R_ROWS[phase - 1];
+    setRow(nextRow ?? []);
     phaseStartRef.current = Date.now();
-  }, [durationSeconds, targetProbability, phase, onPhaseStart]);
+    onPhaseStart?.({ phase, startedAt: phaseStartRef.current });
+    setActive(true);
+  }, [durationSeconds, phase, onPhaseStart]);
 
   const finish = useCallback(() => {
     if (finishedPhaseRef.current) return;
     finishedPhaseRef.current = true;
     setActive(false);
     const targetCount = row.filter((c) => c.target).length;
-    const omissions = Math.max(targetCount - hits, 0);
+    const O = Math.max(targetCount - TA, 0);
+    const TR = Math.max(lastTouchedIndexRef.current + 1, 0);
+    const CON = TA - C;
     setTimeout(() => {
-      onFinish(phase, { hits, errors, omissions });
+      onFinish(phase, { TR, TA, O, C, CON });
       if (onPhaseEnd) {
         onPhaseEnd({
           phase,
           endedAt: Date.now(),
-          hits,
-          errors,
-          omissions,
+          TR,
+          TA,
+          O,
+          C,
+          CON,
           targetCount,
         });
       }
     }, 0);
-  }, [errors, hits, onFinish, onPhaseEnd, phase, row]);
+  }, [C, TA, onFinish, onPhaseEnd, phase, row]);
 
   useEffect(() => {
     startPhase();
     return () => {
-      if (spinTimeoutRef.current) clearTimeout(spinTimeoutRef.current);
+      // no-op
     };
   }, [startPhase, phase]);
 
   const clickCell = (cell: Cell) => {
-    if (!active || spinning) return;
+    if (!active) return;
     if (clickedIds.has(cell.id)) return;
 
     const newSet = new Set(clickedIds);
     newSet.add(cell.id);
     setClickedIds(newSet);
 
-    if (cell.target) setHits((h) => h + 1);
-    else setErrors((e) => e + 1);
+    lastTouchedIndexRef.current = Math.max(lastTouchedIndexRef.current, cell.id);
+    if (cell.target) setTA((h) => h + 1);
+    else setC((e) => e + 1);
     if (onClickEvent) {
       onClickEvent({ phase, ts: Date.now(), cellId: cell.id, isTarget: cell.target });
     }
@@ -173,30 +128,30 @@ export default function D2RWidget({
 
   useEffect(() => {
     let timer: ReturnType<typeof setInterval> | null = null;
-    if (active && !spinning) {
+    if (active) {
       timer = setInterval(() => {
         setTimeLeft((t) => {
           const next = t - 1;
           const value = next <= 0 ? 0 : next;
           if (onTick) {
-            onTick({ phase, timeLeft: value, spinning });
+            onTick({ phase, timeLeft: value });
           }
           return value;
         });
       }, 1000);
     } else {
-      if (onTick) onTick({ phase, timeLeft, spinning });
+      if (onTick) onTick({ phase, timeLeft });
     }
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [active, spinning, onTick, phase, timeLeft]);
+  }, [active, onTick, phase, timeLeft]);
 
   useEffect(() => {
-    if (active && !spinning && timeLeft <= 0) {
+    if (active && timeLeft <= 0) {
       finish();
     }
-  }, [timeLeft, active, spinning, finish]);
+  }, [timeLeft, active, finish]);
 
   const progressPercent = useMemo(
     () => ((durationSeconds - timeLeft) / durationSeconds) * 100,
@@ -253,39 +208,37 @@ export default function D2RWidget({
 
         <div className="mt-4 flex justify-center">
           <div className="grid grid-cols-6 sm:grid-cols-12 gap-2 sm:gap-3">
-            {spinning
-              ? Array.from({ length: ROW_SIZE }).map((_, idx) => <ReelCell key={idx} />)
-              : row.map((cell) => {
-                  const clicked = clickedIds.has(cell.id);
+            {row.map((cell) => {
+              const clicked = clickedIds.has(cell.id);
 
-                  const base =
-                    "h-11 w-11 sm:h-12 sm:w-12 rounded-2xl border text-sm sm:text-base font-semibold flex items-center justify-center transition-all select-none";
-                  const idle = "bg-slate-50 border-slate-200 hover:bg-slate-100";
-                  const neutralPressed = "bg-slate-200 border-slate-300";
+              const base =
+                "h-11 w-11 sm:h-12 sm:w-12 rounded-2xl border text-sm sm:text-base font-semibold flex items-center justify-center transition-all select-none";
+              const idle = "bg-slate-50 border-slate-200 hover:bg-slate-100";
+              const neutralPressed = "bg-slate-200 border-slate-300";
 
-                  return (
-                    <button
-                      key={cell.id}
-                      type="button"
-                      onClick={() => clickCell(cell)}
-                      className={[base, clicked ? neutralPressed : idle, "text-slate-800"]
-                        .filter(Boolean)
-                        .join(" ")}
-                    >
-                      <CellGlyph
-                        letter={cell.letter}
-                        dashesTop={cell.dashesTop}
-                        dashesBottom={cell.dashesBottom}
-                      />
-                    </button>
-                  );
-                })}
+              return (
+                <button
+                  key={cell.id}
+                  type="button"
+                  onClick={() => clickCell(cell)}
+                  className={[base, clicked ? neutralPressed : idle, "text-slate-800"]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  <CellGlyph
+                    letter={cell.letter}
+                    dashesTop={cell.dashesTop}
+                    dashesBottom={cell.dashesBottom}
+                  />
+                </button>
+              );
+            })}
           </div>
         </div>
 
         <div className="mt-6 flex flex-col items-center gap-3 text-xs text-slate-500">
           <p>
-            Fase {phase} de {totalPhases} • {spinning ? "Preparando matriz..." : `${timeLeft} segundos restantes`}
+            Fase {phase} de {totalPhases} • {timeLeft} segundos restantes
           </p>
         </div>
       </div>

@@ -31,6 +31,8 @@ from .models import (
     Enrollment,
     Session,
     AttentionEvent,
+    D2RSession,
+    D2RAttentionEvent,
     User,
     ContentView,
     D2RResult,
@@ -51,6 +53,8 @@ from .serializers import (
     EnrollmentSerializer,
     SessionSerializer,
     AttentionEventSerializer,
+    D2RSessionSerializer,
+    D2RAttentionEventSerializer,
     ContentViewSerializer,
     D2RResultSerializer,
     QuizAttemptSerializer,
@@ -496,7 +500,10 @@ class CourseViewSet(viewsets.ModelViewSet):
         return Course.objects.all()
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        user = self.request.user
+        if user.role not in [User.ROLE_TEACHER, User.ROLE_ADMIN]:
+            raise PermissionDenied("Solo docentes o administradores pueden crear cursos.")
+        serializer.save(owner=user)
 
 
 class CourseModuleViewSet(viewsets.ModelViewSet):
@@ -700,6 +707,64 @@ class ContentViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
+class D2RSessionViewSet(viewsets.ModelViewSet):
+    serializer_class = D2RSessionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == User.ROLE_ADMIN:
+            return D2RSession.objects.all()
+        if user.role == User.ROLE_TEACHER:
+            return D2RSession.objects.filter(user__enrollments__course__owner=user).distinct()
+        return D2RSession.objects.filter(user=user)
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        if user.role != User.ROLE_STUDENT:
+            raise PermissionDenied("Solo estudiantes pueden crear sesiones D2R.")
+        serializer.save(user=user)
+
+
+class D2RAttentionEventViewSet(viewsets.ModelViewSet):
+    serializer_class = D2RAttentionEventSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == User.ROLE_ADMIN:
+            return D2RAttentionEvent.objects.all()
+        if user.role == User.ROLE_TEACHER:
+            return D2RAttentionEvent.objects.filter(d2r_session__user__enrollments__course__owner=user).distinct()
+        return D2RAttentionEvent.objects.filter(user=user)
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        d2r_session = serializer.validated_data.get('d2r_session')
+        target_user = serializer.validated_data.get('user')
+        if target_user != user and user.role not in [User.ROLE_TEACHER, User.ROLE_ADMIN]:
+            raise PermissionDenied("No puedes registrar eventos para otros usuarios.")
+        if not d2r_session or d2r_session.user_id != target_user.id:
+            raise PermissionDenied("El evento debe corresponder a la sesion del estudiante.")
+        event = serializer.save()
+
+        frames = d2r_session.frame_count or 0
+        new_count = frames + 1
+        new_mean = ((d2r_session.mean_attention or 0) * frames + event.value) / new_count
+        low_prev = (d2r_session.low_attention_ratio or 0) * frames
+        is_low = 1 if event.value < 0.4 else 0
+        new_low_ratio = (low_prev + is_low) / new_count
+
+        d2r_session.frame_count = new_count
+        d2r_session.mean_attention = new_mean
+        d2r_session.low_attention_ratio = new_low_ratio
+        d2r_session.last_score = event.value
+        d2r_session.attention_score = event.value
+        d2r_session.save(update_fields=[
+            'frame_count', 'mean_attention', 'low_attention_ratio', 'last_score', 'attention_score'
+        ])
+
+
 class D2RResultViewSet(viewsets.ModelViewSet):
     serializer_class = D2RResultSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -709,11 +774,19 @@ class D2RResultViewSet(viewsets.ModelViewSet):
         if user.role == User.ROLE_ADMIN:
             return D2RResult.objects.all()
         if user.role == User.ROLE_TEACHER:
-            return D2RResult.objects.filter(session__course__owner=user)
+            return D2RResult.objects.filter(user__enrollments__course__owner=user).distinct()
         return D2RResult.objects.filter(user=user)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        user = self.request.user
+        if not user or not user.is_authenticated:
+            raise PermissionDenied("Debes estar autenticado para registrar resultados.")
+        if user.role != User.ROLE_STUDENT:
+            raise PermissionDenied("Solo estudiantes pueden registrar resultados D2R.")
+        d2r_session = serializer.validated_data.get("d2r_session")
+        if not d2r_session or d2r_session.user_id != user.id:
+            raise PermissionDenied("La sesion debe pertenecer al estudiante autenticado.")
+        serializer.save(user=user)
 
 
 class QuizAttemptViewSet(viewsets.ModelViewSet):

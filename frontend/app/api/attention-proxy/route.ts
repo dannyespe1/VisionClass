@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 
 const ML_SERVICE_URL = process.env.ML_SERVICE_URL || "http://localhost:9000";
+const BACKEND_URL =
+  process.env.BACKEND_URL ||
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  "http://localhost:8000";
 const TIMEOUT_MS = 2500;
 
 export async function POST(req: Request) {
@@ -8,6 +12,23 @@ export async function POST(req: Request) {
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
   try {
+    const authHeader = req.headers.get("authorization") || "";
+    if (!authHeader.toLowerCase().startsWith("bearer ")) {
+      return NextResponse.json({ ok: false, detail: "Token requerido" }, { status: 200 });
+    }
+
+    const meRes = await fetch(`${BACKEND_URL}/api/me/`, {
+      headers: { Authorization: authHeader },
+      cache: "no-store",
+    });
+    if (!meRes.ok) {
+      return NextResponse.json({ ok: false, detail: "Token invalido" }, { status: 200 });
+    }
+    const meData = await meRes.json().catch(() => null);
+    if (!meData || meData.role !== "student") {
+      return NextResponse.json({ ok: false, detail: "Rol no permitido" }, { status: 200 });
+    }
+
     const formData = await req.formData();
     const target = `${ML_SERVICE_URL}/analyze/frame`;
 

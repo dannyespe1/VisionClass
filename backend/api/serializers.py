@@ -19,6 +19,8 @@ from .models import (
     AttentionEvent,
     ContentView,
     D2RResult,
+    D2RSession,
+    D2RAttentionEvent,
     QuizAttempt,
     D2RSchedule,
     StudentReport,
@@ -313,6 +315,56 @@ class AttentionEventSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'session', 'user', 'created_at']
 
 
+class D2RSessionSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), source='user', write_only=True, required=False)
+
+    class Meta:
+        model = D2RSession
+        fields = [
+            'id',
+            'user',
+            'user_id',
+            'started_at',
+            'ended_at',
+            'attention_score',
+            'mean_attention',
+            'low_attention_ratio',
+            'frame_count',
+            'last_score',
+            'raw_metrics',
+            'created_at',
+        ]
+        read_only_fields = ['id', 'user', 'created_at']
+
+
+class D2RAttentionEventSerializer(serializers.ModelSerializer):
+    d2r_session = D2RSessionSerializer(read_only=True)
+    d2r_session_id = serializers.PrimaryKeyRelatedField(
+        queryset=D2RSession.objects.all(),
+        source='d2r_session',
+        write_only=True,
+    )
+    user = UserSerializer(read_only=True)
+    user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), source='user', write_only=True)
+
+    class Meta:
+        model = D2RAttentionEvent
+        fields = [
+            'id',
+            'd2r_session',
+            'd2r_session_id',
+            'user',
+            'user_id',
+            'timestamp',
+            'value',
+            'label',
+            'data',
+            'created_at',
+        ]
+        read_only_fields = ['id', 'd2r_session', 'user', 'created_at']
+
+
 class ContentViewSerializer(serializers.ModelSerializer):
     session = SessionSerializer(read_only=True)
     session_id = serializers.PrimaryKeyRelatedField(queryset=Session.objects.all(), source='session', write_only=True)
@@ -329,18 +381,22 @@ class ContentViewSerializer(serializers.ModelSerializer):
 
 
 class D2RResultSerializer(serializers.ModelSerializer):
-    session = SessionSerializer(read_only=True)
-    session_id = serializers.PrimaryKeyRelatedField(queryset=Session.objects.all(), source='session', write_only=True)
+    d2r_session = D2RSessionSerializer(read_only=True)
+    d2r_session_id = serializers.PrimaryKeyRelatedField(
+        queryset=D2RSession.objects.all(),
+        source='d2r_session',
+        write_only=True,
+    )
     user = UserSerializer(read_only=True)
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), source='user', write_only=True)
 
     class Meta:
         model = D2RResult
         fields = [
-            'id', 'session', 'session_id', 'user', 'user_id',
+            'id', 'd2r_session', 'd2r_session_id', 'user', 'user_id',
             'raw_score', 'processing_speed', 'attention_span', 'errors', 'phase_data', 'created_at'
         ]
-        read_only_fields = ['id', 'session', 'user', 'created_at']
+        read_only_fields = ['id', 'd2r_session', 'user', 'created_at']
 
 
 class QuizAttemptSerializer(serializers.ModelSerializer):

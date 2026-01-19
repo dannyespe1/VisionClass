@@ -4,7 +4,7 @@ from typing import Any, Dict, List
 
 from django.core.management.base import BaseCommand
 
-from api.models import D2RResult, AttentionEvent
+from api.models import D2RResult, D2RAttentionEvent
 
 SEQ_LEN_DEFAULT = 16
 STRIDE_DEFAULT = 4
@@ -59,7 +59,7 @@ class Command(BaseCommand):
 
         rows: List[Dict[str, Any]] = []
 
-        results = D2RResult.objects.select_related("session", "user")
+        results = D2RResult.objects.select_related("d2r_session", "user")
 
         for res in results:
             phases = (res.phase_data or {}).get("phases") or []
@@ -73,8 +73,8 @@ class Command(BaseCommand):
                     duration_sec = max((end - start) / 1000.0, 0.001)
                 y_val = compute_y(summary, duration_sec)
 
-                evts = AttentionEvent.objects.filter(
-                    session=res.session_id,
+                evts = D2RAttentionEvent.objects.filter(
+                    d2r_session=res.d2r_session_id,
                     data__context__phase=ph,
                 ).order_by("timestamp")
 
@@ -91,7 +91,7 @@ class Command(BaseCommand):
                         continue
                     rows.append(
                         {
-                            "session_id": res.session_id,
+                            "session_id": res.d2r_session_id,
                             "user_id": res.user_id,
                             "phase": ph,
                             "frames_paths": window_paths,

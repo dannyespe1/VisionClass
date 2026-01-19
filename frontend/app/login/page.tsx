@@ -33,7 +33,16 @@ export default function LoginPage() {
     } else if (profile?.role === "teacher") {
       router.push("/instructor");
     } else {
-      router.push("/d2r");
+      try {
+        const d2rResults = await apiFetch<any[]>("/api/d2r-results/", {}, accessToken);
+        if (Array.isArray(d2rResults) && d2rResults.length > 0) {
+          router.push("/student");
+        } else {
+          router.push("/d2r");
+        }
+      } catch (_) {
+        router.push("/student");
+      }
     }
   }, [router]);
 

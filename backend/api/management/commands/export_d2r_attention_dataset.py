@@ -5,7 +5,7 @@ from typing import Any, Dict, List
 from django.core.management.base import BaseCommand
 from django.db.models import Prefetch
 
-from api.models import D2RResult, AttentionEvent
+from api.models import D2RResult, D2RAttentionEvent
 
 SEQ_LEN_DEFAULT = 16
 STRIDE_DEFAULT = 4
@@ -40,7 +40,7 @@ def compute_y(summary: Dict[str, Any], duration_sec: float | None = None) -> flo
     return y_phase
 
 
-def extract_features(evt: AttentionEvent) -> List[float]:
+def extract_features(evt: D2RAttentionEvent) -> List[float]:
     d = evt.data or {}
     frame = d.get("frame", {})
     temporal = d.get("temporal", {})
@@ -81,13 +81,17 @@ class Command(BaseCommand):
         rows = []
 
         results = (
-            D2RResult.objects.select_related("session", "user")
-            .prefetch_related(Prefetch("session__events", queryset=AttentionEvent.objects.all().order_by("timestamp")))
+            D2RResult.objects.select_related("d2r_session", "user")
+            .prefetch_related(
+                Prefetch("d2r_session__events", queryset=D2RAttentionEvent.objects.all().order_by("timestamp"))
+            )
         )
 
         for res in results:
             phase_data = (res.phase_data or {}).get("phases") or []
-            session_events = list(AttentionEvent.objects.filter(session=res.session_id).order_by("timestamp"))
+            session_events = list(
+                D2RAttentionEvent.objects.filter(d2r_session=res.d2r_session_id).order_by("timestamp")
+            )
 
             for phase_entry in phase_data:
                 phase_num = int(phase_entry.get("phase", 0) or 0)
@@ -116,7 +120,7 @@ class Command(BaseCommand):
                     window = features_seq[start_idx : start_idx + seq_len]
                     rows.append(
                         {
-                            "session_id": res.session_id,
+                            "session_id": res.d2r_session_id,
                             "user_id": res.user_id,
                             "phase": phase_num,
                             "y": y_val,

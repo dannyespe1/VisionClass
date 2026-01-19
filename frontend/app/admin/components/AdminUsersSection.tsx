@@ -10,8 +10,9 @@ type Props = {
   searchQuery: string;
   onSearchChange: (value: string) => void;
   onToggleStatus: (id: number) => void;
-  onDelete: (id: number) => void;
-  onCreate?: () => void;
+  onDeleteRequest: (user: AdminUser) => void;
+  onCreateRequest?: () => void;
+  onEditRequest?: (user: AdminUser) => void;
 };
 
 export function AdminUsersSection({
@@ -19,8 +20,9 @@ export function AdminUsersSection({
   searchQuery,
   onSearchChange,
   onToggleStatus,
-  onDelete,
-  onCreate,
+  onDeleteRequest,
+  onCreateRequest,
+  onEditRequest,
 }: Props) {
   const filteredUsers = users.filter((user) => {
     const query = searchQuery.toLowerCase();
@@ -32,9 +34,9 @@ export function AdminUsersSection({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl mb-2">Gestion de Usuarios</h1>
-          <p className="text-slate-600">Administra estudiantes y profesores</p>
+          <p className="text-slate-600">Administra usuarios y roles</p>
         </div>
-        <Button onClick={onCreate}>
+        <Button onClick={onCreateRequest}>
           <Plus className="w-4 h-4 mr-2" />
           Nuevo Usuario
         </Button>
@@ -75,10 +77,14 @@ export function AdminUsersSection({
                 <td className="py-4 px-6">
                   <span
                     className={`px-3 py-1 rounded-full text-sm ${
-                      user.role === "profesor" ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"
+                      user.role === "admin"
+                        ? "bg-purple-100 text-purple-700"
+                        : user.role === "profesor"
+                        ? "bg-blue-100 text-blue-700"
+                        : "bg-green-100 text-green-700"
                     }`}
                   >
-                    {user.role === "profesor" ? "Profesor" : "Estudiante"}
+                    {user.role === "admin" ? "Admin" : user.role === "profesor" ? "Profesor" : "Estudiante"}
                   </span>
                 </td>
                 <td className="py-4 px-6">{user.courses}</td>
@@ -94,11 +100,14 @@ export function AdminUsersSection({
                 </td>
                 <td className="py-4 px-6">
                   <div className="flex items-center justify-end gap-2">
-                    <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                    <button
+                      onClick={() => onEditRequest?.(user)}
+                      className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                    >
                       <Edit className="w-4 h-4 text-slate-600" />
                     </button>
                     <button
-                      onClick={() => onDelete(user.id)}
+                      onClick={() => onDeleteRequest(user)}
                       className="p-2 hover:bg-red-50 rounded-lg transition-colors"
                     >
                       <Trash2 className="w-4 h-4 text-red-600" />

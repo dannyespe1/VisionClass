@@ -10,6 +10,8 @@ from .models import (
     Enrollment,
     Session,
     AttentionEvent,
+    D2RSession,
+    D2RAttentionEvent,
     ContentView,
     D2RResult,
     QuizAttempt,
@@ -72,6 +74,18 @@ class AttentionEventAdmin(admin.ModelAdmin):
     search_fields = ('session__id', 'user__username', 'label')
 
 
+@admin.register(D2RSession)
+class D2RSessionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'started_at', 'ended_at', 'attention_score', 'frame_count')
+    search_fields = ('user__username',)
+
+
+@admin.register(D2RAttentionEvent)
+class D2RAttentionEventAdmin(admin.ModelAdmin):
+    list_display = ('id', 'd2r_session', 'user', 'timestamp', 'value', 'label')
+    search_fields = ('d2r_session__id', 'user__username', 'label')
+
+
 @admin.register(ContentView)
 class ContentViewAdmin(admin.ModelAdmin):
     list_display = ('user', 'session', 'content_type', 'content_id', 'duration_seconds', 'started_at')
@@ -81,8 +95,8 @@ class ContentViewAdmin(admin.ModelAdmin):
 
 @admin.register(D2RResult)
 class D2RResultAdmin(admin.ModelAdmin):
-    list_display = ('user', 'session', 'raw_score', 'processing_speed', 'attention_span', 'errors', 'created_at')
-    search_fields = ('user__username', 'session__id')
+    list_display = ('user', 'd2r_session', 'raw_score', 'processing_speed', 'attention_span', 'errors', 'created_at')
+    search_fields = ('user__username', 'd2r_session__id')
 
 
 @admin.register(QuizAttempt)

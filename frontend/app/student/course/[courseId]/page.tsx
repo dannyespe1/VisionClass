@@ -48,12 +48,6 @@ type CourseLesson = {
   moduleOrder: number;
 };
 
-type CourseModule = {
-  id: number;
-  title: string;
-  order: number;
-};
-
 type CourseMaterial = {
   id: number;
   title: string;
@@ -75,9 +69,9 @@ type LessonSummary = {
 const toYoutubeEmbed = (url: string) => {
   if (!url) return "";
   if (url.includes("embed/")) return url;
-  if (url.includes("watch?v=")) return url.replace("watch?v=", "embed/");
+  if (url.includes("watchv=")) return url.replace("watchv=", "embed/");
   if (url.includes("youtu.be/")) {
-    const id = url.split("youtu.be/")[1]?.split("?")[0];
+    const id = url.split("youtu.be/")[1].split("?")[0];
     return id ? `https://www.youtube.com/embed/${id}` : url;
   }
   return url;
@@ -87,7 +81,7 @@ export default function CoursePage() {
   const router = useRouter();
   const params = useParams();
   const { token } = useAuth();
-  const courseId = Number(params?.courseId);
+  const courseId = Number(params.courseId);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -125,7 +119,12 @@ export default function CoursePage() {
   const [enrollmentLoaded, setEnrollmentLoaded] = useState(false);
 
   const [permissionOpen, setPermissionOpen] = useState(true);
-  const [permissionSettings, setPermissionSettings] = useState<PermissionSettings | null>(null);
+  const [permissionSettings, setPermissionSettings] = useState<PermissionSettings>({
+    enableCamera: false,
+    enableAttentionTracking: false,
+    saveAnalytics: false,
+    shareWithInstructor: false,
+  });
   const [showCameraSettings, setShowCameraSettings] = useState(false);
   const [openModules, setOpenModules] = useState<Record<number, boolean>>({});
 
@@ -148,7 +147,7 @@ export default function CoursePage() {
       if (!token || !courseId || sessionRef.current) return;
       try {
         const me = await apiFetch<{ id: number }>("/api/me/", {}, token);
-        const resolvedUserId = me?.id || null;
+        const resolvedUserId = me.id || null;
         setUserId(resolvedUserId);
         const session = await apiFetch<any>(
           "/api/sessions/",
@@ -158,12 +157,12 @@ export default function CoursePage() {
           },
           token
         );
-        if (session?.id) {
+        if (session.id) {
           sessionRef.current = session.id;
           setSessionId(session.id);
         }
         const enrollments = await apiFetch<any[]>("/api/enrollments/", {}, token);
-        let enrollment = (enrollments || []).find((e) => e.course?.id === courseId);
+        let enrollment = (enrollments || []).find((e) => e.course.id === courseId);
         if (!enrollment) {
           enrollment = await apiFetch<any>(
             "/api/enrollments/",
@@ -174,7 +173,7 @@ export default function CoursePage() {
             token
           );
         }
-        if (enrollment?.id) {
+        if (enrollment.id) {
           setEnrollmentId(enrollment.id);
           setEnrollmentData(enrollment.enrollment_data || {});
           setEnrollmentLoaded(true);
@@ -189,7 +188,7 @@ export default function CoursePage() {
 
   useEffect(() => {
     if (!enrollmentLoaded) return;
-    const lastLessonId = Number(enrollmentData?.last_lesson_id || 0);
+    const lastLessonId = Number(enrollmentData.last_lesson_id || 0);
     if (!lastLessonId) return;
     if (lessons.find((lesson) => lesson.id === lastLessonId)) {
       setSelectedLessonId(lastLessonId);
@@ -209,9 +208,9 @@ export default function CoursePage() {
           apiFetch<any[]>("/api/course-lessons/", {}, token),
           apiFetch<any[]>("/api/course-materials/", {}, token),
         ]);
-        setCourseTitle(course?.title || "Curso");
+        setCourseTitle(course.title || "Curso");
         const mappedModules = (modulesData || [])
-          .filter((m) => m.course?.id === courseId)
+          .filter((m) => m.course.id === courseId)
           .map((m) => ({
             id: m.id,
             title: m.title,
@@ -226,16 +225,16 @@ export default function CoursePage() {
           }))
         );
         const mappedLessons = (lessonsData || [])
-          .filter((l) => l.module?.course?.id === courseId)
+          .filter((l) => l.module.course.id === courseId)
           .map((l) => ({
             id: l.id,
             title: l.title,
             order: l.order || 0,
-            moduleId: l.module?.id,
-            moduleOrder: mappedModules.find((m) => m.id === l.module?.id)?.order || 0,
+            moduleId: l.module.id,
+            moduleOrder: mappedModules.find((m) => m.id === l.module.id)?.order || 0,
           }));
         const mappedMaterials = (materialsData || [])
-          .filter((mat) => mat.lesson?.module?.course?.id === courseId)
+          .filter((mat) => mat.lesson.module.course.id === courseId)
           .map((mat) => ({
             id: mat.id,
             title: mat.title,
@@ -243,11 +242,11 @@ export default function CoursePage() {
             materialType: mat.material_type,
             url: mat.url || "",
             metadata: mat.metadata || {},
-            lessonId: mat.lesson?.id,
+            lessonId: mat.lesson.id,
           }));
         setLessons(mappedLessons);
         setMaterials(mappedMaterials);
-        const lastLessonId = Number(enrollmentData?.last_lesson_id || 0);
+        const lastLessonId = Number(enrollmentData.last_lesson_id || 0);
         const lessonIds = new Set(mappedLessons.map((lesson) => lesson.id));
         if (lastLessonId && lessonIds.has(lastLessonId)) {
           if (selectedLessonId !== lastLessonId) {
@@ -287,7 +286,7 @@ export default function CoursePage() {
       return {
         id: lesson.id,
         title: lesson.title,
-        materialType: material?.materialType || "pdf",
+        materialType: material?.materialType ?? "pdf",
         duration: "15 min",
         completed: idx < currentLessonIndex,
       };
@@ -314,12 +313,12 @@ export default function CoursePage() {
     const orderedModules = [...modules].sort((a, b) => a.order - b.order);
     const moduleList = orderedModules.map((m) => ({
       id: m.id,
-      title: m.title || `Modulo ${m.order + 1}`,
+      title: m.title || `Módulo ${m.order + 1}`,
       lessons: byModule[m.id] || [],
     }));
     const unassigned = byModule[0] || [];
     if (unassigned.length) {
-      moduleList.push({ id: 0, title: "Lecciones", lessons: unassigned });
+      moduleList.push({ id: 0, title: "Lecciónes", lessons: unassigned });
     }
     return moduleList;
   }, [modules, lessonsSummary, lessons]);
@@ -337,7 +336,7 @@ export default function CoursePage() {
     if (!modules.length) return;
     setOpenModules((prev) => {
       if (Object.keys(prev).length) return prev;
-      const first = modules[0]?.id;
+      const first = modules[0].id;
       return first ? { [first]: true } : prev;
     });
   }, [modules]);
@@ -345,7 +344,7 @@ export default function CoursePage() {
   useEffect(() => {
     if (!selectedLessonId) return;
     const lesson = lessons.find((item) => item.id === selectedLessonId);
-    if (!lesson?.moduleId) return;
+    if (!lesson.moduleId) return;
     setOpenModules((prev) => ({ ...prev, [lesson.moduleId]: true }));
   }, [selectedLessonId, lessons]);
 
@@ -386,7 +385,7 @@ export default function CoursePage() {
   }, [currentMaterial]);
 
   const persistContentView = async (reason: "switch" | "exit" | "complete") => {
-    if (!token || !contentViewRef.current?.id) return;
+    if (!token || !contentViewRef.current.id) return;
     const durationSeconds = Math.max(1, Math.round((Date.now() - contentViewRef.current.startedAt) / 1000));
     const payload = {
       ended_at: new Date().toISOString(),
@@ -429,7 +428,7 @@ export default function CoursePage() {
         token
       );
       contentViewRef.current = {
-        id: view?.id ?? null,
+        id: view.id ?? null,
         startedAt: Date.now(),
         contentType,
         contentId,
@@ -446,15 +445,15 @@ export default function CoursePage() {
     startContentView().catch((err) => console.error(err));
 
     return () => {
-      if (contentViewRef.current?.id) {
+      if (contentViewRef.current.id) {
         persistContentView("switch").catch((err) => console.error(err));
       }
     };
-  }, [currentMaterial?.id, permissionOpen]);
+  }, [currentMaterial.id, permissionOpen]);
 
   useEffect(() => {
     return () => {
-      if (contentViewRef.current?.id) {
+      if (contentViewRef.current.id) {
         persistContentView("exit").catch((err) => console.error(err));
       }
     };
@@ -465,7 +464,7 @@ export default function CoursePage() {
       clearInterval(frameTimerRef.current);
       frameTimerRef.current = null;
     }
-    if (videoRef.current?.srcObject) {
+    if (videoRef.current.srcObject) {
       const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
       tracks.forEach((track) => track.stop());
       videoRef.current.srcObject = null;
@@ -499,18 +498,18 @@ export default function CoursePage() {
       if (selectedLessonId) form.append("lesson_id", String(selectedLessonId));
       if (currentMaterial?.materialType) form.append("material_type", currentMaterial.materialType);
 
-      const resp = await postFrameToML(form);
-      const isOk = resp?.ok !== false;
+      const resp = await postFrameToML(form, token);
+      const isOk = resp.ok !== false;
       if (!isOk) return;
-      const frameLabel = resp?.frame_score?.label;
-      const hasFace = resp?.frame_score?.data?.face;
+      const frameLabel = resp.frame_score.label;
+      const hasFace = resp.frame_score.data.face;
       if (frameLabel === "no_face" || hasFace === false) {
         setAttentionStatus("no_face");
         setAttentionScore(0);
         return;
       }
       setAttentionStatus("ok");
-      const rawValue = resp?.score?.value ?? resp?.frame_score?.value ?? resp?.value ?? null;
+      const rawValue = resp.score?.value ?? resp.frame_score?.value ?? resp.value ?? null;
       if (rawValue !== null && rawValue !== undefined) {
         const normalized = rawValue > 1 ? rawValue : rawValue * 100;
         const rounded = Math.round(normalized);
@@ -568,13 +567,13 @@ export default function CoursePage() {
   };
 
   useEffect(() => {
-    if (permissionSettings?.enableCamera) {
+    if (permissionSettings.enableCamera) {
       startCamera();
       return () => stopCamera();
     }
     stopCamera();
     return undefined;
-  }, [permissionSettings?.enableCamera, sessionId, userId]);
+  }, [permissionSettings.enableCamera, sessionId, userId]);
 
   useEffect(() => {
     const handleVisibility = () => {
@@ -664,12 +663,12 @@ export default function CoursePage() {
   };
 
   const handleSubmitQuiz = async () => {
-    if (!currentMaterial?.metadata?.questions?.length) return;
+    if (!currentMaterial.metadata.questions.length) return;
     if (!token || !sessionId || !userId) return;
     const questions = currentMaterial.metadata.questions as Array<{
       question: string;
-      answer?: string;
-      options?: string[];
+      answer: string;
+      options: string[];
     }>;
     const total = questions.length;
     let correct = 0;
@@ -694,9 +693,9 @@ export default function CoursePage() {
           body: JSON.stringify({
             session_id: sessionId,
             user_id: userId,
-            difficulty: currentMaterial.metadata?.difficulty === "alta" ? "hard" : "normal",
+            difficulty: currentMaterial.metadata.difficulty === "alta" ? "hard" : "normal",
             score,
-            reason: currentMaterial.title || "Evaluacion",
+            reason: currentMaterial.title || "Evaluación",
           }),
         },
         token
@@ -718,7 +717,7 @@ export default function CoursePage() {
         ).catch((err) => console.error(err));
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "No se pudo guardar la evaluacion";
+      const msg = err instanceof Error ? err.message : "No se pudo guardar la evaluación";
       setQuizError(msg);
     }
   };
@@ -802,18 +801,18 @@ export default function CoursePage() {
               >
                 <div className="relative">
                   <Camera
-                    className={`w-4 h-4 ${permissionSettings?.enableCamera ? "text-emerald-600" : "text-slate-400"}`}
+                    className={`w-4 h-4 ${permissionSettings.enableCamera ? "text-emerald-600" : "text-slate-400"}`}
                   />
                   <div
                     className={`absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full ${
-                      permissionSettings?.enableCamera ? "bg-emerald-500" : "bg-slate-400"
+                      permissionSettings.enableCamera ? "bg-emerald-500" : "bg-slate-400"
                     }`}
                   />
                 </div>
                 <span
-                  className={`text-sm ${permissionSettings?.enableCamera ? "text-emerald-600" : "text-slate-600"}`}
+                  className={`text-sm ${permissionSettings.enableCamera ? "text-emerald-600" : "text-slate-600"}`}
                 >
-                  {permissionSettings?.enableCamera ? "Activa" : "Inactiva"}
+                  {permissionSettings.enableCamera ? "Activa" : "Inactiva"}
                 </span>
                 <SettingsIcon className="w-3 h-3 text-slate-400" />
               </button>
@@ -821,13 +820,13 @@ export default function CoursePage() {
             <TooltipContent side="bottom" className="max-w-xs">
               <div className="space-y-2">
                 <p className="text-sm">
-                  {permissionSettings?.enableCamera
-                    ? "Camara activa para analisis de atencion. Click para ajustar configuracion."
-                    : "Camara inactiva. Click para habilitar analisis de atencion."}
+                  {permissionSettings.enableCamera
+                     "Cámara activa para análisis de atención. Click para ajustar configuración."
+                    : "Cámara inactiva. Click para habilitar análisis de atención."}
                 </p>
-                {permissionSettings?.enableAttentionTracking && (
+                {permissionSettings.enableAttentionTracking && (
                   <p className="text-xs text-slate-600">
-                    El seguimiento de atencion esta recopilando datos de forma segura.
+                    El seguimiento de atención esta recopilando datos de forma segura.
                   </p>
                 )}
               </div>
@@ -841,7 +840,7 @@ export default function CoursePage() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="flex items-center gap-2">
               <Camera className="w-5 h-5 text-blue-600" />
-              Configuracion de Camara
+              Configuración de Cámara
             </h3>
             <button
               onClick={() => setShowCameraSettings(false)}
@@ -852,10 +851,10 @@ export default function CoursePage() {
           </div>
           <div className="space-y-4">
             {[
-              { label: "Habilitar Camara", value: permissionSettings?.enableCamera },
-              { label: "Seguimiento de Atencion", value: permissionSettings?.enableAttentionTracking },
-              { label: "Guardar Analisis", value: permissionSettings?.saveAnalytics },
-              { label: "Compartir con Instructor", value: permissionSettings?.shareWithInstructor },
+              { label: "Habilitar Cámara", value: permissionSettings.enableCamera },
+              { label: "Seguimiento de Atención", value: permissionSettings.enableAttentionTracking },
+              { label: "Guardar Análisis", value: permissionSettings.saveAnalytics },
+              { label: "Compartir con Instructor", value: permissionSettings.shareWithInstructor },
             ].map((item) => (
               <div key={item.label} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                 <div className="flex-1">
@@ -868,7 +867,7 @@ export default function CoursePage() {
           </div>
           <div className="mt-6 pt-4 border-t">
             <Button variant="outline" size="sm" className="w-full" onClick={() => setPermissionOpen(true)}>
-              Cambiar configuracion
+              Cambiar configuración
             </Button>
           </div>
         </div>
@@ -892,37 +891,37 @@ export default function CoursePage() {
               </Button>
               <div>
                 <h1 className="text-xl">{courseTitle}</h1>
-                <p className="text-sm text-slate-600">{selectedLesson?.title || "Selecciona una leccion"}</p>
+                <p className="text-sm text-slate-600">{selectedLesson?.title || "Seleccióna una lección"}</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
-              {permissionSettings?.enableAttentionTracking && (
+              {permissionSettings.enableAttentionTracking && (
                 <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-lg">
                   <Eye className="w-4 h-4 text-blue-600" />
                   {attentionStatus === "no_face" ? (
                     <span className="text-sm">Sin rostro</span>
                   ) : attentionStatus === "pending" ? (
-                    <span className="text-sm">Esperando camara</span>
+                    <span className="text-sm">Esperando cámara</span>
                   ) : (
-                    <span className="text-sm">Atencion: {Math.round(attentionScore)}%</span>
+                    <span className="text-sm">Atención: {Math.round(attentionScore)}%</span>
                   )}
                   <div
                     className={`w-2 h-2 rounded-full ${
                       attentionStatus === "no_face"
                         ? "bg-slate-400"
                         : attentionStatus === "pending"
-                        ? "bg-amber-400"
-                        : attentionScore > 80
-                        ? "bg-emerald-500"
-                        : attentionScore > 60
-                        ? "bg-amber-500"
-                        : "bg-red-500"
+                          ? "bg-amber-400"
+                          : attentionScore > 80
+                            ? "bg-emerald-500"
+                            : attentionScore > 60
+                              ? "bg-amber-500"
+                              : "bg-red-500"
                     }`}
                   />
                 </div>
               )}
               <div className="text-sm text-slate-600">
-                Leccion {currentLessonIndex + 1} de {sortedLessons.length || 1}
+                Lección {currentLessonIndex + 1} de {sortedLessons.length || 1}
               </div>
             </div>
           </div>
@@ -937,7 +936,7 @@ export default function CoursePage() {
 
             {!currentMaterial && !loading && (
               <div className="bg-white rounded-xl shadow-sm p-8 text-slate-500">
-                No hay contenidos disponibles para esta leccion.
+                No hay contenidos disponibles para esta lección.
               </div>
             )}
 
@@ -968,7 +967,7 @@ export default function CoursePage() {
                   {pdfUrl ? (
                     <object data={pdfUrl} type="application/pdf" className="w-full h-[640px]">
                       <p className="p-6 text-sm text-slate-600">
-                        No se pudo cargar el PDF. Usa el boton de descarga.
+                        No se pudo cargar el PDF. Usa el botón de descarga.
                       </p>
                     </object>
                   ) : (
@@ -988,10 +987,10 @@ export default function CoursePage() {
                         <span>Tiempo: {Math.floor(readingTime / 60)}:{String(readingTime % 60).padStart(2, "0")}</span>
                       </div>
                     </div>
-                    {permissionSettings?.enableAttentionTracking && (
+                    {permissionSettings.enableAttentionTracking && (
                       <div className="flex items-center gap-2">
                         <Eye className="w-4 h-4 text-blue-600" />
-                        <span>Concentracion promedio: {Math.round(attentionScore)}%</span>
+                        <span>Concentración promedio: {Math.round(attentionScore)}%</span>
                       </div>
                     )}
                   </div>
@@ -1016,7 +1015,7 @@ export default function CoursePage() {
                     </div>
                   )}
 
-                  {permissionSettings?.enableAttentionTracking && (
+                  {permissionSettings.enableAttentionTracking && (
                     <div className="absolute top-4 right-4 bg-black/70 rounded-lg px-4 py-2 flex items-center gap-2">
                       <Eye className="w-4 h-4 text-white" />
                       <span className="text-white text-sm">{Math.round(attentionScore)}%</span>
@@ -1028,10 +1027,10 @@ export default function CoursePage() {
                     </div>
                   )}
 
-                  {permissionSettings?.enableAttentionTracking && attentionScore < 65 && (
+                  {permissionSettings.enableAttentionTracking && attentionScore < 65 && (
                     <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-amber-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2">
                       <AlertCircle className="w-5 h-5" />
-                      <span>Tu atencion ha disminuido. Considera una pausa.</span>
+                      <span>Tu atención ha disminuido. Considera una pausa.</span>
                     </div>
                   )}
                 </div>
@@ -1039,7 +1038,7 @@ export default function CoursePage() {
                 <div className="bg-slate-900 text-white px-4 py-3 text-sm flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Play className="w-4 h-4" />
-                    Video en reproduccion (YouTube)
+                    Video en reproducción (YouTube)
                   </div>
                   <div className="flex items-center gap-2 text-slate-300">
                     <Volume2 className="w-4 h-4" />
@@ -1047,20 +1046,20 @@ export default function CoursePage() {
                   </div>
                 </div>
 
-                {permissionSettings?.enableAttentionTracking && (
+                {permissionSettings.enableAttentionTracking && (
                   <div className="p-6 border-t">
                     <h3 className="mb-4 flex items-center gap-2">
                       <TrendingUp className="w-5 h-5 text-blue-600" />
-                      Analisis de Atencion en Tiempo Real
+                      Análisis de Atención en Tiempo Real
                     </h3>
                     <div className="grid md:grid-cols-3 gap-4">
                       <div className="bg-blue-50 rounded-lg p-4">
                         <div className="text-2xl text-blue-600 mb-1">{Math.round(attentionScore)}%</div>
-                        <div className="text-sm text-slate-600">Atencion Actual</div>
+                        <div className="text-sm text-slate-600">Atención Actual</div>
                       </div>
                       <div className="bg-emerald-50 rounded-lg p-4">
                         <div className="text-2xl text-emerald-600 mb-1">87%</div>
-                        <div className="text-sm text-slate-600">Promedio Sesion</div>
+                        <div className="text-sm text-slate-600">Promedio Sesión</div>
                       </div>
                       <div className="bg-violet-50 rounded-lg p-4">
                         <div className="text-2xl text-violet-600 mb-1">2</div>
@@ -1079,8 +1078,8 @@ export default function CoursePage() {
                     <ClipboardCheck className="w-6 h-6 text-violet-600" />
                   </div>
                   <div>
-                    <h2 className="text-2xl">Evaluacion del Modulo</h2>
-                    <p className="text-slate-600">El docente publicara las preguntas aqui.</p>
+                    <h2 className="text-2xl">Evaluación del Módulo</h2>
+                    <p className="text-slate-600">El docente publicará las preguntas aquí.</p>
                   </div>
                 </div>
                 {currentMaterial.metadata?.questions?.length ? (
@@ -1111,14 +1110,14 @@ export default function CoursePage() {
                         onClick={handleSubmitQuiz}
                         disabled={quizSubmitted || Object.keys(quizAnswers).length === 0}
                       >
-                        Enviar evaluacion
+                        Enviar evaluación
                       </Button>
                       <Button variant="outline" onClick={() => router.push("/student")}>
                         Volver al inicio
                       </Button>
                       {quizScore !== null && (
                         <span className="text-sm text-emerald-600">
-                          Calificacion: {quizScore}%
+                          Calificación: {quizScore}%
                         </span>
                       )}
                       {quizError && <span className="text-sm text-red-600">{quizError}</span>}
@@ -1126,7 +1125,7 @@ export default function CoursePage() {
                   </div>
                 ) : (
                   <div className="text-sm text-slate-600">
-                    No hay preguntas disponibles aun para esta leccion.
+                    No hay preguntas disponibles aún para esta lección.
                   </div>
                 )}
               </div>
@@ -1176,8 +1175,8 @@ export default function CoursePage() {
                                 lesson.completed
                                   ? "bg-emerald-100"
                                   : lesson.id === selectedLessonId
-                                  ? "bg-blue-100"
-                                  : "bg-slate-100"
+                                    ? "bg-blue-100"
+                                    : "bg-slate-100"
                               }`}
                             >
                               {lesson.completed ? (
@@ -1212,7 +1211,7 @@ export default function CoursePage() {
 
               <div className="p-6 border-t bg-slate-50">
                 <Button className="w-full" onClick={goToNextLesson} disabled={!hasNextLesson}>
-                  {hasNextLesson ? "Siguiente Leccion" : "Completado"}
+                  {hasNextLesson ? "Siguiente Lección" : "Completado"}
                 </Button>
               </div>
             </div>

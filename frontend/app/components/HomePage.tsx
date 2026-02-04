@@ -20,14 +20,14 @@ export function HomePage({ onNavigateToLogin }: HomePageProps) {
           <div className="space-y-6 text-white">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-sm">
               <span className="inline-block h-2 w-2 rounded-full bg-emerald-300" />
-              Monitoreo pasivo de atencion en tiempo real
+              Monitoreo pasivo de atención en tiempo real
             </div>
             <h1 className="text-4xl md:text-5xl font-semibold leading-tight">
-              Cursos en linea con seguimiento inteligente de atencion
+              Cursos en linea con seguimiento inteligente de atención
             </h1>
             <p className="text-base md:text-lg text-slate-100/90 max-w-2xl">
               VisionClass combina vision por computadora y aprendizaje adaptativo para personalizar tu experiencia
-              segun tu nivel de atencion y progreso.
+              segun tu nivel de atención y progreso.
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <button
@@ -61,7 +61,7 @@ export function HomePage({ onNavigateToLogin }: HomePageProps) {
             <div className="rounded-3xl bg-white shadow-2xl p-6 space-y-4 border border-slate-100">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-slate-500">Analisis activo</p>
+                  <p className="text-xs text-slate-500">Análisis activo</p>
                   <p className="text-xl font-semibold text-slate-900">127 estudiantes</p>
                 </div>
                 <div className="h-10 w-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
@@ -77,7 +77,7 @@ export function HomePage({ onNavigateToLogin }: HomePageProps) {
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
-                  <p className="text-slate-500">Atencion promedio</p>
+                  <p className="text-slate-500">Atención promedio</p>
                   <p className="text-xl font-semibold text-slate-900">85%</p>
                 </div>
                 <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
@@ -101,7 +101,7 @@ export function HomePage({ onNavigateToLogin }: HomePageProps) {
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div>
             <p className="text-sm font-semibold text-sky-600">Por que VisionClass</p>
-            <h2 className="text-3xl font-semibold text-slate-900">Soluciones inteligentes para educacion</h2>
+            <h2 className="text-3xl font-semibold text-slate-900">Soluciones inteligentes para educación</h2>
             <p className="text-slate-600 mt-2 max-w-2xl">
               Seguimiento pasivo, privacidad como prioridad y recomendaciones en tiempo real para estudiantes,
               docentes y administradores.
@@ -119,12 +119,12 @@ export function HomePage({ onNavigateToLogin }: HomePageProps) {
           {[
             {
               title: "Monitoreo en vivo",
-              desc: "Gaze tracking, micromovimientos y señales de atencion sin hardware extra.",
+              desc: "Gaze tracking, micromovimientos y señales de atención sin hardware extra.",
               icon: "🛰️",
             },
             {
               title: "Aprendizaje adaptativo",
-              desc: "Rutas personalizadas segun atencion en PDFs, video y evaluaciones.",
+              desc: "Rutas personalizadas segun atención en PDFs, video y evaluaciones.",
               icon: "✨",
             },
             {

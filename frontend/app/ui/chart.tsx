@@ -10,11 +10,11 @@ const THEMES = { light: "", dark: ".dark" } as const;
 
 export type ChartConfig = {
   [k in string]: {
-    label?: React.ReactNode;
-    icon?: React.ComponentType;
+    label: React.ReactNode;
+    icon: React.ComponentType;
   } & (
-    | { color?: string; theme?: never }
-    | { color?: never; theme: Record<keyof typeof THEMES, string> }
+    | { color: string; theme: never }
+    | { color: never; theme: Record<keyof typeof THEMES, string> }
   );
 };
 
@@ -121,26 +121,26 @@ const ChartTooltipContent = ({
   labelKey,
 }: React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
   React.ComponentProps<"div"> & {
-    hideLabel?: boolean;
-    hideIndicator?: boolean;
-    indicator?: "line" | "dot" | "dashed";
-    nameKey?: string;
-    labelKey?: string;
+    hideLabel: boolean;
+    hideIndicator: boolean;
+    indicator: "line" | "dot" | "dashed";
+    nameKey: string;
+    labelKey: string;
   }) => {
   const { config } = useChart();
 
   const tooltipLabel = React.useMemo(() => {
-    if (hideLabel || !payload?.length) {
+    if (hideLabel || !payload.length) {
       return null;
     }
 
     const [item] = payload;
-    const key = `${labelKey || item?.dataKey || item?.name || "value"}`;
+    const key = `${labelKey || item.dataKey || item.name || "value"}`;
     const itemConfig = getPayloadConfigFromPayload(config, item, key);
     const value =
       !labelKey && typeof label === "string"
-        ? config[label as keyof typeof config]?.label || label
-        : itemConfig?.label;
+         config[label as keyof typeof config].label || label
+        : itemConfig.label;
 
     if (labelFormatter && value !== undefined) {
       return (
@@ -165,7 +165,7 @@ const ChartTooltipContent = ({
     labelKey,
   ]);
 
-  if (!active || !payload?.length) {
+  if (!active || !payload.length) {
     return null;
   }
 
@@ -183,7 +183,7 @@ const ChartTooltipContent = ({
         {payload.map((item, index) => {
           const key = `${nameKey || item.name || item.dataKey || "value"}`;
           const itemConfig = getPayloadConfigFromPayload(config, item, key);
-          const indicatorColor = color || item.payload?.fill || item.color;
+          const indicatorColor = color || item.payload.fill || item.color;
 
           return (
             <div
@@ -193,11 +193,11 @@ const ChartTooltipContent = ({
                 indicator === "dot" && "items-center"
               )}
             >
-              {formatter && item?.value !== undefined && item.name ? (
+              {formatter && item.value !== undefined && item.name ? (
                 formatter(item.value, item.name, item, index, item.payload)
               ) : (
                 <>
-                  {itemConfig?.icon ? (
+                  {itemConfig.icon ? (
                     <itemConfig.icon />
                   ) : (
                     !hideIndicator && (
@@ -230,7 +230,7 @@ const ChartTooltipContent = ({
                     <div className="grid gap-1.5">
                       {nestLabel ? tooltipLabel : null}
                       <span className="text-muted-foreground">
-                        {itemConfig?.label || item.name}
+                        {itemConfig.label || item.name}
                       </span>
                     </div>
                     {item.value && (
@@ -259,12 +259,12 @@ const ChartLegendContent = ({
   nameKey,
 }: React.ComponentProps<"div"> &
   Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> & {
-    hideIcon?: boolean;
-    nameKey?: string;
+    hideIcon: boolean;
+    nameKey: string;
   }) => {
   const { config } = useChart();
 
-  if (!payload?.length) {
+  if (!payload.length) {
     return null;
   }
 
@@ -287,7 +287,7 @@ const ChartLegendContent = ({
               "[&>svg]:text-muted-foreground flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3"
             )}
           >
-            {itemConfig?.icon && !hideIcon ? (
+            {itemConfig.icon && !hideIcon ? (
               <itemConfig.icon />
             ) : (
               <div
@@ -297,7 +297,7 @@ const ChartLegendContent = ({
                 }}
               />
             )}
-            {itemConfig?.label || item.value}
+            {itemConfig.label || item.value}
           </div>
         );
       })}

@@ -23,4 +23,5 @@ urlpatterns = [
     path('api/exports/student-report/', api_views.StudentReportExportView.as_view(), name='student_report_export'),
     path('api/exports/student-report', api_views.StudentReportExportView.as_view(), name='student_report_export_noslash'),
     path('api/', include('api.urls')),
+    path('accounts/', include('allauth.urls')),
 ]

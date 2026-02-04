@@ -21,9 +21,9 @@ def safe_float(val: Any, default: float = 0.0) -> float:
 
 
 def compute_y(summary: Dict[str, Any], duration_sec: float | None = None) -> float:
-    hits = safe_float(summary.get("hits"), 0.0)
-    errors = safe_float(summary.get("errors"), 0.0)
-    omissions = safe_float(summary.get("omissions"), 0.0)
+    hits = safe_float(summary.get("TA", summary.get("hits")), 0.0)
+    errors = safe_float(summary.get("C", summary.get("errors")), 0.0)
+    omissions = safe_float(summary.get("O", summary.get("omissions")), 0.0)
 
     precision = hits / (hits + errors + 1e-6)
     recall = hits / (hits + omissions + 1e-6)

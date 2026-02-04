@@ -15,10 +15,10 @@ type CarouselOptions = UseCarouselParameters[0];
 type CarouselPlugin = UseCarouselParameters[1];
 
 type CarouselProps = {
-  opts?: CarouselOptions;
-  plugins?: CarouselPlugin;
-  orientation?: "horizontal" | "vertical";
-  setApi?: (api: CarouselApi) => void;
+  opts: CarouselOptions;
+  plugins: CarouselPlugin;
+  orientation: "horizontal" | "vertical";
+  setApi: (api: CarouselApi) => void;
 };
 
 type CarouselContextProps = {
@@ -68,11 +68,11 @@ function Carousel({
   }, []);
 
   const scrollPrev = React.useCallback(() => {
-    api?.scrollPrev();
+    api.scrollPrev();
   }, [api]);
 
   const scrollNext = React.useCallback(() => {
-    api?.scrollNext();
+    api.scrollNext();
   }, [api]);
 
   const handleKeyDown = React.useCallback(
@@ -100,7 +100,7 @@ function Carousel({
     api.on("select", onSelect);
 
     return () => {
-      api?.off("select", onSelect);
+      api.off("select", onSelect);
     };
   }, [api, onSelect]);
 
@@ -111,7 +111,7 @@ function Carousel({
         api: api,
         opts,
         orientation:
-          orientation || (opts?.axis === "y" ? "vertical" : "horizontal"),
+          orientation || (opts.axis === "y" ? "vertical" : "horizontal"),
         scrollPrev,
         scrollNext,
         canScrollPrev,
@@ -187,7 +187,7 @@ function CarouselPrevious({
       className={cn(
         "absolute size-8 rounded-full",
         orientation === "horizontal"
-          ? "top-1/2 -left-12 -translate-y-1/2"
+           "top-1/2 -left-12 -translate-y-1/2"
           : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
         className,
       )}
@@ -217,7 +217,7 @@ function CarouselNext({
       className={cn(
         "absolute size-8 rounded-full",
         orientation === "horizontal"
-          ? "top-1/2 -right-12 -translate-y-1/2"
+           "top-1/2 -right-12 -translate-y-1/2"
           : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
         className,
       )}

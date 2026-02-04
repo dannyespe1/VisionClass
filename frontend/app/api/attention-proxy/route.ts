@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 
-const ML_SERVICE_URL = process.env.ML_SERVICE_URL || "http://localhost:9000";
+const ML_SERVICE_URL =
+  process.env.ML_SERVICE_URL ||
+  process.env.NEXT_PUBLIC_ML_URL ||
+  "http://localhost:9000";
 const BACKEND_URL =
   process.env.BACKEND_URL ||
   process.env.NEXT_PUBLIC_BACKEND_URL ||
@@ -22,7 +25,7 @@ export async function POST(req: Request) {
       cache: "no-store",
     });
     if (!meRes.ok) {
-      return NextResponse.json({ ok: false, detail: "Token invalido" }, { status: 200 });
+      return NextResponse.json({ ok: false, detail: "Token inválido" }, { status: 200 });
     }
     const meData = await meRes.json().catch(() => null);
     if (!meData || meData.role !== "student") {
@@ -42,7 +45,7 @@ export async function POST(req: Request) {
 
     if (!res.ok) {
       return NextResponse.json(
-        { ok: false, detail: data?.detail || "ML service error" },
+        { ok: false, detail: data.detail || "ML service error" },
         { status: 200 }
       );
     }

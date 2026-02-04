@@ -50,13 +50,13 @@ export function InstructorNavbar({ activeTab, onTabChange }: Props) {
       try {
         const data = await apiFetch<any>("/api/me/", {}, token);
         setProfileForm({
-          username: data?.username || "",
-          first_name: data?.first_name || "",
-          last_name: data?.last_name || "",
-          email: data?.email || "",
-          profile_image: data?.profile_image || "",
+          username: data.username || "",
+          first_name: data.first_name || "",
+          last_name: data.last_name || "",
+          email: data.email || "",
+          profile_image: data.profile_image || "",
         });
-        setOriginalEmail(data?.email || "");
+        setOriginalEmail(data.email || "");
       } catch (err) {
         console.error(err);
       }
@@ -100,13 +100,13 @@ export function InstructorNavbar({ activeTab, onTabChange }: Props) {
         token
       );
       setProfileForm({
-        username: updated?.username || profileForm.username,
-        first_name: updated?.first_name || profileForm.first_name,
-        last_name: updated?.last_name || profileForm.last_name,
-        email: updated?.email || profileForm.email,
-        profile_image: updated?.profile_image || profileForm.profile_image,
+        username: updated.username || profileForm.username,
+        first_name: updated.first_name || profileForm.first_name,
+        last_name: updated.last_name || profileForm.last_name,
+        email: updated.email || profileForm.email,
+        profile_image: updated.profile_image || profileForm.profile_image,
       });
-      setOriginalEmail(updated?.email || profileForm.email);
+      setOriginalEmail(updated.email || profileForm.email);
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
@@ -117,7 +117,7 @@ export function InstructorNavbar({ activeTab, onTabChange }: Props) {
     }
   };
 
-  const initials = `${profileForm.first_name?.[0] || ""}${profileForm.last_name?.[0] || ""}` || "VC";
+  const initials = `${profileForm.first_name.[0] || ""}${profileForm.last_name.[0] || ""}` || "VC";
   const avatarUrl = profileForm.profile_image;
 
   return (
@@ -200,7 +200,7 @@ export function InstructorNavbar({ activeTab, onTabChange }: Props) {
                 onClick={handleLogout}
               >
                 <LogOut className="w-4 h-4" />
-                Cerrar sesion
+                Cerrar sesión
               </button>
             </div>
           )}
@@ -234,7 +234,7 @@ export function InstructorNavbar({ activeTab, onTabChange }: Props) {
                           accept="image/*"
                           className="hidden"
                           onChange={(event) => {
-                            const file = event.target.files?.[0];
+                            const file = event.target.files.[0];
                             if (!file) return;
                             if (file.size > 1024 * 1024) {
                               setUploadError("La imagen debe pesar menos de 1MB.");
@@ -292,7 +292,7 @@ export function InstructorNavbar({ activeTab, onTabChange }: Props) {
                     className="w-full border border-slate-200 rounded-lg px-3 py-2 mt-1"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    placeholder="Requerida para cambiar correo o contraseña"
+                    placeholder="Requerida para cambiar correo o contrasea"
                   />
                 </div>
                 <div>

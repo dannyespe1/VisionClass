@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { LoginForm } from "@/app/login/LoginForm";
 import { ImageWithFallback } from "@/app/figma/ImageWithFallback";
 import { Eye, Brain, Shield, ArrowLeft } from "lucide-react";
@@ -15,6 +15,7 @@ export default function LoginPage() {
   const { setTokenValue } = useAuth();
   const [oauthError, setOauthError] = useState<string | null>(null);
   const [oauthLoading, setOauthLoading] = useState(false);
+  const oauthStartedRef = useRef(false);
   const [redirectUri, setRedirectUri] = useState("");
   const [googleAuthUrl, setGoogleAuthUrl] = useState("");
 
@@ -23,14 +24,14 @@ export default function LoginPage() {
   };
 
   const routeByRole = useCallback(async (accessToken: string) => {
-    const profile = await apiFetch<{ role?: string; is_staff?: boolean; is_superuser?: boolean }>(
+    const profile = await apiFetch<{ role: string; is_staff: boolean; is_superuser: boolean }>(
       "/api/me/",
       {},
       accessToken
     );
-    if (profile?.role === "admin" || profile?.is_superuser || profile?.is_staff) {
+    if (profile.role === "admin" || profile.is_superuser || profile.is_staff) {
       router.push("/admin");
-    } else if (profile?.role === "teacher") {
+    } else if (profile.role === "teacher") {
       router.push("/instructor");
     } else {
       try {
@@ -64,14 +65,15 @@ export default function LoginPage() {
       access_type: "online",
       prompt: "consent",
     });
-    setGoogleAuthUrl(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`);
+    setGoogleAuthUrl(`https://accounts.google.com/o/oauth2/v2/auth${params.toString()}`);
   }, []);
 
   useEffect(() => {
     const code = searchParams.get("code");
-    if (!code || oauthLoading || !redirectUri) return;
+    if (!code || oauthLoading || !redirectUri || oauthStartedRef.current) return;
 
     const runOauth = async () => {
+      oauthStartedRef.current = true;
       setOauthLoading(true);
       setOauthError(null);
       try {
@@ -120,25 +122,35 @@ export default function LoginPage() {
 
           <div className="mt-6 space-y-3">
             {oauthError && <p className="text-sm text-red-600">{oauthError}</p>}
+            <div className="flex items-center gap-3">
+              <span className="h-px flex-1 bg-gray-200" />
+              <span className="text-xs uppercase tracking-[0.25em] text-gray-400">o</span>
+              <span className="h-px flex-1 bg-gray-200" />
+            </div>
             <Button
               type="button"
               variant="outline"
-              className="w-full"
+              className="w-full h-12 rounded-xl border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-gray-50 hover:shadow-md"
               disabled={!googleAuthUrl || oauthLoading}
               onClick={() => {
                 if (!googleAuthUrl) return;
                 window.location.href = googleAuthUrl;
               }}
             >
-              {oauthLoading ? "Conectando con Google..." : "Continuar con Google"}
+              <div className="flex items-center justify-center gap-3">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white">
+                  <img src="/google-new.svg" alt="Google" className="h-5 w-5" />
+                </span>
+                <span>{oauthLoading ? "Conectando con Google..." : "Continuar con Google"}</span>
+              </div>
             </Button>
           </div>
 
           <div className="mt-8 pt-8 border-t border-gray-200">
             <p className="text-sm text-gray-500 text-center mb-4">
-              No tienes una cuenta?{" "}
+              No tienes una cuenta{" "}
               <a href="#contacto" onClick={handleBack} className="text-blue-600 hover:underline">
-                Contacta con tu institucion
+                Contacta con tu institución
               </a>
             </p>
           </div>
@@ -148,7 +160,7 @@ export default function LoginPage() {
       <div className="hidden lg:flex flex-1 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-12 flex-col justify-between text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-20">
           <ImageWithFallback
-            src="https://images.unsplash.com/photo-1655272427565-c64fd73298df?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+            src="https://images.unsplash.com/photo-1655272427565-c64fd73298dfcrop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
             alt="Computer Vision Technology"
             className="w-full h-full object-cover"
           />
@@ -163,7 +175,7 @@ export default function LoginPage() {
               <div>
                 <h3 className="mb-2">Deteccion Pasiva</h3>
                 <p className="text-blue-100">
-                  Monitoreo no invasivo de la atencion estudiantil mediante tecnologia de vision por computadora.
+                  Monitoreo no invasivo de la atención estudiantil mediante tecnología de vision por computadora.
                 </p>
               </div>
             </div>
@@ -174,7 +186,7 @@ export default function LoginPage() {
               </div>
               <div>
                 <h3 className="mb-2">Inteligencia Artificial</h3>
-                <p className="text-blue-100">Analisis en tiempo real con algoritmos avanzados para medir atencion.</p>
+                <p className="text-blue-100">Análisis en tiempo real con algoritmos avanzados para medir atención.</p>
               </div>
             </div>
 
@@ -184,7 +196,7 @@ export default function LoginPage() {
               </div>
               <div>
                 <h3 className="mb-2">Privacidad Garantizada</h3>
-                <p className="text-blue-100">Sin almacenar video, solo metricas de atencion.</p>
+                <p className="text-blue-100">Sin almacenar video, solo métricas de atención.</p>
               </div>
             </div>
           </div>
@@ -193,7 +205,7 @@ export default function LoginPage() {
         <div className="relative z-10">
           <blockquote className="border-l-4 border-white/30 pl-4">
             <p className="mb-2 italic">
-              La implementacion de este sistema ha revolucionado nuestra forma de entender la atencion en el aula.
+              La implementacion de este sistema ha revolucionado nuestra forma de entender la atención en el aula.
             </p>
             <footer className="text-blue-100">Dr. Maria Rodriguez - Universidad Nacional</footer>
           </blockquote>

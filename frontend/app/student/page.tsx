@@ -7,12 +7,13 @@ import { useAuth } from "../context/AuthContext";
 import { InicioSection } from "./InicioSection";
 import { CursosSection } from "./CursosSection";
 import { EstadisticasSection } from "./EstadisticasSection";
+import { AlertasSection } from "./AlertasSection";
 import { StudentNavbar } from "./StudentNavbar";
 
 export default function StudentPage() {
   const router = useRouter();
   const { token } = useAuth();
-  const [activeTab, setActiveTab] = useState<"inicio" | "cursos" | "estadisticas">("inicio");
+  const [activeTab, setActiveTab] = useState<"inicio" | "cursos" | "estadisticas" | "alertas">("inicio");
   const [sessionId, setSessionId] = useState("");
   const [contentId, setContentId] = useState("");
   const [selectedCourse, setSelectedCourse] = useState("");
@@ -66,6 +67,12 @@ export default function StudentPage() {
         {activeTab === "estadisticas" && (
           <section className="space-y-4">
             <EstadisticasSection />
+          </section>
+        )}
+
+        {activeTab === "alertas" && (
+          <section className="space-y-4">
+            <AlertasSection />
           </section>
         )}
       </div>

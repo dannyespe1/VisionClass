@@ -48,7 +48,7 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
   const [enrolledIds, setEnrolledIds] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [me, setMe] = useState<{ first_name?: string; last_name?: string; email?: string } | null>(null);
+  const [me, setMe] = useState<{ first_name: string; last_name: string; email: string } | null>(null);
   const [enrollOpen, setEnrollOpen] = useState(false);
   const [enrollCourse, setEnrollCourse] = useState<CourseCard | null>(null);
   const [enrollForm, setEnrollForm] = useState<EnrollmentForm>({
@@ -81,7 +81,7 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
         const [data, enrollments, meData, modulesData, lessonsData, materialsData] = await Promise.all([
           apiFetch<any[]>("/api/courses/", {}, token),
           apiFetch<any[]>("/api/enrollments/", {}, token),
-          apiFetch<{ first_name?: string; last_name?: string; email?: string }>("/api/me/", {}, token),
+          apiFetch<{ first_name: string; last_name: string; email: string }>("/api/me/", {}, token),
           apiFetch<any[]>("/api/course-modules/", {}, token),
           apiFetch<any[]>("/api/course-lessons/", {}, token),
           apiFetch<any[]>("/api/course-materials/", {}, token),
@@ -93,22 +93,22 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
         const materialsByCourse = new Map<number, number>();
 
         (modulesData || []).forEach((m) => {
-          const courseId = m.course?.id;
+          const courseId = m.course.id;
           if (!courseId) return;
           modulesByCourse.set(courseId, (modulesByCourse.get(courseId) || 0) + 1);
         });
         (lessonsData || []).forEach((l) => {
-          const courseId = l.module?.course?.id;
+          const courseId = l.module.course.id;
           if (!courseId) return;
           lessonsByCourse.set(courseId, (lessonsByCourse.get(courseId) || 0) + 1);
         });
         (materialsData || []).forEach((mat) => {
-          const courseId = mat.lesson?.module?.course?.id;
+          const courseId = mat.lesson.module.course.id;
           if (!courseId) return;
           materialsByCourse.set(courseId, (materialsByCourse.get(courseId) || 0) + 1);
         });
         const enrolled = new Set<number>(
-          (enrollments || []).map((e) => e.course?.id).filter(Boolean)
+          (enrollments || []).map((e) => e.course.id).filter(Boolean)
         );
         setEnrolledIds(enrolled);
         setCourses(
@@ -121,13 +121,13 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
             return {
               id: c.id,
               title: c.title,
-              instructor: c.owner?.username || "Profesor",
+              instructor: c.owner.username || "Profesor",
               rating: 4.7,
               students: Math.floor(Math.random() * 8000) + 200,
               duration,
               level: meta.level || "Intermedio",
               price: "Gratis",
-              image: meta.thumbnail || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
+              image: meta.thumbnail || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5w=800",
               category: meta.field || "programacion",
               description: cleanDescription || "Curso generado por el profesor.",
               lessonsCount,
@@ -152,10 +152,10 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
       onCourseSelect(course.id);
       return;
     }
-    const fullName = `${me?.first_name || ""} ${me?.last_name || ""}`.trim();
+    const fullName = `${me.first_name || ""} ${me.last_name || ""}`.trim();
     setEnrollForm({
       fullName,
-      email: me?.email || "",
+      email: me.email || "",
       studentCode: "",
       career: "",
       semester: "",
@@ -178,7 +178,7 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       <div className="mb-8">
         <h1 className="text-3xl font-semibold text-slate-900 mb-2">Explorar Cursos</h1>
-        <p className="text-gray-600">Descubre cursos disenados con tecnologia de vision por computadora</p>
+        <p className="text-gray-600">Descubre cursos disenados con tecnología de vision por computadora</p>
         {loading && <p className="text-sm text-slate-500 mt-2">Cargando cursos...</p>}
         {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
       </div>
@@ -204,7 +204,7 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
               onClick={() => setSelectedCategory(category.id)}
               className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
                 selectedCategory === category.id
-                  ? "bg-blue-600 text-white"
+                   "bg-blue-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-50"
               }`}
             >
@@ -218,7 +218,7 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
         <p className="text-gray-600">
           {filteredCourses.length} curso{filteredCourses.length !== 1 ? "s" : ""}{" "}
           {selectedCategory !== "todos" &&
-            `en ${categories.find((c) => c.id === selectedCategory)?.label}`}
+            `en ${categories.find((c) => c.id === selectedCategory).label}`}
         </p>
       </div>
 
@@ -299,7 +299,7 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
           <DialogHeader>
             <DialogTitle>Confirmar inscripcion</DialogTitle>
             <DialogDescription>
-              Completa los datos para matricularte en {enrollCourse?.title || "el curso"}.
+              Completa los datos para matricularte en {enrollCourse.title || "el curso"}.
             </DialogDescription>
           </DialogHeader>
 

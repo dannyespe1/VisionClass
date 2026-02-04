@@ -14,14 +14,14 @@ export function Footer() {
     { label: "Inicio", href: "#inicio" },
     { label: "Nosotros", href: "#nosotros" },
     { label: "Contacto", href: "#contacto" },
-    { label: "Iniciar sesion", href: "/login" },
+    { label: "Iniciar sesión", href: "/login" },
   ];
 
   const legal = [
     { label: "Privacidad", href: "/privacidad" },
-    { label: "Terminos de uso", href: "/terminos" },
+    { label: "Términos de uso", href: "/terminos" },
     { label: "Seguridad", href: "/seguridad" },
-    { label: "Documentacion", href: "/documentacion" },
+    { label: "Documentación", href: "/documentacion" },
   ];
 
   return (
@@ -36,7 +36,7 @@ export function Footer() {
               <span className="text-xl font-semibold">VisionClass</span>
             </div>
             <p className="text-sm text-slate-300 max-w-md">
-              Monitoreo pasivo de atencion con vision por computadora e IA para cursos en linea y experiencias
+              Monitoreo pasivo de atención con visión por computadora e IA para cursos en línea y experiencias
               adaptativas.
             </p>
             <div className="flex gap-3">
@@ -83,7 +83,7 @@ export function Footer() {
 
         <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-slate-400">
           <p>© {currentYear} VisionClass. Todos los derechos reservados.</p>
-          <p>Hecho con tecnologia de vanguardia para la educacion del futuro.</p>
+          <p>Hecho con tecnología de vanguardia para la educación del futuro.</p>
         </div>
       </div>
     </footer>

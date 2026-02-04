@@ -10,12 +10,12 @@ export default function DocumentacionPage() {
 
       <section className="pt-28 pb-14 px-4 lg:px-2">
         <div className="max-w-5xl mx-auto">
-          <p className="text-sm font-semibold text-sky-600">Documentacion</p>
+          <p className="text-sm font-semibold text-sky-600">Documentación</p>
           <h1 className="text-4xl md:text-5xl font-semibold mt-2">
-            Recursos tecnicos de VisionClass
+            Recursos técnicos de VisionClass
           </h1>
           <p className="text-slate-600 mt-4 text-lg">
-            Accede a la documentacion tecnica, arquitectura y guias de despliegue para el
+            Accede a la documentación técnica, arquitectura y guías de despliegue para el
             ecosistema VisionClass.
           </p>
         </div>
@@ -26,7 +26,7 @@ export default function DocumentacionPage() {
           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 space-y-4">
             <h2 className="text-2xl font-semibold">Repositorio oficial</h2>
             <p className="text-sm text-slate-600">
-              El repositorio incluye instalacion, configuracion de servicios, endpoints y flujos
+              El repositorio incluye instalación, configuración de servicios, endpoints y flujos
               principales para frontend, backend y servicio ML.
             </p>
             <a
@@ -39,7 +39,7 @@ export default function DocumentacionPage() {
             </a>
           </div>
           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 space-y-4">
-            <h2 className="text-2xl font-semibold">Guia rapida</h2>
+            <h2 className="text-2xl font-semibold">Guía rápida</h2>
             <ul className="space-y-2 text-sm text-slate-600 list-disc list-inside">
               <li>Clonar el repositorio y levantar contenedores Docker.</li>
               <li>Configurar variables de entorno para backend y ML.</li>

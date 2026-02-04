@@ -75,14 +75,14 @@ export function AdminAnalyticsSection({ data, onUpdatePolicy, onUpdateResearchSt
   };
 
   const resolvePolicyValue = (policy: PrivacyPolicySetting) =>
-    policyValues[policy.id] ?? policy.current_value;
+    policyValues[policy.id]  policy.current_value;
 
   return (
     <section className="space-y-8">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl mb-2">Analisis Institucional</h1>
-          <p className="text-slate-600">Metricas agregadas, analisis predictivo y gestion de privacidad</p>
+          <h1 className="text-3xl mb-2">Análisis Institucional</h1>
+          <p className="text-slate-600">Métricas agregadas, análisis predictivo y gestion de privacidad</p>
         </div>
         <Button variant="outline" size="sm">
           <Download className="w-4 h-4 mr-2" />
@@ -92,8 +92,8 @@ export function AdminAnalyticsSection({ data, onUpdatePolicy, onUpdateResearchSt
 
       <Tabs defaultValue="metrics" className="space-y-8">
         <TabsList className="bg-white p-1 rounded-lg shadow-sm">
-          <TabsTrigger value="metrics">Metricas por Facultad</TabsTrigger>
-          <TabsTrigger value="prediction">Analisis Predictivo</TabsTrigger>
+          <TabsTrigger value="metrics">Métricas por Facultad</TabsTrigger>
+          <TabsTrigger value="prediction">Análisis Predictivo</TabsTrigger>
           <TabsTrigger value="research">Permisos de Investigacion</TabsTrigger>
           <TabsTrigger value="privacy">Politicas de Privacidad</TabsTrigger>
         </TabsList>
@@ -136,14 +136,14 @@ export function AdminAnalyticsSection({ data, onUpdatePolicy, onUpdateResearchSt
                 </div>
                 <div className="text-3xl mb-1">
                   {facultyMetrics.length
-                    ? Math.round(
+                     Math.round(
                         facultyMetrics.reduce((sum, item) => sum + item.avgAttention, 0) /
                           facultyMetrics.length
                       )
                     : 0}
                   %
                 </div>
-                <div className="text-sm text-slate-600">Atencion Promedio</div>
+                <div className="text-sm text-slate-600">Atención Promedio</div>
               </div>
 
               <div className="bg-white rounded-xl p-6 shadow-sm">
@@ -155,7 +155,7 @@ export function AdminAnalyticsSection({ data, onUpdatePolicy, onUpdateResearchSt
                 </div>
                 <div className="text-3xl mb-1">
                   {facultyMetrics.length
-                    ? Math.round(
+                     Math.round(
                         facultyMetrics.reduce((sum, item) => sum + item.dropoutRisk, 0) / facultyMetrics.length
                       )
                     : 0}
@@ -198,7 +198,7 @@ export function AdminAnalyticsSection({ data, onUpdatePolicy, onUpdateResearchSt
                       <div>
                         <h4 className="mb-1">{faculty.name}</h4>
                         <p className="text-sm text-slate-600">
-                          {faculty.students} estudiantes • {faculty.professors} profesores • {faculty.courses} cursos
+                          {faculty.students} estudiantes  {faculty.professors} profesores  {faculty.courses} cursos
                         </p>
                       </div>
                     </div>
@@ -209,7 +209,7 @@ export function AdminAnalyticsSection({ data, onUpdatePolicy, onUpdateResearchSt
 
                   <div className="grid md:grid-cols-4 gap-4">
                     <div>
-                      <div className="text-sm text-slate-600 mb-2">Atencion Promedio</div>
+                      <div className="text-sm text-slate-600 mb-2">Atención Promedio</div>
                       <div className="flex items-center gap-2">
                         <div className="text-2xl text-purple-600">{faculty.avgAttention}%</div>
                       </div>
@@ -246,7 +246,7 @@ export function AdminAnalyticsSection({ data, onUpdatePolicy, onUpdateResearchSt
           </div>
 
           <div className="bg-white rounded-xl p-6 shadow-sm">
-            <h3 className="text-lg mb-6">Evolucion Institucional</h3>
+            <h3 className="text-lg mb-6">Evolución Institucional</h3>
             <ResponsiveContainer width="100%" height={350}>
               <AreaChart data={institutionalTrend}>
                 <defs>
@@ -294,9 +294,9 @@ export function AdminAnalyticsSection({ data, onUpdatePolicy, onUpdateResearchSt
                 <AlertTriangle className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl mb-2">Analisis Predictivo de Desercion Estudiantil</h2>
+                <h2 className="text-2xl mb-2">Análisis Predictivo de Desercion Estudiantil</h2>
                 <p className="text-red-100">
-                  IA identifica estudiantes en riesgo basandose en metricas de atencion, asistencia y rendimiento
+                  IA identifica estudiantes en riesgo basándose en métricas de atención, asistencia y rendimiento
                 </p>
               </div>
             </div>
@@ -492,7 +492,7 @@ export function AdminAnalyticsSection({ data, onUpdatePolicy, onUpdateResearchSt
                 <Shield className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl mb-2">Configuracion de Politicas de Privacidad</h2>
+                <h2 className="text-2xl mb-2">Configuración de Politicas de Privacidad</h2>
                 <p className="text-blue-100">
                   Gestiona la privacidad de datos a nivel institucional segun regulaciones y buenas practicas
                 </p>
@@ -513,7 +513,7 @@ export function AdminAnalyticsSection({ data, onUpdatePolicy, onUpdateResearchSt
 
                 <div className="flex flex-col md:flex-row md:items-end gap-4">
                   <div className="flex-1">
-                    <div className="text-sm text-slate-600 mb-2">Configuracion Actual:</div>
+                    <div className="text-sm text-slate-600 mb-2">Configuración Actual:</div>
                     <Select value={resolvePolicyValue(policy)} onValueChange={(value) => handlePolicyChange(policy, value)}>
                       <SelectTrigger>
                         <SelectValue />

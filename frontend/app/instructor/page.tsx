@@ -53,7 +53,7 @@ export default function InstructorPage() {
             <div className="flex flex-col gap-2">
               <h1 className="text-2xl font-semibold text-slate-900">Bienvenido, profesor</h1>
               <p className="text-sm text-slate-500">
-                Gestiona tus cursos, revisa la atencion de tus estudiantes y ajusta el contenido en segundos.
+                Gestiona tus cursos, revisa la atención de tus estudiantes y ajusta el contenido en segundos.
               </p>
             </div>
             <InicioProfesor onTabChange={setActiveTab} />

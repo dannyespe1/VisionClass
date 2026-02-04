@@ -41,19 +41,19 @@ export default function D2RWidget({
   onPhaseEnd,
   onClickEvent,
 }: {
-  durationSeconds?: number;
-  phase?: number;
-  totalPhases?: number;
+  durationSeconds: number;
+  phase: number;
+  totalPhases: number;
   onFinish: (phaseNumber: number, results: { TR: number; TA: number; O: number; C: number; CON: number }) => void;
-  onTick?: (data: { phase: number; timeLeft: number }) => void;
-  onPhaseStart?: (data: { phase: number; startedAt: number }) => void;
-  onPhaseEnd?: (data: { phase: number; endedAt: number; TR: number; TA: number; O: number; C: number; CON: number; targetCount: number }) => void;
-  onClickEvent?: (data: { phase: number; ts: number; cellId: number; isTarget: boolean }) => void;
+  onTick: (data: { phase: number; timeLeft: number }) => void;
+  onPhaseStart: (data: { phase: number; startedAt: number }) => void;
+  onPhaseEnd: (data: { phase: number; endedAt: number; TR: number; TA: number; O: number; C: number; CON: number; targetCount: number }) => void;
+  onClickEvent: (data: { phase: number; ts: number; cellId: number; isTarget: boolean }) => void;
 }) {
   const [timeLeft, setTimeLeft] = useState(durationSeconds);
   const [active, setActive] = useState(false);
   const ROW_SIZE = D2R_ROW_SIZE;
-  const [row, setRow] = useState<Cell[]>(() => D2R_ROWS[0] ?? []);
+  const [row, setRow] = useState<Cell[]>(() => D2R_ROWS[0]  []);
   const [TA, setTA] = useState(0); // aciertos
   const [C, setC] = useState(0);   // comisiones
   const [clickedIds, setClickedIds] = useState<Set<number>>(new Set());
@@ -70,11 +70,11 @@ export default function D2RWidget({
     finishedPhaseRef.current = false;
     lastTouchedIndexRef.current = -1;
 
-    // d2-R (Versión A) requiere filas fijas y estímulo estático desde el inicio de la fase
+    // d2-R (Versin A) requiere filas fijas y estmulo esttico desde el inicio de la fase
     const nextRow = D2R_ROWS[phase - 1];
-    setRow(nextRow ?? []);
+    setRow(nextRow  []);
     phaseStartRef.current = Date.now();
-    onPhaseStart?.({ phase, startedAt: phaseStartRef.current });
+    onPhaseStart.({ phase, startedAt: phaseStartRef.current });
     setActive(true);
   }, [durationSeconds, phase, onPhaseStart]);
 
@@ -238,7 +238,7 @@ export default function D2RWidget({
 
         <div className="mt-6 flex flex-col items-center gap-3 text-xs text-slate-500">
           <p>
-            Fase {phase} de {totalPhases} • {timeLeft} segundos restantes
+            Fase {phase} de {totalPhases}  {timeLeft} segundos restantes
           </p>
         </div>
       </div>

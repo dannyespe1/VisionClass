@@ -36,19 +36,19 @@ export function ContactSection() {
           <span className="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-full text-sm inline-block mb-4 border border-indigo-100">
             Contacto
           </span>
-          <h2 className="text-4xl lg:text-5xl text-slate-900 mb-4 font-semibold">Comienza tu transformacion digital</h2>
+          <h2 className="text-4xl lg:text-5xl text-slate-900 mb-4 font-semibold">Comienza tu transformación digital</h2>
           <p className="text-lg text-slate-600 max-w-3xl mx-auto">
-            ¿Listo para implementar VisionClass en tu institucion? Conversemos y te guiaremos en la puesta en marcha.
+            Listo para implementar VisionClass en tu institucion Conversemos y te guiaremos en la puesta en marcha.
           </p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-12">
           <div className="bg-white rounded-3xl shadow-2xl border border-slate-100 p-8 lg:p-10 space-y-6">
             <div className="bg-slate-900 text-white rounded-2xl p-4 flex items-start gap-3">
-              <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center">👁️</div>
+              <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center"></div>
               <div>
                 <p className="text-sm text-slate-200">Soporte dedicado</p>
-                <p className="text-base font-semibold">Resolvemos dudas de implementacion y privacidad.</p>
+                <p className="text-base font-semibold">Resolvemos dudas de implementación y privacidad.</p>
               </div>
             </div>
 
@@ -98,7 +98,7 @@ export function ContactSection() {
                 <Textarea
                   id="message"
                   name="message"
-                  placeholder="Cuéntanos sobre tu necesidad, tiempos y metas de implementacion..."
+                  placeholder="Cuentanos sobre tu necesidad, tiempos y metas de implementación..."
                   rows={4}
                   value={formData.message}
                   onChange={handleChange}
@@ -115,9 +115,9 @@ export function ContactSection() {
 
           <div className="space-y-8">
             <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-8">
-              <h3 className="text-2xl text-slate-900 mb-4 font-semibold">Informacion de contacto</h3>
+              <h3 className="text-2xl text-slate-900 mb-4 font-semibold">Información de contacto</h3>
               <p className="text-slate-600 mb-6">
-                Estamos listos para ayudarte a lanzar VisionClass en tu institucion y asegurar una adopcion rapida.
+                Estamos listos para ayudarte a lanzar VisionClass en tu institución y asegurar una adopción rápida.
               </p>
 
               <div className="space-y-5">
@@ -152,7 +152,7 @@ export function ContactSection() {
                   <div>
                     <div className="text-sm text-slate-500 mb-1">Oficina</div>
                     <p className="text-slate-900">
-                      Av. Innovacion Tecnologica 123
+                      Av. Innovación Tecnologica 123
                       <br />
                       Latacunga, Ecuador
                     </p>
@@ -162,7 +162,7 @@ export function ContactSection() {
             </div>
 
             <div className="bg-gradient-to-br from-indigo-600 to-sky-500 rounded-3xl p-8 text-white shadow-lg">
-              <h4 className="text-xl mb-3 font-semibold">Horario de atencion</h4>
+              <h4 className="text-xl mb-3 font-semibold">Horario de atención</h4>
               <p className="text-indigo-100 mb-4">Nuestro equipo esta disponible para ayudarte.</p>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">

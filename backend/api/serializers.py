@@ -10,6 +10,7 @@ from allauth.socialaccount.helpers import complete_social_login
 from dj_rest_auth.registration.serializers import SocialLoginSerializer
 from allauth.socialaccount.providers.oauth2.client import OAuth2Error
 import inspect
+import json
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from .models import (
@@ -24,6 +25,7 @@ from .models import (
     QuizAttempt,
     D2RSchedule,
     StudentReport,
+    StudentNotification,
     CourseModule,
     CourseLesson,
     CourseMaterial,
@@ -65,7 +67,18 @@ class GoogleSocialLoginSerializer(SocialLoginSerializer):
             self.set_callback_url(view=view, adapter_class=adapter_class)
             redirect_uri = None
             if request:
-                redirect_uri = request.data.get("redirect_uri")
+                if hasattr(request, "data"):
+                    redirect_uri = request.data.get("redirect_uri")
+                elif hasattr(request, "POST"):
+                    redirect_uri = request.POST.get("redirect_uri")
+                else:
+                    try:
+                        body = request.body.decode("utf-8")
+                        if body:
+                            payload = json.loads(body)
+                            redirect_uri = payload.get("redirect_uri")
+                    except Exception:
+                        redirect_uri = None
             if redirect_uri:
                 self.callback_url = redirect_uri
             self.client_class = getattr(view, 'client_class', None)
@@ -118,13 +131,15 @@ class GoogleSocialLoginSerializer(SocialLoginSerializer):
 
         if not login.is_existing:
             if allauth_account_settings.UNIQUE_EMAIL:
-                account_exists = AuthUser.objects.filter(
+                existing_user = AuthUser.objects.filter(
                     email=login.user.email,
-                ).exists()
-                if account_exists:
-                    raise serializers.ValidationError(
-                        'User is already registered with this e-mail address.'
-                    )
+                ).first()
+                if existing_user:
+                    # Vincula la cuenta social con el usuario existente.
+                    login.user = existing_user
+                    login.save(request, connect=True)
+                    attrs['user'] = existing_user
+                    return attrs
 
             login.lookup()
             try:
@@ -432,6 +447,40 @@ class StudentReportSerializer(serializers.ModelSerializer):
         model = StudentReport
         fields = ['id', 'user', 'user_id', 'payload', 'created_at']
         read_only_fields = ['id', 'user', 'created_at']
+
+
+class StudentNotificationSerializer(serializers.ModelSerializer):
+    recipient = UserSerializer(read_only=True)
+    recipient_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), source='recipient', write_only=True
+    )
+    sender = UserSerializer(read_only=True)
+    sender_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), source='sender', write_only=True, required=False
+    )
+    course = CourseSerializer(read_only=True)
+    course_id = serializers.PrimaryKeyRelatedField(
+        queryset=Course.objects.all(), source='course', write_only=True, required=False, allow_null=True
+    )
+
+    class Meta:
+        model = StudentNotification
+        fields = [
+            'id',
+            'recipient',
+            'recipient_id',
+            'sender',
+            'sender_id',
+            'course',
+            'course_id',
+            'subject',
+            'message',
+            'status',
+            'error_message',
+            'sent_at',
+            'created_at',
+        ]
+        read_only_fields = ['id', 'status', 'error_message', 'sent_at', 'created_at', 'recipient', 'sender', 'course']
 
 
 class AdminUserSerializer(serializers.ModelSerializer):

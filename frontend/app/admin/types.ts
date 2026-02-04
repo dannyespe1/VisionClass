@@ -55,9 +55,9 @@ export interface ResearchPermission {
   project: string;
   data_requested: string;
   status: "pending" | "approved" | "rejected";
-  date?: string;
+  date: string;
   ethics_approval: boolean;
-  requested_at?: string;
+  requested_at: string;
 }
 
 export interface PrivacyPolicySetting {
@@ -66,7 +66,7 @@ export interface PrivacyPolicySetting {
   description: string;
   current_value: string;
   options: string[];
-  updated_at?: string;
+  updated_at: string;
 }
 
 export interface AdminAnalyticsData {

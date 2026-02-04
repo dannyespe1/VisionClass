@@ -6,7 +6,7 @@ export function AboutSection() {
     {
       icon: Eye,
       title: "Seguimiento visual",
-      description: "Monitoreo de atencion con vision por computadora para mejorar la concentracion.",
+      description: "Monitoreo de atención con vision por computadora para mejorar la concentración.",
     },
     {
       icon: Brain,
@@ -16,7 +16,7 @@ export function AboutSection() {
     {
       icon: Shield,
       title: "Privacidad garantizada",
-      description: "Datos protegidos con los estandares mas altos de seguridad.",
+      description: "Datos protegidos con los estandares más altos de seguridad.",
     },
     {
       icon: Zap,
@@ -31,7 +31,7 @@ export function AboutSection() {
     {
       icon: BarChart3,
       title: "Estadisticas detalladas",
-      description: "Rendimiento con metricas avanzadas y personalizadas.",
+      description: "Rendimiento con métricas avanzadas y personalizadas.",
     },
   ];
 
@@ -46,7 +46,7 @@ export function AboutSection() {
             Soluciones innovadoras para la educacion
           </h2>
           <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-            VisionClass combina vision por computadora y IA para elevar la atencion y el rendimiento en entornos
+            VisionClass combina vision por computadora y IA para elevar la atención y el rendimiento en entornos
             academicos sin friccion ni hardware adicional.
           </p>
         </div>
@@ -55,32 +55,32 @@ export function AboutSection() {
           <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-slate-100 bg-white">
             <div className="absolute inset-0 bg-gradient-to-tr from-sky-500/20 via-indigo-500/10 to-transparent" />
             <ImageWithFallback
-              src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200"
+              src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbew=1200"
               alt="Inteligencia Artificial"
               className="w-full h-[420px] object-cover"
             />
           </div>
 
           <div className="space-y-6">
-            <h3 className="text-3xl text-slate-900 font-semibold">Transformando el futuro de la educacion</h3>
+            <h3 className="text-3xl text-slate-900 font-semibold">Transformando el futuro de la educación</h3>
             <p className="text-slate-600 leading-relaxed">
-              Detectamos atencion de forma pasiva en tiempo real, preservando la privacidad y ofreciendo
+              Detectamos atención de forma pasiva en tiempo real, preservando la privacidad y ofreciendo
               recomendaciones adaptativas para estudiantes, docentes y administradores.
             </p>
             <p className="text-slate-600 leading-relaxed">
-              Integracion sencilla, alertas tempranas y resultados medibles para mejorar el compromiso y el
-              rendimiento academico sin interrumpir la clase.
+              Integración sencilla, alertas tempranas y resultados medibles para mejorar el compromiso y el
+              rendimiento académico sin interrumpir la clase.
             </p>
             <div className="pt-4 grid sm:grid-cols-2 gap-3">
               {[
-                "Implementacion rapida en cualquier aula",
+                "Implementación rápida en cualquier aula",
                 "Soporte dedicado y mejoras continuas",
                 "Resultados accionables para el equipo docente",
                 "Privacidad como principio central",
               ].map((item) => (
                 <div key={item} className="flex items-start gap-3">
                   <div className="w-6 h-6 bg-slate-900 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-white text-xs">
-                    ✓
+                    
                   </div>
                   <p className="text-slate-700 text-sm">{item}</p>
                 </div>

@@ -1,9 +1,9 @@
 type CourseMeta = {
-  thumbnail?: string;
-  modules?: Array<{ name: string; lessons: number; tests: number }>;
+  thumbnail: string;
+  modules: Array<{ name: string; lessons: number; tests: number }>;
 };
 
-export function parseCourseMeta(description?: string | null): {
+export function parseCourseMeta(description: string | null): {
   meta: CourseMeta;
   cleanDescription: string;
 } {

@@ -11,12 +11,16 @@ from rest_framework.views import APIView
 from rest_framework.decorators import action
 from django.http import HttpResponse, HttpResponseRedirect
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
 import random
+import logging
 import os
 import json
+import re
+from urllib.parse import urlparse, parse_qs
 import io
 import csv
 from datetime import timedelta
@@ -39,6 +43,7 @@ from .models import (
     QuizAttempt,
     D2RSchedule,
     StudentReport,
+    StudentNotification,
     ResearchAccessRequest,
     PrivacyPolicySetting,
 )
@@ -60,6 +65,7 @@ from .serializers import (
     QuizAttemptSerializer,
     D2RScheduleSerializer,
     StudentReportSerializer,
+    StudentNotificationSerializer,
     EmailTokenObtainPairSerializer,
     AdminUserSerializer,
     AdminCourseSerializer,
@@ -71,6 +77,7 @@ from .permissions import IsAdminUserRole
 
 UserModel = get_user_model()
 BASELINE_TITLE = "baseline d2r"
+logger = logging.getLogger(__name__)
 
 
 class EmailTokenObtainPairView(TokenObtainPairView):
@@ -82,6 +89,18 @@ class GoogleLogin(SocialLoginView):
     client_class = OAuth2Client
     callback_url = getattr(settings, "GOOGLE_OAUTH_CALLBACK_URL", "http://localhost:3000/login")
     serializer_class = GoogleSocialLoginSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data.get("user")
+        if not user:
+            return Response({"detail": "No se pudo resolver el usuario."}, status=status.HTTP_400_BAD_REQUEST)
+        refresh = RefreshToken.for_user(user)
+        return Response(
+            {"access": str(refresh.access_token), "refresh": str(refresh)},
+            status=status.HTTP_200_OK,
+        )
 
 
 def _safe_avg(values):
@@ -585,7 +604,20 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
         return Enrollment.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        schedule = serializer.save(user=self.request.user)
+        user = schedule.user
+        if user and user.email:
+            subject = "Recordatorio de D2R programado"
+            scheduled_for = schedule.scheduled_for.isoformat() if schedule.scheduled_for else ""
+            message = (
+                "Se ha programado un nuevo test D2R.\n\n"
+                f"Fecha programada: {scheduled_for}\n"
+                "Ingresa a la plataforma para completarlo cuando corresponda."
+            )
+            try:
+                send_mailgun_email(user.email, subject, message)
+            except Exception as exc:
+                logger.warning("No se pudo enviar mailgun D2R schedule a %s: %s", user.email, exc)
 
 
 class SessionViewSet(viewsets.ModelViewSet):
@@ -786,7 +818,21 @@ class D2RResultViewSet(viewsets.ModelViewSet):
         d2r_session = serializer.validated_data.get("d2r_session")
         if not d2r_session or d2r_session.user_id != user.id:
             raise PermissionDenied("La sesion debe pertenecer al estudiante autenticado.")
-        serializer.save(user=user)
+        result = serializer.save(user=user)
+        if user.email:
+            subject = "Resultado D2R registrado"
+            message = (
+                "Tu resultado del test D2R ha sido registrado.\n\n"
+                f"Fecha: {result.created_at.isoformat() if result.created_at else ''}\n"
+                f"Puntaje (TA): {result.raw_score}\n"
+                f"Concentracion (CON): {result.attention_span}\n"
+                f"Velocidad: {result.processing_speed}\n"
+                f"Errores (C): {result.errors}\n"
+            )
+            try:
+                send_mailgun_email(user.email, subject, message)
+            except Exception as exc:
+                logger.warning("No se pudo enviar mailgun D2R a %s: %s", user.email, exc)
 
 
 class QuizAttemptViewSet(viewsets.ModelViewSet):
@@ -830,6 +876,21 @@ class StudentReportViewSet(viewsets.ReadOnlyModelViewSet):
         if user.role == User.ROLE_ADMIN:
             return StudentReport.objects.all()
         return StudentReport.objects.filter(user=user)
+
+
+class StudentNotificationViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = StudentNotificationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == User.ROLE_ADMIN:
+            return StudentNotification.objects.all()
+        if user.role == User.ROLE_TEACHER:
+            return StudentNotification.objects.filter(
+                recipient__enrollments__course__owner=user
+            ).distinct()
+        return StudentNotification.objects.filter(recipient=user)
 
 
 class StudentMetricsView(APIView):
@@ -897,15 +958,27 @@ class GenerateTestView(APIView):
 
     def post(self, request):
         course_id = request.data.get('course_id')
+        module_id = request.data.get('module_id')
         difficulty = request.data.get('difficulty', 'media')
         num_questions = min(int(request.data.get('num_questions', 20)), 20)
         context = request.data.get('context', '')
+        include_materials = str(request.data.get('include_materials', 'true')).lower() != 'false'
 
-        if not course_id:
-            return Response({"detail": "course_id es requerido"}, status=400)
+        if not course_id and not module_id:
+            return Response({"detail": "course_id o module_id es requerido"}, status=400)
+
+        user = request.user
+        if user.role not in [User.ROLE_TEACHER, User.ROLE_ADMIN]:
+            return Response({"detail": "No autorizado."}, status=403)
 
         gemini_key = os.environ.get("GOOGLE_API_KEY", "")
         questions = []
+        module_context = ""
+        transcript_sources = []
+        source_items = []
+
+        if include_materials:
+            module_context, transcript_sources, source_items = self._build_module_context(user, course_id, module_id)
 
         # 1) Intentar con Gemini si existe key
         fallback_detail = None
@@ -918,8 +991,11 @@ class GenerateTestView(APIView):
                     "No incluyas texto fuera del JSON."
                 )
                 user_prompt = (
-                    f"Genera {num_questions} preguntas de dificultad {difficulty} para el curso {course_id}. "
-                    f"Contexto/Notas: {context}. Ajusta la dificultad segun la atencion reportada."
+                    f"Genera {num_questions} preguntas de dificultad {difficulty}. "
+                    f"Usa el contenido del modulo y sus materiales. "
+                    f"Contenido modulo: {module_context}. "
+                    f"Notas del docente: {context}. "
+                    "Ajusta la dificultad segun la atencion reportada."
                 )
                 resp = client.models.generate_content(
                     model="gemini-2.5-flash",
@@ -955,10 +1031,13 @@ class GenerateTestView(APIView):
         return Response(
             {
                 "course_id": course_id,
+                "module_id": module_id,
                 "difficulty": difficulty,
                 "num_questions": num_questions,
                 "questions": questions,
                 "detail": fallback_detail,
+                "transcripts": transcript_sources,
+                "sources": source_items,
             }
         )
 
@@ -983,6 +1062,184 @@ class GenerateTestView(APIView):
             )
         return out
 
+    def _build_module_context(self, user, course_id, module_id):
+        max_chars = 6000
+        parts = []
+        transcript_sources = []
+        source_items = []
+
+        module = None
+        if module_id:
+            module = CourseModule.objects.select_related("course").filter(id=module_id).first()
+        elif course_id:
+            module = CourseModule.objects.select_related("course").filter(course_id=course_id).order_by("order", "id").first()
+
+        if not module:
+            return ""
+
+        if user.role == User.ROLE_TEACHER and module.course.owner_id != user.id:
+            return ""
+
+        parts.append(f"Curso: {module.course.title}")
+        source_items.append({
+            "type": "course",
+            "title": module.course.title,
+        })
+        parts.append(f"Modulo: {module.title}")
+        source_items.append({
+            "type": "module",
+            "title": module.title,
+        })
+
+        lessons = CourseLesson.objects.filter(module=module).order_by("order", "id")
+        materials = CourseMaterial.objects.filter(lesson__in=lessons).order_by("created_at", "id")
+
+        for lesson in lessons:
+            parts.append(f"Leccion: {lesson.title}")
+            source_items.append({
+                "type": "lesson",
+                "title": lesson.title,
+            })
+
+        for material in materials:
+            if material.material_type == CourseMaterial.TYPE_TEST:
+                continue
+            title = material.title or "Material"
+            desc = material.description or ""
+            parts.append(f"Material: {title}. {desc}")
+            if material.material_type == CourseMaterial.TYPE_PDF:
+                source_items.append({
+                    "type": "pdf",
+                    "title": title,
+                    "detail": desc,
+                })
+
+            if material.material_type == CourseMaterial.TYPE_PDF:
+                pdf_text = self._extract_pdf_text(material)
+                if pdf_text:
+                    parts.append(f"Contenido PDF: {pdf_text}")
+            if material.material_type == CourseMaterial.TYPE_VIDEO:
+                meta = material.metadata or {}
+                transcript = meta.get("transcript") or meta.get("summary") or meta.get("descripcion") or ""
+                url = material.url or ""
+                if not transcript and url:
+                    transcript, transcript_error = self._extract_youtube_transcript(url)
+                    if transcript:
+                        meta["transcript"] = transcript
+                        material.metadata = meta
+                        material.save(update_fields=["metadata"])
+                        transcript_sources.append({
+                            "material_id": material.id,
+                            "title": title,
+                            "source": "youtube",
+                            "status": "fetched",
+                        })
+                        source_items.append({
+                            "type": "video",
+                            "title": title,
+                            "detail": url,
+                            "status": "transcribed",
+                        })
+                    else:
+                        fallback_text = meta.get("summary") or meta.get("descripcion") or desc or ""
+                        if fallback_text:
+                            parts.append(f"Resumen video: {fallback_text}")
+                            source_items.append({
+                                "type": "video",
+                                "title": title,
+                                "detail": url,
+                                "status": "fallback_summary",
+                                "reason": transcript_error or "Sin subtitulos disponibles",
+                            })
+                        elif url:
+                            source_items.append({
+                                "type": "video",
+                                "title": title,
+                                "detail": url,
+                                "status": "no_transcript",
+                                "reason": transcript_error or "Sin subtitulos disponibles",
+                            })
+                if transcript:
+                    parts.append(f"Contenido video: {transcript}")
+                    if not any(s["material_id"] == material.id for s in transcript_sources):
+                        transcript_sources.append({
+                            "material_id": material.id,
+                            "title": title,
+                            "source": "metadata",
+                            "status": "cached",
+                        })
+                        source_items.append({
+                            "type": "video",
+                            "title": title,
+                            "detail": url,
+                            "status": "cached",
+                        })
+                elif url:
+                    parts.append(f"Video: {url}")
+                    transcript_sources.append({
+                        "material_id": material.id,
+                        "title": title,
+                        "source": "youtube",
+                        "status": "not_available",
+                    })
+                    source_items.append({
+                        "type": "video",
+                        "title": title,
+                        "detail": url,
+                        "status": "no_transcript",
+                    })
+
+        joined = "\n".join(parts)
+        if len(joined) > max_chars:
+            joined = joined[:max_chars] + "..."
+        return joined, transcript_sources, source_items
+
+    def _extract_pdf_text(self, material):
+        if not material.file_bytes:
+            return ""
+        try:
+            from pypdf import PdfReader
+            import io
+            reader = PdfReader(io.BytesIO(material.file_bytes))
+            texts = []
+            for page in reader.pages[:10]:
+                text = page.extract_text() or ""
+                if text:
+                    texts.append(text.strip())
+            return " ".join(texts)[:2000]
+        except Exception:
+            return ""
+
+    def _extract_youtube_transcript(self, url):
+        video_id = self._parse_youtube_id(url)
+        if not video_id:
+            return "", "No se pudo extraer el ID del video"
+        try:
+            from youtube_transcript_api import YouTubeTranscriptApi
+            transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=["es", "en"])
+            text = " ".join([item.get("text", "") for item in transcript if item.get("text")])
+            return text[:2000], ""
+        except Exception as exc:
+            return "", str(exc)
+
+    def _parse_youtube_id(self, url):
+        if not url:
+            return ""
+        try:
+            parsed = urlparse(url)
+            if parsed.hostname in ["youtu.be"]:
+                return parsed.path.strip("/").split("/")[0]
+            if parsed.hostname and "youtube" in parsed.hostname:
+                qs = parse_qs(parsed.query)
+                if "v" in qs and qs["v"]:
+                    return qs["v"][0]
+                if parsed.path.startswith("/embed/"):
+                    return parsed.path.split("/embed/")[1].split("/")[0]
+        except Exception:
+            pass
+        match = re.search(r"v=([\\w-]{6,})", url)
+        return match.group(1) if match else ""
+
 
 class SendTestEmailView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -1001,6 +1258,62 @@ class SendTestEmailView(APIView):
             return Response({"detail": f"No se pudo enviar el correo: {exc}"}, status=500)
 
         return Response({"detail": "Correo enviado."}, status=200)
+
+
+class SendStudentNotificationView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        if user.role not in [User.ROLE_TEACHER, User.ROLE_ADMIN]:
+            return Response({"detail": "No autorizado."}, status=403)
+
+        student_id = request.data.get("student_id")
+        course_id = request.data.get("course_id")
+        subject = request.data.get("subject") or "Notificacion de rendimiento"
+        message = request.data.get("message") or ""
+
+        if not student_id:
+            return Response({"detail": "student_id es requerido."}, status=400)
+
+        try:
+            student = User.objects.get(id=student_id)
+        except User.DoesNotExist:
+            return Response({"detail": "Estudiante no encontrado."}, status=404)
+
+        if not student.email:
+            return Response({"detail": "El estudiante no tiene email registrado."}, status=400)
+
+        if user.role == User.ROLE_TEACHER:
+            enrollments = Enrollment.objects.filter(user=student, course__owner=user)
+            if course_id:
+                enrollments = enrollments.filter(course_id=course_id)
+            if not enrollments.exists():
+                return Response({"detail": "No tienes acceso a este estudiante."}, status=403)
+
+        notification = StudentNotification.objects.create(
+            recipient=student,
+            sender=user,
+            course_id=course_id,
+            subject=subject,
+            message=message or "Notificacion enviada por el docente.",
+            status=StudentNotification.STATUS_PENDING,
+        )
+
+        try:
+            send_mailgun_email(student.email, subject, message or "Notificacion enviada por el docente.")
+        except Exception as exc:
+            notification.status = StudentNotification.STATUS_FAILED
+            notification.error_message = str(exc)
+            notification.save(update_fields=["status", "error_message"])
+            logger.warning("No se pudo enviar mailgun a %s: %s", student.email, exc)
+            return Response({"detail": f"No se pudo enviar el correo: {exc}"}, status=500)
+
+        notification.status = StudentNotification.STATUS_SENT
+        notification.sent_at = timezone.now()
+        notification.save(update_fields=["status", "sent_at"])
+
+        return Response({"detail": "Notificacion enviada."}, status=200)
 
 
 class AdminUserViewSet(viewsets.ModelViewSet):

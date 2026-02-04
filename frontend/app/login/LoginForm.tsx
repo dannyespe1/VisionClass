@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from "@/app/ui/alert";
 import { useAuth } from "../context/AuthContext";
 
 interface LoginFormProps {
-  onSuccess?: (token: string) => void;
+  onSuccess: (token: string) => void;
 }
 
 export function LoginForm({ onSuccess }: LoginFormProps) {
@@ -26,7 +26,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
     e.preventDefault();
     setError("");
     if (!username || !password) {
-      setError("Completa correo y contraseña");
+      setError("Completa correo y contrasea");
       return;
     }
     setIsLoading(true);

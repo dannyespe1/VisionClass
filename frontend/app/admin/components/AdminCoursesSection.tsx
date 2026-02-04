@@ -11,7 +11,7 @@ type Props = {
   onSearchChange: (value: string) => void;
   onToggleStatus: (id: number) => void;
   onDelete: (id: number) => void;
-  onCreate?: () => void;
+  onCreate: () => void;
 };
 
 export function AdminCoursesSection({

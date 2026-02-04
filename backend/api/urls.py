@@ -20,6 +20,7 @@ router.register(r'd2r-results', views.D2RResultViewSet, basename='d2r-result')
 router.register(r'quiz-attempts', views.QuizAttemptViewSet, basename='quiz-attempt')
 router.register(r'd2r-schedules', views.D2RScheduleViewSet, basename='d2r-schedule')
 router.register(r'student-reports', views.StudentReportViewSet, basename='student-report')
+router.register(r'student-notifications', views.StudentNotificationViewSet, basename='student-notification')
 router.register(r'admin/users', views.AdminUserViewSet, basename='admin-user')
 router.register(r'admin/courses', views.AdminCourseViewSet, basename='admin-course')
 router.register(r'admin/research-permissions', views.AdminResearchPermissionViewSet, basename='admin-research')
@@ -37,6 +38,7 @@ urlpatterns = [
     path('recommendations/difficulty/', views.RecommendDifficultyView.as_view(), name='recommend_difficulty'),
     path('ai/generate-test/', views.GenerateTestView.as_view(), name='generate_test'),
     path('notifications/test-email/', views.SendTestEmailView.as_view(), name='send_test_email'),
+    path('notifications/student/', views.SendStudentNotificationView.as_view(), name='send_student_notification'),
     path('admin/overview/', views.AdminOverviewView.as_view(), name='admin_overview'),
     path('admin/analytics/', views.AdminAnalyticsView.as_view(), name='admin_analytics'),
 ]

@@ -95,13 +95,13 @@ export default function AdminPage() {
   };
 
   const loadUsers = async (accessToken: string, query = "") => {
-    const q = query ? `?search=${encodeURIComponent(query)}` : "";
+    const q = query ? `search=${encodeURIComponent(query)}` : "";
     const data = await apiFetch<AdminUser[]>(`/api/admin/users/${q}`, {}, accessToken);
     setUsers(data);
   };
 
   const loadCourses = async (accessToken: string, query = "") => {
-    const q = query ? `?search=${encodeURIComponent(query)}` : "";
+    const q = query ? `search=${encodeURIComponent(query)}` : "";
     const data = await apiFetch<AdminCourse[]>(`/api/admin/courses/${q}`, {}, accessToken);
     setCourses(data);
   };
@@ -155,7 +155,7 @@ export default function AdminPage() {
 
   const deleteCourse = (id: number) => {
     if (!token) return;
-    if (!confirm("Estas seguro de que quieres eliminar este curso?")) return;
+    if (!confirm("Estas seguro de que quieres eliminar este curso")) return;
     apiFetch(`/api/admin/courses/${id}/`, { method: "DELETE" }, token)
       .then(() => setCourses((prev) => prev.filter((c) => c.id !== id)))
       .then(() => loadOverview(token))
@@ -235,7 +235,7 @@ export default function AdminPage() {
   const handleCreateSubmit = async () => {
     if (!token) return;
     if (!createForm.name.trim() || !createForm.email.trim() || !createForm.password.trim()) {
-      setFormError("Nombre, email y contraseña son obligatorios.");
+      setFormError("Nombre, email y contrasea son obligatorios.");
       return;
     }
     try {
@@ -468,7 +468,7 @@ export default function AdminPage() {
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="create-password">Contraseña</Label>
+              <Label htmlFor="create-password">Contrasea</Label>
               <Input
                 id="create-password"
                 type="password"
@@ -492,7 +492,7 @@ export default function AdminPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Editar usuario</DialogTitle>
-            <DialogDescription>Actualiza los datos, rol o contraseña del usuario.</DialogDescription>
+            <DialogDescription>Actualiza los datos, rol o contrasea del usuario.</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4">
             <div className="grid gap-2">
@@ -548,7 +548,7 @@ export default function AdminPage() {
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="edit-password">Nueva contraseña (opcional)</Label>
+              <Label htmlFor="edit-password">Nueva contrasea (opcional)</Label>
               <Input
                 id="edit-password"
                 type="password"
@@ -573,7 +573,7 @@ export default function AdminPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Eliminar usuario</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta accion eliminara al usuario {activeUser?.name || activeUser?.email}. No se puede deshacer.
+              Esta accion eliminara al usuario {activeUser.name || activeUser.email}. No se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

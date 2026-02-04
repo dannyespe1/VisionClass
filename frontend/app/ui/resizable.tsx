@@ -33,7 +33,7 @@ function ResizableHandle({
   className,
   ...props
 }: React.ComponentProps<typeof ResizablePrimitive.PanelResizeHandle> & {
-  withHandle?: boolean;
+  withHandle: boolean;
 }) {
   return (
     <ResizablePrimitive.PanelResizeHandle

@@ -1,4 +1,4 @@
-﻿
+
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -163,7 +163,7 @@ export function EstadisticasSection() {
 
     load();
   }, [token]);
-  const academicMetrics = metrics?.academic_metrics ?? {
+  const academicMetrics = metrics.academic_metrics  {
     gpa: 0,
     courses_completed: 0,
     total_courses: 0,
@@ -173,7 +173,7 @@ export function EstadisticasSection() {
     certificates_earned: 0,
   };
 
-  const d2rAnalysis = metrics?.d2r_analysis ?? {
+  const d2rAnalysis = metrics.d2r_analysis  {
     baseline_score: 0,
     current_score: 0,
     trend: "0%",
@@ -185,7 +185,7 @@ export function EstadisticasSection() {
 
   const attentionTrend = useMemo(
     () =>
-      (metrics?.attention_trend || []).map((item) => ({
+      (metrics.attention_trend || []).map((item) => ({
         month: item.label,
         attention: item.attention,
         performance: item.performance,
@@ -193,11 +193,11 @@ export function EstadisticasSection() {
     [metrics]
   );
 
-  const contentEffectiveness = metrics?.content_effectiveness || [];
-  const productivityByHour = metrics?.productivity_by_hour || [];
-  const courseBreakdown = metrics?.course_breakdown || [];
-  const achievements = metrics?.achievements || [];
-  const recommendations = metrics?.recommendations || [];
+  const contentEffectiveness = metrics.content_effectiveness || [];
+  const productivityByHour = metrics.productivity_by_hour || [];
+  const courseBreakdown = metrics.course_breakdown || [];
+  const achievements = metrics.achievements || [];
+  const recommendations = metrics.recommendations || [];
   const COLORS = ["#3b82f6", "#8b5cf6", "#10b981", "#f97316", "#06b6d4"];
 
   const getPriorityColor = (priority: string) => {
@@ -229,7 +229,7 @@ export function EstadisticasSection() {
   };
 
   const categoryDistribution = courseBreakdown.length
-    ? courseBreakdown.map((c) => ({
+     courseBreakdown.map((c) => ({
         name: c.name,
         value: Math.max(5, Math.min(60, Math.round(c.progress))),
       }))
@@ -240,10 +240,10 @@ export function EstadisticasSection() {
       ];
 
   const lastTestLabel = d2rAnalysis.last_test_date
-    ? new Date(d2rAnalysis.last_test_date).toLocaleDateString()
+     new Date(d2rAnalysis.last_test_date).toLocaleDateString()
     : "Sin registro";
   const nextScheduledLabel = d2rAnalysis.next_scheduled
-    ? new Date(d2rAnalysis.next_scheduled).toLocaleDateString()
+     new Date(d2rAnalysis.next_scheduled).toLocaleDateString()
     : "--";
 
   const achievementIconMap: Record<string, typeof Brain> = {
@@ -256,13 +256,13 @@ export function EstadisticasSection() {
 
   const handleExport = async (format: "pdf" | "xlsx") => {
     const authToken =
-      token || (typeof window !== "undefined" ? localStorage.getItem("jwt_token") : null);
+      token || (typeof window !== "undefined"  localStorage.getItem("jwt_token") : null);
     if (!authToken) {
-      setError("Inicia sesion nuevamente para exportar el reporte.");
+      setError("Inicia sesión nuevamente para exportar el reporte.");
       return;
     }
     try {
-      const res = await fetch(`${BACKEND_URL}/api/student-metrics/?export=${format}`, {
+      const res = await fetch(`${BACKEND_URL}/api/student-metrics/export=${format}`, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
       if (!res.ok) return;
@@ -304,7 +304,7 @@ export function EstadisticasSection() {
       <div className="mb-8 flex items-start justify-between">
         <div>
           <h1 className="text-3xl mb-2">Dashboard de Rendimiento</h1>
-          <p className="text-gray-600">Analisis integral de metricas academicas y atencion</p>
+          <p className="text-gray-600">Análisis integral de métricas academicas y atención</p>
           {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
           {loading && <p className="text-sm text-slate-500 mt-2">Cargando estadisticas...</p>}
         </div>
@@ -351,7 +351,7 @@ export function EstadisticasSection() {
             onClick={() => setShowPrivacySettings(!showPrivacySettings)}
           >
             <Settings className="w-4 h-4 mr-2" />
-            Configuracion
+            Configuración
           </Button>
         </div>
       </div>
@@ -362,7 +362,7 @@ export function EstadisticasSection() {
               <Shield className="w-6 h-6 text-blue-600" />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg mb-2">Configuracion de Privacidad y Preferencias</h3>
+              <h3 className="text-lg mb-2">Configuración de Privacidad y Preferencias</h3>
               <p className="text-sm text-gray-600 mb-6">
                 Controla que datos se recopilan y como se utilizan en tu experiencia de aprendizaje
               </p>
@@ -370,9 +370,9 @@ export function EstadisticasSection() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                   <div className="flex-1">
-                    <div className="mb-1">Analisis de Atencion en Tiempo Real</div>
+                    <div className="mb-1">Análisis de Atención en Tiempo Real</div>
                     <p className="text-sm text-gray-600">
-                      Permite el monitoreo de concentracion durante las sesiones
+                      Permite el monitoreo de concentración durante las sesiones
                     </p>
                   </div>
                   <Switch defaultChecked />
@@ -382,7 +382,7 @@ export function EstadisticasSection() {
                   <div className="flex-1">
                     <div className="mb-1">Compartir Estadisticas con Profesores</div>
                     <p className="text-sm text-gray-600">
-                      Los instructores veran tus metricas agregadas para mejor apoyo
+                      Los instructores veran tus métricas agregadas para mejor apoyo
                     </p>
                   </div>
                   <Switch defaultChecked />
@@ -411,7 +411,7 @@ export function EstadisticasSection() {
             </div>
           </div>
           <div className="flex justify-end">
-            <Button onClick={() => setShowPrivacySettings(false)}>Guardar Configuracion</Button>
+            <Button onClick={() => setShowPrivacySettings(false)}>Guardar Configuración</Button>
           </div>
         </div>
       )}
@@ -421,7 +421,7 @@ export function EstadisticasSection() {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
             <h3 className="text-lg mb-2">Programar Test D2R</h3>
             <p className="text-sm text-slate-600 mb-4">
-              Selecciona la fecha y hora para tu proxima evaluacion.
+              Selecciona la fecha y hora para tu proxima evaluación.
             </p>
             <input
               type="datetime-local"
@@ -445,7 +445,7 @@ export function EstadisticasSection() {
       <Tabs defaultValue="overview" className="space-y-8">
         <TabsList className="bg-white p-1 rounded-lg shadow-sm">
           <TabsTrigger value="overview">Resumen General</TabsTrigger>
-          <TabsTrigger value="attention">Analisis D2R</TabsTrigger>
+          <TabsTrigger value="attention">Análisis D2R</TabsTrigger>
           <TabsTrigger value="courses">Por Curso</TabsTrigger>
           <TabsTrigger value="achievements">Logros</TabsTrigger>
         </TabsList>
@@ -502,7 +502,7 @@ export function EstadisticasSection() {
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <h3 className="text-lg mb-6 flex items-center gap-2">
                 <Activity className="w-5 h-5 text-blue-600" />
-                Evolucion de Atencion y Rendimiento
+                Evolución de Atención y Rendimiento
               </h3>
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={attentionTrend}>
@@ -568,7 +568,7 @@ export function EstadisticasSection() {
                 <PolarAngleAxis dataKey="type" stroke="#6b7280" />
                 <PolarRadiusAxis angle={90} domain={[0, 100]} stroke="#6b7280" />
                 <Radar
-                  name="Atencion"
+                  name="Atención"
                   dataKey="attention"
                   stroke="#8b5cf6"
                   fill="#8b5cf6"
@@ -698,7 +698,7 @@ export function EstadisticasSection() {
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
             <h3 className="mb-4 flex items-center gap-2">
               <Eye className="w-5 h-5 text-blue-600" />
-              Interpretacion de tu Perfil Atencional
+              Interpretación de tu Perfil Atencional
             </h3>
             <div className="grid md:grid-cols-2 gap-6">
               <div>
@@ -706,15 +706,15 @@ export function EstadisticasSection() {
                 <ul className="space-y-2 text-sm text-blue-800">
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                    <span>Alta capacidad de concentracion sostenida</span>
+                    <span>Alta capacidad de concentración sostenida</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                    <span>Excelente atencion selectiva en contenido visual</span>
+                    <span>Excelente atención selectiva en contenido visual</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                    <span>Tendencia positiva en las ultimas sesiones</span>
+                    <span>Tendencia positiva en las ltimas sesiones</span>
                   </li>
                 </ul>
               </div>
@@ -723,11 +723,11 @@ export function EstadisticasSection() {
                 <ul className="space-y-2 text-sm text-blue-800">
                   <li className="flex items-start gap-2">
                     <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                    <span>Atencion mas baja en horarios nocturnos</span>
+                    <span>Atención más baja en horarios nocturnos</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                    <span>Atencion fluctuante en contenido teorico denso</span>
+                    <span>Atención fluctuante en contenido teórico denso</span>
                   </li>
                 </ul>
               </div>
@@ -743,7 +743,7 @@ export function EstadisticasSection() {
                   <h3 className="text-xl mb-2">{course.name}</h3>
                   <div className="flex items-center gap-4 text-sm text-gray-600">
                     <span>Ultima actividad: {course.last_activity}</span>
-                    <span>•</span>
+                    <span></span>
                     <span>{course.study_hours}h de estudio</span>
                   </div>
                 </div>
@@ -763,7 +763,7 @@ export function EstadisticasSection() {
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-2 text-sm">
-                    <span className="text-gray-600">Atencion Promedio</span>
+                    <span className="text-gray-600">Atención Promedio</span>
                     <span className="text-purple-600">{course.attention_avg}%</span>
                   </div>
                   <Progress value={course.attention_avg} className="[&>div]:bg-purple-600" />
@@ -819,7 +819,7 @@ export function EstadisticasSection() {
                 <Trophy className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl mb-2">Sistema de Logros por Concentracion</h2>
+                <h2 className="text-2xl mb-2">Sistema de Logros por Concentración</h2>
                 <p className="text-yellow-100">
                   Has desbloqueado {achievements.filter((a) => a.unlocked).length} de {achievements.length} logros
                 </p>

@@ -5,7 +5,7 @@ export const ML_URL = process.env.NEXT_PUBLIC_ML_URL || "http://localhost:9000";
 export async function apiFetch<T>(
   path: string,
   options: RequestInit = {},
-  token?: string
+  token: string
 ): Promise<T> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -39,11 +39,16 @@ export async function apiFetch<T>(
   return JSON.parse(text) as T;
 }
 
-export async function postFrameToML(form: FormData) {
+export async function postFrameToML(form: FormData, token?: string) {
   try {
-    const res = await fetch(`${ML_URL}/analyze/frame`, {
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    const res = await fetch(`/api/attention-proxy`, {
       method: "POST",
       body: form,
+      headers,
     });
     if (!res.ok) {
       const text = await res.text();

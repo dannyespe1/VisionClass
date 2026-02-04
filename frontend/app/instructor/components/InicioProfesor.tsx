@@ -10,20 +10,20 @@ import { Button } from "../../ui/button";
 
 const BASELINE_TITLE = "baseline d2r";
 
-type ModuleMeta = { name: string; lessons?: number; tests?: number };
+type ModuleMeta = { name: string; lessons: number; tests: number };
 
 type CourseItem = {
   id: number;
   title: string;
-  description?: string;
-  is_active?: boolean;
-  image?: string;
-  students?: number;
-  avgAttention?: number;
-  lessonsCompleted?: string;
-  category?: string;
-  lastUpdated?: string;
-  modules?: ModuleMeta[];
+  description: string;
+  is_active: boolean;
+  image: string;
+  students: number;
+  avgAttention: number;
+  lessonsCompleted: string;
+  category: string;
+  lastUpdated: string;
+  modules: ModuleMeta[];
 };
 
 type CourseModule = {
@@ -51,7 +51,7 @@ type CourseMaterial = {
   courseId: number;
 };
 
-function extractMeta(description?: string) {
+function extractMeta(description: string) {
   if (!description) return {};
   const match = description.match(/\[meta\]:\s*(\{.*\})/);
   if (!match || !match[1]) return {};
@@ -63,7 +63,7 @@ function extractMeta(description?: string) {
   }
 }
 
-function stripMeta(description?: string) {
+function stripMeta(description: string) {
   if (!description) return "";
   return description.replace(/\s*\[meta\]:\s*\{.*\}\s*/s, "").trim();
 }
@@ -71,7 +71,7 @@ function stripMeta(description?: string) {
 type TabId = "inicio" | "materiales" | "estadisticas";
 
 type InicioProfesorProps = {
-  onTabChange?: (tab: TabId) => void;
+  onTabChange: (tab: TabId) => void;
 };
 
 export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
@@ -104,52 +104,52 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
               id: c.id,
               title: c.title || `Curso ${idx + 1}`,
               description: stripMeta(c.description || ""),
-              is_active: c.is_active ?? true,
+              is_active: !!c.is_active,
               image:
-                meta?.thumbnail ||
+                meta.thumbnail ||
                 c.thumbnail ||
-                "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
+                "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5w=800",
               students: Math.floor(Math.random() * 40) + 10,
               avgAttention: Math.floor(Math.random() * 20) + 70,
               lessonsCompleted: "--",
               category: "Curso",
               lastUpdated: "Reciente",
-              modules: meta?.modules || [],
+              modules: meta.modules || [],
             };
           });
         setCourses(mapped);
         setModules(
           (moduleData || [])
-            .filter((m) => (m.course?.title || "").toLowerCase() !== BASELINE_TITLE)
+            .filter((m) => (m.course.title || "").toLowerCase() !== BASELINE_TITLE)
             .map((m) => ({
               id: m.id,
               title: m.title,
               order: m.order || 0,
               durationHours: m.duration_hours || 0,
-              courseId: m.course?.id,
+              courseId: m.course.id,
             }))
         );
         setLessons(
           (lessonData || [])
-            .filter((l) => (l.module?.course?.title || "").toLowerCase() !== BASELINE_TITLE)
+            .filter((l) => (l.module.course.title || "").toLowerCase() !== BASELINE_TITLE)
             .map((l) => ({
               id: l.id,
               title: l.title,
               order: l.order || 0,
-              moduleId: l.module?.id,
-              courseId: l.module?.course?.id,
+              moduleId: l.module.id,
+              courseId: l.module.course.id,
             }))
         );
         setMaterials(
           (materialData || [])
-            .filter((mat) => (mat.lesson?.module?.course?.title || "").toLowerCase() !== BASELINE_TITLE)
+            .filter((mat) => (mat.lesson.module.course.title || "").toLowerCase() !== BASELINE_TITLE)
             .map((mat) => ({
               id: mat.id,
               title: mat.title,
               materialType: mat.material_type,
-              lessonId: mat.lesson?.id,
-              moduleId: mat.lesson?.module?.id,
-              courseId: mat.lesson?.module?.course?.id,
+              lessonId: mat.lesson.id,
+              moduleId: mat.lesson.module.id,
+              courseId: mat.lesson.module.course.id,
             }))
         );
       } catch (err) {
@@ -171,7 +171,7 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
   };
 
   const goToTab = (tab: TabId) => {
-    onTabChange?.(tab);
+    onTabChange(tab);
     if (typeof window !== "undefined") {
       window.location.hash = tab;
     }
@@ -248,7 +248,7 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
             <span className="text-sm text-gray-600">Promedio</span>
           </div>
           <div className="text-2xl mb-1">{avgAttention}%</div>
-          <div className="text-sm text-gray-600">Atencion General</div>
+          <div className="text-sm text-gray-600">Atención General</div>
         </div>
       </div>
 
@@ -256,7 +256,7 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
         <h2 className="text-2xl mb-4">Mis Cursos</h2>
         {courses.length === 0 && !loading && (
           <div className="bg-white rounded-xl p-6 shadow-sm border text-sm text-slate-600">
-            Aun no tienes cursos. Crea uno desde la seccion Materiales.
+            Aún no tienes cursos. Crea uno desde la sección Materiales.
           </div>
         )}
         <div className="space-y-4">
@@ -314,7 +314,7 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
                     <div className="flex items-center gap-2">
                       <Eye className="w-5 h-5 text-gray-400" />
                       <div>
-                        <div className="text-sm text-gray-600">Atencion Prom.</div>
+                        <div className="text-sm text-gray-600">Atención Prom.</div>
                         <div>{course.avgAttention ?? "--"}%</div>
                       </div>
                     </div>
@@ -328,7 +328,7 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
                     </div>
 
                     <div>
-                      <div className="text-sm text-gray-600">Ultima actualizacion</div>
+                      <div className="text-sm text-gray-600">Última actualización</div>
                       <div className="text-sm">{course.lastUpdated || "Reciente"}</div>
                     </div>
                   </div>
@@ -359,7 +359,7 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
                         goToTab("estadisticas");
                       }}
                     >
-                      Estadisticas
+                      Estadísticas
                     </button>
                   </div>
                 </div>
@@ -389,29 +389,29 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
           <div className="grid md:grid-cols-3 gap-4">
             <div className="md:col-span-2 space-y-4">
               <p className="text-sm text-slate-700 whitespace-pre-line">
-                {selectedDetails.description || "Sin descripcion"}
+                {selectedDetails.description || "Sin descripción"}
               </p>
               <div className="flex gap-4 text-sm text-slate-600">
-                <span>Atencion prom.: {selectedDetails.avgAttention ?? "--"}%</span>
-                <span>Ultima actualizacion: {selectedDetails.lastUpdated || "Reciente"}</span>
+                <span>Atención prom.: {selectedDetails.avgAttention ?? "--"}%</span>
+                <span>Última actualización: {selectedDetails.lastUpdated || "Reciente"}</span>
               </div>
 
               <div className="space-y-3">
                 <h4 className="text-sm font-semibold text-slate-900">Estructura del curso</h4>
                 {buildStructure(selectedDetails.id).length === 0 && (
-                  <p className="text-xs text-slate-500">Este curso aun no tiene modulos creados.</p>
+                  <p className="text-xs text-slate-500">Este curso aún no tiene módulos creados.</p>
                 )}
                 {buildStructure(selectedDetails.id).map((module) => (
                   <div key={module.id} className="border border-slate-200 rounded-lg p-3 bg-slate-50">
                     <div className="flex items-center justify-between">
                       <div className="font-semibold text-slate-900">{module.title}</div>
                       <div className="text-xs text-slate-500">
-                        Duracion: {Math.max(1, Math.round(module.durationHours * 60))} min
+                        Duración: {Math.max(1, Math.round(module.durationHours * 60))} min
                       </div>
                     </div>
                     <div className="mt-2 space-y-2">
                       {module.lessons.length === 0 && (
-                        <p className="text-xs text-slate-500">Sin lecciones en este modulo.</p>
+                        <p className="text-xs text-slate-500">Sin lecciones en este módulo.</p>
                       )}
                       {module.lessons.map((lesson) => (
                         <div key={lesson.id} className="border border-slate-200 rounded-md px-3 py-2 bg-white">
@@ -437,14 +437,14 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
             <div className="space-y-3">
               <div className="rounded-lg overflow-hidden border border-slate-200">
                 <ImageWithFallback
-                  src={selectedDetails.image || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800"}
+                  src={selectedDetails.image || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5w=800"}
                   alt={selectedDetails.title}
                   className="w-full h-40 object-cover"
                 />
               </div>
               <div className="text-sm text-slate-600">
-                <p>Progreso: {selectedDetails.lessonsCompleted ?? "--"}</p>
-                <p>Categoria: {selectedDetails.category || "Curso"}</p>
+              <p>Progreso: {selectedDetails.lessonsCompleted ?? "--"}</p>
+                <p>Categoría: {selectedDetails.category || "Curso"}</p>
               </div>
               <div className="flex gap-2">
                 <Button
@@ -469,7 +469,7 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
       )}
 
       <div className="bg-blue-50 rounded-xl p-6">
-        <h3 className="mb-4">Acciones Rapidas</h3>
+        <h3 className="mb-4">Acciones Rápidas</h3>
         <div className="grid md:grid-cols-3 gap-4">
           <button
             className="bg-white p-4 rounded-lg hover:shadow-md transition-shadow text-left"
@@ -492,8 +492,8 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
             onClick={() => goToTab("estadisticas")}
           >
             <Eye className="w-8 h-8 text-purple-600 mb-2" />
-            <div className="mb-1">Reportes de Atencion</div>
-            <p className="text-sm text-gray-600">Analisis detallados</p>
+            <div className="mb-1">Reportes de Atención</div>
+            <p className="text-sm text-gray-600">Análisis detallados</p>
           </button>
         </div>
       </div>

@@ -1,4 +1,7 @@
 import os
+import sys
+import subprocess
+from threading import Thread
 from datetime import datetime
 from typing import Optional, Dict, Any
 from collections import deque, defaultdict
@@ -21,6 +24,8 @@ BACKEND_TOKEN = os.environ.get("BACKEND_TOKEN", "")
 SEQUENCE_LENGTH = int(os.environ.get("SEQUENCE_LENGTH", "16"))
 MODEL_PATH = os.environ.get("MODEL_PATH", "checkpoints/cnn_lstm.onnx")
 MODEL_IMG_SIZE = int(os.environ.get("MODEL_IMG_SIZE", "224"))
+TRAIN_ON_START = os.environ.get("TRAIN_ON_START", "0") == "1"
+TRAINING_SCRIPT = os.environ.get("TRAINING_SCRIPT", "train_model.py")
 
 app = FastAPI(title="ML Attention Service", version="0.1.0")
 
@@ -63,6 +68,23 @@ try:
     ort_session = ort.InferenceSession(MODEL_PATH, providers=["CPUExecutionProvider"])
 except Exception:
     ort_session = None
+
+
+def _start_background_training() -> None:
+    if not TRAIN_ON_START:
+        return
+    script_path = os.path.join(os.path.dirname(__file__), TRAINING_SCRIPT)
+    if not os.path.exists(script_path):
+        return
+    def _run():
+        try:
+            subprocess.run([sys.executable, script_path], check=False)
+        except Exception:
+            pass
+    Thread(target=_run, daemon=True).start()
+
+
+_start_background_training()
 
 
 class AttentionEventPayload(BaseModel):

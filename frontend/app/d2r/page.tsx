@@ -6,7 +6,7 @@ import { apiFetch } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import D2RWidget from "./test-widget";
 
-type PhaseResult = { TR: number; TA: number; O: number; C: number; CON: number; targetCount?: number };
+type PhaseResult = { TR: number; TA: number; O: number; C: number; CON: number; targetCount: number };
 type PhaseEvent = { phase: number; ts: number; cellId: number; isTarget: boolean };
 
 export default function D2RPage() {
@@ -40,13 +40,13 @@ export default function D2RPage() {
   const phaseRef = useRef<number>(phase);
   const timeLeftRef = useRef<number>(durationSeconds);
   const spinningRef = useRef<boolean>(false);
-  const phaseTimingRef = useRef<Record<number, { start?: number; end?: number; summary?: PhaseResult }>>({});
+  const phaseTimingRef = useRef<Record<number, { start: number; end: number; summary: PhaseResult }>>({});
   const phaseEventsRef = useRef<PhaseEvent[]>([]);
 
   const completedPhases = useMemo(() => phaseResults.filter((r) => r !== null).length, [phaseResults]);
   const progress = Math.round((completedPhases / totalPhases) * 100);
 
-  // Bootstrap: usuario, curso base, sesión y cámara
+  // Bootstrap: usuario, curso base, sesin y cmara
   useEffect(() => {
     if (!token) {
       router.push("/login");
@@ -64,16 +64,16 @@ export default function D2RPage() {
           { method: "POST", body: JSON.stringify({}) },
           token
         );
-        if (session?.id) {
+        if (session.id) {
           setSessionId(String(session.id));
-          setStatus("Sesion creada automaticamente");
+          setStatus("Sesión creada automaticamente");
         } else {
-          setStatus("No se pudo crear sesion para el test D2R.");
+          setStatus("No se pudo crear sesión para el test D2R.");
         }
 
         await requestCamera();
       } catch (err: any) {
-        setStatus(err?.message || "Error iniciando sesión D2R");
+        setStatus(err.message || "Error iniciando sesin D2R");
       }
     };
     bootstrap();
@@ -112,7 +112,7 @@ export default function D2RPage() {
         setErrors(String(totals.C));
         setAttention(String(Math.max(totals.CON, 0)));
         setProcessing((totals.TA / totalTime).toFixed(2));
-        setStatus("Test completado. Guardaremos este resultado como línea base.");
+        setStatus("Test completado. Guardaremos este resultado como lnea base.");
         stopCamera();
         setFinished(true);
       }
@@ -154,9 +154,9 @@ export default function D2RPage() {
               durationSeconds,
               phases: Object.entries(phaseTimingRef.current).map(([k, v]) => ({
                 phase: Number(k),
-                start: v?.start,
-                end: v?.end,
-                summary: v?.summary,
+                start: v.start,
+                end: v.end,
+                summary: v.summary,
               })),
             },
           }),
@@ -195,7 +195,7 @@ export default function D2RPage() {
     }
   };
 
-  // Enviar frames al servicio ML mientras el test está en curso
+  // Enviar frames al servicio ML mientras el test est en curso
   useEffect(() => {
     if (!started || finished || cameraStatus !== "granted" || !sessionId || !userId) return;
     const video = videoRef.current;
@@ -224,7 +224,7 @@ export default function D2RPage() {
           form.append("time_left", String(timeLeftRef.current ?? 0));
           // d2-R no incluye estímulos dinámicos; mantener el campo por compatibilidad backend.
           form.append("spinning", "false");
-          const start = phaseTimingRef.current[phaseRef.current]?.start;
+          const start = phaseTimingRef.current[phaseRef.current].start;
           if (start) form.append("t_in_phase_ms", String(Math.max(Date.now() - start, 0)));
           if (phaseEventsRef.current.length) {
             form.append("events", JSON.stringify(phaseEventsRef.current.slice(-50)));
@@ -261,12 +261,12 @@ export default function D2RPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 flex flex-col items-center">
-      {!started ? (
+      {!started && (
         <section className="max-w-4xl w-full px-4 py-10 flex flex-col items-center">
           <div className="w-full bg-white rounded-3xl shadow-xl border border-slate-100 p-6 sm:p-8 space-y-6">
             <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm text-emerald-800">
               <p className="font-semibold">Evaluación de línea base</p>
-              <p>Este test inicial establecerá tu perfil atencional para personalizar tu aprendizaje.</p>
+              <p>Este test inicial establecer tu perfil atencional para personalizar tu aprendizaje.</p>
             </div>
 
             <div className="flex items-center gap-3">
@@ -295,10 +295,10 @@ export default function D2RPage() {
             <div className="rounded-xl bg-slate-50 border border-slate-200 p-4 text-sm space-y-2">
               <p className="font-semibold text-slate-900">Instrucciones:</p>
               <ol className="list-decimal list-inside text-slate-700 space-y-1">
-                <li>Se presentarán filas de letras "d" y "p" con diferentes números de guiones.</li>
-                <li>Marca únicamente las "d" con exactamente dos guiones (uno arriba y uno abajo).</li>
+                <li>Se presentan filas de letras "d" y "p" con diferentes números de guiones.</li>
+                <li>Marca unicamente las "d" con exactamente dos guiones (uno arriba y uno abajo).</li>
                 <li>Tienes 15 segundos por fila. Trabaja rápido y preciso.</li>
-                <li>La cámara se usará para monitorear atención (no guardamos video).</li>
+                <li>La cámara se usar para monitorear atención (no guardamos video).</li>
               </ol>
             </div>
 
@@ -318,9 +318,9 @@ export default function D2RPage() {
                 className="px-5 py-3 rounded-xl bg-slate-900 text-white text-sm font-semibold shadow hover:bg-black"
               >
                 {cameraStatus === "pending"
-                  ? "Permitir cámara"
+                   "Permitir cámara"
                   : cameraStatus === "granted"
-                  ? "Cámara habilitada"
+                   "Cámara habilitada"
                   : "Reintentar cámara"}
               </button>
               <button
@@ -341,9 +341,9 @@ export default function D2RPage() {
         <section className="w-full flex justify-center py-12 px-4">
           <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-8 max-w-xl w-full text-center space-y-4">
             <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto text-2xl">
-              ✓
+              
             </div>
-            <h2 className="text-2xl font-semibold text-slate-900">¡Test D2R Completado!</h2>
+            <h2 className="text-2xl font-semibold text-slate-900">Test D2R Completado!</h2>
             <p className="text-sm text-slate-600">
               Has completado el test de atención. Usaremos estos datos como línea base para tus cursos.
             </p>
@@ -429,7 +429,7 @@ export default function D2RPage() {
         </section>
       )}
 
-      {/* video oculto para mantener la cámara activa */}
+      {/* video oculto para mantener la cmara activa */}
       <video ref={videoRef} style={{ display: "none" }} />
     </main>
   );

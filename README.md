@@ -78,6 +78,10 @@ ML (FastAPI):
 - `CORS_ORIGINS`
 - `SAVE_FRAMES` (0/1)
 - `FRAMES_DIR` (default: data/frames)
+- `TRAIN_ON_START` (0/1, si es 1 intenta entrenar al iniciar)
+- `TRAINING_SCRIPT` (default: train_model.py)
+- `TRAIN_DATASET` (default: data/frames_dataset.parquet)
+- `TRAIN_EPOCHS`, `TRAIN_BATCH_SIZE`, `TRAIN_LR`
 
 ## Autenticacion y roles
 Roles disponibles en backend: `student`, `teacher`, `admin`.
@@ -99,7 +103,7 @@ Endpoints de autenticacion:
 - `/privacidad`, `/terminos`, `/seguridad`, `/documentacion`
 
 ## Test D2R
-- 14 fases, 20s por fase (configurable en `frontend/app/d2r/page.tsx`).
+- 14 fases, 15s por fase (configurable en `frontend/app/d2r/page.tsx`).
 - 47 celdas fijas por fase (definido en `frontend/app/d2r/test-widget.tsx`).
 - Se marcan solo las "d" con exactamente dos rayitas (arriba, abajo o divididas).
 - Usa camara para estimar atencion (sin guardar video). Los frames se envian a `/api/attention-proxy`.
@@ -156,3 +160,30 @@ docker compose exec backend python manage.py migrate
 - Si el admin no abre panel: verificar rol y permisos en `/api/me/`.
 - Si el test D2R no inicia: revisar permisos de camara y disponibilidad de `/api/attention-proxy`.
 - Si faltan politicas de privacidad: el endpoint de analytics crea defaults si no existen.
+
+## Entrenamiento de modelo (opcional)
+1. Activar captura de frames:
+   - `SAVE_FRAMES=1` y `FRAMES_DIR=/app/data/frames`
+2. Exportar dataset en backend:
+   - `python manage.py export_d2r_frames_dataset --out data/frames_dataset.parquet`
+3. Entrenar en ML:
+   - `python train_model.py` (genera ONNX en `MODEL_PATH`)
+
+## Despliegue en Render
+1. Backend:
+   - Configurar variables de entorno (ver `backend/.env.example`).
+   - Ejecutar migraciones y `collectstatic`.
+2. ML:
+   - Configurar `BACKEND_URL`, `BACKEND_TOKEN`, `MODEL_PATH`.
+3. Frontend:
+   - Configurar `NEXT_PUBLIC_BACKEND_URL`, `NEXT_PUBLIC_ML_URL`, `ML_SERVICE_URL`.
+
+## Token de servicio ML
+Para generar un usuario de servicio y JWT:
+```bash
+python manage.py create_ml_service_user
+```
+Puedes definir:
+- `ML_SERVICE_EMAIL`
+- `ML_SERVICE_PASSWORD`
+- `ML_SERVICE_ROLE` (default: admin)

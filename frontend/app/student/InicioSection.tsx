@@ -66,26 +66,26 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
           apiFetch<any[]>("/api/course-lessons/", {}, token),
         ]);
         const filtered = (enrollments || []).filter((e) => {
-          const title = (e.course?.title || "").toLowerCase();
+          const title = (e.course.title || "").toLowerCase();
           return title && title !== "baseline d2r";
         });
         const modules: ModuleItem[] = (modulesData || [])
-          .filter((m) => (m.course?.title || "").toLowerCase() !== "baseline d2r")
+          .filter((m) => (m.course.title || "").toLowerCase() !== "baseline d2r")
           .map((m) => ({
             id: m.id,
             order: m.order || 0,
-            courseId: m.course?.id,
+            courseId: m.course.id,
           }));
         const lessons: LessonItem[] = (lessonsData || [])
-          .filter((l) => (l.module?.course?.title || "").toLowerCase() !== "baseline d2r")
+          .filter((l) => (l.module.course.title || "").toLowerCase() !== "baseline d2r")
           .map((l) => {
-            const moduleOrder = modules.find((m) => m.id === l.module?.id)?.order || 0;
+            const moduleOrder = modules.find((m) => m.id === l.module.id).order || 0;
             return {
               id: l.id,
               title: l.title || "Leccion",
               order: l.order || 0,
-              moduleId: l.module?.id,
-              courseId: l.module?.course?.id,
+              moduleId: l.module.id,
+              courseId: l.module.course.id,
               moduleOrder,
             };
           });
@@ -109,18 +109,18 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
           const lastLessonId = data.last_lesson_id;
           const lastIndex = courseLessons.findIndex((l) => l.id === lastLessonId);
           const nextLesson =
-            (lastIndex >= 0 ? courseLessons[lastIndex + 1]?.title : courseLessons[0]?.title) ||
-            meta.modules?.[0]?.name ||
+            (lastIndex >= 0 ? courseLessons[lastIndex + 1].title : courseLessons[0].title) ||
+            meta.modules.[0].name ||
             "Contenido inicial";
           return {
             id: course.id,
             title: course.title || "Curso",
-            instructor: course.owner?.username || "Profesor",
+            instructor: course.owner.username || "Profesor",
             progress,
             totalLessons,
             completedLessons,
             nextLesson,
-            image: meta.thumbnail || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
+            image: meta.thumbnail || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5w=800",
             category: "Programacion",
             attentionLevel: 85,
           } as EnrolledCourse;
@@ -203,7 +203,7 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
                 </div>
                 <div className="space-y-2">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-lg font-semibold">Muestreo mensual de atencion</h3>
+                    <h3 className="text-lg font-semibold">Muestreo mensual de atención</h3>
                     <span className="text-[11px] px-3 py-1 rounded-full bg-white/20">5-7 minutos</span>
                   </div>
                   <p className="text-sm text-blue-50 max-w-xl">
@@ -228,7 +228,7 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
                   className="inline-flex items-center justify-center rounded-xl border border-white/40 text-white px-4 py-2 text-xs font-medium hover:bg-white/10"
                   onClick={() => setShowD2RBanner(false)}
                 >
-                  Recordar mas tarde
+                  Recordar más tarde
                 </button>
               </div>
             </div>
@@ -316,7 +316,7 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
                   </div>
                   <div className="flex items-center gap-1">
                     <div className="w-2 h-2 bg-green-500 rounded-full" />
-                    <span className="text-sm text-gray-600">{course.attentionLevel}% atencion</span>
+                    <span className="text-sm text-gray-600">{course.attentionLevel}% atención</span>
                   </div>
                 </div>
 
@@ -407,7 +407,7 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Temario del curso</DialogTitle>
-            <DialogDescription>{syllabusCourse?.title || "Curso"}</DialogDescription>
+            <DialogDescription>{syllabusCourse.title || "Curso"}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 max-h-[60vh] overflow-auto pr-2">
             {syllabusModules.length === 0 && (

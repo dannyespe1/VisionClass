@@ -28,28 +28,28 @@ type Course = {
 
 type Enrollment = {
   id: number;
-  course?: { id: number; title: string };
-  user?: { id: number; username: string; first_name?: string; last_name?: string };
-  enrollment_data?: {
-    attention_avg?: number;
-    attention_last?: number;
-    progress?: number;
-    last_attention_at?: string;
+  course: { id: number; title: string };
+  user: { id: number; username: string; first_name: string; last_name: string };
+  enrollment_data: {
+    attention_avg: number;
+    attention_last: number;
+    progress: number;
+    last_attention_at: string;
   };
 };
 
 type Session = {
   id: number;
-  created_at?: string;
-  mean_attention?: number;
-  last_score?: number;
-  attention_score?: number;
+  created_at: string;
+  mean_attention: number;
+  last_score: number;
+  attention_score: number;
 };
 
 type QuizAttempt = {
   id: number;
-  score?: number;
-  session?: { course?: { id: number } };
+  score: number;
+  session: { course: { id: number } };
 };
 
 const COLORS = ["#10b981", "#3b82f6", "#f59e0b", "#ef4444"];
@@ -60,7 +60,7 @@ const avg = (values: number[]) => {
   return Math.round(sum / values.length);
 };
 
-const normalizeNumber = (value?: number) => {
+const normalizeNumber = (value: number) => {
   if (typeof value !== "number" || Number.isNaN(value)) return 0;
   return value;
 };
@@ -100,7 +100,7 @@ export function EstadisticasProfesor() {
         setSessions(sessionData || []);
         setQuizAttempts(quizData || []);
       } catch (err) {
-        const msg = err instanceof Error ? err.message : "No se pudieron cargar las estadisticas";
+        const msg = err instanceof Error ? err.message : "No se pudieron cargar las estadísticas";
         setError(msg);
       } finally {
         setLoading(false);
@@ -111,15 +111,18 @@ export function EstadisticasProfesor() {
 
   const courseStats = useMemo(() => {
     return courses.map((course) => {
-      const courseEnrollments = enrollments.filter((enroll) => enroll.course?.id === course.id);
+      const courseEnrollments = enrollments.filter((enroll) => enroll.course.id === course.id);
       const attentionValues = courseEnrollments.map((enroll) =>
-        normalizeNumber(enroll.enrollment_data?.attention_avg ?? enroll.enrollment_data?.attention_last)
+        normalizeNumber(
+          enroll.enrollment_data.attention_avg 
+            enroll.enrollment_data.attention_last
+        )
       );
       const completionValues = courseEnrollments.map((enroll) =>
-        normalizeNumber(enroll.enrollment_data?.progress)
+        normalizeNumber(enroll.enrollment_data.progress)
       );
       const courseQuizScores = quizAttempts
-        .filter((attempt) => attempt.session?.course?.id === course.id)
+        .filter((attempt) => attempt.session.course.id === course.id)
         .map((attempt) => normalizeNumber(attempt.score));
       return {
         course: course.title,
@@ -133,10 +136,13 @@ export function EstadisticasProfesor() {
 
   const overallStats = useMemo(() => {
     const attentionValues = enrollments.map((enroll) =>
-      normalizeNumber(enroll.enrollment_data?.attention_avg ?? enroll.enrollment_data?.attention_last)
+      normalizeNumber(
+        enroll.enrollment_data.attention_avg 
+          enroll.enrollment_data.attention_last
+      )
     );
     const completionValues = enrollments.map((enroll) =>
-      normalizeNumber(enroll.enrollment_data?.progress)
+      normalizeNumber(enroll.enrollment_data.progress)
     );
     const gradeValues = quizAttempts.map((attempt) => normalizeNumber(attempt.score));
     return {
@@ -152,29 +158,32 @@ export function EstadisticasProfesor() {
     sessions.forEach((session) => {
       if (!session.created_at) return;
       const value = normalizeNumber(
-        session.mean_attention ?? session.attention_score ?? session.last_score
+        session.mean_attention 
+          session.attention_score 
+          session.last_score
       );
       if (!value) return;
       const date = new Date(session.created_at);
       const key = formatWeek(date);
       if (!grouped.has(key)) grouped.set(key, []);
-      grouped.get(key)?.push(value);
+      grouped.get(key).push(value);
     });
     if (!grouped.size) {
       enrollments.forEach((enroll) => {
         const timestamp =
-          enroll.enrollment_data?.attention_updated_at ||
-          enroll.enrollment_data?.last_attention_at ||
-          enroll.enrollment_data?.last_update_at;
+          enroll.enrollment_data.attention_updated_at ||
+          enroll.enrollment_data.last_attention_at ||
+          enroll.enrollment_data.last_update_at;
         if (!timestamp) return;
         const value = normalizeNumber(
-          enroll.enrollment_data?.attention_avg ?? enroll.enrollment_data?.attention_last
+          enroll.enrollment_data.attention_avg 
+            enroll.enrollment_data.attention_last
         );
         if (!value) return;
         const date = new Date(timestamp);
         const key = formatWeek(date);
         if (!grouped.has(key)) grouped.set(key, []);
-        grouped.get(key)?.push(value);
+        grouped.get(key).push(value);
       });
     }
     return Array.from(grouped.entries())
@@ -187,9 +196,10 @@ export function EstadisticasProfesor() {
 
   const attentionDistribution = useMemo(() => {
     const buckets = { excelente: 0, bueno: 0, regular: 0, bajo: 0 };
-    enrollments.forEach((enroll) => {
+      enrollments.forEach((enroll) => {
       const value = normalizeNumber(
-        enroll.enrollment_data?.attention_avg ?? enroll.enrollment_data?.attention_last
+        enroll.enrollment_data.attention_avg 
+          enroll.enrollment_data.attention_last
       );
       if (!value) return;
       if (value >= 90) buckets.excelente += 1;
@@ -215,9 +225,9 @@ export function EstadisticasProfesor() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl mb-2">Estadisticas del profesor</h1>
+        <h1 className="text-3xl mb-2">Estadísticas del profesor</h1>
         <p className="text-gray-600">
-          Analisis del rendimiento y la atencion basada en actividad real de los estudiantes.
+          Análisis del rendimiento y la atención basada en actividad real de los estudiantes.
         </p>
       </div>
 
@@ -247,7 +257,7 @@ export function EstadisticasProfesor() {
             <TrendingUp className="w-5 h-5 text-green-600" />
           </div>
           <div className="text-2xl mb-1">{overallStats.avgAttention}%</div>
-          <div className="text-sm text-gray-600">Atencion promedio</div>
+          <div className="text-sm text-gray-600">Atención promedio</div>
         </div>
 
         <div className="bg-white rounded-xl p-6 shadow-sm">
@@ -269,7 +279,7 @@ export function EstadisticasProfesor() {
             <TrendingUp className="w-5 h-5 text-green-600" />
           </div>
           <div className="text-2xl mb-1">{overallStats.avgGrade || "--"}</div>
-          <div className="text-sm text-gray-600">Calificacion promedio</div>
+          <div className="text-sm text-gray-600">Calificación promedio</div>
         </div>
       </div>
 
@@ -283,7 +293,7 @@ export function EstadisticasProfesor() {
               <tr>
                 <th className="text-left py-4 px-6">Curso</th>
                 <th className="text-left py-4 px-6">Estudiantes</th>
-                <th className="text-left py-4 px-6">Atencion prom.</th>
+                <th className="text-left py-4 px-6">Atención prom.</th>
                 <th className="text-left py-4 px-6">Progreso</th>
                 <th className="text-left py-4 px-6">Calificacion</th>
               </tr>
@@ -304,7 +314,7 @@ export function EstadisticasProfesor() {
                       <span
                         className={`px-3 py-1 rounded-full text-sm ${
                           stat.avgAttention >= 80
-                            ? "bg-green-100 text-green-700"
+                             "bg-green-100 text-green-700"
                             : "bg-yellow-100 text-yellow-700"
                         }`}
                       >
@@ -334,7 +344,7 @@ export function EstadisticasProfesor() {
 
       <div className="grid lg:grid-cols-2 gap-6 mb-8">
         <div className="bg-white rounded-xl p-6 shadow-sm">
-          <h3 className="text-xl mb-6">Tendencia semanal de atencion</h3>
+          <h3 className="text-xl mb-6">Tendencia semanal de atención</h3>
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={attentionTrend}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -345,12 +355,12 @@ export function EstadisticasProfesor() {
             </LineChart>
           </ResponsiveContainer>
           {!attentionTrend.length && (
-            <p className="text-sm text-gray-500 mt-4">Aun no hay sesiones para graficar tendencia.</p>
+            <p className="text-sm text-gray-500 mt-4">Aún no hay sesiones para graficar tendencia.</p>
           )}
         </div>
 
         <div className="bg-white rounded-xl p-6 shadow-sm">
-          <h3 className="text-xl mb-6">Distribucion de estudiantes</h3>
+          <h3 className="text-xl mb-6">Distribución de estudiantes</h3>
           <ResponsiveContainer width="100%" height={200}>
             <PieChart>
               <Pie
@@ -382,7 +392,7 @@ export function EstadisticasProfesor() {
       </div>
 
       <div className="bg-white rounded-xl p-6 shadow-sm">
-        <h3 className="text-xl mb-6">Atencion promedio por curso</h3>
+        <h3 className="text-xl mb-6">Atención promedio por curso</h3>
         <ResponsiveContainer width="100%" height={250}>
           <BarChart data={attentionByCourse}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -393,7 +403,7 @@ export function EstadisticasProfesor() {
           </BarChart>
         </ResponsiveContainer>
         {!attentionByCourse.length && (
-          <p className="text-sm text-gray-500 mt-4">No hay cursos para graficar atencion.</p>
+          <p className="text-sm text-gray-500 mt-4">No hay cursos para graficar atención.</p>
         )}
       </div>
     </div>

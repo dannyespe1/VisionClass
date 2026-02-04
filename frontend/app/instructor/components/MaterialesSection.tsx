@@ -10,11 +10,15 @@ import {
   Download,
   ArrowUp,
   ArrowDown,
+  BookOpen,
+  Library,
+  Layers,
 } from "lucide-react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { Label } from "../../ui/label";
 import { Textarea } from "../../ui/textarea";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../../ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
 import { apiFetch } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext";
@@ -45,8 +49,8 @@ type CourseMeta = {
 type CourseItem = {
   id: number;
   title: string;
-  description?: string;
-  meta?: CourseMeta;
+  description: string;
+  meta: CourseMeta;
 };
 
 type ModuleBlock = {
@@ -101,6 +105,30 @@ export function MaterialesSection() {
   const [status, setStatus] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiQuestions, setAiQuestions] = useState<any[]>([]);
+  const [aiSourcesOpen, setAiSourcesOpen] = useState(false);
+  const [aiSources, setAiSources] = useState<
+    Array<{
+      type: "pdf" | "video" | "lesson" | "course" | "module";
+      title: string;
+      detail: string;
+      status: string;
+      reason: string;
+    }>
+  >([]);
+  const sourceTypeLabels: Record<string, string> = {
+    pdf: "PDF",
+    video: "Video",
+    lesson: "Leccion",
+    course: "Curso",
+    module: "Modulo",
+  };
+  const sourceTypeIcons: Record<string, JSX.Element> = {
+    pdf: <FileText className="h-4 w-4 text-sky-600" />,
+    video: <Video className="h-4 w-4 text-violet-600" />,
+    lesson: <BookOpen className="h-4 w-4 text-emerald-600" />,
+    course: <Library className="h-4 w-4 text-amber-600" />,
+    module: <Layers className="h-4 w-4 text-indigo-600" />,
+  };
   const [aiDifficulty, setAiDifficulty] = useState("media");
   const [aiNumQuestions, setAiNumQuestions] = useState(20);
   const [aiContext, setAiContext] = useState("");
@@ -160,29 +188,29 @@ export function MaterialesSection() {
       );
 
       const mappedModules: CourseModule[] = (modulesData || [])
-        .filter((m) => (m.course?.title || "").toLowerCase() !== BASELINE_TITLE)
+        .filter((m) => (m.course.title || "").toLowerCase() !== BASELINE_TITLE)
         .map((m) => ({
           id: m.id,
           title: m.title,
           order: m.order || 0,
           durationMinutes: Math.round((m.duration_hours || 0) * 60),
-          courseId: m.course?.id,
-          courseTitle: m.course?.title || "Curso",
+          courseId: m.course.id,
+          courseTitle: m.course.title || "Curso",
         }));
 
       const mappedLessons: CourseLesson[] = (lessonsData || [])
-        .filter((l) => (l.module?.course?.title || "").toLowerCase() !== BASELINE_TITLE)
+        .filter((l) => (l.module.course.title || "").toLowerCase() !== BASELINE_TITLE)
         .map((l) => ({
           id: l.id,
           title: l.title,
           order: l.order || 0,
-          moduleId: l.module?.id,
-          moduleTitle: l.module?.title || "Modulo",
-          courseId: l.module?.course?.id,
+          moduleId: l.module.id,
+          moduleTitle: l.module.title || "Modulo",
+          courseId: l.module.course.id,
         }));
 
       const mappedMaterials: CourseMaterial[] = (materialsData || [])
-        .filter((mat) => (mat.lesson?.module?.course?.title || "").toLowerCase() !== BASELINE_TITLE)
+        .filter((mat) => (mat.lesson.module.course.title || "").toLowerCase() !== BASELINE_TITLE)
         .map((mat) => ({
           id: mat.id,
           title: mat.title,
@@ -190,12 +218,12 @@ export function MaterialesSection() {
           materialType: mat.material_type as MaterialType,
           url: mat.url || "",
           metadata: mat.metadata || {},
-          lessonId: mat.lesson?.id,
-          lessonTitle: mat.lesson?.title || "Leccion",
-          moduleId: mat.lesson?.module?.id,
-          moduleTitle: mat.lesson?.module?.title || "Modulo",
-          courseId: mat.lesson?.module?.course?.id,
-          courseTitle: mat.lesson?.module?.course?.title || "Curso",
+          lessonId: mat.lesson.id,
+          lessonTitle: mat.lesson.title || "Leccion",
+          moduleId: mat.lesson.module.id,
+          moduleTitle: mat.lesson.module.title || "Modulo",
+          courseId: mat.lesson.module.course.id,
+          courseTitle: mat.lesson.module.course.title || "Curso",
           createdAt: mat.created_at || "",
         }));
 
@@ -348,7 +376,7 @@ export function MaterialesSection() {
     setModulesDraft((prev) => {
       const idx = prev.findIndex((m) => m.id === id);
       if (idx === -1) return prev;
-      const swapWith = dir === "up" ? idx - 1 : idx + 1;
+      const swapWith = dir === "up"  idx - 1 : idx + 1;
       if (swapWith < 0 || swapWith >= prev.length) return prev;
       const copy = [...prev];
       [copy[idx], copy[swapWith]] = [copy[swapWith], copy[idx]];
@@ -361,7 +389,7 @@ export function MaterialesSection() {
       return;
     }
     if (!token) {
-      setStatus("Debes iniciar sesion");
+      setStatus("Debes iniciar sesin");
       return;
     }
     try {
@@ -476,9 +504,9 @@ export function MaterialesSection() {
       description: "",
       type: "pdf",
       url: "",
-      courseId: formData.courseId || (courses[0] ? String(courses[0].id) : ""),
-      moduleId: moduleOptions[0]?.id || "",
-      lessonId: lessonOptions[0]?.id || "",
+      courseId: formData.courseId || (courses[0]  String(courses[0].id) : ""),
+      moduleId: moduleOptions[0].id || "",
+      lessonId: lessonOptions[0].id || "",
     });
     setFilePdf(null);
     setFileBase64("");
@@ -499,7 +527,7 @@ export function MaterialesSection() {
     });
     setFilePdf(null);
     setFileBase64("");
-    setYoutubePreview(material.materialType === "video" && material.url ? material.url.replace("watch?v=", "embed/") : "");
+    setYoutubePreview(material.materialType === "video" && material.url ? material.url.replace("watchv=", "embed/") : "");
     setShowMaterialModal(true);
   };
 
@@ -507,7 +535,7 @@ export function MaterialesSection() {
     e.preventDefault();
     if (!token) return;
     if (!formData.lessonId) {
-      setStatus("Selecciona una leccion");
+      setStatus("Selecciona una leccin");
       return;
     }
     let finalUrl = formData.url;
@@ -532,9 +560,9 @@ export function MaterialesSection() {
               description: formData.description,
               url: finalUrl,
               metadata,
-              file_name: filePdf?.name || "",
-              file_content_type: filePdf?.type || "",
-              file_size: filePdf?.size || 0,
+              file_name: filePdf.name || "",
+              file_content_type: filePdf.type || "",
+              file_size: filePdf.size || 0,
               file_base64: fileBase64 || "",
             }),
           },
@@ -554,9 +582,9 @@ export function MaterialesSection() {
               description: formData.description,
               url: finalUrl,
               metadata,
-              file_name: filePdf?.name || "",
-              file_content_type: filePdf?.type || "",
-              file_size: filePdf?.size || 0,
+              file_name: filePdf.name || "",
+              file_content_type: filePdf.type || "",
+              file_size: filePdf.size || 0,
               file_base64: fileBase64 || "",
             }),
           },
@@ -600,7 +628,7 @@ export function MaterialesSection() {
 
   const handleYoutubePreview = (url: string) => {
     setFormData((prev) => ({ ...prev, url }));
-    const match = url.match(/(?:youtu\.be\/|v=)([^&#]+)/);
+    const match = url.match(/(:youtu\.be\/|v=)([^&#]+)/);
     if (match && match[1]) {
       setYoutubePreview(`https://www.youtube.com/embed/${match[1]}`);
     } else {
@@ -635,7 +663,7 @@ export function MaterialesSection() {
       .filter((m) => String(m.courseId) === manageCourseId)
       .sort((a, b) => a.order - b.order);
     const idx = courseModulesForCourse.findIndex((m) => m.id === moduleId);
-    const swapIdx = dir === "up" ? idx - 1 : idx + 1;
+    const swapIdx = dir === "up"  idx - 1 : idx + 1;
     if (idx === -1 || swapIdx < 0 || swapIdx >= courseModulesForCourse.length) return;
     const current = courseModulesForCourse[idx];
     const target = courseModulesForCourse[swapIdx];
@@ -708,7 +736,7 @@ export function MaterialesSection() {
       await refreshData();
     } catch (err) {
       console.error(err);
-      setStatus("Error creando leccion");
+      setStatus("Error creando leccin");
     }
   };
 
@@ -815,7 +843,7 @@ export function MaterialesSection() {
       .filter((l) => l.moduleId === lesson.moduleId)
       .sort((a, b) => a.order - b.order);
     const idx = lessonsForModule.findIndex((l) => l.id === lessonId);
-    const swapIdx = dir === "up" ? idx - 1 : idx + 1;
+    const swapIdx = dir === "up"  idx - 1 : idx + 1;
     if (idx === -1 || swapIdx < 0 || swapIdx >= lessonsForModule.length) return;
     const current = lessonsForModule[idx];
     const target = lessonsForModule[swapIdx];
@@ -971,7 +999,7 @@ export function MaterialesSection() {
               className="bg-red-600 text-white hover:bg-red-700"
               onClick={() => {
                 if (!manageCourseId) return;
-                if (!window.confirm("Seguro que deseas eliminar este curso?")) return;
+                if (!window.confirm("Seguro que deseas eliminar este curso")) return;
                 handleDeleteCourse(Number(manageCourseId));
               }}
             >
@@ -1238,27 +1266,30 @@ export function MaterialesSection() {
             <Button
               onClick={async () => {
                 if (!token) {
-                  alert("Inicia sesion para usar IA.");
+                  alert("Inicia sesión para usar IA.");
                   return;
                 }
                 try {
                   setAiLoading(true);
-                  const res = await apiFetch<{ questions: any[] }>(
+                  const res = await apiFetch<{ questions: any[]; sources: any[] }>(
                     "/api/ai/generate-test/",
                     {
                       method: "POST",
                       body: JSON.stringify({
                         course_id: aiTargetCourseId,
+                        module_id: aiTargetModuleId || null,
                         difficulty: aiDifficulty,
                         num_questions: aiNumQuestions,
                         context: aiContext,
+                        include_materials: true,
                       }),
                     },
                     token
                   );
                   setAiQuestions(res.questions || []);
+                  setAiSources(res.sources || []);
                 } catch (err: any) {
-                  alert(err?.message || "Error generando prueba");
+                  alert(err.message || "Error generando prueba");
                 } finally {
                   setAiLoading(false);
                 }
@@ -1275,6 +1306,16 @@ export function MaterialesSection() {
           <div className="mt-6 space-y-3">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-semibold text-slate-900">Preguntas generadas ({aiQuestions.length})</h4>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setAiSourcesOpen(true)}
+                  disabled={!aiSources.length}
+                >
+                  Ver material usado
+                </Button>
+              </div>
               <Button
                 variant="outline"
                 onClick={async () => {
@@ -1290,7 +1331,7 @@ export function MaterialesSection() {
                       const testIndex = Number(parts[3]);
                       const existing = getModuleTestLessons(moduleId);
                       const target = existing[testIndex - 1];
-                      if (target?.id) {
+                      if (target.id) {
                         lessonId = target.id;
                       } else {
                         const lessonsForModule = courseLessons.filter((l) => l.moduleId === moduleId);
@@ -1307,7 +1348,7 @@ export function MaterialesSection() {
                           },
                           token
                         );
-                        lessonId = created?.id || null;
+                        lessonId = created.id || null;
                       }
                     }
                     if (!lessonId) return;
@@ -1349,7 +1390,7 @@ export function MaterialesSection() {
                   </p>
                   <div className="text-xs text-slate-500 mb-2">Dificultad: {q.difficulty}</div>
                   <ul className="list-disc list-inside text-sm text-slate-700 space-y-1">
-                    {q.options?.map((opt: string, i: number) => (
+                    {q.options.map((opt: string, i: number) => (
                       <li key={i}>{opt}</li>
                     ))}
                   </ul>
@@ -1359,6 +1400,38 @@ export function MaterialesSection() {
             </div>
           </div>
         )}
+
+        <Dialog open={aiSourcesOpen} onOpenChange={setAiSourcesOpen}>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Material usado para generar la prueba</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3 max-h-[420px] overflow-y-auto">
+              {!aiSources.length && (
+                <div className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
+                  No hay materiales detectados para este módulo.
+                </div>
+              )}
+              {aiSources.map((item, idx) => (
+                <div key={`${item.type}-${idx}`} className="rounded-lg border border-slate-200 bg-white px-4 py-3">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                    {sourceTypeIcons[item.type]  <ClipboardList className="h-4 w-4 text-slate-400" />}
+                    <span>{item.title}</span>
+                  </div>
+                  <div className="text-xs text-slate-500 mt-1">
+                    Tipo: {sourceTypeLabels[item.type]  item.type}
+                  </div>
+                  {item.detail && <div className="text-xs text-slate-600 mt-1">{item.detail}</div>}
+                </div>
+              ))}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setAiSourcesOpen(false)}>
+                Cerrar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1389,7 +1462,7 @@ export function MaterialesSection() {
             {material.materialType === "video" && material.url && (
               <div className="rounded-lg overflow-hidden border border-slate-100">
                 <iframe
-                  src={material.url.replace("watch?v=", "embed/")}
+                  src={material.url.replace("watchv=", "embed/")}
                   className="w-full h-40"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
@@ -1492,7 +1565,7 @@ export function MaterialesSection() {
                 <Label>URL / recurso</Label>
                 <Input
                   value={formData.url}
-                  onChange={(e) => (formData.type === "video" ? handleYoutubePreview(e.target.value) : setFormData({ ...formData, url: e.target.value }))}
+                  onChange={(e) => (formData.type === "video"  handleYoutubePreview(e.target.value) : setFormData({ ...formData, url: e.target.value }))}
                   placeholder={formData.type === "video" ? "https://... (YouTube)" : "https://... (opcional si subes PDF)"}
                   required={formData.type !== "pdf"}
                 />
@@ -1505,14 +1578,14 @@ export function MaterialesSection() {
                     type="file"
                     accept="application/pdf"
                     onChange={(e) => {
-                      const file = e.target.files?.[0] || null;
+                      const file = e.target.files.[0] || null;
                       setFilePdf(file);
                       setFileBase64("");
                       if (!file) return;
                       const reader = new FileReader();
                       reader.onload = () => {
-                        const result = typeof reader.result === "string" ? reader.result : "";
-                        const base64 = result.includes(",") ? result.split(",")[1] : result;
+                        const result = typeof reader.result === "string"  reader.result : "";
+                        const base64 = result.includes(",")  result.split(",")[1] : result;
                         setFileBase64(base64 || "");
                       };
                       reader.readAsDataURL(file);

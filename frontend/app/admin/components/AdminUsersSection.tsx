@@ -11,8 +11,8 @@ type Props = {
   onSearchChange: (value: string) => void;
   onToggleStatus: (id: number) => void;
   onDeleteRequest: (user: AdminUser) => void;
-  onCreateRequest?: () => void;
-  onEditRequest?: (user: AdminUser) => void;
+  onCreateRequest: () => void;
+  onEditRequest: (user: AdminUser) => void;
 };
 
 export function AdminUsersSection({
@@ -78,9 +78,9 @@ export function AdminUsersSection({
                   <span
                     className={`px-3 py-1 rounded-full text-sm ${
                       user.role === "admin"
-                        ? "bg-purple-100 text-purple-700"
+                         "bg-purple-100 text-purple-700"
                         : user.role === "profesor"
-                        ? "bg-blue-100 text-blue-700"
+                         "bg-blue-100 text-blue-700"
                         : "bg-green-100 text-green-700"
                     }`}
                   >
@@ -101,7 +101,7 @@ export function AdminUsersSection({
                 <td className="py-4 px-6">
                   <div className="flex items-center justify-end gap-2">
                     <button
-                      onClick={() => onEditRequest?.(user)}
+                      onClick={() => onEditRequest.(user)}
                       className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
                     >
                       <Edit className="w-4 h-4 text-slate-600" />

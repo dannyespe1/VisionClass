@@ -21,6 +21,13 @@ import {
   SelectValue,
 } from "../../ui/select";
 import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../../ui/dialog";
+import {
   ScatterChart,
   Scatter,
   XAxis,
@@ -42,36 +49,36 @@ type Course = {
 
 type Enrollment = {
   id: number;
-  course?: { id: number; title: string };
-  user?: {
+  course: { id: number; title: string };
+  user: {
     id: number;
     username: string;
-    email?: string;
-    first_name?: string;
-    last_name?: string;
+    email: string;
+    first_name: string;
+    last_name: string;
   };
-  enrollment_data?: {
-    attention_avg?: number;
-    attention_last?: number;
-    progress?: number;
-    last_attention_at?: string;
+  enrollment_data: {
+    attention_avg: number;
+    attention_last: number;
+    progress: number;
+    last_attention_at: string;
   };
 };
 
 type D2RResult = {
   id: number;
-  user?: { id: number };
-  attention_span?: number;
-  created_at?: string;
+  user: { id: number };
+  attention_span: number;
+  created_at: string;
 };
 
 type QuizAttempt = {
   id: number;
-  user?: { id: number };
-  score?: number;
+  user: { id: number };
+  score: number;
 };
 
-const normalizeNumber = (value?: number) => {
+const normalizeNumber = (value: number) => {
   if (typeof value !== "number" || Number.isNaN(value)) return 0;
   return value;
 };
@@ -82,7 +89,7 @@ const avg = (values: number[]) => {
   return Math.round(sum / values.length);
 };
 
-const formatName = (user?: Enrollment["user"]) => {
+const formatName = (user: Enrollment["user"]) => {
   if (!user) return "Estudiante";
   const full = `${user.first_name || ""} ${user.last_name || ""}`.trim();
   return full || user.username || "Estudiante";
@@ -104,6 +111,19 @@ export function EstadisticasProfesorAdvanced() {
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [messageOpen, setMessageOpen] = useState(false);
+  const [messageTarget, setMessageTarget] = useState<{
+    userId: number;
+    courseId: number;
+    name: string;
+    email: string;
+    attentionAvg: number;
+    completionRate: number;
+    avgGrade: number;
+  } | null>(null);
+  const [messageSubject, setMessageSubject] = useState("");
+  const [messageBody, setMessageBody] = useState("");
+  const [messageStatus, setMessageStatus] = useState<{ type: "ok" | "error"; text: string } | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -138,9 +158,9 @@ export function EstadisticasProfesorAdvanced() {
   }, [token, selectedCourseId]);
 
   const d2rByUser = useMemo(() => {
-    const map = new Map<number, { score: number; created_at?: string }>();
+    const map = new Map<number, { score: number; created_at: string }>();
     d2rResults.forEach((result) => {
-      const userId = result.user?.id;
+      const userId = result.user.id;
       if (!userId) return;
       const score = normalizeNumber(result.attention_span);
       const current = map.get(userId);
@@ -156,29 +176,32 @@ export function EstadisticasProfesorAdvanced() {
   const studentAnalytics = useMemo(() => {
     const courseId = Number(selectedCourseId);
     return enrollments
-      .filter((enroll) => enroll.course?.id === courseId)
+      .filter((enroll) => enroll.course.id === courseId)
       .map((enroll) => {
         const attention = normalizeNumber(
-          enroll.enrollment_data?.attention_avg ?? enroll.enrollment_data?.attention_last
+          enroll.enrollment_data.attention_avg 
+            enroll.enrollment_data.attention_last
         );
-        const progress = normalizeNumber(enroll.enrollment_data?.progress);
-        const d2rScore = d2rByUser.get(enroll.user?.id || 0)?.score ?? 0;
+        const progress = normalizeNumber(enroll.enrollment_data.progress);
+        const d2rScore = d2rByUser.get(enroll.user.id || 0)?.score ?? 0;
         const avgGrade = avg(
           quizAttempts
-            .filter((attempt) => attempt.user?.id === enroll.user?.id)
+            .filter((attempt) => attempt.user.id === enroll.user.id)
             .map((attempt) => normalizeNumber(attempt.score))
         );
         const riskLevel = getRiskLevel(attention, progress);
         return {
           id: enroll.id,
+          userId: enroll.user.id || 0,
+          courseId: enroll.course.id || 0,
           name: formatName(enroll.user),
-          email: enroll.user?.email || "--",
+          email: enroll.user.email || "--",
           d2rScore,
           avgGrade,
           attentionAvg: attention,
           completionRate: progress,
           riskLevel,
-          lastActivity: enroll.enrollment_data?.last_attention_at || "Sin actividad",
+          lastActivity: enroll.enrollment_data.last_attention_at || "Sin actividad",
         };
       });
   }, [enrollments, selectedCourseId, d2rByUser, quizAttempts]);
@@ -188,13 +211,19 @@ export function EstadisticasProfesorAdvanced() {
       .filter((student) => student.riskLevel === "critical" || student.riskLevel === "high")
       .map((student, index) => ({
         id: `${student.id}-${index}`,
+        userId: student.userId,
+        courseId: student.courseId,
+        email: student.email,
         type: student.riskLevel === "critical" ? "critical" : "warning",
         student: student.name,
+        attentionAvg: student.attentionAvg,
+        completionRate: student.completionRate,
+        avgGrade: student.avgGrade,
         issue:
           student.riskLevel === "critical"
-            ? "Riesgo alto de desconexion"
-            : "Disminucion en atencion",
-        details: `Atencion ${student.attentionAvg}% y avance ${student.completionRate}%`,
+             "Riesgo alto de desconexión"
+            : "Disminución en atención",
+        details: `Atención ${student.attentionAvg}% y avance ${student.completionRate}%`,
         action: "Contactar estudiante",
       }));
   }, [studentAnalytics]);
@@ -208,10 +237,61 @@ export function EstadisticasProfesorAdvanced() {
     }));
   }, [studentAnalytics]);
 
+  const openMessageModal = (student: typeof studentAnalytics[number]) => {
+    if (!student.userId || !student.courseId) return;
+    setMessageTarget({
+      userId: student.userId,
+      courseId: student.courseId,
+      name: student.name,
+      email: student.email,
+      attentionAvg: student.attentionAvg,
+      completionRate: student.completionRate,
+      avgGrade: student.avgGrade,
+    });
+    setMessageSubject("Alerta de rendimiento");
+    setMessageBody(
+      `Hola ${student.name},\n\n` +
+        `Detectamos una disminucion en tu rendimiento.\n` +
+        `Atención promedio: ${student.attentionAvg}%\n` +
+        `Progreso del curso: ${student.completionRate}%\n` +
+        `Promedio de evaluaciones: ${student.avgGrade}%\n\n` +
+        "Te recomendamos agendar una tutoría o comunicarte conmigo si necesitas apoyo.\n"
+    );
+    setMessageStatus(null);
+    setMessageOpen(true);
+  };
+
+  const sendNotification = async () => {
+    if (!token || !messageTarget) return;
+    if (!messageTarget.email || messageTarget.email === "--") {
+      setMessageStatus({ type: "error", text: "El estudiante no tiene email registrado." });
+      return;
+    }
+    try {
+      await apiFetch(
+        "/api/notifications/student/",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            student_id: messageTarget.userId,
+            course_id: messageTarget.courseId,
+            subject: messageSubject,
+            message: messageBody,
+          }),
+        },
+        token
+      );
+      setMessageStatus({ type: "ok", text: "Notificación enviada correctamente." });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "No se pudo enviar la notificación.";
+      setMessageStatus({ type: "error", text: msg });
+    }
+  };
+
   const getRiskBadge = (level: string) => {
     switch (level) {
       case "critical":
-        return <Badge variant="destructive">Critico</Badge>;
+        return <Badge variant="destructive">Crítico</Badge>;
       case "high":
         return <Badge className="bg-orange-500">Alto</Badge>;
       case "medium":
@@ -227,7 +307,7 @@ export function EstadisticasProfesorAdvanced() {
         <div>
           <h1 className="text-3xl mb-2">Analytics avanzados</h1>
           <p className="text-gray-600">
-            Seguimiento de estudiantes basado en progreso y atencion real.
+            Seguimiento de estudiantes basado en progreso y atención real.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -290,7 +370,24 @@ export function EstadisticasProfesorAdvanced() {
                       <div className="mb-2">{warning.issue}</div>
                       <p className="text-sm text-gray-600 mb-3">{warning.details}</p>
                       <div className="flex items-center gap-3">
-                        <Button size="sm">
+                        <Button
+                          size="sm"
+                          onClick={() =>
+                            openMessageModal({
+                              id: warning.id,
+                              userId: warning.userId,
+                              courseId: warning.courseId,
+                              name: warning.student,
+                              email: warning.email,
+                              d2rScore: 0,
+                              avgGrade: warning.avgGrade,
+                              attentionAvg: warning.attentionAvg,
+                              completionRate: warning.completionRate,
+                              riskLevel: warning.type === "critical" ? "critical" : "high",
+                              lastActivity: "",
+                            })
+                          }
+                        >
                           <Send className="w-3 h-3 mr-2" />
                           {warning.action}
                         </Button>
@@ -313,7 +410,7 @@ export function EstadisticasProfesorAdvanced() {
           <div className="bg-white rounded-xl p-6 shadow-sm">
             <h3 className="text-lg mb-6 flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-blue-600" />
-              Correlacion entre D2R y progreso
+              Correlación entre D2R y progreso
             </h3>
             <ResponsiveContainer width="100%" height={350}>
               <ScatterChart>
@@ -335,7 +432,7 @@ export function EstadisticasProfesorAdvanced() {
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
             <div className="p-6 border-b">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg">Analisis individual de estudiantes</h3>
+                <h3 className="text-lg">Análisis individual de estudiantes</h3>
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm">
                     <Filter className="w-4 h-4 mr-2" />
@@ -368,7 +465,7 @@ export function EstadisticasProfesorAdvanced() {
                       <div className="text-xl text-purple-600">{student.d2rScore}%</div>
                     </div>
                     <div className="bg-green-50 rounded-lg p-3">
-                      <div className="text-xs text-gray-600 mb-1">Atencion</div>
+                      <div className="text-xs text-gray-600 mb-1">Atencin</div>
                       <div className="text-xl text-green-600">{student.attentionAvg}%</div>
                     </div>
                     <div className="bg-orange-50 rounded-lg p-3">
@@ -376,7 +473,7 @@ export function EstadisticasProfesorAdvanced() {
                       <div className="text-xl text-orange-600">{student.completionRate}%</div>
                     </div>
                     <div className="bg-blue-50 rounded-lg p-3">
-                      <div className="text-xs text-gray-600 mb-1">Calificacion</div>
+                      <div className="text-xs text-gray-600 mb-1">Calificacin</div>
                       <div className="text-xl text-blue-600">{student.avgGrade}%</div>
                     </div>
                   </div>
@@ -385,12 +482,12 @@ export function EstadisticasProfesorAdvanced() {
                     <Button size="sm" variant="outline">
                       Ver perfil
                     </Button>
-                    <Button size="sm" variant="outline">
+                    <Button size="sm" variant="outline" onClick={() => openMessageModal(student)}>
                       Enviar mensaje
                     </Button>
                     {(student.riskLevel === "high" || student.riskLevel === "critical") && (
                       <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
-                        Programar tutoria
+                        Programar tutora
                       </Button>
                     )}
                   </div>
@@ -405,6 +502,55 @@ export function EstadisticasProfesorAdvanced() {
           </div>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={messageOpen} onOpenChange={setMessageOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Notificar estudiante</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm text-gray-600">Destinatario</p>
+              <p className="text-sm">{messageTarget.name}  {messageTarget.email}</p>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm text-gray-600">Asunto</label>
+              <input
+                className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+                value={messageSubject}
+                onChange={(event) => setMessageSubject(event.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm text-gray-600">Mensaje</label>
+              <textarea
+                className="min-h-[140px] w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+                value={messageBody}
+                onChange={(event) => setMessageBody(event.target.value)}
+              />
+            </div>
+            {messageStatus && (
+              <div
+                className={`rounded-md border px-3 py-2 text-sm ${
+                  messageStatus.type === "ok"
+                     "border-emerald-200 bg-emerald-50 text-emerald-700"
+                    : "border-red-200 bg-red-50 text-red-700"
+                }`}
+              >
+                {messageStatus.text}
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setMessageOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={sendNotification}>
+              Enviar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

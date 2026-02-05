@@ -1,0 +1,41 @@
+substitutions:
+  _REGION: us-central1
+  _REPO: visionclass
+  _BACKEND_SERVICE: visionclass-backend
+  _FRONTEND_SERVICE: visionclass-frontend
+  _ML_SERVICE: visionclass-ml
+
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -f
+      - backend/Dockerfile.gcp
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/backend:$COMMIT_SHA
+      - ./backend
+
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -f
+      - frontend/Dockerfile.gcp
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/frontend:$COMMIT_SHA
+      - ./frontend
+
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -f
+      - ml/Dockerfile.gcp
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/ml:$COMMIT_SHA
+      - ./ml
+
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/backend:$COMMIT_SHA
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/frontend:$COMMIT_SHA
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/ml:$COMMIT_SHA
+
+timeout: 1800s

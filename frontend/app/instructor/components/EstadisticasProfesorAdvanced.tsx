@@ -179,7 +179,7 @@ export function EstadisticasProfesorAdvanced() {
       .filter((enroll) => enroll.course.id === courseId)
       .map((enroll) => {
         const attention = normalizeNumber(
-          enroll.enrollment_data.attention_avg 
+          enroll.enrollment_data.attention_avg ??
             enroll.enrollment_data.attention_last
         );
         const progress = normalizeNumber(enroll.enrollment_data.progress);
@@ -221,7 +221,7 @@ export function EstadisticasProfesorAdvanced() {
         avgGrade: student.avgGrade,
         issue:
           student.riskLevel === "critical"
-             "Riesgo alto de desconexión"
+            ? "Riesgo alto de desconexión"
             : "Disminución en atención",
         details: `Atención ${student.attentionAvg}% y avance ${student.completionRate}%`,
         action: "Contactar estudiante",
@@ -251,7 +251,7 @@ export function EstadisticasProfesorAdvanced() {
     setMessageSubject("Alerta de rendimiento");
     setMessageBody(
       `Hola ${student.name},\n\n` +
-        `Detectamos una disminucion en tu rendimiento.\n` +
+        `Detectamos una disminución en tu rendimiento.\n` +
         `Atención promedio: ${student.attentionAvg}%\n` +
         `Progreso del curso: ${student.completionRate}%\n` +
         `Promedio de evaluaciones: ${student.avgGrade}%\n\n` +
@@ -465,7 +465,7 @@ export function EstadisticasProfesorAdvanced() {
                       <div className="text-xl text-purple-600">{student.d2rScore}%</div>
                     </div>
                     <div className="bg-green-50 rounded-lg p-3">
-                      <div className="text-xs text-gray-600 mb-1">Atencin</div>
+                      <div className="text-xs text-gray-600 mb-1">Atención</div>
                       <div className="text-xl text-green-600">{student.attentionAvg}%</div>
                     </div>
                     <div className="bg-orange-50 rounded-lg p-3">
@@ -511,7 +511,9 @@ export function EstadisticasProfesorAdvanced() {
           <div className="space-y-4">
             <div>
               <p className="text-sm text-gray-600">Destinatario</p>
-              <p className="text-sm">{messageTarget.name}  {messageTarget.email}</p>
+              <p className="text-sm">
+                {messageTarget?.name || "Estudiante"} {messageTarget?.email || ""}
+              </p>
             </div>
             <div className="space-y-2">
               <label className="text-sm text-gray-600">Asunto</label>
@@ -533,7 +535,7 @@ export function EstadisticasProfesorAdvanced() {
               <div
                 className={`rounded-md border px-3 py-2 text-sm ${
                   messageStatus.type === "ok"
-                     "border-emerald-200 bg-emerald-50 text-emerald-700"
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                     : "border-red-200 bg-red-50 text-red-700"
                 }`}
               >

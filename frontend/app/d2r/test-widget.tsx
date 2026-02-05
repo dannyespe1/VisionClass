@@ -53,7 +53,7 @@ export default function D2RWidget({
   const [timeLeft, setTimeLeft] = useState(durationSeconds);
   const [active, setActive] = useState(false);
   const ROW_SIZE = D2R_ROW_SIZE;
-  const [row, setRow] = useState<Cell[]>(() => D2R_ROWS[0]  []);
+  const [row, setRow] = useState<Cell[]>(() => D2R_ROWS[0] ?? []);
   const [TA, setTA] = useState(0); // aciertos
   const [C, setC] = useState(0);   // comisiones
   const [clickedIds, setClickedIds] = useState<Set<number>>(new Set());
@@ -72,9 +72,9 @@ export default function D2RWidget({
 
     // d2-R (Versin A) requiere filas fijas y estmulo esttico desde el inicio de la fase
     const nextRow = D2R_ROWS[phase - 1];
-    setRow(nextRow  []);
+    setRow(nextRow ?? []);
     phaseStartRef.current = Date.now();
-    onPhaseStart.({ phase, startedAt: phaseStartRef.current });
+    onPhaseStart?.({ phase, startedAt: phaseStartRef.current });
     setActive(true);
   }, [durationSeconds, phase, onPhaseStart]);
 

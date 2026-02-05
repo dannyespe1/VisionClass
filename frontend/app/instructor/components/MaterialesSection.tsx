@@ -376,7 +376,7 @@ export function MaterialesSection() {
     setModulesDraft((prev) => {
       const idx = prev.findIndex((m) => m.id === id);
       if (idx === -1) return prev;
-      const swapWith = dir === "up"  idx - 1 : idx + 1;
+      const swapWith = dir === "up" ? idx - 1 : idx + 1;
       if (swapWith < 0 || swapWith >= prev.length) return prev;
       const copy = [...prev];
       [copy[idx], copy[swapWith]] = [copy[swapWith], copy[idx]];
@@ -504,9 +504,9 @@ export function MaterialesSection() {
       description: "",
       type: "pdf",
       url: "",
-      courseId: formData.courseId || (courses[0]  String(courses[0].id) : ""),
-      moduleId: moduleOptions[0].id || "",
-      lessonId: lessonOptions[0].id || "",
+      courseId: formData.courseId || (courses[0] ? String(courses[0].id) : ""),
+      moduleId: moduleOptions[0]?.id || "",
+      lessonId: lessonOptions[0]?.id || "",
     });
     setFilePdf(null);
     setFileBase64("");
@@ -663,7 +663,7 @@ export function MaterialesSection() {
       .filter((m) => String(m.courseId) === manageCourseId)
       .sort((a, b) => a.order - b.order);
     const idx = courseModulesForCourse.findIndex((m) => m.id === moduleId);
-    const swapIdx = dir === "up"  idx - 1 : idx + 1;
+    const swapIdx = dir === "up" ? idx - 1 : idx + 1;
     if (idx === -1 || swapIdx < 0 || swapIdx >= courseModulesForCourse.length) return;
     const current = courseModulesForCourse[idx];
     const target = courseModulesForCourse[swapIdx];
@@ -843,7 +843,7 @@ export function MaterialesSection() {
       .filter((l) => l.moduleId === lesson.moduleId)
       .sort((a, b) => a.order - b.order);
     const idx = lessonsForModule.findIndex((l) => l.id === lessonId);
-    const swapIdx = dir === "up"  idx - 1 : idx + 1;
+    const swapIdx = dir === "up" ? idx - 1 : idx + 1;
     if (idx === -1 || swapIdx < 0 || swapIdx >= lessonsForModule.length) return;
     const current = lessonsForModule[idx];
     const target = lessonsForModule[swapIdx];
@@ -1415,11 +1415,11 @@ export function MaterialesSection() {
               {aiSources.map((item, idx) => (
                 <div key={`${item.type}-${idx}`} className="rounded-lg border border-slate-200 bg-white px-4 py-3">
                   <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                    {sourceTypeIcons[item.type]  <ClipboardList className="h-4 w-4 text-slate-400" />}
+                    {sourceTypeIcons[item.type] || <ClipboardList className="h-4 w-4 text-slate-400" />}
                     <span>{item.title}</span>
                   </div>
                   <div className="text-xs text-slate-500 mt-1">
-                    Tipo: {sourceTypeLabels[item.type]  item.type}
+                    Tipo: {sourceTypeLabels[item.type] || item.type}
                   </div>
                   {item.detail && <div className="text-xs text-slate-600 mt-1">{item.detail}</div>}
                 </div>
@@ -1565,7 +1565,11 @@ export function MaterialesSection() {
                 <Label>URL / recurso</Label>
                 <Input
                   value={formData.url}
-                  onChange={(e) => (formData.type === "video"  handleYoutubePreview(e.target.value) : setFormData({ ...formData, url: e.target.value }))}
+                  onChange={(e) =>
+                    formData.type === "video"
+                      ? handleYoutubePreview(e.target.value)
+                      : setFormData({ ...formData, url: e.target.value })
+                  }
                   placeholder={formData.type === "video" ? "https://... (YouTube)" : "https://... (opcional si subes PDF)"}
                   required={formData.type !== "pdf"}
                 />
@@ -1578,14 +1582,14 @@ export function MaterialesSection() {
                     type="file"
                     accept="application/pdf"
                     onChange={(e) => {
-                      const file = e.target.files.[0] || null;
+                      const file = e.target.files?.[0] || null;
                       setFilePdf(file);
                       setFileBase64("");
                       if (!file) return;
                       const reader = new FileReader();
                       reader.onload = () => {
-                        const result = typeof reader.result === "string"  reader.result : "";
-                        const base64 = result.includes(",")  result.split(",")[1] : result;
+                        const result = typeof reader.result === "string" ? reader.result : "";
+                        const base64 = result.includes(",") ? result.split(",")[1] : result;
                         setFileBase64(base64 || "");
                       };
                       reader.readAsDataURL(file);

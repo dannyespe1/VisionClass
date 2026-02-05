@@ -163,7 +163,7 @@ export function EstadisticasSection() {
 
     load();
   }, [token]);
-  const academicMetrics = metrics.academic_metrics  {
+  const academicMetrics = metrics?.academic_metrics ?? {
     gpa: 0,
     courses_completed: 0,
     total_courses: 0,
@@ -173,7 +173,7 @@ export function EstadisticasSection() {
     certificates_earned: 0,
   };
 
-  const d2rAnalysis = metrics.d2r_analysis  {
+  const d2rAnalysis = metrics?.d2r_analysis ?? {
     baseline_score: 0,
     current_score: 0,
     trend: "0%",
@@ -185,7 +185,7 @@ export function EstadisticasSection() {
 
   const attentionTrend = useMemo(
     () =>
-      (metrics.attention_trend || []).map((item) => ({
+      (metrics?.attention_trend || []).map((item) => ({
         month: item.label,
         attention: item.attention,
         performance: item.performance,
@@ -193,11 +193,11 @@ export function EstadisticasSection() {
     [metrics]
   );
 
-  const contentEffectiveness = metrics.content_effectiveness || [];
-  const productivityByHour = metrics.productivity_by_hour || [];
-  const courseBreakdown = metrics.course_breakdown || [];
-  const achievements = metrics.achievements || [];
-  const recommendations = metrics.recommendations || [];
+  const contentEffectiveness = metrics?.content_effectiveness || [];
+  const productivityByHour = metrics?.productivity_by_hour || [];
+  const courseBreakdown = metrics?.course_breakdown || [];
+  const achievements = metrics?.achievements || [];
+  const recommendations = metrics?.recommendations || [];
   const COLORS = ["#3b82f6", "#8b5cf6", "#10b981", "#f97316", "#06b6d4"];
 
   const getPriorityColor = (priority: string) => {
@@ -229,21 +229,21 @@ export function EstadisticasSection() {
   };
 
   const categoryDistribution = courseBreakdown.length
-     courseBreakdown.map((c) => ({
+    ? courseBreakdown.map((c) => ({
         name: c.name,
         value: Math.max(5, Math.min(60, Math.round(c.progress))),
       }))
     : [
-        { name: "Programacion", value: 45 },
+        { name: "Programación", value: 45 },
         { name: "IA/ML", value: 30 },
-        { name: "Diseno", value: 25 },
+        { name: "Diseño", value: 25 },
       ];
 
   const lastTestLabel = d2rAnalysis.last_test_date
-     new Date(d2rAnalysis.last_test_date).toLocaleDateString()
+    ? new Date(d2rAnalysis.last_test_date).toLocaleDateString()
     : "Sin registro";
   const nextScheduledLabel = d2rAnalysis.next_scheduled
-     new Date(d2rAnalysis.next_scheduled).toLocaleDateString()
+    ? new Date(d2rAnalysis.next_scheduled).toLocaleDateString()
     : "--";
 
   const achievementIconMap: Record<string, typeof Brain> = {
@@ -256,7 +256,7 @@ export function EstadisticasSection() {
 
   const handleExport = async (format: "pdf" | "xlsx") => {
     const authToken =
-      token || (typeof window !== "undefined"  localStorage.getItem("jwt_token") : null);
+      token || (typeof window !== "undefined" ? localStorage.getItem("jwt_token") : null);
     if (!authToken) {
       setError("Inicia sesión nuevamente para exportar el reporte.");
       return;

@@ -73,7 +73,7 @@ export default function D2RPage() {
 
         await requestCamera();
       } catch (err: any) {
-        setStatus(err.message || "Error iniciando sesin D2R");
+        setStatus(err.message || "Error iniciando sesión D2R");
       }
     };
     bootstrap();
@@ -112,7 +112,7 @@ export default function D2RPage() {
         setErrors(String(totals.C));
         setAttention(String(Math.max(totals.CON, 0)));
         setProcessing((totals.TA / totalTime).toFixed(2));
-        setStatus("Test completado. Guardaremos este resultado como lnea base.");
+        setStatus("Test completado. Guardaremos este resultado como línea base.");
         stopCamera();
         setFinished(true);
       }
@@ -261,7 +261,7 @@ export default function D2RPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 flex flex-col items-center">
-      {!started && (
+      {!started ? (
         <section className="max-w-4xl w-full px-4 py-10 flex flex-col items-center">
           <div className="w-full bg-white rounded-3xl shadow-xl border border-slate-100 p-6 sm:p-8 space-y-6">
             <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm text-emerald-800">
@@ -318,10 +318,10 @@ export default function D2RPage() {
                 className="px-5 py-3 rounded-xl bg-slate-900 text-white text-sm font-semibold shadow hover:bg-black"
               >
                 {cameraStatus === "pending"
-                   "Permitir cámara"
+                  ? "Permitir cámara"
                   : cameraStatus === "granted"
-                   "Cámara habilitada"
-                  : "Reintentar cámara"}
+                    ? "Cámara habilitada"
+                    : "Reintentar cámara"}
               </button>
               <button
                 disabled={cameraStatus !== "granted"}

@@ -109,8 +109,8 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
           const lastLessonId = data.last_lesson_id;
           const lastIndex = courseLessons.findIndex((l) => l.id === lastLessonId);
           const nextLesson =
-            (lastIndex >= 0 ? courseLessons[lastIndex + 1].title : courseLessons[0].title) ||
-            meta.modules.[0].name ||
+            (lastIndex >= 0 ? courseLessons[lastIndex + 1]?.title : courseLessons[0]?.title) ||
+            meta.modules?.[0]?.name ||
             "Contenido inicial";
           return {
             id: course.id,
@@ -121,7 +121,7 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
             completedLessons,
             nextLesson,
             image: meta.thumbnail || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5w=800",
-            category: "Programacion",
+            category: "Programación",
             attentionLevel: 85,
           } as EnrolledCourse;
         });
@@ -151,7 +151,7 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
       .sort((a, b) => a.order - b.order);
     return modules.map((m, idx) => ({
       id: m.id,
-      title: `Modulo ${idx + 1}`,
+      title: `Módulo ${idx + 1}`,
       lessons: lessonData
         .filter((l) => l.moduleId === m.id)
         .sort((a, b) => (a.moduleOrder - b.moduleOrder) || (a.order - b.order)),
@@ -164,7 +164,7 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-semibold text-slate-900">Bienvenido de nuevo</h2>
-            <p className="text-sm text-slate-500">Continua con tu aprendizaje donde lo dejaste.</p>
+            <p className="text-sm text-slate-500">Continúa con tu aprendizaje donde lo dejaste.</p>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -407,7 +407,7 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Temario del curso</DialogTitle>
-            <DialogDescription>{syllabusCourse.title || "Curso"}</DialogDescription>
+            <DialogDescription>{syllabusCourse?.title || "Curso"}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 max-h-[60vh] overflow-auto pr-2">
             {syllabusModules.length === 0 && (

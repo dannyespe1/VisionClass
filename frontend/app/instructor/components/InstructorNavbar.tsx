@@ -117,7 +117,8 @@ export function InstructorNavbar({ activeTab, onTabChange }: Props) {
     }
   };
 
-  const initials = `${profileForm.first_name.[0] || ""}${profileForm.last_name.[0] || ""}` || "VC";
+  const initials =
+    `${profileForm.first_name?.[0] || ""}${profileForm.last_name?.[0] || ""}` || "VC";
   const avatarUrl = profileForm.profile_image;
 
   return (
@@ -234,7 +235,7 @@ export function InstructorNavbar({ activeTab, onTabChange }: Props) {
                           accept="image/*"
                           className="hidden"
                           onChange={(event) => {
-                            const file = event.target.files.[0];
+                            const file = event.target.files?.[0];
                             if (!file) return;
                             if (file.size > 1024 * 1024) {
                               setUploadError("La imagen debe pesar menos de 1MB.");

@@ -111,7 +111,8 @@ export function StudentNavbar({ activeTab, onTabChange }: Props) {
     }
   };
 
-  const initials = `${profileForm.first_name.[0] || ""}${profileForm.last_name.[0] || ""}` || "VC";
+  const initials =
+    `${profileForm.first_name?.[0] || ""}${profileForm.last_name?.[0] || ""}` || "VC";
   const avatarUrl = profileForm.profile_image;
 
   const tabs: { id: TabId; label: string }[] = [
@@ -235,7 +236,7 @@ export function StudentNavbar({ activeTab, onTabChange }: Props) {
                           accept="image/*"
                           className="hidden"
                           onChange={(event) => {
-                            const file = event.target.files.[0];
+                            const file = event.target.files?.[0];
                             if (!file) return;
                             if (file.size > 1024 * 1024) {
                               setUploadError("La imagen debe pesar menos de 1MB.");
@@ -287,17 +288,17 @@ export function StudentNavbar({ activeTab, onTabChange }: Props) {
                 />
               </div>
               <div>
-                <label className="text-sm text-slate-600">Contrasea actual</label>
+                <label className="text-sm text-slate-600">Contraseña actual</label>
                 <input
                   type="password"
                   className="w-full border border-slate-200 rounded-lg px-3 py-2 mt-1"
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
-                  placeholder="Requerida para cambiar correo o contrasea"
+                  placeholder="Requerida para cambiar correo o contraseña"
                 />
               </div>
               <div>
-                <label className="text-sm text-slate-600">Nueva contrasea</label>
+                <label className="text-sm text-slate-600">Nueva contraseña</label>
                 <input
                   type="password"
                   className="w-full border border-slate-200 rounded-lg px-3 py-2 mt-1"
@@ -306,7 +307,7 @@ export function StudentNavbar({ activeTab, onTabChange }: Props) {
                 />
               </div>
               <div>
-                <label className="text-sm text-slate-600">Confirmar nueva contrasea</label>
+                <label className="text-sm text-slate-600">Confirmar nueva contraseña</label>
                 <input
                   type="password"
                   className="w-full border border-slate-200 rounded-lg px-3 py-2 mt-1"

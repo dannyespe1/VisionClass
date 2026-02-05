@@ -204,7 +204,7 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
               onClick={() => setSelectedCategory(category.id)}
               className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
                 selectedCategory === category.id
-                   "bg-blue-600 text-white"
+                  ? "bg-blue-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-50"
               }`}
             >
@@ -299,7 +299,7 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
           <DialogHeader>
             <DialogTitle>Confirmar inscripcion</DialogTitle>
             <DialogDescription>
-              Completa los datos para matricularte en {enrollCourse.title || "el curso"}.
+              Completa los datos para matricularte en {enrollCourse?.title || "el curso"}.
             </DialogDescription>
           </DialogHeader>
 

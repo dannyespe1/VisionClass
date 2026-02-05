@@ -573,7 +573,7 @@ export default function AdminPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Eliminar usuario</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta accion eliminara al usuario {activeUser.name || activeUser.email}. No se puede deshacer.
+              Esta accion eliminara al usuario {activeUser?.name || activeUser?.email || "seleccionado"}. No se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

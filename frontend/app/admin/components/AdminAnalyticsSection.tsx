@@ -75,14 +75,14 @@ export function AdminAnalyticsSection({ data, onUpdatePolicy, onUpdateResearchSt
   };
 
   const resolvePolicyValue = (policy: PrivacyPolicySetting) =>
-    policyValues[policy.id]  policy.current_value;
+    policyValues[policy.id] ?? policy.current_value;
 
   return (
     <section className="space-y-8">
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-3xl mb-2">Análisis Institucional</h1>
-          <p className="text-slate-600">Métricas agregadas, análisis predictivo y gestion de privacidad</p>
+          <p className="text-slate-600">Métricas agregadas, análisis predictivo y gestión de privacidad</p>
         </div>
         <Button variant="outline" size="sm">
           <Download className="w-4 h-4 mr-2" />
@@ -94,8 +94,8 @@ export function AdminAnalyticsSection({ data, onUpdatePolicy, onUpdateResearchSt
         <TabsList className="bg-white p-1 rounded-lg shadow-sm">
           <TabsTrigger value="metrics">Métricas por Facultad</TabsTrigger>
           <TabsTrigger value="prediction">Análisis Predictivo</TabsTrigger>
-          <TabsTrigger value="research">Permisos de Investigacion</TabsTrigger>
-          <TabsTrigger value="privacy">Politicas de Privacidad</TabsTrigger>
+          <TabsTrigger value="research">Permisos de Investigación</TabsTrigger>
+          <TabsTrigger value="privacy">Políticas de Privacidad</TabsTrigger>
         </TabsList>
 
         <TabsContent value="metrics" className="space-y-8">
@@ -135,12 +135,10 @@ export function AdminAnalyticsSection({ data, onUpdatePolicy, onUpdateResearchSt
                   <TrendingUp className="w-5 h-5 text-green-600" />
                 </div>
                 <div className="text-3xl mb-1">
-                  {facultyMetrics.length
-                     Math.round(
+                  {facultyMetrics.length ? Math.round(
                         facultyMetrics.reduce((sum, item) => sum + item.avgAttention, 0) /
                           facultyMetrics.length
-                      )
-                    : 0}
+                      ) : 0}
                   %
                 </div>
                 <div className="text-sm text-slate-600">Atención Promedio</div>
@@ -154,14 +152,12 @@ export function AdminAnalyticsSection({ data, onUpdatePolicy, onUpdateResearchSt
                   <TrendingDown className="w-5 h-5 text-red-600" />
                 </div>
                 <div className="text-3xl mb-1">
-                  {facultyMetrics.length
-                     Math.round(
+                  {facultyMetrics.length ? Math.round(
                         facultyMetrics.reduce((sum, item) => sum + item.dropoutRisk, 0) / facultyMetrics.length
-                      )
-                    : 0}
+                      ) : 0}
                   %
                 </div>
-                <div className="text-sm text-slate-600">Riesgo de Desercion</div>
+                <div className="text-sm text-slate-600">Riesgo de Deserción</div>
               </div>
             </div>
 
@@ -230,7 +226,7 @@ export function AdminAnalyticsSection({ data, onUpdatePolicy, onUpdateResearchSt
                       <Progress value={faculty.completionRate} className="h-2 mt-2" />
                     </div>
                     <div>
-                      <div className="text-sm text-slate-600 mb-2">Riesgo de Desercion</div>
+                      <div className="text-sm text-slate-600 mb-2">Riesgo de Deserción</div>
                       <div className="flex items-center gap-2">
                         <div className="text-2xl text-red-600">{faculty.dropoutRisk}%</div>
                       </div>
@@ -492,7 +488,7 @@ export function AdminAnalyticsSection({ data, onUpdatePolicy, onUpdateResearchSt
                 <Shield className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl mb-2">Configuración de Politicas de Privacidad</h2>
+                <h2 className="text-2xl mb-2">Configuración de Políticas de Privacidad</h2>
                 <p className="text-blue-100">
                   Gestiona la privacidad de datos a nivel institucional segun regulaciones y buenas practicas
                 </p>

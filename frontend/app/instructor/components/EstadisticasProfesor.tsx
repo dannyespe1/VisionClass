@@ -114,7 +114,7 @@ export function EstadisticasProfesor() {
       const courseEnrollments = enrollments.filter((enroll) => enroll.course.id === course.id);
       const attentionValues = courseEnrollments.map((enroll) =>
         normalizeNumber(
-          enroll.enrollment_data.attention_avg 
+          enroll.enrollment_data.attention_avg ??
             enroll.enrollment_data.attention_last
         )
       );
@@ -137,7 +137,7 @@ export function EstadisticasProfesor() {
   const overallStats = useMemo(() => {
     const attentionValues = enrollments.map((enroll) =>
       normalizeNumber(
-        enroll.enrollment_data.attention_avg 
+        enroll.enrollment_data.attention_avg ??
           enroll.enrollment_data.attention_last
       )
     );
@@ -158,8 +158,8 @@ export function EstadisticasProfesor() {
     sessions.forEach((session) => {
       if (!session.created_at) return;
       const value = normalizeNumber(
-        session.mean_attention 
-          session.attention_score 
+        session.mean_attention ??
+          session.attention_score ??
           session.last_score
       );
       if (!value) return;
@@ -176,7 +176,7 @@ export function EstadisticasProfesor() {
           enroll.enrollment_data.last_update_at;
         if (!timestamp) return;
         const value = normalizeNumber(
-          enroll.enrollment_data.attention_avg 
+          enroll.enrollment_data.attention_avg ??
             enroll.enrollment_data.attention_last
         );
         if (!value) return;
@@ -198,7 +198,7 @@ export function EstadisticasProfesor() {
     const buckets = { excelente: 0, bueno: 0, regular: 0, bajo: 0 };
       enrollments.forEach((enroll) => {
       const value = normalizeNumber(
-        enroll.enrollment_data.attention_avg 
+        enroll.enrollment_data.attention_avg ??
           enroll.enrollment_data.attention_last
       );
       if (!value) return;
@@ -314,7 +314,7 @@ export function EstadisticasProfesor() {
                       <span
                         className={`px-3 py-1 rounded-full text-sm ${
                           stat.avgAttention >= 80
-                             "bg-green-100 text-green-700"
+                            ? "bg-green-100 text-green-700"
                             : "bg-yellow-100 text-yellow-700"
                         }`}
                       >

@@ -821,7 +821,7 @@ export default function CoursePage() {
               <div className="space-y-2">
                 <p className="text-sm">
                   {permissionSettings.enableCamera
-                     "Cámara activa para análisis de atención. Click para ajustar configuración."
+                    ? "Cámara activa para análisis de atención. Click para ajustar configuración."
                     : "Cámara inactiva. Click para habilitar análisis de atención."}
                 </p>
                 {permissionSettings.enableAttentionTracking && (

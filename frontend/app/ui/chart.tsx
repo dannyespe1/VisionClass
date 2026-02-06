@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import * as RechartsPrimitive from "recharts";
+import type { TooltipProps, ValueType, NameType } from "recharts";
 
 import { cn } from "../utils";
 
@@ -119,28 +120,29 @@ const ChartTooltipContent = ({
   color,
   nameKey,
   labelKey,
-}: React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
+}: TooltipProps<ValueType, NameType> &
   React.ComponentProps<"div"> & {
-    hideLabel: boolean;
-    hideIndicator: boolean;
-    indicator: "line" | "dot" | "dashed";
-    nameKey: string;
-    labelKey: string;
+    hideLabel?: boolean;
+    hideIndicator?: boolean;
+    indicator?: "line" | "dot" | "dashed";
+    nameKey?: string;
+    labelKey?: string;
   }) => {
   const { config } = useChart();
+  const payloadList = payload ?? [];
 
   const tooltipLabel = React.useMemo(() => {
-    if (hideLabel || !payload.length) {
+    if (hideLabel || !payloadList.length) {
       return null;
     }
 
-    const [item] = payload;
+    const [item] = payloadList;
     const key = `${labelKey || item.dataKey || item.name || "value"}`;
     const itemConfig = getPayloadConfigFromPayload(config, item, key);
     const value =
       !labelKey && typeof label === "string"
-         config[label as keyof typeof config].label || label
-        : itemConfig.label;
+        ? config[label as keyof typeof config]?.label || label
+        : itemConfig?.label;
 
     if (labelFormatter && value !== undefined) {
       return (
@@ -158,18 +160,18 @@ const ChartTooltipContent = ({
   }, [
     label,
     labelFormatter,
-    payload,
+    payloadList,
     hideLabel,
     labelClassName,
     config,
     labelKey,
   ]);
 
-  if (!active || !payload.length) {
+  if (!active || !payloadList.length) {
     return null;
   }
 
-  const nestLabel = payload.length === 1 && indicator !== "dot";
+  const nestLabel = payloadList.length === 1 && indicator !== "dot";
 
   return (
     <div
@@ -180,7 +182,7 @@ const ChartTooltipContent = ({
     >
       {!nestLabel ? tooltipLabel : null}
       <div className="grid gap-1.5">
-        {payload.map((item, index) => {
+        {payloadList.map((item, index) => {
           const key = `${nameKey || item.name || item.dataKey || "value"}`;
           const itemConfig = getPayloadConfigFromPayload(config, item, key);
           const indicatorColor = color || item.payload.fill || item.color;

@@ -439,7 +439,7 @@ export default function CoursePage() {
     startContentView().catch((err) => console.error(err));
 
     return () => {
-      if (contentViewRef.current.id) {
+      if (contentViewRef.current?.id) {
         persistContentView("switch").catch((err) => console.error(err));
       }
     };
@@ -447,7 +447,7 @@ export default function CoursePage() {
 
   useEffect(() => {
     return () => {
-      if (contentViewRef.current.id) {
+      if (contentViewRef.current?.id) {
         persistContentView("exit").catch((err) => console.error(err));
       }
     };

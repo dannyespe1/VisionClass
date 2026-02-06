@@ -492,7 +492,7 @@ export default function CoursePage() {
       if (selectedLessonId) form.append("lesson_id", String(selectedLessonId));
       if (currentMaterial?.materialType) form.append("material_type", currentMaterial.materialType);
 
-      const resp = await postFrameToML(form, token);
+      const resp = await postFrameToML(form, token || undefined);
       const isOk = resp.ok !== false;
       if (!isOk) return;
       const frameLabel = resp.frame_score.label;

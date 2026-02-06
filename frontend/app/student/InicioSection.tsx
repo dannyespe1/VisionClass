@@ -79,7 +79,7 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
         const lessons: LessonItem[] = (lessonsData || [])
           .filter((l) => (l.module.course.title || "").toLowerCase() !== "baseline d2r")
           .map((l) => {
-            const moduleOrder = modules.find((m) => m.id === l.module.id).order || 0;
+            const moduleOrder = modules.find((m) => m.id === l.module.id)?.order || 0;
             return {
               id: l.id,
               title: l.title || "Leccion",

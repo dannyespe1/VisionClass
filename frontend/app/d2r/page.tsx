@@ -6,7 +6,7 @@ import { apiFetch } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import D2RWidget from "./test-widget";
 
-type PhaseResult = { TR: number; TA: number; O: number; C: number; CON: number; targetCount: number };
+type PhaseResult = { TR: number; TA: number; O: number; C: number; CON: number; targetCount?: number };
 type PhaseEvent = { phase: number; ts: number; cellId: number; isTarget: boolean };
 
 export default function D2RPage() {

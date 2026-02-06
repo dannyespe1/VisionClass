@@ -379,7 +379,7 @@ export default function CoursePage() {
   }, [currentMaterial]);
 
   const persistContentView = async (reason: "switch" | "exit" | "complete") => {
-    if (!token || !contentViewRef.current.id) return;
+    if (!token || !contentViewRef.current?.id) return;
     const durationSeconds = Math.max(1, Math.round((Date.now() - contentViewRef.current.startedAt) / 1000));
     const payload = {
       ended_at: new Date().toISOString(),

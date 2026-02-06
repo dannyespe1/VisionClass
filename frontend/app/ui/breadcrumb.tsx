@@ -36,7 +36,7 @@ function BreadcrumbLink({
   className,
   ...props
 }: React.ComponentProps<"a"> & {
-  asChild: boolean;
+  asChild?: boolean;
 }) {
   const Comp = asChild ? Slot : "a";
 
@@ -75,7 +75,7 @@ function BreadcrumbSeparator({
       className={cn("[&>svg]:size-3.5", className)}
       {...props}
     >
-      {children  <ChevronRight />}
+      {children || <ChevronRight />}
     </li>
   );
 }

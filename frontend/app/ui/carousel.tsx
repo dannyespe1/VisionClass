@@ -111,7 +111,7 @@ function Carousel({
         api,
         opts,
         orientation:
-          orientation || (opts.axis === "y" ? "vertical" : "horizontal"),
+          orientation || (opts?.axis === "y" ? "vertical" : "horizontal"),
         plugins,
         setApi,
         scrollPrev,

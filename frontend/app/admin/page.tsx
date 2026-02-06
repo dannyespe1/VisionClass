@@ -31,7 +31,14 @@ import {
 } from "../ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { apiFetch } from "../lib/api";
-import type { AdminAnalyticsData, AdminCourse, AdminUser, AdminView } from "./types";
+import type {
+  AdminAnalyticsData,
+  AdminCourse,
+  AdminUser,
+  AdminView,
+  PrivacyPolicySetting,
+  ResearchPermission,
+} from "./types";
 
 export default function AdminPage() {
   const { token } = useAuth();
@@ -325,7 +332,7 @@ export default function AdminPage() {
   const handleUpdatePolicy = async (id: number, value: string) => {
     if (!token) return;
     try {
-      const updated = await apiFetch(`/api/admin/privacy-policies/${id}/`, {
+      const updated = await apiFetch<PrivacyPolicySetting>(`/api/admin/privacy-policies/${id}/`, {
         method: "PATCH",
         body: JSON.stringify({ current_value: value }),
       }, token);
@@ -343,7 +350,7 @@ export default function AdminPage() {
   const handleUpdateResearchStatus = async (id: number, statusValue: "pending" | "approved" | "rejected") => {
     if (!token) return;
     try {
-      const updated = await apiFetch(`/api/admin/research-permissions/${id}/`, {
+      const updated = await apiFetch<ResearchPermission>(`/api/admin/research-permissions/${id}/`, {
         method: "PATCH",
         body: JSON.stringify({ status: statusValue }),
       }, token);

@@ -124,6 +124,7 @@ const ChartTooltipContent = ({
   payload?: any[];
   label?: unknown;
   labelFormatter?: (value: unknown, payload: any[]) => React.ReactNode;
+  labelClassName?: string;
   formatter?: (
     value: unknown,
     name: string,

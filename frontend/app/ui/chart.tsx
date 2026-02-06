@@ -210,7 +210,7 @@ const ChartTooltipContent = ({
                 formatter(item.value, item.name, item, index, item.payload)
               ) : (
                 <>
-                  {itemConfig.icon ? (
+                  {itemConfig?.icon ? (
                     <itemConfig.icon />
                   ) : (
                     !hideIndicator && (
@@ -243,7 +243,7 @@ const ChartTooltipContent = ({
                     <div className="grid gap-1.5">
                       {nestLabel ? tooltipLabel : null}
                       <span className="text-muted-foreground">
-                        {itemConfig.label || item.name}
+                        {itemConfig?.label || item.name}
                       </span>
                     </div>
                     {item.value && (
@@ -300,7 +300,7 @@ const ChartLegendContent = ({
               "[&>svg]:text-muted-foreground flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3"
             )}
           >
-            {itemConfig.icon && !hideIcon ? (
+            {itemConfig?.icon && !hideIcon ? (
               <itemConfig.icon />
             ) : (
               <div
@@ -310,7 +310,7 @@ const ChartLegendContent = ({
                 }}
               />
             )}
-            {itemConfig.label || item.value}
+            {itemConfig?.label || item.value}
           </div>
         );
       })}

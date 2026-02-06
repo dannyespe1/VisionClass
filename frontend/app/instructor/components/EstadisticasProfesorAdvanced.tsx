@@ -65,6 +65,16 @@ type Enrollment = {
   };
 };
 
+type MessageTargetInput = {
+  userId: number;
+  courseId: number;
+  name: string;
+  email: string;
+  attentionAvg: number;
+  completionRate: number;
+  avgGrade: number;
+};
+
 type D2RResult = {
   id: number;
   user: { id: number };
@@ -237,7 +247,7 @@ export function EstadisticasProfesorAdvanced() {
     }));
   }, [studentAnalytics]);
 
-  const openMessageModal = (student: typeof studentAnalytics[number]) => {
+  const openMessageModal = (student: MessageTargetInput) => {
     if (!student.userId || !student.courseId) return;
     setMessageTarget({
       userId: student.userId,
@@ -374,17 +384,13 @@ export function EstadisticasProfesorAdvanced() {
                           size="sm"
                           onClick={() =>
                             openMessageModal({
-                              id: warning.id,
                               userId: warning.userId,
                               courseId: warning.courseId,
                               name: warning.student,
                               email: warning.email,
-                              d2rScore: 0,
                               avgGrade: warning.avgGrade,
                               attentionAvg: warning.attentionAvg,
                               completionRate: warning.completionRate,
-                              riskLevel: warning.type === "critical" ? "critical" : "high",
-                              lastActivity: "",
                             })
                           }
                         >

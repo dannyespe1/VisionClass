@@ -152,10 +152,10 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
       onCourseSelect(course.id);
       return;
     }
-    const fullName = `${me.first_name || ""} ${me.last_name || ""}`.trim();
+    const fullName = `${me?.first_name || ""} ${me?.last_name || ""}`.trim();
     setEnrollForm({
       fullName,
-      email: me.email || "",
+      email: me?.email || "",
       studentCode: "",
       career: "",
       semester: "",

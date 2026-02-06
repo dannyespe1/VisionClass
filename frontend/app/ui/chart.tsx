@@ -158,7 +158,7 @@ const ChartTooltipContent = ({
     if (labelFormatter && value !== undefined) {
       return (
         <div className={cn("font-medium", labelClassName)}>
-          {labelFormatter(value, payload)}
+          {labelFormatter(value, payloadList)}
         </div>
       );
     }

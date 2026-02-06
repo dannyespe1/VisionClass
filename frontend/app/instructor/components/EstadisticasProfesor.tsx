@@ -35,6 +35,8 @@ type Enrollment = {
     attention_last: number;
     progress: number;
     last_attention_at: string;
+    attention_updated_at?: string;
+    last_update_at?: string;
   };
 };
 

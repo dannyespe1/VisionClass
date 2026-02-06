@@ -217,13 +217,7 @@ export default function CoursePage() {
             order: m.order || 0,
             durationMinutes: Math.round((m.duration_hours || 0) * 60),
           }));
-        setModules(
-          mappedModules.map((m) => ({
-            id: m.id,
-            title: m.title,
-            order: m.order,
-          }))
-        );
+        setModules(mappedModules);
         const mappedLessons = (lessonsData || [])
           .filter((l) => l.module.course.id === courseId)
           .map((l) => ({

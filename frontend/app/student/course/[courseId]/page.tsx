@@ -338,7 +338,7 @@ export default function CoursePage() {
   useEffect(() => {
     if (!selectedLessonId) return;
     const lesson = lessons.find((item) => item.id === selectedLessonId);
-    if (!lesson.moduleId) return;
+    if (!lesson?.moduleId) return;
     setOpenModules((prev) => ({ ...prev, [lesson.moduleId]: true }));
   }, [selectedLessonId, lessons]);
 

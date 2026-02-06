@@ -218,7 +218,7 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
         <p className="text-gray-600">
           {filteredCourses.length} curso{filteredCourses.length !== 1 ? "s" : ""}{" "}
           {selectedCategory !== "todos" &&
-            `en ${categories.find((c) => c.id === selectedCategory).label}`}
+            `en ${categories.find((c) => c.id === selectedCategory)?.label || ""}`}
         </p>
       </div>
 

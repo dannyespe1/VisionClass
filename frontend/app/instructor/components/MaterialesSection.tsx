@@ -122,7 +122,7 @@ export function MaterialesSection() {
     course: "Curso",
     module: "Modulo",
   };
-  const sourceTypeIcons: Record<string, JSX.Element> = {
+  const sourceTypeIcons: Record<string, React.ReactElement> = {
     pdf: <FileText className="h-4 w-4 text-sky-600" />,
     video: <Video className="h-4 w-4 text-violet-600" />,
     lesson: <BookOpen className="h-4 w-4 text-emerald-600" />,

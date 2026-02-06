@@ -65,7 +65,7 @@ function extractMeta(description: string) {
 
 function stripMeta(description: string) {
   if (!description) return "";
-  return description.replace(/\s*\[meta\]:\s*\{.*\}\s*/s, "").trim();
+  return description.replace(/\s*\[meta\]:\s*\{[\s\S]*\}\s*/, "").trim();
 }
 
 type TabId = "inicio" | "materiales" | "estadisticas";

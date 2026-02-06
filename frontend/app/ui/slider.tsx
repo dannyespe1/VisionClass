@@ -16,9 +16,9 @@ function Slider({
   const _values = React.useMemo(
     () =>
       Array.isArray(value)
-         value
+        ? value
         : Array.isArray(defaultValue)
-           defaultValue
+          ? defaultValue
           : [min, max],
     [value, defaultValue, min, max],
   );

@@ -1,6 +1,8 @@
 type CourseMeta = {
   thumbnail?: string;
   modules?: Array<{ name: string; lessons: number; tests: number }>;
+  level?: string;
+  field?: string;
 };
 
 export function parseCourseMeta(description: string | null): {

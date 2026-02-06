@@ -39,3 +39,6 @@ images:
   - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/ml:$COMMIT_SHA
 
 timeout: 1800s
+
+options:
+  logging: CLOUD_LOGGING_ONLY

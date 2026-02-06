@@ -166,7 +166,7 @@ export function EstadisticasProfesor() {
       const date = new Date(session.created_at);
       const key = formatWeek(date);
       if (!grouped.has(key)) grouped.set(key, []);
-      grouped.get(key).push(value);
+      grouped.get(key)?.push(value);
     });
     if (!grouped.size) {
       enrollments.forEach((enroll) => {
@@ -183,7 +183,7 @@ export function EstadisticasProfesor() {
         const date = new Date(timestamp);
         const key = formatWeek(date);
         if (!grouped.has(key)) grouped.set(key, []);
-        grouped.get(key).push(value);
+        grouped.get(key)?.push(value);
       });
     }
     return Array.from(grouped.entries())

@@ -458,7 +458,7 @@ export default function CoursePage() {
       clearInterval(frameTimerRef.current);
       frameTimerRef.current = null;
     }
-    if (videoRef.current.srcObject) {
+    if (videoRef.current?.srcObject) {
       const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
       tracks.forEach((track) => track.stop());
       videoRef.current.srcObject = null;

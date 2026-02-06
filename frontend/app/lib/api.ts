@@ -5,7 +5,7 @@ export const ML_URL = process.env.NEXT_PUBLIC_ML_URL || "http://localhost:9000";
 export async function apiFetch<T>(
   path: string,
   options: RequestInit = {},
-  token: string
+  token?: string
 ): Promise<T> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",

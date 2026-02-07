@@ -93,22 +93,25 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
         const materialsByCourse = new Map<number, number>();
 
         (modulesData || []).forEach((m) => {
+          if (!m.course) return;
           const courseId = m.course.id;
           if (!courseId) return;
           modulesByCourse.set(courseId, (modulesByCourse.get(courseId) || 0) + 1);
         });
         (lessonsData || []).forEach((l) => {
+          if (!l.module || !l.module.course) return;
           const courseId = l.module.course.id;
           if (!courseId) return;
           lessonsByCourse.set(courseId, (lessonsByCourse.get(courseId) || 0) + 1);
         });
         (materialsData || []).forEach((mat) => {
+          if (!mat.lesson || !mat.lesson.module || !mat.lesson.module.course) return;
           const courseId = mat.lesson.module.course.id;
           if (!courseId) return;
           materialsByCourse.set(courseId, (materialsByCourse.get(courseId) || 0) + 1);
         });
         const enrolled = new Set<number>(
-          (enrollments || []).map((e) => e.course.id).filter(Boolean)
+          (enrollments || []).filter((e) => e.course).map((e) => e.course.id).filter(Boolean)
         );
         setEnrolledIds(enrolled);
         setCourses(

@@ -188,7 +188,7 @@ export function MaterialesSection() {
       );
 
       const mappedModules: CourseModule[] = (modulesData || [])
-        .filter((m) => (m.course.title || "").toLowerCase() !== BASELINE_TITLE)
+        .filter((m) => m.course && (m.course.title || "").toLowerCase() !== BASELINE_TITLE)
         .map((m) => ({
           id: m.id,
           title: m.title,
@@ -199,7 +199,7 @@ export function MaterialesSection() {
         }));
 
       const mappedLessons: CourseLesson[] = (lessonsData || [])
-        .filter((l) => (l.module.course.title || "").toLowerCase() !== BASELINE_TITLE)
+        .filter((l) => l.module && l.module.course && (l.module.course.title || "").toLowerCase() !== BASELINE_TITLE)
         .map((l) => ({
           id: l.id,
           title: l.title,
@@ -210,7 +210,7 @@ export function MaterialesSection() {
         }));
 
       const mappedMaterials: CourseMaterial[] = (materialsData || [])
-        .filter((mat) => (mat.lesson.module.course.title || "").toLowerCase() !== BASELINE_TITLE)
+        .filter((mat) => mat.lesson && mat.lesson.module && mat.lesson.module.course && (mat.lesson.module.course.title || "").toLowerCase() !== BASELINE_TITLE)
         .map((mat) => ({
           id: mat.id,
           title: mat.title,

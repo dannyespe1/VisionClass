@@ -162,7 +162,7 @@ export default function CoursePage() {
           setSessionId(session.id);
         }
         const enrollments = await apiFetch<any[]>("/api/enrollments/", {}, token);
-        let enrollment = (enrollments || []).find((e) => e.course.id === courseId);
+        let enrollment = (enrollments || []).find((e) => e.course && e.course.id === courseId);
         if (!enrollment) {
           enrollment = await apiFetch<any>(
             "/api/enrollments/",

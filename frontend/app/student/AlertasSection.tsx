@@ -84,7 +84,7 @@ export function AlertasSection() {
                 <p className="text-sm text-slate-600 mt-1">
                   {formatSender(item.sender)}  {formatDate(item.sent_at || item.created_at)}
                 </p>
-                {item.course.title && (
+                {item.course && item.course.title && (
                   <p className="text-xs text-slate-500 mt-1">Curso: {item.course.title}</p>
                 )}
               </div>

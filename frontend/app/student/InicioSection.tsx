@@ -66,18 +66,19 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
           apiFetch<any[]>("/api/course-lessons/", {}, token),
         ]);
         const filtered = (enrollments || []).filter((e) => {
+          if (!e.course) return false;
           const title = (e.course.title || "").toLowerCase();
           return title && title !== "baseline d2r";
         });
         const modules: ModuleItem[] = (modulesData || [])
-          .filter((m) => (m.course.title || "").toLowerCase() !== "baseline d2r")
+          .filter((m) => m.course && (m.course.title || "").toLowerCase() !== "baseline d2r")
           .map((m) => ({
             id: m.id,
             order: m.order || 0,
             courseId: m.course.id,
           }));
         const lessons: LessonItem[] = (lessonsData || [])
-          .filter((l) => (l.module.course.title || "").toLowerCase() !== "baseline d2r")
+          .filter((l) => l.module && l.module.course && (l.module.course.title || "").toLowerCase() !== "baseline d2r")
           .map((l) => {
             const moduleOrder = modules.find((m) => m.id === l.module.id)?.order || 0;
             return {

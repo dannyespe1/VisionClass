@@ -443,7 +443,7 @@ export default function CoursePage() {
         persistContentView("switch").catch((err) => console.error(err));
       }
     };
-  }, [currentMaterial.id, permissionOpen]);
+  }, [currentMaterial?.id, permissionOpen]);
 
   useEffect(() => {
     return () => {

@@ -69,11 +69,19 @@ type LessonSummary = {
 const toYoutubeEmbed = (url: string) => {
   if (!url) return "";
   if (url.includes("embed/")) return url;
-  if (url.includes("watchv=")) return url.replace("watchv=", "embed/");
-  if (url.includes("youtu.be/")) {
-    const id = url.split("youtu.be/")[1].split("?")[0];
-    return id ? `https://www.youtube.com/embed/${id}` : url;
+  
+  // Handle youtube.com/watch?v=VIDEO_ID format
+  if (url.includes("watch?v=")) {
+    const match = url.match(/v=([a-zA-Z0-9_-]{11})/);
+    if (match && match[1]) return `https://www.youtube.com/embed/${match[1]}`;
   }
+  
+  // Handle youtu.be/VIDEO_ID format
+  if (url.includes("youtu.be/")) {
+    const id = url.split("youtu.be/")[1].split("?")[0].split("&")[0];
+    if (id) return `https://www.youtube.com/embed/${id}`;
+  }
+  
   return url;
 };
 

@@ -293,7 +293,9 @@ async def analyze_frame(
     has_face = result.get("data", {}).get("face", False)
     frame_score = result.get("value")
     temporal_score = temporal.get("value")
-    print(f"[analyze/frame] session={session_key}, face={has_face}, frame_score={frame_score:.2f if frame_score else None}, temporal={temporal_score:.2f if temporal_score else None}")
+    frame_score_str = f"{frame_score:.2f}" if frame_score is not None else "None"
+    temporal_score_str = f"{temporal_score:.2f}" if temporal_score is not None else "None"
+    print(f"[analyze/frame] session={session_key}, face={has_face}, frame_score={frame_score_str}, temporal={temporal_score_str}")
 
     # Opcional: guardar frame para dataset (no es video, solo imágenes sueltas)
     frame_path = None

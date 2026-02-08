@@ -289,6 +289,12 @@ async def analyze_frame(
     result = compute_attention_score(image)
     temporal = aggregate_temporal_score(session_key, result)
 
+    # LOG DETALLADO para debugging
+    has_face = result.get("data", {}).get("face", False)
+    frame_score = result.get("value")
+    temporal_score = temporal.get("value")
+    print(f"[analyze/frame] session={session_key}, face={has_face}, frame_score={frame_score:.2f if frame_score else None}, temporal={temporal_score:.2f if temporal_score else None}")
+
     # Opcional: guardar frame para dataset (no es video, solo imágenes sueltas)
     frame_path = None
     if os.environ.get("SAVE_FRAMES", "0") == "1":
@@ -325,8 +331,8 @@ async def analyze_frame(
             crop = crop.astype("float32") / 255.0
             crop = np.transpose(crop, (2, 0, 1))  # C,H,W
             session_frame_buffers[session_key].append(crop)
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"[analyze/frame] Error procesando frame para modelo: {e}")
 
         if ort_session and len(session_frame_buffers[session_key]) >= SEQUENCE_LENGTH and int(spinning) == 0:
             try:
@@ -335,7 +341,9 @@ async def analyze_frame(
                 ort_out = ort_session.run(None, {"frames": arr, "mask": None})
                 if ort_out:
                     model_score = float(np.clip(np.ravel(ort_out[0])[0], 0.0, 1.0))
-            except Exception:
+                    print(f"[analyze/frame] Modelo CNN-LSTM calculado: {model_score:.4f}")
+            except Exception as e:
+                print(f"[analyze/frame] Error ejecutando modelo CNN-LSTM: {e}")
                 model_score = None
 
     label = "attention_model" if model_score is not None else (

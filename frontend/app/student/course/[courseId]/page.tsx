@@ -537,12 +537,17 @@ export default function CoursePage() {
       const hasFace = frameScore.data?.face ?? frameScore.face ?? false;
       
       console.log("[sendFrame] Frame procesado", {
+        has_frame_score: !!resp.frame_score,
+        has_score: !!resp.score,
         label: frameLabel,
         hasFace,
-        hasValue: !!frameScore.value,
+        frameScoreKeys: resp.frame_score ? Object.keys(resp.frame_score) : [],
+        frameScoreDataKeys: resp.frame_score?.data ? Object.keys(resp.frame_score.data) : [],
+        frameValue: frameScore.value,
       });
       
       if (frameLabel === "no_face" || hasFace === false) {
+        console.log("[sendFrame] Sin rostro detectado");
         setAttentionStatus("no_face");
         setAttentionScore(0);
         return;
@@ -553,9 +558,21 @@ export default function CoursePage() {
       // Extraer valor de atención con múltiples fallbacks
       let rawValue = frameScore.value ?? resp.score?.value ?? resp.value ?? null;
       
+      console.log("[sendFrame] Valores extraídos", {
+        frameScore_value: frameScore.value,
+        score_value: resp.score?.value,
+        resp_value: resp.value,
+        rawValue,
+      });
+      
       if (rawValue !== null && rawValue !== undefined) {
         const normalized = rawValue > 1 ? rawValue : rawValue * 100;
         const rounded = Math.round(normalized);
+        console.log("[sendFrame] Atención calculada", {
+          rawValue,
+          normalized,
+          rounded,
+        });
         setAttentionScore(rounded);
         
         if (enrollmentId && token) {
@@ -576,6 +593,10 @@ export default function CoursePage() {
               last_attention_at: new Date().toISOString(),
             };
             setEnrollmentData(nextData);
+            console.log("[sendFrame] Enviando datos de atención al backend", {
+              avg,
+              frames: attentionAggRef.current.count,
+            });
             apiFetch(
               `/api/enrollments/${enrollmentId}/`,
               {
@@ -586,6 +607,10 @@ export default function CoursePage() {
             ).catch((err) => console.error("[sendFrame] Error actualizando enrollments", err));
           }
         }
+      } else {
+        console.warn("[sendFrame] No se pudo extraer valor de atención de la respuesta", {
+          resp,
+        });
       }
     } catch (err) {
       console.error("[sendFrame] Error en sendFrame:", err instanceof Error ? err.message : err);

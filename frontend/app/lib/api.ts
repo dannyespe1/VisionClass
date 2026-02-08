@@ -61,3 +61,16 @@ export async function postFrameToML(form: FormData, token?: string) {
     return { ok: false, error: message };
   }
 }
+
+export async function checkMLServiceHealth() {
+  try {
+    const res = await fetch(`/api/attention-proxy`, {
+      method: "GET",
+    });
+    const data = await res.json().catch(() => ({ ok: false }));
+    return { ok: data.ok === true, url: data.service_url, message: data.message };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Healthcheck failed";
+    return { ok: false, message };
+  }
+}

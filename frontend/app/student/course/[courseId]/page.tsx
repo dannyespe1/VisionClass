@@ -22,7 +22,7 @@ import {
   Video,
   Volume2,
 } from "lucide-react";
-import { apiFetch, BACKEND_URL, postFrameToML } from "../../../lib/api";
+import { apiFetch, BACKEND_URL, postFrameToML, checkMLServiceHealth } from "../../../lib/api";
 import { useAuth } from "../../../context/AuthContext";
 import { Button } from "../../../ui/button";
 import { CameraPermissionModal, PermissionSettings } from "../../CameraPermissionModal";
@@ -481,15 +481,33 @@ export default function CoursePage() {
     try {
       const video = videoRef.current;
       const canvas = canvasRef.current;
-      canvas.width = video.videoWidth || 640;
-      canvas.height = video.videoHeight || 480;
+      
+      // Validar que el video tiene contenido
+      if (!video.videoWidth || !video.videoHeight) {
+        console.warn("[sendFrame] Video no tiene dimensiones aún", {
+          videoWidth: video.videoWidth,
+          videoHeight: video.videoHeight,
+          readyState: video.readyState,
+        });
+        return;
+      }
+      
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
       const ctx = canvas.getContext("2d");
-      if (!ctx) return;
+      if (!ctx) {
+        console.warn("[sendFrame] No se puede obtener contexto 2D del canvas");
+        return;
+      }
+      
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       const blob = await new Promise<Blob | null>((resolve) =>
         canvas.toBlob(resolve, "image/jpeg", 0.8)
       );
-      if (!blob) return;
+      if (!blob) {
+        console.warn("[sendFrame] No se pudo crear blob de la imagen");
+        return;
+      }
 
       const form = new FormData();
       form.append("file", blob, "frame.jpg");
@@ -501,21 +519,45 @@ export default function CoursePage() {
       if (currentMaterial?.materialType) form.append("material_type", currentMaterial.materialType);
 
       const resp = await postFrameToML(form, token || undefined);
-      const isOk = resp.ok !== false;
-      if (!isOk) return;
-      const frameLabel = resp.frame_score.label;
-      const hasFace = resp.frame_score.data.face;
+      
+      // Validar respuesta
+      if (!resp?.ok) {
+        console.warn("[sendFrame] Respuesta de ML no válida", {
+          ok: resp?.ok,
+          error: resp?.error,
+          detail: resp?.detail,
+        });
+        // No cambiar el estado, mantener en "pending" mientras se intenta
+        return;
+      }
+      
+      // Extraer datos de frame_score de forma segura
+      const frameScore = resp.frame_score || resp.score || {};
+      const frameLabel = frameScore.label || frameScore.state;
+      const hasFace = frameScore.data?.face ?? frameScore.face ?? false;
+      
+      console.log("[sendFrame] Frame procesado", {
+        label: frameLabel,
+        hasFace,
+        hasValue: !!frameScore.value,
+      });
+      
       if (frameLabel === "no_face" || hasFace === false) {
         setAttentionStatus("no_face");
         setAttentionScore(0);
         return;
       }
+      
       setAttentionStatus("ok");
-      const rawValue = resp.score?.value ?? resp.frame_score?.value ?? resp.value ?? null;
+      
+      // Extraer valor de atención con múltiples fallbacks
+      let rawValue = frameScore.value ?? resp.score?.value ?? resp.value ?? null;
+      
       if (rawValue !== null && rawValue !== undefined) {
         const normalized = rawValue > 1 ? rawValue : rawValue * 100;
         const rounded = Math.round(normalized);
         setAttentionScore(rounded);
+        
         if (enrollmentId && token) {
           attentionAggRef.current.sum += rounded;
           attentionAggRef.current.count += 1;
@@ -541,12 +583,12 @@ export default function CoursePage() {
                 body: JSON.stringify({ enrollment_data: nextData }),
               },
               token
-            ).catch((err) => console.error(err));
+            ).catch((err) => console.error("[sendFrame] Error actualizando enrollments", err));
           }
         }
       }
     } catch (err) {
-      console.error(err);
+      console.error("[sendFrame] Error en sendFrame:", err instanceof Error ? err.message : err);
     }
   };
 
@@ -555,16 +597,38 @@ export default function CoursePage() {
     if (!videoRef.current) return;
     setAttentionStatus("pending");
     try {
+      console.log("[startCamera] Iniciando cámara...");
       const media = await navigator.mediaDevices.getUserMedia({
         video: { width: 640, height: 480 },
         audio: false,
       });
       videoRef.current.srcObject = media;
+      
+      // Esperar a que el video esté listo antes de empezar a capturar frames
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => reject(new Error("Timeout esperando video")), 5000);
+        const handleCanPlay = () => {
+          clearTimeout(timeout);
+          videoRef.current?.removeEventListener("canplay", handleCanPlay);
+          resolve();
+        };
+        videoRef.current?.addEventListener("canplay", handleCanPlay);
+      });
+      
       await videoRef.current.play();
       cameraActiveRef.current = true;
-      frameTimerRef.current = setInterval(sendFrame, 1000);
+      console.log("[startCamera] Cámara iniciada correctamente");
+      
+      // Comenzar a capturar frames cada 1 segundo
+      frameTimerRef.current = setInterval(() => {
+        if (cameraActiveRef.current && videoRef.current?.readyState === videoRef.current?.HAVE_ENOUGH_DATA) {
+          sendFrame();
+        }
+      }, 1000);
     } catch (err) {
-      console.error(err);
+      console.error("[startCamera] Error al iniciar cámara:", err instanceof Error ? err.message : err);
+      cameraActiveRef.current = false;
+      setAttentionStatus("pending");
     }
   };
 
@@ -605,9 +669,24 @@ export default function CoursePage() {
       return;
     }
     try {
+      console.log("[requestCamera] Verificando permisos de cámara...");
       await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      console.log("[requestCamera] Permisos de cámara otorgados");
+      
+      // Verificar disponibilidad del servicio ML
+      console.log("[requestCamera] Verificando disponibilidad del servicio ML...");
+      const healthCheck = await checkMLServiceHealth();
+      if (!healthCheck.ok) {
+        console.warn("[requestCamera] Servicio ML no disponible. Algunos datos pueden no procesarse.", {
+          service_url: healthCheck.url,
+          message: healthCheck.message,
+        });
+      } else {
+        console.log("[requestCamera] Servicio ML disponible");
+      }
     } catch (err) {
-      console.error(err);
+      console.error("[requestCamera] Error al acceder a la cámara:", err instanceof Error ? err.message : err);
+      // No lanzar error, permitir continuar sin cámara
     } finally {
       setPermissionOpen(false);
     }

@@ -3,6 +3,7 @@
 VisionClass es una plataforma web de atencion inteligente con frontend en Next.js, backend en Django/DRF y servicio ML en FastAPI (MediaPipe + heuristicas). La plataforma incluye paneles de estudiante, profesor y administrador, y un test D2R para calibracion atencional.
 
 ## Arquitectura
+
 - Frontend: Next.js (app router), Tailwind/React.
 - Backend: Django + DRF + JWT (SimpleJWT).
 - ML: FastAPI + MediaPipe + heuristicas de atencion por frame (opcional CNN-LSTM via ONNX).
@@ -10,10 +11,12 @@ VisionClass es una plataforma web de atencion inteligente con frontend en Next.j
 - Orquestacion: Docker Compose.
 
 ## Requisitos
+
 - Docker y Docker Compose.
 - Opcional: Node.js y Python si se desea correr fuera de contenedores.
 
 ## Puesta en marcha rapida (Docker)
+
 ```bash
 docker compose up -d --build
 docker compose exec backend python manage.py migrate
@@ -21,13 +24,16 @@ docker compose exec backend python manage.py create_default_admin
 ```
 
 Servicios por defecto:
+
 - Frontend: http://localhost:3000
 - Backend: http://localhost:8000
 - ML: http://localhost:9000
 - DB: localhost:5432
 
 ## Desarrollo local (sin Docker)
+
 Backend:
+
 ```bash
 cd backend
 python -m venv venv
@@ -38,6 +44,7 @@ python manage.py runserver 0.0.0.0:8000
 ```
 
 Frontend:
+
 ```bash
 cd frontend
 npm install
@@ -45,6 +52,7 @@ npm run dev
 ```
 
 ML:
+
 ```bash
 cd ml
 pip install -r requirements.txt
@@ -52,9 +60,11 @@ python ml_service.py
 ```
 
 ## Variables de entorno
+
 Nota: evita commitear secretos. Usa `.env` locales.
 
 Backend (Django):
+
 - `SECRET_KEY`, `DEBUG`, `ALLOWED_HOSTS`
 - `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`
 - `ACCESS_TOKEN_MINUTES`, `REFRESH_TOKEN_DAYS`
@@ -64,12 +74,14 @@ Backend (Django):
 - `MAILGUN_API_KEY`, `MAILGUN_DOMAIN`, `MAILGUN_BASE_URL`, `MAILGUN_FROM_EMAIL`
 
 Frontend (Next.js):
+
 - `NEXT_PUBLIC_BACKEND_URL` (default: http://localhost:8000)
 - `NEXT_PUBLIC_ML_URL` (default: http://localhost:9000)
 - `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
 - `NEXT_PUBLIC_GOOGLE_REDIRECT_URI`
 
 ML (FastAPI):
+
 - `BACKEND_URL` (default: http://backend:8000)
 - `BACKEND_TOKEN` (JWT para postear eventos)
 - `SEQUENCE_LENGTH` (default: 16)
@@ -84,16 +96,19 @@ ML (FastAPI):
 - `TRAIN_EPOCHS`, `TRAIN_BATCH_SIZE`, `TRAIN_LR`
 
 ## Autenticacion y roles
+
 Roles disponibles en backend: `student`, `teacher`, `admin`.
 El login se realiza via JWT (email) o Google OAuth.
 
 Endpoints de autenticacion:
+
 - `POST /api/auth/token/` (login con email/username)
 - `POST /api/auth/token/refresh/`
 - `POST /api/auth/google/`
 - `GET /api/me/` (perfil y rol)
 
 ## Rutas principales (frontend)
+
 - `/` landing
 - `/login`
 - `/student`
@@ -103,6 +118,7 @@ Endpoints de autenticacion:
 - `/privacidad`, `/terminos`, `/seguridad`, `/documentacion`
 
 ## Test D2R
+
 - 14 fases, 15s por fase (configurable en `frontend/app/d2r/page.tsx`).
 - 47 celdas fijas por fase (definido en `frontend/app/d2r/test-widget.tsx`).
 - Se marcan solo las "d" con exactamente dos rayitas (arriba, abajo o divididas).
@@ -110,7 +126,9 @@ Endpoints de autenticacion:
 - Los resultados se guardan en `D2RResult` y alimentan metricas del estudiante.
 
 ## Backend: endpoints core
+
 Recursos principales (DRF):
+
 - `GET/POST /api/users/`
 - `GET/POST /api/courses/`
 - `GET/POST /api/course-modules/`
@@ -131,6 +149,7 @@ Recursos principales (DRF):
 - `POST /api/notifications/test-email/`
 
 ## Backend: endpoints admin
+
 - `GET /api/admin/overview/`
 - `GET/POST /api/admin/users/`
 - `PATCH/DELETE /api/admin/users/{id}/`
@@ -141,27 +160,33 @@ Recursos principales (DRF):
 - `GET/POST/PATCH /api/admin/research-permissions/`
 
 Notas:
+
 - `admin/users` devuelve: `id, name, email, role, status, courses`.
 - `admin/courses` devuelve: `id, title, category, instructor, students, status`.
 - `admin/analytics` agrega metricas por categoria (usada como "facultad").
 - `privacy-policies` y `research-permissions` se guardan en BD.
 
 ## Backend: permisos
+
 Endpoints admin requieren usuario con `role=admin` o `is_staff/is_superuser`.
 
 ## Migraciones
+
 Cada cambio de modelos requiere migracion:
+
 ```bash
 docker compose exec backend python manage.py makemigrations
 docker compose exec backend python manage.py migrate
 ```
 
 ## Troubleshooting
+
 - Si el admin no abre panel: verificar rol y permisos en `/api/me/`.
 - Si el test D2R no inicia: revisar permisos de camara y disponibilidad de `/api/attention-proxy`.
 - Si faltan politicas de privacidad: el endpoint de analytics crea defaults si no existen.
 
 ## Entrenamiento de modelo (opcional)
+
 1. Activar captura de frames:
    - `SAVE_FRAMES=1` y `FRAMES_DIR=/app/data/frames`
 2. Exportar dataset en backend:
@@ -170,6 +195,7 @@ docker compose exec backend python manage.py migrate
    - `python train_model.py` (genera ONNX en `MODEL_PATH`)
 
 ## Despliegue en Render
+
 1. Backend:
    - Configurar variables de entorno (ver `backend/.env.example`).
    - Ejecutar migraciones y `collectstatic`.
@@ -179,9 +205,11 @@ docker compose exec backend python manage.py migrate
    - Configurar `NEXT_PUBLIC_BACKEND_URL`, `NEXT_PUBLIC_ML_URL`, `ML_SERVICE_URL`.
 
 ## Configuracion de OAuth en Render
+
 Para habilitar Google OAuth en Render, sigue estos pasos:
 
 ### 1. Crear proyecto en Google Cloud Console
+
 1. Ir a [Google Cloud Console](https://console.cloud.google.com/)
 2. Crear un nuevo proyecto
 3. Habilitar "Google+ API"
@@ -193,26 +221,32 @@ Para habilitar Google OAuth en Render, sigue estos pasos:
      - `http://localhost:3000/login` (para desarrollo local)
 
 ### 2. Configurar variables en Render
+
 En el dashboard de Render, agregar las siguientes variables de entorno:
 
 **Backend (visionclass-backend):**
+
 - `GOOGLE_OAUTH_CLIENT_ID`: El Client ID de Google Cloud
 - `GOOGLE_OAUTH_CLIENT_SECRET`: El Client Secret de Google Cloud
 - `GOOGLE_OAUTH_CALLBACK_URL`: `https://visionclass-frontend.onrender.com/login`
 
 **Frontend (visionclass-frontend):**
+
 - `NEXT_PUBLIC_GOOGLE_CLIENT_ID`: El Client ID de Google Cloud (mismo que backend)
 - `NEXT_PUBLIC_GOOGLE_REDIRECT_URI`: `https://visionclass-frontend.onrender.com/login`
 
 ### 3. Redeploy
+
 1. Hacer push de los cambios (incluyendo `render.yaml`)
 2. Render detectara automaticamente y desplegara con las nuevas variables
 3. Probar el flujo de login en https://visionclass-frontend.onrender.com/login
 
 ### Desarrollo Local con OAuth
+
 Para probar OAuth localmente:
 
 **Backend (.env):**
+
 ```
 GOOGLE_OAUTH_CLIENT_ID=<from_google_cloud>
 GOOGLE_OAUTH_CLIENT_SECRET=<from_google_cloud>
@@ -220,17 +254,22 @@ GOOGLE_OAUTH_CALLBACK_URL=http://localhost:3000/login
 ```
 
 **Frontend (.env.local):**
+
 ```
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=<from_google_cloud>
 NEXT_PUBLIC_GOOGLE_REDIRECT_URI=http://localhost:3000/login
 ```
 
 ## Token de servicio ML
+
 Para generar un usuario de servicio y JWT:
+
 ```bash
 python manage.py create_ml_service_user
 ```
+
 Puedes definir:
+
 - `ML_SERVICE_EMAIL`
 - `ML_SERVICE_PASSWORD`
 - `ML_SERVICE_ROLE` (default: admin)

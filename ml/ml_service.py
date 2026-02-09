@@ -57,8 +57,10 @@ if mp_face_mesh is not None:
         min_detection_confidence=0.5,
         min_tracking_confidence=0.5,
     )
+    print("✅ [INIT] MediaPipe FaceMesh initialized successfully")
 else:
     face_mesh = None
+    print("⚠️  [INIT] MediaPipe FaceMesh initialization FAILED - face_mesh=None")
 
 session_sequences: Dict[int, deque] = defaultdict(lambda: deque(maxlen=SEQUENCE_LENGTH))
 session_frame_buffers: Dict[int, deque] = defaultdict(lambda: deque(maxlen=SEQUENCE_LENGTH))

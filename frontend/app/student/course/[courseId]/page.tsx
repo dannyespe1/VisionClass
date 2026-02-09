@@ -391,8 +391,6 @@ export default function CoursePage() {
     };
   }, [currentMaterial, token]);
 
-  const [attentionStatus, setAttentionStatus] = useState<"ok" | "no_face" | "pending">("pending");
-
   useEffect(() => {
     if (currentMaterial?.materialType === "pdf") {
       const interval = setInterval(() => {

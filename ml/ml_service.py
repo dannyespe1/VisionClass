@@ -286,6 +286,16 @@ async def health():
     return {"status": "ok"}
 
 
+@app.get("/debug/status")
+async def debug_status():
+    return {
+        "mediapipe_initialized": face_mesh is not None,
+        "haar_cascade_loaded": cascade is not None,
+        "onnx_model_loaded": ort_session is not None,
+        "sequence_length": SEQUENCE_LENGTH,
+    }
+
+
 @app.post("/events")
 async def receive_event(payload: AttentionEventPayload):
     """

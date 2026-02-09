@@ -53,19 +53,39 @@ export function LoginContent() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const resolvedRedirect = process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI || `${window.location.origin}/login`;
-    setRedirectUri(resolvedRedirect);
-    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
-    if (!clientId || !resolvedRedirect) return;
-    const params = new URLSearchParams({
-      client_id: clientId,
-      redirect_uri: resolvedRedirect,
-      response_type: "code",
-      scope: "openid email profile",
-      access_type: "online",
-      prompt: "consent",
-    });
-    setGoogleAuthUrl(`https://accounts.google.com/o/oauth2/v2/auth${params.toString()}`);
+    try {
+      const resolvedRedirect = process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI || `${window.location.origin}/login`;
+      setRedirectUri(resolvedRedirect);
+      const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+      
+      if (!clientId) {
+        console.warn("⚠️ NEXT_PUBLIC_GOOGLE_CLIENT_ID no configurado. OAuth deshabilitado.");
+        setOauthError("Google OAuth no configurado. Usa el formulario de login.");
+        return;
+      }
+      
+      if (!resolvedRedirect) {
+        console.error("❌ NEXT_PUBLIC_GOOGLE_REDIRECT_URI no configurado");
+        setOauthError("Configuración de OAuth incompleta.");
+        return;
+      }
+      
+      const params = new URLSearchParams({
+        client_id: clientId,
+        redirect_uri: resolvedRedirect,
+        response_type: "code",
+        scope: "openid email profile",
+        access_type: "online",
+        prompt: "consent",
+      });
+      
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+      setGoogleAuthUrl(authUrl);
+      console.log("✅ Google OAuth URL generada correctamente");
+    } catch (error) {
+      console.error("❌ Error configurando Google OAuth:", error);
+      setOauthError("Error al configurar Google OAuth.");
+    }
   }, []);
 
   useEffect(() => {
@@ -77,15 +97,20 @@ export function LoginContent() {
       setOauthLoading(true);
       setOauthError(null);
       try {
+        console.log("🔄 Iniciando OAuth con código:", code.substring(0, 20) + "...");
         const data = await apiFetch<{ access: string; refresh: string }>("/api/auth/google/", {
           method: "POST",
           body: JSON.stringify({ code, redirect_uri: redirectUri }),
         });
+        console.log("✅ Token OAuth obtenido exitosamente");
         setTokenValue(data.access);
         await routeByRole(data.access);
       } catch (err) {
         const msg = err instanceof Error ? err.message : "No se pudo autenticar con Google.";
+        console.error("❌ Error en OAuth:", msg);
         setOauthError(msg);
+        // Reset para reintentar
+        oauthStartedRef.current = false;
       } finally {
         setOauthLoading(false);
       }
@@ -121,7 +146,16 @@ export function LoginContent() {
           <LoginForm onSuccess={handleLogin} />
 
           <div className="mt-6 space-y-3">
-            {oauthError && <p className="text-sm text-red-600">{oauthError}</p>}
+            {oauthError && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-700">
+                {oauthError}
+              </div>
+            )}
+            {!oauthError && googleAuthUrl && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-2 text-xs text-green-700">
+                ✅ Google OAuth activado
+              </div>
+            )}
             <div className="flex items-center gap-3">
               <span className="h-px flex-1 bg-gray-200" />
               <span className="text-xs uppercase tracking-[0.25em] text-gray-400">o</span>
@@ -130,12 +164,16 @@ export function LoginContent() {
             <Button
               type="button"
               variant="outline"
-              className="w-full h-12 rounded-xl border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-gray-50 hover:shadow-md"
-              disabled={!googleAuthUrl || oauthLoading}
+              className="w-full h-12 rounded-xl border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-gray-50 hover:shadow-md disabled:opacity-50"
+              disabled={!googleAuthUrl || oauthLoading || !!oauthError}
               onClick={() => {
-                if (!googleAuthUrl) return;
+                if (!googleAuthUrl) {
+                  setOauthError("Google OAuth no configurado.");
+                  return;
+                }
                 window.location.href = googleAuthUrl;
               }}
+              title={!googleAuthUrl ? "Google OAuth no configurado" : "Continuar con Google"}
             >
               <div className="flex items-center justify-center gap-3">
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white">

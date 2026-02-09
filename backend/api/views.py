@@ -91,16 +91,27 @@ class GoogleLogin(SocialLoginView):
     serializer_class = GoogleSocialLoginSerializer
 
     def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data.get("user")
-        if not user:
-            return Response({"detail": "No se pudo resolver el usuario."}, status=status.HTTP_400_BAD_REQUEST)
-        refresh = RefreshToken.for_user(user)
-        return Response(
-            {"access": str(refresh.access_token), "refresh": str(refresh)},
-            status=status.HTTP_200_OK,
-        )
+        try:
+            logger.info(f"🔄 GoogleLogin POST - data: {request.data.keys()}")
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            user = serializer.validated_data.get("user")
+            if not user:
+                logger.error("❌ No se pudo resolver el usuario desde OAuth")
+                return Response({"detail": "No se pudo resolver el usuario."}, status=status.HTTP_400_BAD_REQUEST)
+            logger.info(f"✅ Usuario OAuth autenticado: {user.email}")
+            refresh = RefreshToken.for_user(user)
+            return Response(
+                {"access": str(refresh.access_token), "refresh": str(refresh)},
+                status=status.HTTP_200_OK,
+            )
+        except Exception as e:
+            logger.error(f"❌ Error en GoogleLogin: {str(e)}", exc_info=True)
+            return Response(
+                {"detail": f"Error de autenticación: {str(e)}"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
 
 
 def _safe_avg(values):

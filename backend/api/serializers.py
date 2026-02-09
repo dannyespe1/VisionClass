@@ -39,6 +39,9 @@ AuthUser = get_auth_user_model()
 
 class GoogleSocialLoginSerializer(SocialLoginSerializer):
     def validate(self, attrs):
+        import logging
+        logger = logging.getLogger(__name__)
+        
         view = self.context.get('view')
         request = self._get_request()
 
@@ -58,12 +61,14 @@ class GoogleSocialLoginSerializer(SocialLoginSerializer):
         code = attrs.get('code')
 
         if access_token:
+            logger.info(f"🔄 GoogleSocialLoginSerializer: usando access_token")
             tokens_to_parse = {'access_token': access_token}
             token = access_token
             id_token = attrs.get('id_token')
             if id_token:
                 tokens_to_parse['id_token'] = id_token
         elif code:
+            logger.info(f"🔄 GoogleSocialLoginSerializer: intercambiando code por token")
             self.set_callback_url(view=view, adapter_class=adapter_class)
             redirect_uri = None
             if request:
@@ -80,6 +85,7 @@ class GoogleSocialLoginSerializer(SocialLoginSerializer):
                     except Exception:
                         redirect_uri = None
             if redirect_uri:
+                logger.info(f"✅ redirect_uri encontrado: {redirect_uri}")
                 self.callback_url = redirect_uri
             self.client_class = getattr(view, 'client_class', None)
 
@@ -98,8 +104,11 @@ class GoogleSocialLoginSerializer(SocialLoginSerializer):
                 adapter=adapter,
             )
             try:
+                logger.info(f"🔄 Intercambiando Google OAuth code...")
                 token = client.get_access_token(code)
+                logger.info(f"✅ Token obtenido exitosamente")
             except OAuth2Error as ex:
+                logger.error(f"❌ Error intercambiando code: {str(ex)}", exc_info=True)
                 raise serializers.ValidationError(
                     'Failed to exchange code for access token'
                 ) from ex
@@ -118,23 +127,29 @@ class GoogleSocialLoginSerializer(SocialLoginSerializer):
         social_token.app = app
 
         try:
+            logger.info(f"🔄 Completando social login...")
             if adapter.provider_id == 'google' and not code:
                 login = self.get_social_login(adapter, app, social_token, response={'id_token': id_token})
             else:
                 login = self.get_social_login(adapter, app, social_token, token)
             ret = complete_social_login(request, login)
-        except HTTPError:
+            logger.info(f"✅ Social login completado para: {login.account.user.email if login.account.user else 'nuevo usuario'}")
+        except HTTPError as e:
+            logger.error(f"❌ HTTPError en social login: {str(e)}", exc_info=True)
             raise serializers.ValidationError('Incorrect value')
 
         if isinstance(ret, HttpResponseBadRequest):
+            logger.error(f"❌ Bad request response: {ret.content}")
             raise serializers.ValidationError(ret.content)
 
         if not login.is_existing:
+            logger.info(f"🔄 Nuevo usuario social, creando...")
             if allauth_account_settings.UNIQUE_EMAIL:
                 existing_user = AuthUser.objects.filter(
                     email=login.user.email,
                 ).first()
                 if existing_user:
+                    logger.info(f"✅ Usuario existente encontrado, vinculando: {existing_user.email}")
                     # Vincula la cuenta social con el usuario existente.
                     login.user = existing_user
                     login.save(request, connect=True)
@@ -144,15 +159,20 @@ class GoogleSocialLoginSerializer(SocialLoginSerializer):
             login.lookup()
             try:
                 login.save(request, connect=True)
+                logger.info(f"✅ Nuevo usuario OAuth creado: {login.user.email}")
             except IntegrityError as ex:
+                logger.error(f"❌ IntegrityError al crear usuario: {str(ex)}", exc_info=True)
                 raise serializers.ValidationError(
                     'User is already registered with this e-mail address.'
                 ) from ex
             self.post_signup(login, attrs)
+        else:
+            logger.info(f"✅ Usuario existente autenticado: {login.account.user.email}")
 
         attrs['user'] = login.account.user
 
         return attrs
+
 
     def _build_oauth_client(self, request, app, adapter):
         return self.client_class(

@@ -131,17 +131,30 @@ def compute_attention_score(image: np.ndarray) -> Dict[str, Any]:
         if cascade is not None:
             try:
                 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                faces = cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(60, 60))
-                if len(faces) > 0:
-                    x, y, w2, h2 = faces[0]
+                # Try multiple parameter sets to improve recall on varied camera images
+                params = [
+                    (1.1, 5, (60, 60)),
+                    (1.05, 4, (48, 48)),
+                    (1.03, 3, (32, 32)),
+                ]
+                detected = None
+                for scaleFactor, minNeighbors, minSize in params:
+                    faces = cascade.detectMultiScale(gray, scaleFactor=scaleFactor, minNeighbors=minNeighbors, minSize=minSize)
+                    print(f"[compute_attention_score] Haar try sf={scaleFactor} mn={minNeighbors} ms={minSize} -> found={len(faces)}")
+                    if len(faces) > 0:
+                        detected = faces[0]
+                        used_params = (scaleFactor, minNeighbors, minSize)
+                        break
+                if detected is not None:
+                    x, y, w2, h2 = detected
                     bbox = [int(x), int(y), int(x + w2), int(y + h2)]
                     area = (w2 * h2) / float(image.shape[0] * image.shape[1])
                     score = float(np.clip(area * 2.0, 0.0, 1.0))
-                    print(f"[compute_attention_score] ✅ Haar detected face bbox={bbox} area={area:.4f}")
+                    print(f"[compute_attention_score] ✅ Haar detected face bbox={bbox} area={area:.4f} params={used_params}")
                     return {
                         "value": score,
                         "label": "attention_score",
-                        "data": {"face": True, "method": "haar", "bbox": bbox, "area": area},
+                        "data": {"face": True, "method": "haar", "bbox": bbox, "area": area, "params": used_params},
                     }
             except Exception as e:
                 print(f"[compute_attention_score] ⚠️ Haar detection error: {e}")

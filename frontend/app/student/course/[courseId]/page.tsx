@@ -95,6 +95,7 @@ export default function CoursePage() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const frameTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const cameraActiveRef = useRef(false);
+  const faceDetectorRef = useRef<any | null>(null);
   const sessionRef = useRef<number | null>(null);
   const progressSyncRef = useRef<{ lessonId: number | null; completed: number }>({
     lessonId: null,
@@ -515,6 +516,22 @@ export default function CoursePage() {
       }
       
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      // Client-side face detection using FaceDetector API when available
+      if (typeof window !== "undefined" && "FaceDetector" in window) {
+        try {
+          if (!faceDetectorRef.current) faceDetectorRef.current = new (window as any).FaceDetector();
+          const faces = await faceDetectorRef.current.detect(canvas as any);
+          if (!faces || faces.length === 0) {
+            console.log("[sendFrame] Client-side FaceDetector: no faces detected");
+            setAttentionStatus("no_face");
+            setAttentionScore(0);
+            return;
+          }
+        } catch (err) {
+          console.warn("[sendFrame] FaceDetector error, falling back to server", err);
+        }
+      }
+
       const blob = await new Promise<Blob | null>((resolve) =>
         canvas.toBlob(resolve, "image/jpeg", 0.8)
       );

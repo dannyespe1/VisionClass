@@ -143,11 +143,27 @@ export default function CoursePage() {
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizScore, setQuizScore] = useState<number | null>(null);
   const [quizError, setQuizError] = useState<string | null>(null);
+  const [attentionStatus, setAttentionStatus] = useState<"ok" | "no_face" | "pending" | "error">("pending");
+  const [mlServiceStatus, setMlServiceStatus] = useState<"checking" | "available" | "unavailable" | null>(null);
 
   useEffect(() => {
     if (!token) {
       router.push("/login");
     }
+    
+    // Verificar disponibilidad del ML Service
+    const checkML = async () => {
+      setMlServiceStatus("checking");
+      const health = await checkMLServiceHealth();
+      if (health.ok) {
+        console.log("✅ ML Service disponible");
+        setMlServiceStatus("available");
+      } else {
+        console.error("❌ ML Service no disponible:", health.message);
+        setMlServiceStatus("unavailable");
+      }
+    };
+    checkML();
   }, [token, router]);
 
   useEffect(() => {
@@ -1002,29 +1018,39 @@ export default function CoursePage() {
             </div>
             <div className="flex items-center gap-4">
               {permissionSettings.enableAttentionTracking && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-lg">
-                  <Eye className="w-4 h-4 text-blue-600" />
-                  {attentionStatus === "no_face" ? (
-                    <span className="text-sm">Sin rostro</span>
-                  ) : attentionStatus === "pending" ? (
-                    <span className="text-sm">Esperando cámara</span>
-                  ) : (
-                    <span className="text-sm">Atención: {Math.round(attentionScore)}%</span>
+                <>
+                  <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-lg">
+                    <Eye className="w-4 h-4 text-blue-600" />
+                    {attentionStatus === "no_face" ? (
+                      <span className="text-sm">Sin rostro</span>
+                    ) : attentionStatus === "pending" ? (
+                      <span className="text-sm">Esperando cámara</span>
+                    ) : (
+                      <span className="text-sm">Atención: {Math.round(attentionScore)}%</span>
+                    )}
+                    <div
+                      className={`w-2 h-2 rounded-full ${
+                        attentionStatus === "no_face"
+                          ? "bg-slate-400"
+                          : attentionStatus === "pending"
+                            ? "bg-amber-400"
+                            : attentionScore > 80
+                              ? "bg-emerald-500"
+                              : attentionScore > 60
+                                ? "bg-amber-500"
+                                : "bg-red-500"
+                      }`}
+                    />
+                  </div>
+                  {mlServiceStatus && mlServiceStatus !== "available" && (
+                    <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 rounded-lg border border-amber-200">
+                      <AlertCircle className="w-4 h-4 text-amber-600" />
+                      <span className="text-xs text-amber-700">
+                        {mlServiceStatus === "unavailable" ? "ML Service no disponible" : "Verificando servicio..."}
+                      </span>
+                    </div>
                   )}
-                  <div
-                    className={`w-2 h-2 rounded-full ${
-                      attentionStatus === "no_face"
-                        ? "bg-slate-400"
-                        : attentionStatus === "pending"
-                          ? "bg-amber-400"
-                          : attentionScore > 80
-                            ? "bg-emerald-500"
-                            : attentionScore > 60
-                              ? "bg-amber-500"
-                              : "bg-red-500"
-                    }`}
-                  />
-                </div>
+                </>
               )}
               <div className="text-sm text-slate-600">
                 Lección {currentLessonIndex + 1} de {sortedLessons.length || 1}

@@ -17,7 +17,7 @@ export async function POST(req: Request) {
   try {
     const authHeader = req.headers.get("authorization") || "";
     if (!authHeader.toLowerCase().startsWith("bearer ")) {
-      console.error("[attention-proxy] Token no proporcionado");
+      console.error("[attention-proxy] ❌ Token no proporcionado");
       return NextResponse.json({ ok: false, detail: "Token requerido" }, { status: 200 });
     }
 
@@ -26,21 +26,23 @@ export async function POST(req: Request) {
       cache: "no-store",
     });
     if (!meRes.ok) {
-      console.error("[attention-proxy] Token inválido", meRes.status);
+      console.error("[attention-proxy] ❌ Token inválido", meRes.status);
       return NextResponse.json({ ok: false, detail: "Token inválido" }, { status: 200 });
     }
     const meData = await meRes.json().catch(() => null);
     if (!meData || meData.role !== "student") {
-      console.error("[attention-proxy] Rol no permitido", meData?.role);
+      console.error("[attention-proxy] ❌ Rol no permitido", meData?.role);
       return NextResponse.json({ ok: false, detail: "Rol no permitido" }, { status: 200 });
     }
 
     const formData = await req.formData();
     const target = `${ML_SERVICE_URL}/analyze/frame`;
     
-    console.log("[attention-proxy] Enviando frame a ML Service", {
+    console.log("[attention-proxy] ✅ Enviando frame a ML Service", {
       url: target,
       timeout: TIMEOUT_MS,
+      backend_url: BACKEND_URL,
+      user_role: meData?.role,
     });
 
     const res = await fetch(target, {
@@ -52,9 +54,10 @@ export async function POST(req: Request) {
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok) {
-      console.error("[attention-proxy] ML Service error", {
+      console.error("[attention-proxy] ❌ ML Service error", {
         status: res.status,
         detail: data.detail || res.statusText,
+        url: target,
       });
       return NextResponse.json(
         { ok: false, detail: data.detail || "ML service error" },
@@ -62,9 +65,12 @@ export async function POST(req: Request) {
       );
     }
 
-    console.log("[attention-proxy] Frame procesado correctamente", {
+    console.log("[attention-proxy] ✅ Frame procesado correctamente", {
       ok: data.ok,
       hasFrameScore: !!data.frame_score,
+      frameScoreLabel: data.frame_score?.label,
+      hasFace: data.frame_score?.data?.face,
+      score: data.frame_score?.value,
     });
     return NextResponse.json({ ok: true, ...data });
   } catch (err: unknown) {
@@ -72,7 +78,8 @@ export async function POST(req: Request) {
     
     // Detectar timeout específicamente
     if (message.includes("abort")) {
-      console.error("[attention-proxy] Timeout esperando respuesta del ML Service (5000ms)");
+      console.error("[attention-proxy] ❌ Timeout esperando respuesta del ML Service (5000ms)");
+      console.error("[attention-proxy] 📍 Verifique que el ML Service esté corriendo en:", ML_SERVICE_URL);
       return NextResponse.json(
         { 
           ok: false, 
@@ -83,7 +90,7 @@ export async function POST(req: Request) {
       );
     }
     
-    console.error("[attention-proxy] Error en proxy", message);
+    console.error("[attention-proxy] ❌ Error en proxy", message);
     return NextResponse.json({ ok: false, detail: message }, { status: 200 });
   } finally {
     clearTimeout(timer);
@@ -93,14 +100,15 @@ export async function POST(req: Request) {
 // Endpoint de healthcheck para verificar si el ML Service está disponible
 export async function GET() {
   try {
-    console.log("[attention-proxy/health] Verificando disponibilidad de ML Service");
+    console.log("[attention-proxy/health] 🔄 Verificando disponibilidad de ML Service");
+    console.log("[attention-proxy/health] 📍 URL:", ML_SERVICE_URL);
     
     const res = await fetch(`${ML_SERVICE_URL}/docs`, {
       signal: AbortSignal.timeout(3000),
     }).catch(() => null);
 
     if (res?.ok) {
-      console.log("[attention-proxy/health] ML Service disponible");
+      console.log("[attention-proxy/health] ✅ ML Service disponible");
       return NextResponse.json({ 
         ok: true, 
         service_url: ML_SERVICE_URL,
@@ -108,24 +116,28 @@ export async function GET() {
       });
     }
 
-    console.error("[attention-proxy/health] ML Service no responde");
+    console.error("[attention-proxy/health] ❌ ML Service no responde");
+    console.error("[attention-proxy/health] 📍 URL intentada:", ML_SERVICE_URL);
     return NextResponse.json(
       { 
         ok: false, 
         service_url: ML_SERVICE_URL,
-        message: "ML Service is not responding"
+        message: "ML Service is not responding",
+        backend_url: BACKEND_URL,
       },
       { status: 503 }
     );
   } catch (err) {
-    console.error("[attention-proxy/health] Error verificando ML Service", err);
+    console.error("[attention-proxy/health] ❌ Error verificando ML Service", err);
     return NextResponse.json(
       { 
         ok: false,
         service_url: ML_SERVICE_URL,
-        message: "Could not verify ML Service"
+        message: "Could not verify ML Service",
+        error: err instanceof Error ? err.message : String(err),
       },
       { status: 503 }
     );
   }
 }
+

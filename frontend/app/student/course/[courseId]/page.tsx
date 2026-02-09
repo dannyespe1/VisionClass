@@ -126,6 +126,7 @@ export default function CoursePage() {
   const [enrollmentId, setEnrollmentId] = useState<number | null>(null);
   const [enrollmentData, setEnrollmentData] = useState<Record<string, any>>({});
   const [enrollmentLoaded, setEnrollmentLoaded] = useState(false);
+  const [lessonInitialized, setLessonInitialized] = useState(false);
 
   const [permissionOpen, setPermissionOpen] = useState(true);
   const [permissionSettings, setPermissionSettings] = useState<PermissionSettings>({
@@ -211,15 +212,42 @@ export default function CoursePage() {
     init();
   }, [token, courseId]);
 
+  // Initialize selected lesson from enrollment data ONCE
   useEffect(() => {
-    if (!enrollmentLoaded) return;
-    const lastLessonId = Number(enrollmentData.last_lesson_id || 0);
-    if (!lastLessonId) return;
-    if (lessons.find((lesson) => lesson.id === lastLessonId)) {
-      setSelectedLessonId(lastLessonId);
-      initialLessonSetRef.current = true;
+    if (!enrollmentLoaded || lessonInitialized) return;
+    if (!lessons.length) return;
+    
+    // Check sessionStorage first (fastest, most recent)
+    let targetLessonId: number | null = null;
+    if (typeof window !== "undefined") {
+      const cacheKey = `course_${courseId}_lesson`;
+      const cached = sessionStorage.getItem(cacheKey);
+      if (cached) {
+        targetLessonId = Number(cached);
+      }
     }
-  }, [enrollmentData, lessons, enrollmentLoaded]);
+    
+    // Fall back to enrollment data if no cache
+    if (!targetLessonId) {
+      targetLessonId = Number(enrollmentData.last_lesson_id || 0);
+    }
+    
+    // Verify the lesson exists, otherwise use first lesson
+    const lessonExists = lessons.find((lesson) => lesson.id === targetLessonId);
+    if (targetLessonId && lessonExists) {
+      setSelectedLessonId(targetLessonId);
+    } else {
+      // Select first lesson if no previous lesson recorded or if lesson no longer exists
+      const firstLesson = [...lessons].sort(
+        (a, b) => (a.moduleOrder - b.moduleOrder) || (a.order - b.order)
+      )[0];
+      if (firstLesson) {
+        setSelectedLessonId(firstLesson.id);
+      }
+    }
+    
+    setLessonInitialized(true);
+  }, [enrollmentLoaded, lessons, lessonInitialized, courseId]);
 
   useEffect(() => {
     const load = async () => {
@@ -265,19 +293,6 @@ export default function CoursePage() {
           }));
         setLessons(mappedLessons);
         setMaterials(mappedMaterials);
-        const lastLessonId = Number(enrollmentData.last_lesson_id || 0);
-        const lessonIds = new Set(mappedLessons.map((lesson) => lesson.id));
-        if (lastLessonId && lessonIds.has(lastLessonId)) {
-          if (selectedLessonId !== lastLessonId) {
-            setSelectedLessonId(lastLessonId);
-          }
-          initialLessonSetRef.current = true;
-        } else if (enrollmentLoaded && !selectedLessonId && mappedLessons.length) {
-          const firstLesson = [...mappedLessons].sort(
-            (a, b) => (a.moduleOrder - b.moduleOrder) || (a.order - b.order)
-          )[0];
-          setSelectedLessonId(firstLesson.id);
-        }
       } catch (err) {
         const msg = err instanceof Error ? err.message : "No se pudo cargar el curso";
         setError(msg);
@@ -286,7 +301,7 @@ export default function CoursePage() {
       }
     };
     load();
-  }, [token, courseId, enrollmentData]);
+  }, [token, courseId]);
 
   const sortedLessons = useMemo(() => {
     return [...lessons].sort((a, b) => (a.moduleOrder - b.moduleOrder) || (a.order - b.order));
@@ -762,6 +777,13 @@ export default function CoursePage() {
       progress: progressPercent,
       updated_at: new Date().toISOString(),
     };
+    
+    // IMPORTANT: Save to sessionStorage as backup in case server sync fails
+    if (typeof window !== "undefined") {
+      const cacheKey = `course_${courseId}_lesson`;
+      sessionStorage.setItem(cacheKey, String(selectedLessonId));
+    }
+    
     setEnrollmentData(nextData);
     try {
       await fetch(`${BACKEND_URL}/api/enrollments/${enrollmentId}/`, {
@@ -896,7 +918,9 @@ export default function CoursePage() {
       if (!token || !enrollmentId || !selectedLessonId || !sortedLessons.length) return;
       const completed = Math.max(currentLessonIndex, 0);
       const lastSync = progressSyncRef.current;
+      // Only sync if lesson or progress changed
       if (lastSync.lessonId === selectedLessonId && lastSync.completed === completed) return;
+      
       const total = sortedLessons.length;
       const progressPercent = total ? Math.round((completed / total) * 100) : 0;
       const nextData = {
@@ -909,6 +933,13 @@ export default function CoursePage() {
         updated_at: new Date().toISOString(),
       };
       progressSyncRef.current = { lessonId: selectedLessonId, completed };
+      
+      // Save to sessionStorage BEFORE updating state to prevent race conditions
+      if (typeof window !== "undefined") {
+        const cacheKey = `course_${courseId}_lesson`;
+        sessionStorage.setItem(cacheKey, String(selectedLessonId));
+      }
+      
       setEnrollmentData(nextData);
       try {
         await apiFetch(
@@ -924,7 +955,7 @@ export default function CoursePage() {
       }
     };
     syncProgress();
-  }, [token, enrollmentId, selectedLessonId, currentLessonIndex, sortedLessons.length, enrollmentData]);
+  }, [selectedLessonId, currentLessonIndex, token, enrollmentId, sortedLessons.length, courseId];
 
   return (
     <main className="min-h-screen bg-slate-50">

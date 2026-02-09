@@ -3,6 +3,7 @@
 ## 📊 Resumen del Problema
 
 Los logs muestran:
+
 - ✅ Frontend envía frames al ML Service correctamente
 - ✅ ML Service recibe las solicitudes
 - ❌ **PERO nunca detecta rostros** (`face=False` SIEMPRE)
@@ -14,12 +15,16 @@ Los logs muestran:
 ## 🎯 Próximos Pasos - Qué Hacer Ahora
 
 ### PASO 1: Esperar Redeployment de Render
+
 El ML Service se está redeploys ahora con logging mejorado.
+
 - **Tiempo**: ~3-5 minutos
 - Ver status en: https://dashboard.render.com (visionclass-ml service)
 
 ### PASO 2: Una vez deployed, Abre la Consola de Render
+
 En Render Dashboard:
+
 1. Click `visionclass-ml` service
 2. Click `Logs` tab
 3. Busca líneas que digan:
@@ -37,7 +42,9 @@ En Render Dashboard:
 **Si ves FAILED**: El problema es que MediaPipe no se puede instalar en Render. Ver SOLUCIÓN A abajo.
 
 ### PASO 3: Test Frame Capture
+
 Una vez deployed, una persona abre la app en Render:
+
 1. Login como student
 2. Entra a lesson con cámara
 3. Permite permisos de cámara
@@ -46,6 +53,7 @@ Una vez deployed, una persona abre la app en Render:
 **En Render logs ML Service, debería ver**:
 
 Opción A (SUCCESS):
+
 ```
 [analyze_frame] 📥 Frame recibido: XXXX bytes
 [analyze_frame] ✅ Decodificado OK: forma=(480, 640, 3)
@@ -53,18 +61,22 @@ Opción A (SUCCESS):
 ```
 
 Opción B (Canvas vacío):
+
 ```
 [analyze_frame] 📥 Frame recibido: 500 bytes
 [analyze_frame] ✅ Decodificado OK: forma=(480, 640, 3)
 [compute_attention] ⚠️  NO DETECTADO shape=(480, 640, 3) range=[0,0]
 ```
+
 → Si ves range=[0,0], **Canvas está dark/empty**
 
 Opción C (MediaPipe no inicializó):
+
 ```
 [analyze_frame] 📥 Frame recibido: 2000 bytes
 [compute_attention] ⚠️  face_mesh_init=False
 ```
+
 → Ver SOLUCIÓN A
 
 ---
@@ -75,7 +87,8 @@ Opción C (MediaPipe no inicializó):
 
 **Síntoma**: Logs muestran `face_mesh_init=False` o error "FaceMesh initialization FAILED"
 
-**Root Cause**: 
+**Root Cause**:
+
 - Package `mediapipe` no instaló en Render
 - O versión de Python incompatible
 - O falta dependencia (protobuf, etc)
@@ -83,12 +96,15 @@ Opción C (MediaPipe no inicializó):
 **Fix**:
 
 1. **Revisar `ml/requirements.txt`**:
+
    ```bash
    cat ml/requirements.txt | grep mediapipe
    ```
+
    Debería mostrar: `mediapipe>=0.9.0`
 
 2. **Si NO está, agregarlo**:
+
    ```bash
    echo "mediapipe>=0.9.0" >> ml/requirements.txt
    ```
@@ -114,6 +130,7 @@ Opción C (MediaPipe no inicializó):
 **Síntoma**: Frames llegan con range=[0,0], shape OK pero sin contenido
 
 **Root Cause**:
+
 - Video stream no está playing
 - Canvas size 0x0
 - getUserMedia() falló silenciosamente
@@ -127,40 +144,45 @@ async function requestCamera() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
     if (!videoRef.current) return;
-    
+
     videoRef.current.srcObject = stream;
-    
+
     // DEBUG: Esperar que el video esté listo
-    await new Promise(resolve => {
+    await new Promise((resolve) => {
       videoRef.current!.onloadedmetadata = () => {
-        console.log('✅ Video metadata loaded');
-        console.log('   Video size:', videoRef.current!.videoWidth, 'x', videoRef.current!.videoHeight);
+        console.log("✅ Video metadata loaded");
+        console.log(
+          "   Video size:",
+          videoRef.current!.videoWidth,
+          "x",
+          videoRef.current!.videoHeight,
+        );
         videoRef.current!.play().then(() => {
-          console.log('✅ Video is now playing');
+          console.log("✅ Video is now playing");
           resolve(null);
         });
       };
     });
-    
+
     // Verificar canvas está ok
     const canvas = canvasRef.current;
     if (canvas.width === 0 || canvas.height === 0) {
-      console.error('❌ Canvas size is 0! Check canvas element attributes');
+      console.error("❌ Canvas size is 0! Check canvas element attributes");
       return;
     }
-    
-    console.log('✅ Canvas size:', canvas.width, 'x', canvas.height);
+
+    console.log("✅ Canvas size:", canvas.width, "x", canvas.height);
     cameraActiveRef.current = true;
-    
   } catch (e) {
-    console.error('❌ getUserMedia failed:', e);
+    console.error("❌ getUserMedia failed:", e);
   }
 }
 ```
 
 Esto logará cuando:
+
 - Video actually está playing
-- Canvas tiene tamaño correcto  
+- Canvas tiene tamaño correcto
 - Si falla, te dirá por qué
 
 ---
@@ -184,7 +206,7 @@ else:
     img_min, img_max = image.min(), image.max()
     is_empty = (img_max - img_min) < 10
     non_zero_pixels = (image > 10).sum()
-    
+
     print(f"[DEBUG] ✅ Imagen decodificada:")
     print(f"   shape: {image.shape}")
     print(f"   dtype: {image.dtype}")
@@ -202,7 +224,7 @@ Esto te mostrará EXACTAMENTE qué trae el frame.
 
 ```
 [ ] 1. Render redeployó ML Service con nuevos logs
-[ ] 2. Abre logs de Render ML Service 
+[ ] 2. Abre logs de Render ML Service
 [ ] 3. Busca [INIT] - ¿inicializó MediaPipe?
 [ ] 4. Un usuario intenta capturar en producción
 [ ] 5. Revisa logs ML para ver qué frame llegó:
@@ -252,16 +274,19 @@ python test_ml_service.py
 ## 💡 Insights Clave
 
 El hecho de que:
+
 - ✅ Backend recibe requests
 - ✅ Frontend envía frames
 - ❌ Pero NUNCA hay face=True
 
 Significa **definitivamente** uno de estos:
+
 1. MediaPipe = None (no inicializó)
 2. image shape / range wrong (frame vacío)
 3. imagen demasiado pequeña/ pobre calidad para detectar
 
 YA HEMOS DESCARTADO:
+
 - ✅ Network connectivity (requests llegan)
 - ✅ CORS issues (requests procesa)
 - ✅ Frontend permissions (video captura)

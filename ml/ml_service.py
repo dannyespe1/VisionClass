@@ -64,6 +64,7 @@ else:
 
 # Fallback: Haar cascade face detector (lighter, more portable)
 cascade = None
+eye_cascade = None
 try:
     cascade_path = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
     cascade = cv2.CascadeClassifier(cascade_path)
@@ -72,8 +73,17 @@ try:
         print(f"⚠️  [INIT] Haar cascade exists but failed to load: {cascade_path}")
     else:
         print(f"✅ [INIT] Haar cascade loaded from: {cascade_path}")
+        
+    # Load eye cascade for attention scoring (when MediaPipe unavailable)
+    eye_cascade_path = cv2.data.haarcascades + "haarcascade_eye.xml"
+    eye_cascade = cv2.CascadeClassifier(eye_cascade_path)
+    if eye_cascade.empty():
+        eye_cascade = None
+    else:
+        print(f"✅ [INIT] Eye cascade loaded")
 except Exception as e:
     cascade = None
+    eye_cascade = None
     print(f"⚠️  [INIT] Haar cascade initialization error: {e}")
 session_sequences: Dict[int, deque] = defaultdict(lambda: deque(maxlen=SEQUENCE_LENGTH))
 session_frame_buffers: Dict[int, deque] = defaultdict(lambda: deque(maxlen=SEQUENCE_LENGTH))
@@ -149,12 +159,52 @@ def compute_attention_score(image: np.ndarray) -> Dict[str, Any]:
                     x, y, w2, h2 = detected
                     bbox = [int(x), int(y), int(x + w2), int(y + h2)]
                     area = (w2 * h2) / float(image.shape[0] * image.shape[1])
-                    score = float(np.clip(area * 2.0, 0.0, 1.0))
-                    print(f"[compute_attention_score] ✅ Haar detected face bbox={bbox} area={area:.4f} params={used_params}")
+                    
+                    # IMPROVED SCORING: face_area + eye_detection + confidence
+                    # Base score: larger face area = more attention (closer to camera)
+                    face_area_score = float(np.clip(area * 3.5, 0.0, 1.0))  # Increased from 2.0 to 3.5
+                    
+                    # Bonus: Try to detect eyes within face ROI (better attention indicator)
+                    eye_score = 0.0
+                    if eye_cascade is not None:
+                        try:
+                            face_roi = gray[int(y):int(y+h2), int(x):int(x+w2)]
+                            eyes = eye_cascade.detectMultiScale(face_roi, scaleFactor=1.1, minNeighbors=5, minSize=(15, 15))
+                            # If we detect 2 eyes, full bonus; 1 eye = 0.5; 0 eyes = 0
+                            if len(eyes) >= 2:
+                                eye_score = 0.3
+                            elif len(eyes) == 1:
+                                eye_score = 0.15
+                        except:
+                            pass
+                    
+                    # Confidence: face size relative to typical distances
+                    # Small face (0-5%) = low confidence, Medium (5-15%) = medium, Large (15%+) = high
+                    if area < 0.05:
+                        confidence_score = area * 5  # 0-0.25
+                    elif area < 0.15:
+                        confidence_score = 0.5 + (area - 0.05) * 3.33  # 0.5-1.0
+                    else:
+                        confidence_score = 1.0
+                    confidence_score = float(np.clip(confidence_score, 0.0, 1.0))
+                    
+                    # Composite score: 70% face area + 20% eye detection + 10% confidence
+                    score = float(np.clip(0.7 * face_area_score + 0.2 * eye_score + 0.1 * confidence_score, 0.0, 1.0))
+                    
+                    print(f"[compute_attention_score] ✅ Haar detected bbox={bbox} area={area:.4f} face_s={face_area_score:.2f} eye_s={eye_score:.2f} conf={confidence_score:.2f} → score={score:.2f}")
                     return {
                         "value": score,
                         "label": "attention_score",
-                        "data": {"face": True, "method": "haar", "bbox": bbox, "area": area, "params": used_params},
+                        "data": {
+                            "face": True,
+                            "method": "haar",
+                            "bbox": bbox,
+                            "area": area,
+                            "face_area_score": face_area_score,
+                            "eye_score": eye_score,
+                            "confidence": confidence_score,
+                            "params": used_params
+                        },
                     }
             except Exception as e:
                 print(f"[compute_attention_score] ⚠️ Haar detection error: {e}")
@@ -245,12 +295,19 @@ def aggregate_temporal_score(session_id: int, frame_result: Dict[str, Any]) -> D
     """
     seq = session_sequences[session_id]
     score_val = frame_result.get("value")
+    
+    # Extract features - handle both MediaPipe and Haar fallback data
+    data = frame_result.get("data", {})
+    eyes_open = data.get("eyes_open", data.get("eye_score", 0))  # Haar uses eye_score
+    gaze_center = data.get("gaze_center", data.get("confidence", 0))  # Haar uses confidence
+    ear = data.get("ear", 0)
+    
     seq.append(
         {
             "score": score_val,
-            "eyes_open": frame_result["data"].get("eyes_open", 0),
-            "gaze_center": frame_result["data"].get("gaze_center", 0),
-            "ear": frame_result["data"].get("ear", 0),
+            "eyes_open": eyes_open,
+            "gaze_center": gaze_center,
+            "ear": ear,
         }
     )
     scores = [x["score"] for x in seq if x.get("score") is not None]

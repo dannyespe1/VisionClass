@@ -178,6 +178,53 @@ docker compose exec backend python manage.py migrate
 3. Frontend:
    - Configurar `NEXT_PUBLIC_BACKEND_URL`, `NEXT_PUBLIC_ML_URL`, `ML_SERVICE_URL`.
 
+## Configuracion de OAuth en Render
+Para habilitar Google OAuth en Render, sigue estos pasos:
+
+### 1. Crear proyecto en Google Cloud Console
+1. Ir a [Google Cloud Console](https://console.cloud.google.com/)
+2. Crear un nuevo proyecto
+3. Habilitar "Google+ API"
+4. Crear credenciales OAuth 2.0:
+   - Pantalla de consentimiento: Completar con nombre de app (VisionClass)
+   - Crear credencial tipo "OAuth 2.0 Client ID" para aplicacion web
+   - Authorized redirect URIs:
+     - `https://visionclass-frontend.onrender.com/login`
+     - `http://localhost:3000/login` (para desarrollo local)
+
+### 2. Configurar variables en Render
+En el dashboard de Render, agregar las siguientes variables de entorno:
+
+**Backend (visionclass-backend):**
+- `GOOGLE_OAUTH_CLIENT_ID`: El Client ID de Google Cloud
+- `GOOGLE_OAUTH_CLIENT_SECRET`: El Client Secret de Google Cloud
+- `GOOGLE_OAUTH_CALLBACK_URL`: `https://visionclass-frontend.onrender.com/login`
+
+**Frontend (visionclass-frontend):**
+- `NEXT_PUBLIC_GOOGLE_CLIENT_ID`: El Client ID de Google Cloud (mismo que backend)
+- `NEXT_PUBLIC_GOOGLE_REDIRECT_URI`: `https://visionclass-frontend.onrender.com/login`
+
+### 3. Redeploy
+1. Hacer push de los cambios (incluyendo `render.yaml`)
+2. Render detectara automaticamente y desplegara con las nuevas variables
+3. Probar el flujo de login en https://visionclass-frontend.onrender.com/login
+
+### Desarrollo Local con OAuth
+Para probar OAuth localmente:
+
+**Backend (.env):**
+```
+GOOGLE_OAUTH_CLIENT_ID=<from_google_cloud>
+GOOGLE_OAUTH_CLIENT_SECRET=<from_google_cloud>
+GOOGLE_OAUTH_CALLBACK_URL=http://localhost:3000/login
+```
+
+**Frontend (.env.local):**
+```
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=<from_google_cloud>
+NEXT_PUBLIC_GOOGLE_REDIRECT_URI=http://localhost:3000/login
+```
+
 ## Token de servicio ML
 Para generar un usuario de servicio y JWT:
 ```bash

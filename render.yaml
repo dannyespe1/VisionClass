@@ -31,6 +31,14 @@ services:
         value: "True"
       - key: CSRF_COOKIE_SECURE
         value: "True"
+      - key: GOOGLE_OAUTH_CLIENT_ID
+        sync: false
+      - key: GOOGLE_OAUTH_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_OAUTH_CALLBACK_URL
+        value: "https://visionclass-frontend.onrender.com/login"
+      - key: SITE_ID
+        value: "1"
 
   - type: web
     name: visionclass-ml
@@ -61,3 +69,7 @@ services:
         value: https://visionclass-ml.onrender.com
       - key: BACKEND_URL
         value: https://visionclass-backend.onrender.com
+      - key: NEXT_PUBLIC_GOOGLE_CLIENT_ID
+        sync: false
+      - key: NEXT_PUBLIC_GOOGLE_REDIRECT_URI
+        value: "https://visionclass-frontend.onrender.com/login"

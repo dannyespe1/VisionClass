@@ -62,6 +62,19 @@ else:
     face_mesh = None
     print("⚠️  [INIT] MediaPipe FaceMesh initialization FAILED - face_mesh=None")
 
+# Fallback: Haar cascade face detector (lighter, more portable)
+cascade = None
+try:
+    cascade_path = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+    cascade = cv2.CascadeClassifier(cascade_path)
+    if cascade.empty():
+        cascade = None
+        print(f"⚠️  [INIT] Haar cascade exists but failed to load: {cascade_path}")
+    else:
+        print(f"✅ [INIT] Haar cascade loaded from: {cascade_path}")
+except Exception as e:
+    cascade = None
+    print(f"⚠️  [INIT] Haar cascade initialization error: {e}")
 session_sequences: Dict[int, deque] = defaultdict(lambda: deque(maxlen=SEQUENCE_LENGTH))
 session_frame_buffers: Dict[int, deque] = defaultdict(lambda: deque(maxlen=SEQUENCE_LENGTH))
 
@@ -114,7 +127,28 @@ def compute_attention_score(image: np.ndarray) -> Dict[str, Any]:
     - Desviación del gaze (iris) respecto al centro
     """
     if face_mesh is None:
-        return {"value": None, "label": "no_face", "data": {"face": False}}
+        # Fallback to Haar cascade if available
+        if cascade is not None:
+            try:
+                gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                faces = cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(60, 60))
+                if len(faces) > 0:
+                    x, y, w2, h2 = faces[0]
+                    bbox = [int(x), int(y), int(x + w2), int(y + h2)]
+                    area = (w2 * h2) / float(image.shape[0] * image.shape[1])
+                    score = float(np.clip(area * 2.0, 0.0, 1.0))
+                    print(f"[compute_attention_score] ✅ Haar detected face bbox={bbox} area={area:.4f}")
+                    return {
+                        "value": score,
+                        "label": "attention_score",
+                        "data": {"face": True, "method": "haar", "bbox": bbox, "area": area},
+                    }
+            except Exception as e:
+                print(f"[compute_attention_score] ⚠️ Haar detection error: {e}")
+        # If no face detected or no cascade available, log image stats
+        img_stats = {"shape": image.shape, "min": int(image.min()), "max": int(image.max()), "mean": int(image.mean())}
+        print(f"[compute_attention_score] ⚠️  NO DETECTADO: {img_stats} face_mesh={face_mesh is not None} cascade={cascade is not None}")
+        return {"value": None, "label": "no_face", "data": {"face": False, "image_stats": img_stats}}
 
     h, w, _ = image.shape
     rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)

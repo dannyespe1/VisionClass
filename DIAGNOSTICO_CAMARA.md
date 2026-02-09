@@ -33,6 +33,7 @@ cat frontend/.env.local
 ```
 
 **Debe tener:**
+
 ```
 NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
 ML_SERVICE_URL=http://localhost:9000
@@ -55,6 +56,7 @@ cat backend/.env
 ```
 
 **Debe tener (mínimo):**
+
 ```
 DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1
@@ -85,12 +87,13 @@ Significa que el proxy no puede alcanzar `http://localhost:9000`
 
 ```javascript
 // En la consola del navegador
-fetch('/api/attention-proxy', { method: 'GET' })
-  .then(r => r.json())
-  .then(d => console.log(JSON.stringify(d, null, 2)))
+fetch("/api/attention-proxy", { method: "GET" })
+  .then((r) => r.json())
+  .then((d) => console.log(JSON.stringify(d, null, 2)));
 ```
 
 **Debería retornar:**
+
 ```json
 {
   "ok": true,
@@ -118,11 +121,13 @@ python ml_service.py
 ```
 
 Si ves en los logs del ML Service:
+
 ```
 [analyze/frame] session=..., face=False, frame_score=None
 ```
 
 Significa que MediaPipe **no detecta rostro**, que puede ser por:
+
 - Mala iluminación
 - Distancia incorrecta de la cámara
 - Rostro fuera de frame
@@ -154,6 +159,7 @@ curl -X POST "http://localhost:9000/analyze/frame" \
 ```
 
 **Respuesta esperada:**
+
 ```json
 {
   "ok": true,
@@ -174,6 +180,7 @@ curl -X POST "http://localhost:9000/analyze/frame" \
 **Si face=false:**
 
 El issue es que MediaPipe no detecta rostro. Intenta:
+
 - Mejor iluminación
 - Posiciona la cabeza hacia la cámara
 - Acércate más a la cámara
@@ -260,7 +267,7 @@ if cap.isOpened():
     if ret:
         print(f"✅ Cámara funcionando ({frame.shape})")
         cv2.imwrite('test.jpg', frame)
-        
+
         # 4. Enviar a ML Service
         print("\n[4] Enviando frame a ML Service...")
         try:

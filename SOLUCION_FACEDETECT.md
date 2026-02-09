@@ -3,6 +3,7 @@
 ## 📊 Diagnóstico de los Logs
 
 ### Lo que vemos en los logs:
+
 ```
 ML Service:  [analyze/frame] session=19, face=False, frame_score=None, temporal=0.00
 Frontend:    [attention-proxy] hasFace: false, score: null
@@ -40,7 +41,7 @@ Backend:     ✅ Requests llegando correctamente
 
 if not result.multi_face_landmarks:
     img_min = int(image.min())
-    img_max = int(image.max()) 
+    img_max = int(image.max())
     img_mean = int(image.mean())
     print(f"[compute_attention_score] ⚠️  NO DETECTADO")
     print(f"   shape={image.shape}")
@@ -68,51 +69,57 @@ En `frontend/app/api/attention-proxy/route.ts`, agregar:
 
 ```typescript
 // Después de capturar frame del canvas
-const canvasImage = canvas.toDataURL('image/jpeg', 0.8);
-if (!canvasImage || canvasImage === 'data:image/jpeg;base64,') {
-  console.error('[proxy] ❌ Canvas NO contiene contenido!');
-  return NextResponse.json({ error: 'Canvas is empty' }, { status: 400 });
+const canvasImage = canvas.toDataURL("image/jpeg", 0.8);
+if (!canvasImage || canvasImage === "data:image/jpeg;base64,") {
+  console.error("[proxy] ❌ Canvas NO contiene contenido!");
+  return NextResponse.json({ error: "Canvas is empty" }, { status: 400 });
 }
 ```
 
 ## 📝 Pasos de Testing en Orden
 
 ### Test 1: ¿Está MediaPipe inicializado?
+
 ```bash
 # Request a Render ML Service
-curl -X GET "https://visionclass-ml.onrender.com/debug/status" 
+curl -X GET "https://visionclass-ml.onrender.com/debug/status"
 # Esperado: { "mediapipe_alive": true }
 # Si es false, MediaPipe NO inicializó correctamente
 ```
 
 ### Test 2: Enviar una imagen simple de prueba
+
 ```bash
 # Crear imagen de prueba (480x640, con contenido)
 python test_ml_service.py
 # Ver logs en Render ML Service
 
 # Los logs deberían mostrar:
-# ✅ Shape, rango and content  
+# ✅ Shape, rango and content
 # ❌ Pero face_mesh sigue siendo False = MediaPipe issue
 ```
 
 ### Test 3: Revisar Canvas del Frontend
+
 ```javascript
 // En browser console cuando está capturando:
-const canvas = document.querySelector('canvas');
-console.log('Canvas size:', canvas.width, canvas.height);
-console.log('Canvas empty?', canvas.toDataURL() === 'data:image/jpeg;base64,');
+const canvas = document.querySelector("canvas");
+console.log("Canvas size:", canvas.width, canvas.height);
+console.log("Canvas empty?", canvas.toDataURL() === "data:image/jpeg;base64,");
 ```
 
 ## 🚨 Root Cause Probables
 
 ### Escenario A: MediaPipe No inicializó (85%)
+
 **Síntoma**: `/debug/status` devuelve `mediapipe_alive: false`
-**Causa**: 
+**Causa**:
+
 - Python package `mediapipe` no instaló correctamente en Render container
 - Dependencias faltantes (por ej: protobuf, numpy versión incompatible)
 
 **Solución**:
+
 1. Verificar `ml/requirements.txt` tiene `mediapipe>=0.9.0`
 2. Forzar reinstalación en Render:
    - Ir a Render Dashboard → visionclass-ml service
@@ -120,31 +127,37 @@ console.log('Canvas empty?', canvas.toDataURL() === 'data:image/jpeg;base64,');
    - Revisar logs de build para errores de `pip install`
 
 ### Escenario B: Canvas está vacío (10%)
-**Síntoma**:  Canvas captura video pero array es [0,0,0,...]
-**Causa**: 
+
+**Síntoma**: Canvas captura video pero array es [0,0,0,...]
+**Causa**:
+
 - Video stream no started
 - CORS blocking canvas
 - getUserMedia falla silenciosamente
 
 **Solución**:
+
 - En browser console: `document.querySelector('video').readyState === 2` (playing?)
 - Verificar permisos de cámara concedidos
 - Ver logs de `requestCamera()` en frontend
 
 ### Escenario C: Imagen muy pequeña o mal formateada (5%)
+
 **Síntoma**: Logs muestran shape [1,1,3] o [10,10,3]
 **Causa**:
+
 - Canvas size set to 1x1 por error
 - Frame buffer overflow
 
 **Solución**:
+
 - Verificar `<canvas width="640" height="480">`
 - Logs frontendmostrarían canvas dimensions
 
 ## 📋 Checklist Depuración
 
 - [ ] PASO 1: Redeployar ML Service con logs mejorados
-- [ ] PASO 2: Revisar logs en Render ML  durante test
+- [ ] PASO 2: Revisar logs en Render ML durante test
 - [ ] PASO 3: Run `test_ml_service.py` localmente
 - [ ] PASO 4: Verificar `/debug/status` en producción
 - [ ] PASO 5: Revisar logs de MediaPipe en build

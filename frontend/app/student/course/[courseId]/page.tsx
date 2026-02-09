@@ -955,8 +955,7 @@ export default function CoursePage() {
       }
     };
     syncProgress();
-  }, [selectedLessonId, currentLessonIndex, token, enrollmentId, sortedLessons.length, courseId];
-
+  }, [selectedLessonId, currentLessonIndex, token, enrollmentId, sortedLessons.length, courseId]);
   return (
     <main className="min-h-screen bg-slate-50">
       <TooltipProvider>

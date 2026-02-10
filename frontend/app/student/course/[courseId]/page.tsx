@@ -66,6 +66,8 @@ type LessonSummary = {
   completed: boolean;
 };
 
+const isFinalExamLesson = (title: string) => (title || "").toLowerCase().includes("examen final");
+
 const toYoutubeEmbed = (url: string) => {
   if (!url) return "";
   if (url.includes("embed/")) return url;
@@ -860,17 +862,27 @@ export default function CoursePage() {
         token
       );
       if (enrollmentId) {
+        const finalExam = Boolean(selectedLesson && isFinalExamLesson(selectedLesson.title));
         const nextData = {
           ...enrollmentData,
           last_quiz_score: score,
           last_quiz_at: new Date().toISOString(),
         };
+        if (finalExam) {
+          nextData.progress_percent = 100;
+          nextData.progress = 100;
+          nextData.completed_at = new Date().toISOString();
+        }
         setEnrollmentData(nextData);
+        const payload: Record<string, unknown> = { enrollment_data: nextData };
+        if (finalExam) {
+          payload.status = "completed";
+        }
         apiFetch(
           `/api/enrollments/${enrollmentId}/`,
           {
             method: "PATCH",
-            body: JSON.stringify({ enrollment_data: nextData }),
+            body: JSON.stringify(payload),
           },
           token
         ).catch((err) => console.error(err));

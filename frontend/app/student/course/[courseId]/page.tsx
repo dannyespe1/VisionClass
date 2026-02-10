@@ -27,6 +27,14 @@ import { useAuth } from "../../../context/AuthContext";
 import { Button } from "../../../ui/button";
 import { CameraPermissionModal, PermissionSettings } from "../../CameraPermissionModal";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../../../ui/dialog";
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -147,6 +155,7 @@ export default function CoursePage() {
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizScore, setQuizScore] = useState<number | null>(null);
   const [quizError, setQuizError] = useState<string | null>(null);
+  const [courseCompletedOpen, setCourseCompletedOpen] = useState(false);
   const [attentionStatus, setAttentionStatus] = useState<"ok" | "no_face" | "pending" | "error">("pending");
   const [mlServiceStatus, setMlServiceStatus] = useState<"checking" | "available" | "unavailable" | null>(null);
 
@@ -886,6 +895,9 @@ export default function CoursePage() {
           },
           token
         ).catch((err) => console.error(err));
+        if (finalExam) {
+          setCourseCompletedOpen(true);
+        }
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "No se pudo guardar la evaluación";
@@ -1420,6 +1432,29 @@ export default function CoursePage() {
           }}
         />
       )}
+
+      <Dialog open={courseCompletedOpen} onOpenChange={setCourseCompletedOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+              Curso completado
+            </DialogTitle>
+            <DialogDescription>
+              Has finalizado el examen final. Tu curso queda marcado como completado.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+            {courseTitle}
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setCourseCompletedOpen(false)}>
+              Cerrar
+            </Button>
+            <Button onClick={() => router.push("/student")}>Ir al panel</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }

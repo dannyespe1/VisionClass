@@ -5,13 +5,14 @@ import { useRouter } from "next/navigation";
 import { apiFetch } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import D2RWidget from "./test-widget";
+import { D2R_ROWS } from "./d2r-rows";
 
 type PhaseResult = { TR: number; TA: number; O: number; C: number; CON: number; targetCount?: number };
 type PhaseEvent = { phase: number; ts: number; cellId: number; isTarget: boolean };
 
 export default function D2RPage() {
   const totalPhases = 14;
-  const durationSeconds = 15;
+  const durationSeconds = 20;
 
   const router = useRouter();
   const { token } = useAuth();
@@ -33,6 +34,9 @@ export default function D2RPage() {
   const [cameraStatus, setCameraStatus] = useState<"pending" | "granted" | "denied">("pending");
   const [started, setStarted] = useState(false);
   const [finished, setFinished] = useState(false);
+  const [practiceOpen, setPracticeOpen] = useState(false);
+  const [practiceDone, setPracticeDone] = useState(false);
+  const [practiceClicked, setPracticeClicked] = useState<Set<number>>(new Set());
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -45,6 +49,7 @@ export default function D2RPage() {
 
   const completedPhases = useMemo(() => phaseResults.filter((r) => r !== null).length, [phaseResults]);
   const progress = Math.round((completedPhases / totalPhases) * 100);
+  const practiceRow = useMemo(() => D2R_ROWS[0] ?? [], []);
 
   // Bootstrap: usuario, curso base, sesin y cmara
   useEffect(() => {
@@ -297,9 +302,100 @@ export default function D2RPage() {
               <ol className="list-decimal list-inside text-slate-700 space-y-1">
                 <li>Se presentan filas de letras "d" y "p" con diferentes números de guiones.</li>
                 <li>Marca unicamente las "d" con exactamente dos guiones (uno arriba y uno abajo).</li>
-                <li>Tienes 15 segundos por fila. Trabaja rápido y preciso.</li>
+                <li>Tienes 20 segundos por fila. Trabaja rápido y preciso.</li>
                 <li>La cámara se usar para monitorear atención (no guardamos video).</li>
               </ol>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="font-semibold text-slate-900">Práctica guiada</p>
+                  <p className="text-slate-600 text-xs">
+                    Antes del test real, revisa una fila de ejemplo y practica los clics correctos.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPracticeOpen((prev) => !prev)}
+                  className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  {practiceOpen ? "Ocultar práctica" : "Iniciar práctica"}
+                </button>
+              </div>
+
+              {practiceOpen && (
+                <div className="rounded-xl bg-slate-50 border border-slate-200 p-4">
+                  <p className="text-xs text-slate-600 mb-3">
+                    Haz clic solo en las <span className="font-semibold">d</span> con{" "}
+                    <span className="font-semibold">dos guiones</span> (uno arriba y uno abajo).
+                  </p>
+                  <div className="grid grid-cols-6 sm:grid-cols-12 gap-2 sm:gap-3">
+                    {practiceRow.map((cell) => {
+                      const clicked = practiceClicked.has(cell.id);
+                      const base =
+                        "h-11 w-11 sm:h-12 sm:w-12 rounded-2xl border text-sm sm:text-base font-semibold flex items-center justify-center transition-all select-none";
+                      const idle = "bg-white border-slate-200 hover:bg-slate-100";
+                      const pressed = "bg-slate-200 border-slate-300";
+
+                      return (
+                        <button
+                          key={`practice-${cell.id}`}
+                          type="button"
+                          onClick={() => {
+                            setPracticeClicked((prev) => {
+                              const next = new Set(prev);
+                              if (next.has(cell.id)) {
+                                next.delete(cell.id);
+                              } else {
+                                next.add(cell.id);
+                              }
+                              return next;
+                            });
+                          }}
+                          className={[base, clicked ? pressed : idle, "text-slate-800"].filter(Boolean).join(" ")}
+                        >
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="flex items-center justify-center gap-0.5 min-h-2">
+                              {Array.from({ length: cell.dashesTop }).map((_, idx) => (
+                                <span key={`pt-${cell.id}-${idx}`} className="h-2.5 w-0.5 rounded-full bg-slate-500" />
+                              ))}
+                            </div>
+                            <span className="font-semibold">{cell.letter}</span>
+                            <div className="flex items-center justify-center gap-0.5 min-h-2">
+                              {Array.from({ length: cell.dashesBottom }).map((_, idx) => (
+                                <span key={`pb-${cell.id}-${idx}`} className="h-2.5 w-0.5 rounded-full bg-slate-500" />
+                              ))}
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="mt-4 flex flex-col sm:flex-row gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPracticeDone(true);
+                        setPracticeOpen(false);
+                      }}
+                      className="px-4 py-2 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700"
+                    >
+                      Marcar práctica como completada
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPracticeClicked(new Set())}
+                      className="px-4 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      Limpiar selección
+                    </button>
+                    {practiceDone && (
+                      <span className="text-xs text-emerald-600 flex items-center">Práctica completada</span>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="rounded-xl bg-blue-600 text-white p-4 text-sm">
@@ -324,13 +420,21 @@ export default function D2RPage() {
                     : "Reintentar cámara"}
               </button>
               <button
-                disabled={cameraStatus !== "granted"}
-                onClick={() => setStarted(true)}
+                disabled={cameraStatus !== "granted" || !practiceDone}
+                onClick={() => {
+                  setPracticeOpen(false);
+                  setStarted(true);
+                }}
                 className="px-5 py-3 rounded-xl border border-slate-300 text-slate-800 text-sm font-semibold disabled:opacity-60"
               >
                 Comenzar Test
               </button>
             </div>
+            {!practiceDone && (
+              <p className="text-xs text-slate-500">
+                Completa la práctica para habilitar el inicio del test.
+              </p>
+            )}
             {cameraStatus === "denied" && (
               <p className="text-sm text-red-600">No pudimos acceder a la cámara. Revisa permisos en el navegador.</p>
             )}

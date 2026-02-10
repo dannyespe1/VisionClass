@@ -845,6 +845,30 @@ class D2RResultViewSet(viewsets.ModelViewSet):
         if not d2r_session or d2r_session.user_id != user.id:
             raise PermissionDenied("La sesion debe pertenecer al estudiante autenticado.")
         result = serializer.save(user=user)
+
+        try:
+            baseline_course = Course.objects.filter(title__iexact=BASELINE_TITLE).first()
+            if baseline_course:
+                enrollment, _ = Enrollment.objects.get_or_create(
+                    user=user,
+                    course=baseline_course,
+                    defaults={"enrollment_data": {}},
+                )
+                data = enrollment.enrollment_data or {}
+                data.update(
+                    {
+                        "progress_percent": 100,
+                        "progress": 100,
+                        "completed_at": timezone.now().isoformat(),
+                        "source": "d2r",
+                    }
+                )
+                enrollment.enrollment_data = data
+                enrollment.status = Enrollment.STATUS_COMPLETED
+                enrollment.save(update_fields=["status", "enrollment_data"])
+        except Exception as exc:
+            logger.warning("No se pudo marcar curso D2R como completado para %s: %s", user.id, exc)
+
         if user.email:
             subject = "Resultado D2R registrado"
             message = (

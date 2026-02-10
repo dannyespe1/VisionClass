@@ -32,7 +32,7 @@ function CellGlyph({ letter, dashesTop, dashesBottom }: Omit<Cell, "id" | "targe
 }
 
 export default function D2RWidget({
-  durationSeconds = 15,
+  durationSeconds = 20,
   phase = 1,
   totalPhases = 14,
   onFinish,

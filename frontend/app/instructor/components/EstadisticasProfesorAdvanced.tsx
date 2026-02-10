@@ -80,6 +80,26 @@ type D2RResult = {
   user: { id: number };
   attention_span: number;
   created_at: string;
+  raw_score?: number;
+  processing_speed?: number;
+  errors?: number;
+  phase_data?: {
+    totalPhases?: number;
+    durationSeconds?: number;
+    phases?: Array<{
+      phase: number;
+      start?: number;
+      end?: number;
+      summary?: {
+        TR?: number;
+        TA?: number;
+        O?: number;
+        C?: number;
+        CON?: number;
+        targetCount?: number;
+      };
+    }>;
+  };
 };
 
 type QuizAttempt = {
@@ -134,6 +154,8 @@ export function EstadisticasProfesorAdvanced() {
   const [messageSubject, setMessageSubject] = useState("");
   const [messageBody, setMessageBody] = useState("");
   const [messageStatus, setMessageStatus] = useState<{ type: "ok" | "error"; text: string } | null>(null);
+  const [d2rOpen, setD2rOpen] = useState(false);
+  const [d2rTarget, setD2rTarget] = useState<{ name: string; result: D2RResult } | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -167,21 +189,33 @@ export function EstadisticasProfesorAdvanced() {
     load();
   }, [token, selectedCourseId]);
 
-  const d2rByUser = useMemo(() => {
-    const map = new Map<number, { score: number; created_at: string }>();
+  const latestD2RByUser = useMemo(() => {
+    const map = new Map<number, D2RResult>();
     d2rResults.forEach((result) => {
       const userId = result.user.id;
       if (!userId) return;
-      const score = normalizeNumber(result.attention_span);
       const current = map.get(userId);
-      if (!current || (result.created_at && current.created_at && result.created_at > current.created_at)) {
-        map.set(userId, { score, created_at: result.created_at });
-      } else if (!current) {
-        map.set(userId, { score, created_at: result.created_at });
+      if (!current) {
+        map.set(userId, result);
+        return;
+      }
+      if (result.created_at && current.created_at && result.created_at > current.created_at) {
+        map.set(userId, result);
       }
     });
     return map;
   }, [d2rResults]);
+
+  const d2rByUser = useMemo(() => {
+    const map = new Map<number, { score: number; created_at: string }>();
+    latestD2RByUser.forEach((result, userId) => {
+      map.set(userId, {
+        score: normalizeNumber(result.attention_span),
+        created_at: result.created_at,
+      });
+    });
+    return map;
+  }, [latestD2RByUser]);
 
   const studentAnalytics = useMemo(() => {
     const courseId = Number(selectedCourseId);
@@ -270,6 +304,44 @@ export function EstadisticasProfesorAdvanced() {
     setMessageStatus(null);
     setMessageOpen(true);
   };
+
+  const openD2RModal = (student: {
+    userId: number;
+    name: string;
+  }) => {
+    const result = latestD2RByUser.get(student.userId);
+    if (!result) return;
+    setD2rTarget({ name: student.name, result });
+    setD2rOpen(true);
+  };
+
+  const d2rPhaseRows = useMemo(() => {
+    const phases = d2rTarget?.result.phase_data?.phases || [];
+    return phases
+      .map((p) => ({
+        phase: p.phase,
+        TR: p.summary?.TR ?? 0,
+        TA: p.summary?.TA ?? 0,
+        O: p.summary?.O ?? 0,
+        C: p.summary?.C ?? 0,
+        CON: p.summary?.CON ?? 0,
+      }))
+      .sort((a, b) => a.phase - b.phase);
+  }, [d2rTarget]);
+
+  const d2rTotals = useMemo(() => {
+    return d2rPhaseRows.reduce(
+      (acc, row) => {
+        acc.TR += row.TR;
+        acc.TA += row.TA;
+        acc.O += row.O;
+        acc.C += row.C;
+        acc.CON += row.CON;
+        return acc;
+      },
+      { TR: 0, TA: 0, O: 0, C: 0, CON: 0 }
+    );
+  }, [d2rPhaseRows]);
 
   const sendNotification = async () => {
     if (!token || !messageTarget) return;
@@ -488,6 +560,14 @@ export function EstadisticasProfesorAdvanced() {
                     <Button size="sm" variant="outline">
                       Ver perfil
                     </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={!latestD2RByUser.get(student.userId)}
+                      onClick={() => openD2RModal({ userId: student.userId, name: student.name })}
+                    >
+                      Ver D2R
+                    </Button>
                     <Button size="sm" variant="outline" onClick={() => openMessageModal(student)}>
                       Enviar mensaje
                     </Button>
@@ -555,6 +635,97 @@ export function EstadisticasProfesorAdvanced() {
             </Button>
             <Button onClick={sendNotification}>
               Enviar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={d2rOpen} onOpenChange={setD2rOpen}>
+        <DialogContent className="sm:max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Resultados D2R (último test)</DialogTitle>
+          </DialogHeader>
+          {d2rTarget ? (
+            <div className="space-y-6">
+              <div className="grid sm:grid-cols-3 gap-3">
+                <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm">
+                  <div className="text-xs text-slate-500">Estudiante</div>
+                  <div className="font-semibold text-slate-900">{d2rTarget.name}</div>
+                </div>
+                <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm">
+                  <div className="text-xs text-slate-500">Fecha</div>
+                  <div className="font-semibold text-slate-900">
+                    {d2rTarget.result.created_at
+                      ? new Date(d2rTarget.result.created_at).toLocaleString()
+                      : "--"}
+                  </div>
+                </div>
+                <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm">
+                  <div className="text-xs text-slate-500">CON (concentración)</div>
+                  <div className="font-semibold text-slate-900">
+                    {normalizeNumber(d2rTarget.result.attention_span)}
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 overflow-hidden">
+                <div className="bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
+                  Resumen por fase
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead className="bg-white border-b border-slate-200 text-slate-500">
+                      <tr>
+                        <th className="px-3 py-2 text-left">Fase</th>
+                        <th className="px-3 py-2 text-center">TR</th>
+                        <th className="px-3 py-2 text-center">TA</th>
+                        <th className="px-3 py-2 text-center">O</th>
+                        <th className="px-3 py-2 text-center">C</th>
+                        <th className="px-3 py-2 text-center">CON</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {d2rPhaseRows.length ? (
+                        d2rPhaseRows.map((row) => (
+                          <tr key={`d2r-row-${row.phase}`} className="border-b border-slate-100">
+                            <td className="px-3 py-2 text-left font-semibold text-slate-700">{row.phase}</td>
+                            <td className="px-3 py-2 text-center">{row.TR}</td>
+                            <td className="px-3 py-2 text-center">{row.TA}</td>
+                            <td className="px-3 py-2 text-center">{row.O}</td>
+                            <td className="px-3 py-2 text-center">{row.C}</td>
+                            <td className="px-3 py-2 text-center">{row.CON}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={6} className="px-3 py-4 text-center text-slate-500">
+                            No hay datos de fases para este test.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                    {d2rPhaseRows.length > 0 && (
+                      <tfoot className="bg-slate-50 border-t border-slate-200 font-semibold text-slate-700">
+                        <tr>
+                          <td className="px-3 py-2 text-left">Total</td>
+                          <td className="px-3 py-2 text-center">{d2rTotals.TR}</td>
+                          <td className="px-3 py-2 text-center">{d2rTotals.TA}</td>
+                          <td className="px-3 py-2 text-center">{d2rTotals.O}</td>
+                          <td className="px-3 py-2 text-center">{d2rTotals.C}</td>
+                          <td className="px-3 py-2 text-center">{d2rTotals.CON}</td>
+                        </tr>
+                      </tfoot>
+                    )}
+                  </table>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-sm text-slate-600">No hay resultado D2R disponible.</div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setD2rOpen(false)}>
+              Cerrar
             </Button>
           </DialogFooter>
         </DialogContent>

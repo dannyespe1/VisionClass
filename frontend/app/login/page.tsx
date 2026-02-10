@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import { LoginContent } from "@/app/login/LoginContent";
 
+export const dynamic = "force-dynamic";
+
 function LoginPageSkeleton() {
   return (
     <div className="min-h-screen flex">

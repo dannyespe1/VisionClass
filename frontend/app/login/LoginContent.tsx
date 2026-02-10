@@ -213,7 +213,7 @@ export function LoginContent() {
               <div>
                 <h3 className="mb-2">Deteccion Pasiva</h3>
                 <p className="text-blue-100">
-                  Monitoreo no invasivo de la atención estudiantil mediante tecnología de vision por computadora.
+                  Monitoreo no invasivo de la atención estudiantil mediante tecnología de visi?n por computadora.
                 </p>
               </div>
             </div>

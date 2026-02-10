@@ -872,7 +872,7 @@ export default function CoursePage() {
       );
       if (enrollmentId) {
         const finalExam = Boolean(selectedLesson && isFinalExamLesson(selectedLesson.title));
-        const nextData = {
+        const nextData: Record<string, any> = {
           ...enrollmentData,
           last_quiz_score: score,
           last_quiz_at: new Date().toISOString(),

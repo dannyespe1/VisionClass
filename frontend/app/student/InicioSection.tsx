@@ -121,7 +121,7 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
             totalLessons,
             completedLessons,
             nextLesson,
-            image: meta.thumbnail || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5w=800",
+            image: meta.thumbnail || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
             category: "Programación",
             attentionLevel: 85,
           } as EnrolledCourse;

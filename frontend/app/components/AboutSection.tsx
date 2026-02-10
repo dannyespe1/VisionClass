@@ -55,7 +55,7 @@ export function AboutSection() {
           <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-slate-100 bg-white">
             <div className="absolute inset-0 bg-gradient-to-tr from-sky-500/20 via-indigo-500/10 to-transparent" />
             <ImageWithFallback
-              src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbew=1200"
+              src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200"
               alt="Inteligencia Artificial"
               className="w-full h-[420px] object-cover"
             />

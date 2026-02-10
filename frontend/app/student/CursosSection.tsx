@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Search, Star, Clock, Users, BookOpen } from "lucide-react";
+import { Search, Star, Clock, Users, BookOpen, CheckCircle } from "lucide-react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
@@ -51,6 +51,8 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
   const [me, setMe] = useState<{ first_name: string; last_name: string; email: string } | null>(null);
   const [enrollOpen, setEnrollOpen] = useState(false);
   const [enrollCourse, setEnrollCourse] = useState<CourseCard | null>(null);
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [successCourse, setSuccessCourse] = useState<CourseCard | null>(null);
   const [enrollForm, setEnrollForm] = useState<EnrollmentForm>({
     fullName: "",
     email: "",
@@ -130,7 +132,7 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
               duration,
               level: meta.level || "Intermedio",
               price: "Gratis",
-              image: meta.thumbnail || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5w=800",
+              image: meta.thumbnail || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
               category: meta.field || "programacion",
               description: cleanDescription || "Curso generado por el profesor.",
               lessonsCount,
@@ -399,7 +401,8 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
                   );
                   setEnrolledIds((prev) => new Set(prev).add(enrollCourse.id));
                   setEnrollOpen(false);
-                  onCourseSelect(enrollCourse.id);
+                  setSuccessCourse(enrollCourse);
+                  setSuccessOpen(true);
                 } catch (err: unknown) {
                   const msg = err instanceof Error ? err.message : "No se pudo inscribir";
                   setError(msg);
@@ -409,6 +412,39 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
               }}
             >
               {enrollSubmitting ? "Inscribiendo..." : "Confirmar inscripcion"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={successOpen} onOpenChange={setSuccessOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-emerald-600" />
+              Inscripción exitosa
+            </DialogTitle>
+            <DialogDescription>
+              Tu inscripción se registró correctamente.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-700">
+            {successCourse ? `Curso: ${successCourse.title}` : "Curso disponible en tu panel."}
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" type="button" onClick={() => setSuccessOpen(false)}>
+              Cerrar
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                if (successCourse) {
+                  onCourseSelect(successCourse.id);
+                }
+                setSuccessOpen(false);
+              }}
+            >
+              Ir al curso
             </Button>
           </DialogFooter>
         </DialogContent>

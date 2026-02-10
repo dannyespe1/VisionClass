@@ -151,11 +151,6 @@ export function LoginContent() {
                 {oauthError}
               </div>
             )}
-            {!oauthError && googleAuthUrl && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-2 text-xs text-green-700">
-                ✅ Google OAuth activado
-              </div>
-            )}
             <div className="flex items-center gap-3">
               <span className="h-px flex-1 bg-gray-200" />
               <span className="text-xs uppercase tracking-[0.25em] text-gray-400">o</span>
@@ -198,7 +193,7 @@ export function LoginContent() {
       <div className="hidden lg:flex flex-1 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-12 flex-col justify-between text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-20">
           <ImageWithFallback
-            src="https://images.unsplash.com/photo-1655272427565-c64fd73298dfcrop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+            src="https://images.unsplash.com/photo-1655272427565-c64fd73298df?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
             alt="Computer Vision Technology"
             className="w-full h-full object-cover"
           />
@@ -211,9 +206,9 @@ export function LoginContent() {
                 <Eye className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="mb-2">Deteccion Pasiva</h3>
+                <h3 className="mb-2">Detección Pasiva</h3>
                 <p className="text-blue-100">
-                  Monitoreo no invasivo de la atención estudiantil mediante tecnología de visi?n por computadora.
+                  Monitoreo no invasivo de la atención estudiantil mediante tecnología de visión por computadora.
                 </p>
               </div>
             </div>
@@ -243,9 +238,9 @@ export function LoginContent() {
         <div className="relative z-10">
           <blockquote className="border-l-4 border-white/30 pl-4">
             <p className="mb-2 italic">
-              La implementacion de este sistema ha revolucionado nuestra forma de entender la atención en el aula.
+              La implementación de este sistema ha revolucionado nuestra forma de entender la atención en el aula.
             </p>
-            <footer className="text-blue-100">Dr. Maria Rodriguez - Universidad Nacional</footer>
+            <footer className="text-blue-100">Dr. María Rodríguez - Universidad Nacional</footer>
           </blockquote>
         </div>
       </div>

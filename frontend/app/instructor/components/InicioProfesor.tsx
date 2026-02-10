@@ -108,7 +108,7 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
               image:
                 meta.thumbnail ||
                 c.thumbnail ||
-                "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5w=800",
+                "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
               students: Math.floor(Math.random() * 40) + 10,
               avgAttention: Math.floor(Math.random() * 20) + 70,
               lessonsCompleted: "--",
@@ -437,7 +437,7 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
             <div className="space-y-3">
               <div className="rounded-lg overflow-hidden border border-slate-200">
                 <ImageWithFallback
-                  src={selectedDetails.image || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5w=800"}
+                  src={selectedDetails.image || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800"}
                   alt={selectedDetails.title}
                   className="w-full h-40 object-cover"
                 />

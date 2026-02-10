@@ -615,20 +615,35 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
         return Enrollment.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        schedule = serializer.save(user=self.request.user)
-        user = schedule.user
+        user = self.request.user
+        course = serializer.validated_data.get("course")
+        enrollment_data = serializer.validated_data.get("enrollment_data", {})
+
+        enrollment, created = Enrollment.objects.get_or_create(
+            user=user,
+            course=course,
+            defaults={"enrollment_data": enrollment_data},
+        )
+
+        if not created and enrollment_data:
+            merged = {**(enrollment.enrollment_data or {}), **enrollment_data}
+            enrollment.enrollment_data = merged
+            enrollment.save(update_fields=["enrollment_data"])
+
+        serializer.instance = enrollment
+
         if user and user.email:
-            subject = "Recordatorio de D2R programado"
-            scheduled_for = schedule.scheduled_for.isoformat() if schedule.scheduled_for else ""
+            subject = "Inscripción confirmada"
+            course_title = course.title if course else "tu curso"
             message = (
-                "Se ha programado un nuevo test D2R.\n\n"
-                f"Fecha programada: {scheduled_for}\n"
-                "Ingresa a la plataforma para completarlo cuando corresponda."
+                "Tu inscripción se ha registrado correctamente.\n\n"
+                f"Curso: {course_title}\n"
+                "Ya puedes acceder a los contenidos desde la plataforma."
             )
             try:
                 send_mailgun_email(user.email, subject, message)
             except Exception as exc:
-                logger.warning("No se pudo enviar mailgun D2R schedule a %s: %s", user.email, exc)
+                logger.warning("No se pudo enviar mailgun de inscripción a %s: %s", user.email, exc)
 
 
 class SessionViewSet(viewsets.ModelViewSet):

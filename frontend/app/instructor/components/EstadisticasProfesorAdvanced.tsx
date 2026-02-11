@@ -672,8 +672,8 @@ export function EstadisticasProfesorAdvanced() {
                 <div className="bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
                   Resumen por fase
                 </div>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full text-sm">
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[640px] text-sm">
                     <thead className="bg-white border-b border-slate-200 text-slate-500">
                       <tr>
                         <th className="px-3 py-2 text-left">Fase</th>

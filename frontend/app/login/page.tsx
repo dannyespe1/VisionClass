@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 function LoginPageSkeleton() {
   return (
     <div className="min-h-screen flex">
-      <div className="flex-1 flex items-center justify-center p-8 bg-white">
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-8 bg-white">
         <div className="w-full max-w-md space-y-4">
           <div className="h-6 bg-gray-200 rounded animate-pulse" />
           <div className="h-12 bg-gray-200 rounded animate-pulse" />

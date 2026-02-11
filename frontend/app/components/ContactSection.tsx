@@ -43,7 +43,7 @@ export function ContactSection() {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-12">
-          <div className="bg-white rounded-3xl shadow-2xl border border-slate-100 p-8 lg:p-10 space-y-6">
+          <div className="bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 sm:p-8 lg:p-10 space-y-6">
             <div className="bg-slate-900 text-white rounded-2xl p-4 flex items-start gap-3">
               <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center"></div>
               <div>

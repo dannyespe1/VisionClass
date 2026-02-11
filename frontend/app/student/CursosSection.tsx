@@ -201,8 +201,8 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
         </div>
       </div>
 
-      <div className="mb-8">
-        <div className="flex items-center gap-2 overflow-x-auto pb-2">
+        <div className="mb-8">
+          <div className="flex items-center gap-2 overflow-x-auto sm:overflow-visible pb-2 flex-nowrap sm:flex-wrap">
           {categories.map((category) => (
             <button
               key={category.id}

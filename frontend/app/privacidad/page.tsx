@@ -50,7 +50,7 @@ export default function PrivacidadPage() {
       </section>
 
       <section className="px-4 lg:px-2 pb-20">
-        <div className="max-w-5xl mx-auto bg-slate-900 text-white rounded-3xl p-10 space-y-4">
+        <div className="max-w-5xl mx-auto bg-slate-900 text-white rounded-3xl p-6 sm:p-8 md:p-10 space-y-4">
           <h2 className="text-2xl font-semibold">Derechos del titular</h2>
           <p className="text-sm text-slate-200">
             Puedes solicitar acceso, rectificación, eliminación o actualización de tus datos.

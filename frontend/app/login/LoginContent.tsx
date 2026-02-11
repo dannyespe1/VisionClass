@@ -121,7 +121,7 @@ export function LoginContent() {
 
   return (
     <div className="min-h-screen flex">
-      <div className="flex-1 flex items-center justify-center p-8 bg-white">
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-8 bg-white">
         <div className="w-full max-w-md">
           <button
             onClick={handleBack}

@@ -212,7 +212,7 @@ export default function D2RWidget({
               const clicked = clickedIds.has(cell.id);
 
               const base =
-                "h-11 w-11 sm:h-12 sm:w-12 rounded-2xl border text-sm sm:text-base font-semibold flex items-center justify-center transition-all select-none";
+                "h-9 w-9 sm:h-11 sm:w-11 md:h-12 md:w-12 rounded-2xl border text-sm sm:text-base font-semibold flex items-center justify-center transition-all select-none";
               const idle = "bg-slate-50 border-slate-200 hover:bg-slate-100";
               const neutralPressed = "bg-slate-200 border-slate-300";
 

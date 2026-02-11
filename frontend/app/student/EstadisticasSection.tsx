@@ -451,7 +451,7 @@ export function EstadisticasSection() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-8">
-          <div className="grid md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -498,7 +498,7 @@ export function EstadisticasSection() {
               <div className="text-sm text-gray-600">Calificacion Promedio</div>
             </div>
           </div>
-          <div className="grid lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <h3 className="text-lg mb-6 flex items-center gap-2">
                 <Activity className="w-5 h-5 text-blue-600" />
@@ -601,7 +601,7 @@ export function EstadisticasSection() {
               <Lightbulb className="w-5 h-5 text-yellow-600" />
               Recomendaciones Personalizadas Basadas en IA
             </h3>
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {recommendations.map((rec, index) => {
                 const recommendationIconMap: Record<string, typeof Lightbulb> = {
                   "peak-time": Sun,
@@ -637,7 +637,7 @@ export function EstadisticasSection() {
           </div>
         </TabsContent>
         <TabsContent value="attention" className="space-y-8">
-          <div className="grid lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white rounded-xl p-6 shadow-lg">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
@@ -700,7 +700,7 @@ export function EstadisticasSection() {
               <Eye className="w-5 h-5 text-blue-600" />
               Interpretación de tu Perfil Atencional
             </h3>
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <h4 className="text-sm mb-2 text-blue-900">Fortalezas Detectadas:</h4>
                 <ul className="space-y-2 text-sm text-blue-800">
@@ -753,7 +753,7 @@ export function EstadisticasSection() {
                 </div>
               </div>
 
-              <div className="grid md:grid-cols-3 gap-6 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-6">
                 <div>
                   <div className="flex items-center justify-between mb-2 text-sm">
                     <span className="text-gray-600">Progreso del Curso</span>
@@ -774,7 +774,7 @@ export function EstadisticasSection() {
                 </div>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6 pt-6 border-t">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t">
                 <div>
                   <h4 className="text-sm mb-3 flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-green-600" />
@@ -827,7 +827,7 @@ export function EstadisticasSection() {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {achievements.map((achievement) => {
               const Icon = achievementIconMap[achievement.icon] || Trophy;
               const isUnlocked = achievement.unlocked;

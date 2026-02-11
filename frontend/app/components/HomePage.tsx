@@ -40,7 +40,7 @@ export function HomePage({ onNavigateToLogin }: HomePageProps) {
                 Ver demo
               </button>
             </div>
-            <div className="grid grid-cols-3 gap-4 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-sm">
               {[
                 { label: "Precision", value: "98%" },
                 { label: "Universidades", value: "50+" },
@@ -75,7 +75,7 @@ export function HomePage({ onNavigateToLogin }: HomePageProps) {
                 </div>
                 <div className="text-3xl">👁️</div>
               </div>
-              <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                 <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
                   <p className="text-slate-500">Atención promedio</p>
                   <p className="text-xl font-semibold text-slate-900">85%</p>

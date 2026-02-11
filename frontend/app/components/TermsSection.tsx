@@ -1,7 +1,7 @@
 export function TermsSection() {
   return (
     <section id="terminos" className="max-w-6xl mx-auto px-4 lg:px-2 py-16">
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 md:p-10 space-y-4">
+      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 md:p-10 space-y-4">
         <p className="text-sm font-semibold text-sky-600">Terminos de uso</p>
         <h2 className="text-3xl font-semibold text-slate-900">Condiciones de uso empresarial</h2>
         <p className="text-slate-600">

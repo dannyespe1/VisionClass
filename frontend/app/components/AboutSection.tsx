@@ -57,7 +57,7 @@ export function AboutSection() {
             <ImageWithFallback
               src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200"
               alt="Inteligencia Artificial"
-              className="w-full h-[420px] object-cover"
+              className="w-full h-64 sm:h-80 lg:h-[420px] object-cover"
             />
           </div>
 

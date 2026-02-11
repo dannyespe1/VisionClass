@@ -206,7 +206,7 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-      <div className="grid md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
         <div className="bg-white rounded-xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -302,7 +302,7 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
                     </div>
                   </div>
 
-                  <div className="grid md:grid-cols-4 gap-4 mb-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                     <div className="flex items-center gap-2">
                       <Users className="w-5 h-5 text-gray-400" />
                       <div>
@@ -386,7 +386,7 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
             </button>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <div className="md:col-span-2 space-y-4">
               <p className="text-sm text-slate-700 whitespace-pre-line">
                 {selectedDetails.description || "Sin descripción"}
@@ -470,7 +470,7 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
 
       <div className="bg-blue-50 rounded-xl p-6">
         <h3 className="mb-4">Acciones Rápidas</h3>
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <button
             className="bg-white p-4 rounded-lg hover:shadow-md transition-shadow text-left"
             onClick={() => goToTab("materiales")}

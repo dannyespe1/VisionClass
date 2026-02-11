@@ -23,7 +23,7 @@ export default function TerminosPage() {
 
       <section className="px-4 lg:px-2 pb-16">
         <div className="max-w-5xl mx-auto grid lg:grid-cols-2 gap-8">
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 space-y-4">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-4">
             <h2 className="text-2xl font-semibold">Uso permitido</h2>
             <ul className="space-y-2 text-sm text-slate-600 list-disc list-inside">
               <li>Acceso al contenido educativo y evaluaciones.</li>
@@ -32,7 +32,7 @@ export default function TerminosPage() {
               <li>Prohibicion de uso malicioso o no autorizado.</li>
             </ul>
           </div>
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 space-y-4">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-4">
             <h2 className="text-2xl font-semibold">Consentimiento y datos</h2>
             <p className="text-sm text-slate-600">
               Al activar la cámara, el usuario acepta el tratamiento de métricas de atención para
@@ -49,7 +49,7 @@ export default function TerminosPage() {
       </section>
 
       <section className="px-4 lg:px-2 pb-20">
-        <div className="max-w-5xl mx-auto bg-white rounded-3xl border border-slate-200 shadow-sm p-8 space-y-4">
+        <div className="max-w-5xl mx-auto bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-4">
           <h2 className="text-2xl font-semibold">Responsabilidades</h2>
           <div className="grid md:grid-cols-2 gap-6 text-sm text-slate-600">
             <div className="space-y-2">

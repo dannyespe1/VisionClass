@@ -925,7 +925,7 @@ export function MaterialesSection() {
               >
                 <div className="flex-1 space-y-2">
                   <Input value={m.name} onChange={(e) => updateModuleDraft(m.id, "name", e.target.value)} placeholder={`Modulo ${idx + 1}`} />
-                  <div className="grid grid-cols-3 gap-2 text-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
                     <div className="flex items-center gap-2">
                       <Label className="text-xs text-slate-600">Lecciones</Label>
                       <Input type="number" min={0} value={m.lessons} onChange={(e) => updateModuleDraft(m.id, "lessons", Number(e.target.value))} />
@@ -1231,7 +1231,7 @@ export function MaterialesSection() {
           </div>
         </div>
 
-        <div className="grid sm:grid-cols-3 gap-4 mt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
           <div className="space-y-2">
             <Label>Modulo destino</Label>
             <Select value={aiTargetModuleId} onValueChange={(v) => setAiTargetModuleId(v)}>
@@ -1434,7 +1434,7 @@ export function MaterialesSection() {
         </Dialog>
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredMaterials.map((material) => (
           <div key={material.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col gap-3 transition transform hover:-translate-y-1 hover:shadow-lg">
             <div className="flex items-center justify-between">

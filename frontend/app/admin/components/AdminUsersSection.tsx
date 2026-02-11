@@ -55,7 +55,8 @@ export function AdminUsersSection({
       </div>
 
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <table className="w-full">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[720px]">
           <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
               <th className="text-left py-4 px-6">Usuario</th>
@@ -124,7 +125,8 @@ export function AdminUsersSection({
               </tr>
             )}
           </tbody>
-        </table>
+          </table>
+        </div>
       </div>
     </section>
   );

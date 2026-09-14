@@ -1,0 +1,31 @@
+name: Épica del plan
+description: Agrupa trabajo de código, operativo y aprobaciones sin fusionar sus decisiones.
+title: "[EPIC] "
+labels: []
+body:
+  - type: input
+    id: epic_id
+    attributes:
+      label: ID de épica
+      placeholder: EPIC-G1
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Resultado y límites
+    validations:
+      required: true
+  - type: textarea
+    id: children
+    attributes:
+      label: Issues hijos por tipo
+      description: Separa code, operations y approval e indica sus dependencias.
+    validations:
+      required: true
+  - type: textarea
+    id: exit
+    attributes:
+      label: Criterios de cierre y gate siguiente
+    validations:
+      required: true

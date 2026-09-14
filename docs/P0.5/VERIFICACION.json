@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "cutoff_date": "2026-09-14",
+  "branch": "p05-preparacion-codex",
+  "base_commit": "7f8f9cb",
+  "results": [
+    {
+      "check": "governance",
+      "command": "python scripts/verify_governance.py",
+      "status": "PASS",
+      "note": "Ejecutado con el runtime Python 3.11 incluido por Codex."
+    },
+    {
+      "check": "execution-plan-import",
+      "command": "python scripts/import_execution_plan.py <extraccion> <documento>",
+      "status": "PASS",
+      "prs_imported": 41,
+      "docx_sha256": "4352015df2a874707cf725564f1e1d56cbe974fb838b414357f50f9786186134",
+      "extraction_sha256": "9be008f0a32dbe344fe9596f4ed8ced1b11cef5f62a2001347f3c69c3cb05f58",
+      "note": "DOCX y extracción tienen 41 encabezados PR idénticos; campos obligatorios y orden topológico validados."
+    },
+    {
+      "check": "g0-form-decisions",
+      "command": "python scripts/verify_g0.py",
+      "status": "PASS",
+      "source_sha256": "267e4c8869683610a125c65471b2e3fd0cfebb6a6ef2a156e328dc4e77942349",
+      "note": "Decisiones saneadas sin contacto personal; G0 bloqueada, cero participantes y DEP-FE/DEP-BE/DEP-ML en orden."
+    },
+    {
+      "check": "frontend-types",
+      "command": "npm --prefix frontend run typecheck",
+      "status": "PASS"
+    },
+    {
+      "check": "python-static",
+      "command": "python -m compileall -q scripts ml",
+      "status": "PASS",
+      "note": "No se cargaron modelos ni datos."
+    },
+    {
+      "check": "compose-config",
+      "command": "docker compose config --quiet",
+      "status": "PASS_WITH_WARNING",
+      "note": "Docker no pudo leer el config.json del perfil local; Compose sí validó."
+    },
+    {
+      "check": "frontend-lint",
+      "command": "npm --prefix frontend run lint",
+      "status": "FAIL",
+      "errors": 71,
+      "warnings": 45,
+      "note": "Fallo preexistente consistente con la evidencia P0.1."
+    },
+    {
+      "check": "frontend-build",
+      "command": "npm --prefix frontend run build",
+      "status": "PASS",
+      "note": "Repetición con acceso de red completada; baseline-browser-mapping emitió advertencia de datos desactualizados."
+    },
+    {
+      "check": "backend",
+      "command": "python backend/manage.py check; python backend/manage.py makemigrations --check --dry-run; python backend/manage.py test api --noinput",
+      "status": "PASS_WITH_ZERO_TESTS",
+      "note": "Ejecutado con instalación temporal aislada; check y migraciones pasaron, api descubrió 0 pruebas."
+    },
+    {
+      "check": "github-yaml-and-actions",
+      "command": "GitHub Actions run",
+      "status": "LOCAL_YAML_PASS_REMOTE_NOT_RUN",
+      "note": "PyYAML validó seis archivos, seis jobs y cuatro formularios; workflow no publicado en GitHub."
+    },
+    {
+      "check": "branch-protection",
+      "command": "GET /repos/dannyespe1/VisionClass/branches/main/protection",
+      "status": "NOT_RUN",
+      "note": "Requiere credencial con Administration:read; estado remoto desconocido."
+    }
+  ]
+}

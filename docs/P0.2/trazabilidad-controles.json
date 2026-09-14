@@ -1,0 +1,338 @@
+{
+  "camera_switch_uses": [
+    {
+      "file": "frontend/app/student/CameraPermissionModal.tsx",
+      "line": 13,
+      "text": "enableAttentionTracking: boolean;"
+    },
+    {
+      "file": "frontend/app/student/CameraPermissionModal.tsx",
+      "line": 14,
+      "text": "saveAnalytics: boolean;"
+    },
+    {
+      "file": "frontend/app/student/CameraPermissionModal.tsx",
+      "line": 15,
+      "text": "shareWithInstructor: boolean;"
+    },
+    {
+      "file": "frontend/app/student/CameraPermissionModal.tsx",
+      "line": 21,
+      "text": "enableAttentionTracking: true,"
+    },
+    {
+      "file": "frontend/app/student/CameraPermissionModal.tsx",
+      "line": 22,
+      "text": "saveAnalytics: true,"
+    },
+    {
+      "file": "frontend/app/student/CameraPermissionModal.tsx",
+      "line": 23,
+      "text": "shareWithInstructor: true,"
+    },
+    {
+      "file": "frontend/app/student/CameraPermissionModal.tsx",
+      "line": 122,
+      "text": "checked={settings.enableAttentionTracking}"
+    },
+    {
+      "file": "frontend/app/student/CameraPermissionModal.tsx",
+      "line": 124,
+      "text": "setSettings({ ...settings, enableAttentionTracking: checked })"
+    },
+    {
+      "file": "frontend/app/student/CameraPermissionModal.tsx",
+      "line": 138,
+      "text": "checked={settings.saveAnalytics}"
+    },
+    {
+      "file": "frontend/app/student/CameraPermissionModal.tsx",
+      "line": 140,
+      "text": "setSettings({ ...settings, saveAnalytics: checked })"
+    },
+    {
+      "file": "frontend/app/student/CameraPermissionModal.tsx",
+      "line": 142,
+      "text": "disabled={!settings.enableAttentionTracking}"
+    },
+    {
+      "file": "frontend/app/student/CameraPermissionModal.tsx",
+      "line": 154,
+      "text": "checked={settings.shareWithInstructor}"
+    },
+    {
+      "file": "frontend/app/student/CameraPermissionModal.tsx",
+      "line": 156,
+      "text": "setSettings({ ...settings, shareWithInstructor: checked })"
+    },
+    {
+      "file": "frontend/app/student/CameraPermissionModal.tsx",
+      "line": 158,
+      "text": "disabled={!settings.saveAnalytics}"
+    },
+    {
+      "file": "frontend/app/student/course/[courseId]/page.tsx",
+      "line": 144,
+      "text": "enableAttentionTracking: false,"
+    },
+    {
+      "file": "frontend/app/student/course/[courseId]/page.tsx",
+      "line": 145,
+      "text": "saveAnalytics: false,"
+    },
+    {
+      "file": "frontend/app/student/course/[courseId]/page.tsx",
+      "line": 146,
+      "text": "shareWithInstructor: false,"
+    },
+    {
+      "file": "frontend/app/student/course/[courseId]/page.tsx",
+      "line": 1018,
+      "text": "{permissionSettings.enableAttentionTracking && ("
+    },
+    {
+      "file": "frontend/app/student/course/[courseId]/page.tsx",
+      "line": 1046,
+      "text": "{ label: \"Seguimiento de Atención\", value: permissionSettings.enableAttentionTracking },"
+    },
+    {
+      "file": "frontend/app/student/course/[courseId]/page.tsx",
+      "line": 1047,
+      "text": "{ label: \"Guardar Análisis\", value: permissionSettings.saveAnalytics },"
+    },
+    {
+      "file": "frontend/app/student/course/[courseId]/page.tsx",
+      "line": 1048,
+      "text": "{ label: \"Compartir con Instructor\", value: permissionSettings.shareWithInstructor },"
+    },
+    {
+      "file": "frontend/app/student/course/[courseId]/page.tsx",
+      "line": 1089,
+      "text": "{permissionSettings.enableAttentionTracking && ("
+    },
+    {
+      "file": "frontend/app/student/course/[courseId]/page.tsx",
+      "line": 1191,
+      "text": "{permissionSettings.enableAttentionTracking && ("
+    },
+    {
+      "file": "frontend/app/student/course/[courseId]/page.tsx",
+      "line": 1219,
+      "text": "{permissionSettings.enableAttentionTracking && ("
+    },
+    {
+      "file": "frontend/app/student/course/[courseId]/page.tsx",
+      "line": 1231,
+      "text": "{permissionSettings.enableAttentionTracking && attentionScore < 65 && ("
+    },
+    {
+      "file": "frontend/app/student/course/[courseId]/page.tsx",
+      "line": 1250,
+      "text": "{permissionSettings.enableAttentionTracking && ("
+    }
+  ],
+  "policy_uses": [
+    {
+      "file": "backend/api/migrations/0010_course_category_and_admin_models.py",
+      "line": 17,
+      "text": "name=\"PrivacyPolicySetting\","
+    },
+    {
+      "file": "backend/api/migrations/0010_course_category_and_admin_models.py",
+      "line": 31,
+      "text": "name=\"ResearchAccessRequest\","
+    },
+    {
+      "file": "backend/api/models.py",
+      "line": 310,
+      "text": "class ResearchAccessRequest(models.Model):"
+    },
+    {
+      "file": "backend/api/models.py",
+      "line": 335,
+      "text": "class PrivacyPolicySetting(models.Model):"
+    },
+    {
+      "file": "backend/api/serializers.py",
+      "line": 32,
+      "text": "ResearchAccessRequest,"
+    },
+    {
+      "file": "backend/api/serializers.py",
+      "line": 33,
+      "text": "PrivacyPolicySetting,"
+    },
+    {
+      "file": "backend/api/serializers.py",
+      "line": 666,
+      "text": "class ResearchAccessRequestSerializer(serializers.ModelSerializer):"
+    },
+    {
+      "file": "backend/api/serializers.py",
+      "line": 668,
+      "text": "model = ResearchAccessRequest"
+    },
+    {
+      "file": "backend/api/serializers.py",
+      "line": 682,
+      "text": "class PrivacyPolicySettingSerializer(serializers.ModelSerializer):"
+    },
+    {
+      "file": "backend/api/serializers.py",
+      "line": 684,
+      "text": "model = PrivacyPolicySetting"
+    },
+    {
+      "file": "backend/api/views.py",
+      "line": 47,
+      "text": "ResearchAccessRequest,"
+    },
+    {
+      "file": "backend/api/views.py",
+      "line": 48,
+      "text": "PrivacyPolicySetting,"
+    },
+    {
+      "file": "backend/api/views.py",
+      "line": 72,
+      "text": "ResearchAccessRequestSerializer,"
+    },
+    {
+      "file": "backend/api/views.py",
+      "line": 73,
+      "text": "PrivacyPolicySettingSerializer,"
+    },
+    {
+      "file": "backend/api/views.py",
+      "line": 1584,
+      "text": "if not PrivacyPolicySetting.objects.exists():"
+    },
+    {
+      "file": "backend/api/views.py",
+      "line": 1585,
+      "text": "PrivacyPolicySetting.objects.bulk_create("
+    },
+    {
+      "file": "backend/api/views.py",
+      "line": 1587,
+      "text": "PrivacyPolicySetting("
+    },
+    {
+      "file": "backend/api/views.py",
+      "line": 1593,
+      "text": "PrivacyPolicySetting("
+    },
+    {
+      "file": "backend/api/views.py",
+      "line": 1599,
+      "text": "PrivacyPolicySetting("
+    },
+    {
+      "file": "backend/api/views.py",
+      "line": 1605,
+      "text": "PrivacyPolicySetting("
+    },
+    {
+      "file": "backend/api/views.py",
+      "line": 1617,
+      "text": "\"research_permissions\": ResearchAccessRequestSerializer("
+    },
+    {
+      "file": "backend/api/views.py",
+      "line": 1618,
+      "text": "ResearchAccessRequest.objects.all(), many=True"
+    },
+    {
+      "file": "backend/api/views.py",
+      "line": 1620,
+      "text": "\"privacy_policies\": PrivacyPolicySettingSerializer("
+    },
+    {
+      "file": "backend/api/views.py",
+      "line": 1621,
+      "text": "PrivacyPolicySetting.objects.all(), many=True"
+    },
+    {
+      "file": "backend/api/views.py",
+      "line": 1628,
+      "text": "serializer_class = ResearchAccessRequestSerializer"
+    },
+    {
+      "file": "backend/api/views.py",
+      "line": 1630,
+      "text": "queryset = ResearchAccessRequest.objects.all().order_by(\"-requested_at\", \"id\")"
+    },
+    {
+      "file": "backend/api/views.py",
+      "line": 1634,
+      "text": "serializer_class = PrivacyPolicySettingSerializer"
+    },
+    {
+      "file": "backend/api/views.py",
+      "line": 1636,
+      "text": "queryset = PrivacyPolicySetting.objects.all().order_by(\"name\", \"id\")"
+    }
+  ],
+  "ml_lifecycle": [
+    {
+      "file": "ml/ml_service.py",
+      "line": 88,
+      "text": "session_sequences: Dict[int, deque] = defaultdict(lambda: deque(maxlen=SEQUENCE_LENGTH))"
+    },
+    {
+      "file": "ml/ml_service.py",
+      "line": 89,
+      "text": "session_frame_buffers: Dict[int, deque] = defaultdict(lambda: deque(maxlen=SEQUENCE_LENGTH))"
+    },
+    {
+      "file": "ml/ml_service.py",
+      "line": 296,
+      "text": "seq = session_sequences[session_id]"
+    },
+    {
+      "file": "ml/ml_service.py",
+      "line": 417,
+      "text": "frame_path = None"
+    },
+    {
+      "file": "ml/ml_service.py",
+      "line": 418,
+      "text": "if os.environ.get(\"SAVE_FRAMES\", \"0\") == \"1\":"
+    },
+    {
+      "file": "ml/ml_service.py",
+      "line": 427,
+      "text": "frame_path = str(fpath)"
+    },
+    {
+      "file": "ml/ml_service.py",
+      "line": 429,
+      "text": "frame_path = None"
+    },
+    {
+      "file": "ml/ml_service.py",
+      "line": 430,
+      "text": "if frame_path:"
+    },
+    {
+      "file": "ml/ml_service.py",
+      "line": 431,
+      "text": "result.setdefault(\"data\", {})[\"frame_path\"] = frame_path"
+    },
+    {
+      "file": "ml/ml_service.py",
+      "line": 451,
+      "text": "session_frame_buffers[session_key].append(crop)"
+    },
+    {
+      "file": "ml/ml_service.py",
+      "line": 455,
+      "text": "if ort_session and len(session_frame_buffers[session_key]) >= SEQUENCE_LENGTH and int(spinning) == 0:"
+    },
+    {
+      "file": "ml/ml_service.py",
+      "line": 457,
+      "text": "seq = list(session_frame_buffers[session_key])[-SEQUENCE_LENGTH:]"
+    }
+  ]
+}

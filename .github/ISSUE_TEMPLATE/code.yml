@@ -1,0 +1,41 @@
+name: Cambio de código
+description: Unidad reversible de implementación vinculada al plan VisionClass.
+title: "[CODE] "
+labels: []
+body:
+  - type: input
+    id: plan_id
+    attributes:
+      label: ID del plan
+      description: PRNN y épica padre.
+      placeholder: PR01 / EPIC-G1
+    validations:
+      required: true
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objetivo y criterios de aceptación
+      description: Resultado observable, alcance y exclusiones.
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencias y gate
+      description: IDs, estado y enlace a la evidencia aprobatoria.
+    validations:
+      required: true
+  - type: textarea
+    id: files
+    attributes:
+      label: Archivos y grupos de colisión
+      description: Rutas previstas y reserva según COLISIONES_WORKTREES.csv.
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Pruebas, seguridad y rollback
+      description: Caminos positivos, negativos, observabilidad y reversión.
+    validations:
+      required: true

@@ -1,0 +1,58 @@
+{
+  "date": "2026-09-14",
+  "commit": "7f8f9cb987779b6e4df417b3195040a7b4b7dc60",
+  "context_confirmed_by_user": {
+    "operator": "Un tesista",
+    "participants_country": "Ecuador",
+    "minors_under_18": false,
+    "population": "Estudiantes universitarios mayores de edad",
+    "minimum_age_years": 18
+  },
+  "existing_files_hashed": 208,
+  "changed_or_missing_preexisting_files": [],
+  "missing_local_markdown_links": [],
+  "explicit_models": 18,
+  "explicit_fields": 119,
+  "control_reference_counts": {
+    "camera_switch_uses": 26,
+    "policy_uses": 28,
+    "ml_lifecycle": 12
+  },
+  "invalid_control_references": [],
+  "product_tests_rerun": false,
+  "reason": "Only documentation and static evidence added. P0.1 evidence reused and preserved.",
+  "limitations": [
+    "No deployed DB/IAM/contracts/backup settings inspected",
+    "No real participant data or private env values read",
+    "Risk ratings are qualitative estimates, not measured frequencies"
+  ],
+  "branch": "p02-inventario-amenazas-privacidad",
+  "late_external_file": {
+    "path": "AGENTS.md",
+    "status": "Appeared after initial inventory; read, applied and preserved without edits",
+    "sha256": "d90aaf830d3d9f92bf3125de0f0aa6ac8aab3823962c57619df0774c17a83973",
+    "applicable_overrides_found": false,
+    "execution_plan_found": false
+  },
+  "integration_check": "git fetch origin --quiet; git rev-list --left-right --count main...origin/main -> 0 0",
+  "commits_push_pr_created": false,
+  "scope_correction": {
+    "source": "Corrección expresa del usuario: el estudio no usará datos de menores",
+    "scope": "Adults only; previous inclusion of minors superseded",
+    "product_eligibility_control_implemented": false
+  },
+  "scope_correction_verification": {
+    "other_files_changed": [],
+    "local_links_valid": true,
+    "document_encoding_valid": true,
+    "checks": "Text consistency, local links, JSON and SHA256; no product tests rerun for documentation-only correction"
+  },
+  "g0_form_import": {
+    "source_file": "Formulario_Decisiones_G0_VisionClass_COMPLETADO_Omar_Quimbita.docx",
+    "source_sha256": "267e4c8869683610a125c65471b2e3fd0cfebb6a6ef2a156e328dc4e77942349",
+    "review": "APROBAR_CON_CORRECCIONES",
+    "technical_owner_assigned": true,
+    "institutional_privacy_ethics_ratification_pending": true,
+    "real_data_authorized": false
+  }
+}

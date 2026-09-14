@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "imported_at": "2026-09-14",
+  "source": {
+    "file_name": "Formulario_Decisiones_G0_VisionClass_COMPLETADO_Omar_Quimbita.docx",
+    "sha256": "267e4c8869683610a125c65471b2e3fd0cfebb6a6ef2a156e328dc4e77942349",
+    "extraction_name": "completed_form_extract.txt",
+    "extraction_sha256": "28ec78f5af46b50b70124c6613781a345e60c7cdf21d92f9feffdf68509e2cd5",
+    "completed_on": "2026-09-13"
+  },
+  "sanitization": {
+    "personal_contact_copied": false,
+    "participant_data_copied": false,
+    "credentials_copied": false,
+    "owner_identifier": "tesista_operador",
+    "note": "Se conservan roles, decisiones y el nombre de archivo exigido para trazabilidad; se omiten correo, firma y otros datos de contacto."
+  },
+  "gate": {
+    "id": "G0",
+    "verdict": "BLOQUEADA",
+    "approval_claim": false,
+    "participants_authorized": 0,
+    "real_data_collection_authorized": false,
+    "pilot_deployment_authorized": false,
+    "allowed_now": [
+      "documentación y evidencia versionable",
+      "pruebas locales con datos sintéticos",
+      "cambios técnicos expresamente autorizados",
+      "preparación local de issues y épicas"
+    ],
+    "forbidden_until_authorized": [
+      "reclutamiento",
+      "captura o tratamiento de datos reales",
+      "despliegue de piloto",
+      "publicación remota de issues",
+      "declarar G0 aprobada"
+    ]
+  },
+  "authority": {
+    "technical_executor": "tesista_operador",
+    "technical_owner": "tesista_operador",
+    "repository_administrator_proposed": "tesista_operador",
+    "data_custodian_proposed": "tesista_operador",
+    "substitute_designated": false,
+    "cannot_self_approve": [
+      "G0",
+      "ética",
+      "privacidad institucional",
+      "metodología confirmatoria",
+      "validez",
+      "equidad",
+      "riesgo residual institucional",
+      "piloto"
+    ]
+  },
+  "p0_1": {
+    "review": "APROBAR_CON_CORRECCIONES",
+    "decisions": {
+      "D01": "La tarea propia de cancelación visual sustituirá gradualmente D2R; el histórico quedará en solo lectura y PR41 hará el retiro final.",
+      "D02": "Ningún usuario puede elevar su rol; el backend debe imponer propiedad y mínimo privilegio por actor.",
+      "D03": "Se fijan unidades TA, C, O, precisión, exhaustividad, F1_tarea y CON; no_observable no equivale a cero atención; éxito exige commit confirmado e idempotency key.",
+      "D04": "Render es opción provisional, sujeta a región y contrato; ML usa identidad de servicio mínima y secretos en gestor; latencia adopta P0.4.",
+      "D05": "R01-R14 tienen propietario técnico y hito; ningún riesgo abierto autoriza exposición real."
+    }
+  },
+  "p0_2": {
+    "review": "APROBAR_CON_CORRECCIONES",
+    "decisions": {
+      "D01": {"status": "PROPUESTO_PENDIENTE_RATIFICACION", "value": "ESPE como sede propuesta; responsabilidad institucional y canal formal pendientes."},
+      "D02": {"status": "DECIDIDO_TECNICO_CON_BLOQUEO_HUMANO", "value": "Adultos universitarios, elegibilidad institucional mínima, invitación voluntaria, consentimiento separado y alternativa sin cámara; requiere aprobación institucional y ética."},
+      "D03": {"status": "DECIDIDO", "value": "Uso de investigación y métricas de tarea; se prohíben diagnóstico, sanciones, calificación automática, vigilancia e inferencia causal."},
+      "D04": {"status": "LISTO_PARA_IMPLEMENTAR", "value": "Acceso mínimo auditado, ML solo events:create para sesión autorizada, sin datos de investigación individuales para docentes o administradores."},
+      "D05": {"status": "PARCIALMENTE_DECIDIDO", "value": "Calendario técnico aceptado; plazo de consentimiento y retirada depende de institución y ética; backups con ventana rodante de 35 días."},
+      "D06": {"status": "BLOQUEADO_EXTERNO", "value": "Render provisional; región, contrato, cuenta y restauración deben comprobarse antes de datos reales."},
+      "D07": {"status": "DECIDIDO_CON_CONDICIONES", "value": "Solo resultados agregados y código; dataset seudonimizado exige consentimiento específico, revisión de reidentificación, destinatario, vencimiento y acuerdo."}
+    }
+  },
+  "p0_3": {
+    "review": "APROBAR_CON_CORRECCIONES",
+    "decisions": {
+      "D01": {"status": "PROPUESTO_PENDIENTE_RATIFICACION", "value": "ESPE Latacunga, una sede, invitación voluntaria de mayores de edad; periodo posterior a G0 y aprobaciones."},
+      "D02": {"status": "DECIDIDO", "value": "Tarea propia de cancelación visual; no usar nombre, baremos ni percentiles d2-R sin licencia y equivalencia."},
+      "D03": {"status": "PROPUESTO_PENDIENTE_RATIFICACION", "value": "SESOI 0.10 F1_tarea; N objetivo 80 y máximo 100; confirmar por simulación ciega antes del reclutamiento."},
+      "D04": {"status": "DECIDIDO", "value": "Autoinforme en español después de fases 3, 6, 9, 12 y 14, con cuatro respuestas y confianza opcional 1-4."},
+      "D05": {"status": "DECIDIDO_CON_BLOQUEO_HUMANO", "value": "Observación presencial sin grabar, dos anotadores ciegos e independientes; segundo anotador pendiente."},
+      "D06": {"status": "DECIDIDO_COMO_CRITERIO", "value": "Kappa de Cohen >=0.80 y límite inferior IC95% bootstrap por participante >=0.67."},
+      "D07": {"status": "DECIDIDO", "value": "Covariables confirmatorias y técnicas cerradas; demografía solo exploratoria, voluntaria, consentida y sin identificadores."},
+      "D08": {"status": "PROPUESTO_PENDIENTE_RATIFICACION", "value": "Zenodo, PDF/JSON, diccionario, SHA-256, DOI y enmiendas trazables; ratificación independiente pendiente."}
+    },
+    "outcomes_or_model_scores_reviewed": false,
+    "model_training_or_evaluation_permitted": false
+  },
+  "p0_4": {
+    "review": "APROBAR_CON_CORRECCIONES",
+    "initial_thresholds_accepted_as_requirements": true,
+    "thresholds_demonstrated": false,
+    "platform": "Render provisional; solo pruebas sintéticas hasta verificar región y contrato.",
+    "budget_usd_monthly": 75,
+    "safe_shutdown_targets": {"capture_minutes": 5, "isolation_minutes": 15, "rollback_minutes": 30},
+    "critical_queue": {"max_items": 100, "alert_seconds": 30, "suspend_seconds": 60, "max_attempts": 3},
+    "frames": {"retries": 0, "dead_letter_queue": false, "raw_persistence": false},
+    "audit_group_minimums": {"participants": 30, "observable_windows_per_class": 100},
+    "rollback_version_exists": false,
+    "gate_owner": "tesista_operador",
+    "independent_approvers_designated": false
+  },
+  "p0_5": {
+    "review": "APROBAR_CON_CORRECCIONES",
+    "merge_policy": "squash",
+    "runtime_isolation": "single_serial_stack",
+    "lint_policy": "corregir toda la línea base antes de reconsiderar G0; cero deuda nueva",
+    "test_policy": "crear pruebas backend y frontend; cero pruebas no equivale a cobertura",
+    "issues": {"prepared": true, "remote_publication_authorized_now": false},
+    "branch_protection": {"applied": false, "remote_state": "unknown"},
+    "independent_reviewer_designated": false
+  },
+  "technical_work": [
+    {"id": "DEP-FE", "status": "LISTO_PARA_IMPLEMENTAR", "scope": "Next, Axios, PostCSS y transitivas vulnerables; conservar lockfile y evitar audit fix automático."},
+    {"id": "DEP-BE", "status": "AUTORIZADO_PENDIENTE_DEP_FE", "scope": "Paquetes backend con avisos y resolución reproducible con hashes."},
+    {"id": "DEP-ML", "status": "AUTORIZADO_PENDIENTE_DEP_BE", "scope": "Python 3.11, índices, versiones ML y lock reproducible."}
+  ],
+  "risk_treatment": {
+    "R01": {"owner": "tesista_operador", "target": "PR03", "close_before": "G0"},
+    "R02": {"owner": "tesista_operador", "target": "PR03", "close_before": "G0"},
+    "R03": {"owner": "tesista_operador", "target": "PR04", "close_before": "exposición"},
+    "R04": {"owner": "tesista_operador", "target": "PR06|PR10", "close_before": "piloto"},
+    "R05": {"owner": "tesista_operador", "target": "PR03|PR04", "close_before": "exposición"},
+    "R06": {"owner": "tesista_operador", "target": "PR12", "close_before": "carga multiusuario"},
+    "R07": {"owner": "tesista_operador", "target": "PR02|PR08", "close_before": "exposición"},
+    "R08": {"owner": "tesista_operador", "target": "DEP-FE|DEP-BE|DEP-ML", "close_before": "G0"},
+    "R09": {"owner": "tesista_operador", "target": "PR06", "close_before": "G0"},
+    "R10": {"owner": "tesista_operador", "target": "PR14|PR15", "close_before": "captura"},
+    "R11": {"owner": "tesista_operador", "target": "PR03", "close_before": "cuentas reales"},
+    "R12": {"owner": "tesista_operador", "target": "PR09|PR10", "close_before": "inferencia ONNX"},
+    "R13": {"owner": "tesista_operador", "target": "PR05|PR13|PR39", "close_before": "piloto"},
+    "R14": {"owner": "tesista_operador", "target": "PR06|PR10", "close_before": "exposición"}
+  },
+  "g0_submission": {
+    "candidate_commit": null,
+    "independent_approver": null,
+    "approval_media": ["acta fechada", "issue GitHub de tipo approval"],
+    "requested_verdict": "BLOQUEADA"
+  }
+}

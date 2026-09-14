@@ -1,0 +1,13 @@
+# Propietario provisional comprobado por el remoto origin.
+# P0.5 queda bloqueado hasta añadir al menos una segunda cuenta para revisión independiente.
+* @dannyespe1
+
+/AGENTS.md @dannyespe1
+/.github/ @dannyespe1
+/docs/ @dannyespe1
+/backend/ @dannyespe1
+/frontend/ @dannyespe1
+/ml/ @dannyespe1
+/docker-compose.yml @dannyespe1
+/render.yaml @dannyespe1
+/cloudbuild*.yaml @dannyespe1

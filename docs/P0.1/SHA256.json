@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-14",
+  "files": [
+    {
+      "path": "backend-check.txt",
+      "sha256": "eb7156b339ee3677f14658fb8b7bf0239ebeeedddf5e21d553aa22bc552b9bb8"
+    },
+    {
+      "path": "backend-dependencias-resueltas.txt",
+      "sha256": "0cc9a6632eb6159cf705d05bf1156b0d6fe51e2d17aa925030378524294ed197"
+    },
+    {
+      "path": "backend-pip-check.txt",
+      "sha256": "9261363b733079a641c2e4cc9bc46ffa1d8336945a87f807b6cf68847dbc9b09"
+    },
+    {
+      "path": "backend-tests.txt",
+      "sha256": "89427ffa721b17bebdb70978e7b4fc8ff4918be34c449775e6773cf188e906fe"
+    },
+    {
+      "path": "build.txt",
+      "sha256": "cdf5e2f0e7a3b691c88c73b1522fc02521f53d0c7040b1bee8fef1675885f2ad"
+    },
+    {
+      "path": "collectstatic.txt",
+      "sha256": "7e4a2bb11cbdaa9e9b718ad2a55556fc211687aef112da6227d571344d5d43ab"
+    },
+    {
+      "path": "compose-example.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "compose.txt",
+      "sha256": "2c927d55dbb398407e50913c1df63b5b50cdc93e7bd61dfb57bf4b67af12dd76"
+    },
+    {
+      "path": "deploy-check.txt",
+      "sha256": "c4a60b6804565c3069538194ec9ec7b2b3aede97843e63cfb46ada3fb205e023"
+    },
+    {
+      "path": "INFORME.md",
+      "sha256": "e82da469cd801dfaeb32f65435800cb0970a5cadb40463e749f27793f957ba38"
+    },
+    {
+      "path": "inventario-d2r.csv",
+      "sha256": "42ba4eb3730732232bec5aea009a17697a2061535252e1507b251dc0fb03ec3b"
+    },
+    {
+      "path": "lint-resultados.json",
+      "sha256": "677ed91c2b0593ee3bf31ceed834a2f903989de92a3a2a28d8c0364c9a6909dc"
+    },
+    {
+      "path": "npm-ci.txt",
+      "sha256": "e9ddf13e081fd12522cfebad871f73f50b2bfd7dfda85541585759367c20df3c"
+    },
+    {
+      "path": "probe_baseline.py",
+      "sha256": "defe0f1efe5b2fc52588b7399828c2fc55d8c1cbc586cae8b204473edbd994b0"
+    },
+    {
+      "path": "sondas-resultados.txt",
+      "sha256": "7f89b67ff7ae606717e32641c993e931cc6440fffef4f21b1ec1b830d2975022"
+    },
+    {
+      "path": "types.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

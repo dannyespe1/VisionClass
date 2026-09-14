@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "baseline_id": "VISIONCLASS-P0.4-2026-09-12",
+  "status": "PROPOSED_NOT_APPROVED",
+  "pilot_mode": "shadow_visual",
+  "automated_decisions_allowed": false,
+  "current_authorized_visual_capacity_participants": 0,
+  "measurement_windows": {"rolling_days": 7, "per_scheduled_session": true},
+  "load_gate": {
+    "steady": {"participants": 5, "frames_per_second_each": 2, "requests_per_second": 10, "duration_minutes": 30},
+    "spike": {"participants": 8, "frames_per_second_each": 2, "requests_per_second": 16, "duration_minutes": 5},
+    "synthetic_non_biometric_frames_only": true,
+    "resource_caps_may_change_during_test": false
+  },
+  "slos": [
+    {"id":"SLO-01","name":"core_journey_exactly_once","target":0.99,"error_budget":0.01},
+    {"id":"SLO-02","name":"core_api_semantic_success","target":0.99,"latency_p95_ms":500,"latency_p99_ms":1500},
+    {"id":"SLO-03","name":"shadow_frame_terminal_response","target":0.98,"latency_p95_ms":400,"latency_p99_ms":1000,"hard_deadline_ms":2000},
+    {"id":"SLO-04","name":"critical_event_exactly_once","target":0.999,"consent_and_revocation_target":1.0},
+    {"id":"SLO-05","name":"prediction_freshness","target":0.99,"maximum_age_ms":2000},
+    {"id":"SLO-06","name":"end_to_end_readiness_scheduled_minutes","target":0.99}
+  ],
+  "backpressure": {
+    "per_participant_processing": 1,
+    "per_participant_replaceable_pending": 1,
+    "global_frames_processing_or_pending": 10,
+    "d2r_max_queue_age_ms": 1000,
+    "course_max_queue_age_ms": 2000,
+    "frame_retries": 0,
+    "raw_frame_dlq_allowed": false,
+    "critical_event_queue_max": 100,
+    "critical_event_warning_age_seconds": 30,
+    "critical_event_suspend_age_seconds": 60,
+    "critical_event_max_attempts": 3,
+    "unresolved_dlq_before_analysis": 0
+  },
+  "resources": {
+    "frontend":{"vcpu":1,"memory_mib":512,"concurrency":20,"max_instances":2},
+    "backend":{"vcpu":1,"memory_mib":1024,"concurrency":20,"max_instances":2,"db_connections_per_instance_max":10},
+    "ml":{"vcpu":2,"memory_mib":2048,"concurrency":2,"max_instances":5,"min_instances_during_sessions":1},
+    "utilization":{"cpu_p95_max":0.70,"ml_cpu_p95_max":0.75,"memory_p95_max":0.70,"memory_absolute_max":0.85,"db_total_connections_fraction_max":0.70},
+    "ml_state":{"active_sessions_max":10,"ttl_seconds":300,"buffer_memory_mib_max":100},
+    "visual_request":{"jpeg_kib_max":300,"body_kib_max":350,"decoded_width_max":640,"decoded_height_max":480},
+    "raw_visual_persistence_bytes":0,
+    "derived_data_mib_per_participant_max":5,
+    "pilot_derived_data_gib_max":1,
+    "logs_mib_per_day_max":250,
+    "logs_retention_days_max":7,
+    "cloud_cost_usd_per_month_max":75
+  },
+  "calibration": {
+    "probabilistic_target_required":true,
+    "absolute_intercept_max":0.10,
+    "slope_min":0.80,
+    "slope_max":1.20,
+    "ece_equal_frequency_bins":10,
+    "ece_max":0.05,
+    "ece_ci95_upper_max":0.10,
+    "brier_fraction_of_prevalence_baseline_max":0.90
+  },
+  "coverage": {
+    "evaluable_windows_overall_min":0.90,
+    "evaluable_windows_each_group_min":0.80,
+    "absolute_group_gap_max":0.10,
+    "sessions_with_80_percent_evaluable_phases_min":0.85,
+    "insufficient_signal_explicit_unknown_target":1.0
+  },
+  "validity": {
+    "cohen_kappa_min":0.80,
+    "cohen_kappa_ci95_lower_min":0.67,
+    "h1_ci95_lower_greater_than":0,
+    "h1_effect_must_meet_p03_sesoi":true,
+    "h2_odds_ratio_ci95_lower_greater_than":1,
+    "model_auroc_ci95_lower_min":0.75,
+    "sensitivity_min":0.80,
+    "specificity_min":0.80,
+    "auprc_absolute_improvement_over_prevalence_min":0.15,
+    "repeat_run_primary_metric_absolute_difference_max":0.005
+  },
+  "equity": {
+    "absolute_sensitivity_gap_max":0.10,
+    "absolute_false_positive_rate_gap_max":0.10,
+    "absolute_ece_gap_max":0.05,
+    "absolute_coverage_gap_max":0.10,
+    "error_gap_ci95_upper_max":0.15,
+    "participants_per_group_min":30,
+    "observable_windows_each_class_per_group_min":100,
+    "insufficient_sample_result":"INSUFFICIENT_EVIDENCE_NO_ACTIONABLE_USE"
+  },
+  "suspension": {
+    "semantic_error_rate_over_5_minutes":0.05,
+    "frame_p99_ms":2000,
+    "queue_global_max":10,
+    "queue_age_ms":2000,
+    "queue_breach_minutes":2,
+    "memory_emergency_fraction":0.90,
+    "db_connection_emergency_fraction":0.85,
+    "error_budget_burn_rate":2,
+    "burn_rate_minutes":15,
+    "event_loss_rate":0.001,
+    "event_duplicate_rate":0.001,
+    "provisional_coverage_gap":0.20,
+    "provisional_error_gap":0.15
+  },
+  "response_times": {
+    "capture_off_minutes_max":5,
+    "isolation_minutes_max":15,
+    "application_rollback_minutes_max":30,
+    "gate_closeout_hours_max":48
+  }
+}

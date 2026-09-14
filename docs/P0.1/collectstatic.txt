@@ -1,0 +1,12 @@
+python.exe : <COPIA_TEMPORAL>\venv-backend\Lib\site
+-packages\requests\__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer
+(3.5.1) doesn't match a supported version!
+En línea: 2 Carácter: 206
++ ... 'backend'); & $auditPython manage.py collectstatic --noinput *> ../co ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (C:\Users\usuari...ported version!:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+  warnings.warn(
+
+163 static files copied to '<COPIA_TEMPORAL>\backend\staticfiles'.

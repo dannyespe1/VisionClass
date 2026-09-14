@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-14",
+  "files": [
+    {
+      "path": "INFORME.md",
+      "sha256": "fbe823b5493f93abf6438d422ef65ff20566fd21084201d6db09c3cb2da1355a"
+    },
+    {
+      "path": "REGISTRO_GATES.csv",
+      "sha256": "44600992d5c12f9fe07624af4400ab05f12d3d8c8f0e9ea0f45bfb6ed578b3ed"
+    },
+    {
+      "path": "RUNBOOK_SUSPENSION_ROLLBACK.md",
+      "sha256": "0b8952263000a6d17dab87a89ecf8b29a212a4993d768d56908a8a7c258600fb"
+    },
+    {
+      "path": "UMBRALES.json",
+      "sha256": "f4dde35ef984fffddd1b377dfddca8f1d2fdde2257b05b87cbcc7adf3ccace78"
+    },
+    {
+      "path": "VERIFICACION.json",
+      "sha256": "d94b5f62b64a4ad795a3185ce3a32a7ecf726c2408f431fbcea2b1e95e5368af"
+    }
+  ]
+}

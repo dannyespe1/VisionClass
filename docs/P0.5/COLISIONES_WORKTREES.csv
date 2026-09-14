@@ -1,0 +1,29 @@
+group,kind,path_or_resource,risk,evidence,coordination,rule
+contract-api,file,backend/api/views.py,critical,11 cambios históricos y concentra endpoints,serializar,Un PR activo en contract-api
+contract-api,file,backend/api/serializers.py,high,6 cambios históricos y contrato de respuesta,serializar,Coordinar junto con consumidores frontend y ML
+contract-api,file,backend/api/urls.py,high,6 cambios históricos y rutas públicas,serializar,Reservar cuando cambie cualquier endpoint
+contract-api,file,frontend/app/lib/api.ts,high,6 cambios históricos y cliente compartido,serializar,Actualizar compatibilidad en el mismo PR o transición versionada
+contract-api,file,frontend/app/api/proxy/[...path]/route.ts,high,proxy compartido hacia backend,serializar,Revisar identidad cabeceras y errores
+data-schema,file,backend/api/models.py,critical,modelo central y fuente de migraciones,serializar,Un PR de esquema activo
+data-schema,directory,backend/api/migrations/,critical,numeración y orden global,serializar,Regenerar desde la rama actualizada y revisar rollback
+d2r-frontend,file,frontend/app/student/course/[courseId]/page.tsx,critical,23 cambios históricos máximo del repositorio,serializar,Separar UI captura y curso antes de paralelizar
+d2r-frontend,file,frontend/app/d2r/page.tsx,high,8 cambios históricos,serializar,Coordinar con test-widget y contrato API
+d2r-frontend,file,frontend/app/d2r/test-widget.tsx,high,8 cambios históricos,serializar,No editar en worktrees simultáneos
+ml-service,file,ml/ml_service.py,critical,12 cambios históricos y servicio monolítico,serializar,Un PR ML activo hasta dividir contratos
+auth,file,frontend/app/context/AuthContext.tsx,critical,estado global de identidad y tokens,serializar,Requiere revisión de seguridad
+auth,file,frontend/app/login/LoginContent.tsx,high,flujo de login compartido,serializar,Coordinar con backend auth
+instructor-ui,file,frontend/app/instructor/components/MaterialesSection.tsx,high,10 cambios históricos,serializar,Un PR activo sobre materiales
+student-ui,file,frontend/app/student/CursosSection.tsx,high,10 cambios históricos,serializar,Un PR activo sobre cursos
+ui-shared,file,frontend/app/ui/chart.tsx,high,10 cambios históricos y componente compartido,serializar,Coordinar consumidores antes de cambiar API
+dependencies,file,frontend/package.json,high,manifiesto y scripts compartidos,serializar,Actualizaciones de dependencias o scripts en PR exclusivo
+dependencies,file,frontend/package-lock.json,critical,lockfile generado y propenso a conflictos,serializar,Regenerar una sola vez desde rama actualizada
+dependencies,file,backend/requirements.txt,high,manifiesto compartido,serializar,Actualizaciones de dependencias en PR exclusivo
+deployment,file,docker-compose.yml,critical,puertos credenciales locales y volumen compartidos,serializar,Usar nombre de proyecto y puertos únicos por worktree
+deployment,file,render.yaml,high,servicios externos compartidos,serializar,Aplicar solo con propietario operativo
+deployment,file,cloudbuild*.yaml,high,recursos cloud compartidos,serializar,Aplicar solo con propietario operativo
+governance,file,AGENTS.md,high,reglas globales para todos los agentes,serializar,Un PR de gobernanza activo
+governance,directory,.github/,high,CI plantillas y protección globales,serializar,Un PR de gobernanza activo
+local-runtime,resource,TCP 3000|8000|9000|5432,critical,puertos fijos en Compose,serializar,Asignar puertos únicos o ejecutar un stack a la vez
+local-runtime,resource,Docker volume pg_data,critical,estado persistente compartido por nombre de proyecto,serializar,Usar COMPOSE_PROJECT_NAME único y base desechable
+research-data,directory,data/|ml/checkpoints/|backend/data/,critical,datos y artefactos no versionados,serializar,No compartir y registrar procedencia retención y eliminación
+secrets,file,backend/.env|frontend/.env.local,critical,credenciales locales ignoradas por Git,serializar,Crear por worktree desde ejemplo sin copiar valores reales

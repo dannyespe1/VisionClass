@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "evaluated_at": "2026-09-14",
+  "base_commit": "7f8f9cb987779b6e4df417b3195040a7b4b7dc60",
+  "branch": "p05-preparacion-codex",
+  "verdict": "BLOQUEADA",
+  "source_integrity": {
+    "P0.1": {"files_checked": 16, "missing": 0, "mismatches": 0, "result": "PASS"},
+    "P0.2": {"files_checked": 6, "missing": 0, "mismatches": 0, "result": "PASS"},
+    "P0.3": {"files_checked": 5, "missing": 0, "mismatches": 0, "result": "PASS"},
+    "P0.4": {"files_checked": 5, "missing": 0, "mismatches": 0, "result": "PASS"},
+    "P0.5": {"files_checked": 9, "missing": 0, "mismatches": 0, "result": "PASS"}
+  },
+  "observations": {
+    "required_evidence_categories_present": 10,
+    "required_evidence_categories_total": 10,
+    "p01_frontend_lint_errors": 71,
+    "p01_frontend_lint_warnings": 45,
+    "p01_backend_tests_discovered": 0,
+    "p02_open_approval_criteria": 4,
+    "p03_open_decisions": 4,
+    "p03_tbd_tokens": 1,
+    "p03_preregistration_status": "FROZEN_CANDIDATE_PENDING_INDEPENDENT_RATIFICATION",
+    "p04_blocked_gates": 7,
+    "p04_not_started_gates": 2,
+    "p05_prs_without_detailed_scope": 0,
+    "p05_detailed_prs": 41,
+    "p05_plan_source_docx_sha256": "4352015df2a874707cf725564f1e1d56cbe974fb838b414357f50f9786186134",
+    "p05_plan_source_extraction_sha256": "9be008f0a32dbe344fe9596f4ed8ced1b11cef5f62a2001347f3c69c3cb05f58",
+    "p05_branch_policy_applied": false,
+    "p05_remote_branch_state": "unknown",
+    "git_tracked_commit_delta_from_origin_main": 0,
+    "p0_and_governance_files_tracked": true
+  },
+  "dependency_evidence": {
+    "execution_graph_present": true,
+    "frontend_lockfile_present": true,
+    "backend_direct_requirements_pinned": true,
+    "backend_transitive_lock_present": false,
+    "ml_unpinned_requirement_count": 10,
+    "automated_dependency_update_policy_present": false,
+    "freshness_or_vulnerability_audit_pass": false,
+    "frontend_audit": {
+      "status": "FAIL",
+      "vulnerable_packages": 17,
+      "critical": 1,
+      "high": 11,
+      "moderate": 4,
+      "low": 1,
+      "outdated_packages": 48
+    },
+    "backend_audit": {
+      "status": "FAIL",
+      "resolved_packages": 35,
+      "affected_packages": 9,
+      "vulnerability_records": 109
+    },
+    "ml_audit": {
+      "status": "NOT_RESOLVED",
+      "audit_python": "3.12",
+      "target_python": "3.11",
+      "blocking_requirement": "torch==2.1.0",
+      "declared_requirements": 15,
+      "unpinned_requirements": 10
+    }
+  },
+  "technical_follow_up": {
+    "github_yaml": "PASS: 6 YAML files parsed; 6 workflow jobs and 4 issue forms validated with PyYAML 6.0.2",
+    "plan_source_import": "PASS: 41 PR imported once from the supplied detailed DOCX/extraction; required fields and approved topological order validated",
+    "g0_decision_form_import": "PASS: sanitized decisions imported from supplied DOCX; source and extraction hashes recorded; personal contact omitted",
+    "frontend_typecheck": "PASS",
+    "frontend_build": "PASS with network access; baseline-browser-mapping emitted an outdated-data warning",
+    "backend_install": "PASS in isolated temporary target with Python 3.12",
+    "backend_check": "PASS",
+    "backend_migration_drift": "PASS: No changes detected",
+    "backend_tests": "PASS_EXIT_WITH_ZERO_TESTS: api suite discovered 0 tests",
+    "backend_dependency_warning": "requests reported incompatible resolved urllib3/chardet/charset_normalizer versions",
+    "compose_config": "PASS_WITH_LOCAL_DOCKER_CONFIG_WARNING",
+    "product_manifests_modified_by_follow_up": false,
+    "temporary_tools_removed": true
+  },
+  "blocking_conditions": [
+    "P0.1-P0.5 have only tesista review with corrections; independent review and approval are absent.",
+    "P0.2 has an operational custodian and technical decisions, but institutional, ethics, privacy and provider ratification remain open.",
+    "P0.3 preregistration remains a candidate with D01, D03, D05 and D08 pending independent ratification.",
+    "P0.4 records seven blocked gates and no runtime evidence for thresholds or rollback.",
+    "P0.5 has complete local scope for 41 PR, but it is not versioned or ratified and remote branch protection remains unverified.",
+    "Dependency audit demonstrates unresolved critical/high findings in frontend and numerous affected backend packages; ML audit is not reproducible yet."
+  ],
+  "approval_claim": false
+}

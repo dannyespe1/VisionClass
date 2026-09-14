@@ -1,0 +1,930 @@
+[
+  {
+    "file": "frontend/app/admin/components/AdminAnalyticsSection.tsx",
+    "line": 41,
+    "column": 9,
+    "severity": 1,
+    "rule": "react-hooks/exhaustive-deps",
+    "message": "The 'facultyMetrics' logical expression could make the dependencies of useMemo Hook (at line 50) change on every render. To fix this, wrap the initialization of 'facultyMetrics' in its own useMemo() Hook."
+  },
+  {
+    "file": "frontend/app/admin/components/AdminNavbar.tsx",
+    "line": 44,
+    "column": 15,
+    "severity": 1,
+    "rule": "@next/next/no-img-element",
+    "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element"
+  },
+  {
+    "file": "frontend/app/admin/page.tsx",
+    "line": 118,
+    "column": 5,
+    "severity": 2,
+    "rule": "react-hooks/immutability",
+    "message": "Error: Cannot access variable before it is declared\n\n`setAnalyticsData` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.\n\nC:\\Users\\usuario\\AppData\\Local\\Temp\\visionclass-p01-771b31ca1ee34a2aaa323056db1015a1\\frontend\\app\\admin\\page.tsx:118:5\n  116 |   const loadAnalytics = async (accessToken: string) => {\n  117 |     const data = await apiFetch<AdminAnalyticsData>(\"/api/admin/analytics/\", {}, accessToken);\n> 118 |     setAnalyticsData(data);\n      |     ^^^^^^^^^^^^^^^^ `setAnalyticsData` accessed before it is declared\n  119 |   };\n  120 |\n  121 |   useEffect(() => {\n\nC:\\Users\\usuario\\AppData\\Local\\Temp\\visionclass-p01-771b31ca1ee34a2aaa323056db1015a1\\frontend\\app\\admin\\page.tsx:204:25\n  202 |   };\n  203 |\n> 204 |   const [analyticsData, setAnalyticsData] = useState<AdminAnalyticsData>({\n      |                         ^^^^^^^^^^^^^^^^ `setAnalyticsData` is declared here\n  205 |     faculty_metrics: [],\n  206 |     institutional_trend: [],\n  207 |     dropout_prediction: [],"
+  },
+  {
+    "file": "frontend/app/components/Navbar.tsx",
+    "line": 55,
+    "column": 15,
+    "severity": 1,
+    "rule": "@next/next/no-img-element",
+    "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element"
+  },
+  {
+    "file": "frontend/app/d2r/page.tsx",
+    "line": 65,
+    "column": 24,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/d2r/page.tsx",
+    "line": 79,
+    "column": 15,
+    "severity": 2,
+    "rule": "react-hooks/immutability",
+    "message": "Error: Cannot access variable before it is declared\n\n`requestCamera` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.\n\nC:\\Users\\usuario\\AppData\\Local\\Temp\\visionclass-p01-771b31ca1ee34a2aaa323056db1015a1\\frontend\\app\\d2r\\page.tsx:79:15\n  77 |         }\n  78 |\n> 79 |         await requestCamera();\n     |               ^^^^^^^^^^^^^ `requestCamera` accessed before it is declared\n  80 |       } catch (err: any) {\n  81 |         setStatus(err.message || \"Error iniciando sesión D2R\");\n  82 |       }\n\nC:\\Users\\usuario\\AppData\\Local\\Temp\\visionclass-p01-771b31ca1ee34a2aaa323056db1015a1\\frontend\\app\\d2r\\page.tsx:179:3\n  177 |   };\n  178 |\n> 179 |   const requestCamera = async () => {\n      |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n> 180 |     try {\n      | ^^^^^^^^^\n> 181 |       const media = await navigator.mediaDevices.getUserMedia({ video: true });\n      …\n      | ^^^^^^^^^\n> 190 |     }\n      | ^^^^^^^^^\n> 191 |   };\n      | ^^^^^ `requestCamera` is declared here\n  192 |\n  193 |   const stopCamera = () => {\n  194 |     if (streamRef.current) {"
+  },
+  {
+    "file": "frontend/app/d2r/page.tsx",
+    "line": 80,
+    "column": 21,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/d2r/page.tsx",
+    "line": 188,
+    "column": 14,
+    "severity": 1,
+    "rule": "@typescript-eslint/no-unused-vars",
+    "message": "'err' is defined but never used."
+  },
+  {
+    "file": "frontend/app/d2r/page.tsx",
+    "line": 243,
+    "column": 20,
+    "severity": 1,
+    "rule": "@typescript-eslint/no-unused-vars",
+    "message": "'_' is defined but never used."
+  },
+  {
+    "file": "frontend/app/d2r/page.tsx",
+    "line": 303,
+    "column": 50,
+    "severity": 2,
+    "rule": "react/no-unescaped-entities",
+    "message": "`\"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`."
+  },
+  {
+    "file": "frontend/app/d2r/page.tsx",
+    "line": 303,
+    "column": 52,
+    "severity": 2,
+    "rule": "react/no-unescaped-entities",
+    "message": "`\"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`."
+  },
+  {
+    "file": "frontend/app/d2r/page.tsx",
+    "line": 303,
+    "column": 56,
+    "severity": 2,
+    "rule": "react/no-unescaped-entities",
+    "message": "`\"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`."
+  },
+  {
+    "file": "frontend/app/d2r/page.tsx",
+    "line": 303,
+    "column": 58,
+    "severity": 2,
+    "rule": "react/no-unescaped-entities",
+    "message": "`\"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`."
+  },
+  {
+    "file": "frontend/app/d2r/page.tsx",
+    "line": 304,
+    "column": 42,
+    "severity": 2,
+    "rule": "react/no-unescaped-entities",
+    "message": "`\"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`."
+  },
+  {
+    "file": "frontend/app/d2r/page.tsx",
+    "line": 304,
+    "column": 44,
+    "severity": 2,
+    "rule": "react/no-unescaped-entities",
+    "message": "`\"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`."
+  },
+  {
+    "file": "frontend/app/d2r/test-widget.tsx",
+    "line": 55,
+    "column": 9,
+    "severity": 1,
+    "rule": "@typescript-eslint/no-unused-vars",
+    "message": "'ROW_SIZE' is assigned a value but never used."
+  },
+  {
+    "file": "frontend/app/d2r/test-widget.tsx",
+    "line": 125,
+    "column": 33,
+    "severity": 2,
+    "rule": "react-hooks/purity",
+    "message": "Error: Cannot call impure function during render\n\n`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).\n\nC:\\Users\\usuario\\AppData\\Local\\Temp\\visionclass-p01-771b31ca1ee34a2aaa323056db1015a1\\frontend\\app\\d2r\\test-widget.tsx:125:33\n  123 |     else setC((e) => e + 1);\n  124 |     if (onClickEvent) {\n> 125 |       onClickEvent({ phase, ts: Date.now(), cellId: cell.id, isTarget: cell.target });\n      |                                 ^^^^^^^^^^ Cannot call impure function\n  126 |     }\n  127 |   };\n  128 |"
+  },
+  {
+    "file": "frontend/app/d2r/test-widget.tsx",
+    "line": 205,
+    "column": 84,
+    "severity": 2,
+    "rule": "react/no-unescaped-entities",
+    "message": "`\"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`."
+  },
+  {
+    "file": "frontend/app/d2r/test-widget.tsx",
+    "line": 205,
+    "column": 86,
+    "severity": 2,
+    "rule": "react/no-unescaped-entities",
+    "message": "`\"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`."
+  },
+  {
+    "file": "frontend/app/figma/ImageWithFallback.tsx",
+    "line": 22,
+    "column": 9,
+    "severity": 1,
+    "rule": "@next/next/no-img-element",
+    "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element"
+  },
+  {
+    "file": "frontend/app/figma/ImageWithFallback.tsx",
+    "line": 26,
+    "column": 5,
+    "severity": 1,
+    "rule": "@next/next/no-img-element",
+    "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element"
+  },
+  {
+    "file": "frontend/app/instructor/components/EstadisticasProfesor.tsx",
+    "line": 91,
+    "column": 20,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/instructor/components/EstadisticasProfesor.tsx",
+    "line": 92,
+    "column": 20,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/instructor/components/EstadisticasProfesor.tsx",
+    "line": 93,
+    "column": 20,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/instructor/components/EstadisticasProfesor.tsx",
+    "line": 94,
+    "column": 20,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/instructor/components/EstadisticasProfesorAdvanced.tsx",
+    "line": 5,
+    "column": 3,
+    "severity": 1,
+    "rule": "@typescript-eslint/no-unused-vars",
+    "message": "'Users' is defined but never used."
+  },
+  {
+    "file": "frontend/app/instructor/components/EstadisticasProfesorAdvanced.tsx",
+    "line": 6,
+    "column": 3,
+    "severity": 1,
+    "rule": "@typescript-eslint/no-unused-vars",
+    "message": "'Eye' is defined but never used."
+  },
+  {
+    "file": "frontend/app/instructor/components/EstadisticasProfesorAdvanced.tsx",
+    "line": 7,
+    "column": 3,
+    "severity": 1,
+    "rule": "@typescript-eslint/no-unused-vars",
+    "message": "'TrendingUp' is defined but never used."
+  },
+  {
+    "file": "frontend/app/instructor/components/EstadisticasProfesorAdvanced.tsx",
+    "line": 167,
+    "column": 20,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/instructor/components/EstadisticasProfesorAdvanced.tsx",
+    "line": 168,
+    "column": 20,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/instructor/components/EstadisticasProfesorAdvanced.tsx",
+    "line": 169,
+    "column": 20,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/instructor/components/EstadisticasProfesorAdvanced.tsx",
+    "line": 171,
+    "column": 41,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/instructor/components/InicioProfesor.tsx",
+    "line": 61,
+    "column": 12,
+    "severity": 1,
+    "rule": "@typescript-eslint/no-unused-vars",
+    "message": "'_' is defined but never used."
+  },
+  {
+    "file": "frontend/app/instructor/components/InicioProfesor.tsx",
+    "line": 81,
+    "column": 10,
+    "severity": 1,
+    "rule": "@typescript-eslint/no-unused-vars",
+    "message": "'error' is assigned a value but never used."
+  },
+  {
+    "file": "frontend/app/instructor/components/InicioProfesor.tsx",
+    "line": 94,
+    "column": 20,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/instructor/components/InicioProfesor.tsx",
+    "line": 95,
+    "column": 20,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/instructor/components/InicioProfesor.tsx",
+    "line": 96,
+    "column": 20,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/instructor/components/InicioProfesor.tsx",
+    "line": 97,
+    "column": 20,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/instructor/components/InstructorNavbar.tsx",
+    "line": 51,
+    "column": 37,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/instructor/components/InstructorNavbar.tsx",
+    "line": 94,
+    "column": 38,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/instructor/components/InstructorNavbar.tsx",
+    "line": 138,
+    "column": 15,
+    "severity": 1,
+    "rule": "@next/next/no-img-element",
+    "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element"
+  },
+  {
+    "file": "frontend/app/instructor/components/InstructorNavbar.tsx",
+    "line": 179,
+    "column": 17,
+    "severity": 1,
+    "rule": "@next/next/no-img-element",
+    "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element"
+  },
+  {
+    "file": "frontend/app/instructor/components/InstructorNavbar.tsx",
+    "line": 225,
+    "column": 25,
+    "severity": 1,
+    "rule": "@next/next/no-img-element",
+    "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element"
+  },
+  {
+    "file": "frontend/app/instructor/components/MaterialesSection.tsx",
+    "line": 88,
+    "column": 28,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/instructor/components/MaterialesSection.tsx",
+    "line": 107,
+    "column": 50,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/instructor/components/MaterialesSection.tsx",
+    "line": 181,
+    "column": 18,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/instructor/components/MaterialesSection.tsx",
+    "line": 182,
+    "column": 18,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/instructor/components/MaterialesSection.tsx",
+    "line": 183,
+    "column": 18,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/instructor/components/MaterialesSection.tsx",
+    "line": 251,
+    "column": 6,
+    "severity": 1,
+    "rule": "react-hooks/exhaustive-deps",
+    "message": "React Hook useEffect has a missing dependency: 'refreshData'. Either include it or remove the dependency array."
+  },
+  {
+    "file": "frontend/app/instructor/components/MaterialesSection.tsx",
+    "line": 320,
+    "column": 6,
+    "severity": 1,
+    "rule": "react-hooks/exhaustive-deps",
+    "message": "React Hook useMemo has missing dependencies: 'getCourseFinalExamLesson' and 'getModuleTestLessons'. Either include them or remove the dependency array."
+  },
+  {
+    "file": "frontend/app/instructor/components/MaterialesSection.tsx",
+    "line": 356,
+    "column": 6,
+    "severity": 1,
+    "rule": "react-hooks/exhaustive-deps",
+    "message": "React Hook useEffect has missing dependencies: 'getCourseFinalExamLesson' and 'getModuleTestLessons'. Either include them or remove the dependency array."
+  },
+  {
+    "file": "frontend/app/instructor/components/MaterialesSection.tsx",
+    "line": 420,
+    "column": 42,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/instructor/components/MaterialesSection.tsx",
+    "line": 542,
+    "column": 36,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/instructor/components/MaterialesSection.tsx",
+    "line": 685,
+    "column": 40,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/instructor/components/MaterialesSection.tsx",
+    "line": 1172,
+    "column": 91,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/instructor/components/MaterialesSection.tsx",
+    "line": 1274,
+    "column": 59,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/instructor/components/MaterialesSection.tsx",
+    "line": 1274,
+    "column": 75,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/instructor/components/MaterialesSection.tsx",
+    "line": 1291,
+    "column": 31,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/instructor/components/MaterialesSection.tsx",
+    "line": 1339,
+    "column": 56,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/login/LoginContent.tsx",
+    "line": 38,
+    "column": 43,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/login/LoginContent.tsx",
+    "line": 44,
+    "column": 16,
+    "severity": 1,
+    "rule": "@typescript-eslint/no-unused-vars",
+    "message": "'_' is defined but never used."
+  },
+  {
+    "file": "frontend/app/login/LoginContent.tsx",
+    "line": 175,
+    "column": 19,
+    "severity": 1,
+    "rule": "@next/next/no-img-element",
+    "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element"
+  },
+  {
+    "file": "frontend/app/student/CursosSection.tsx",
+    "line": 84,
+    "column": 20,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/student/CursosSection.tsx",
+    "line": 85,
+    "column": 20,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/student/CursosSection.tsx",
+    "line": 87,
+    "column": 20,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/student/CursosSection.tsx",
+    "line": 88,
+    "column": 20,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/student/CursosSection.tsx",
+    "line": 89,
+    "column": 20,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/student/EstadisticasSection.tsx",
+    "line": 39,
+    "column": 3,
+    "severity": 1,
+    "rule": "@typescript-eslint/no-unused-vars",
+    "message": "'LineChart' is defined but never used."
+  },
+  {
+    "file": "frontend/app/student/EstadisticasSection.tsx",
+    "line": 40,
+    "column": 3,
+    "severity": 1,
+    "rule": "@typescript-eslint/no-unused-vars",
+    "message": "'Line' is defined but never used."
+  },
+  {
+    "file": "frontend/app/student/EstadisticasSection.tsx",
+    "line": 41,
+    "column": 3,
+    "severity": 1,
+    "rule": "@typescript-eslint/no-unused-vars",
+    "message": "'PieChart' is defined but never used."
+  },
+  {
+    "file": "frontend/app/student/EstadisticasSection.tsx",
+    "line": 42,
+    "column": 3,
+    "severity": 1,
+    "rule": "@typescript-eslint/no-unused-vars",
+    "message": "'Pie' is defined but never used."
+  },
+  {
+    "file": "frontend/app/student/EstadisticasSection.tsx",
+    "line": 43,
+    "column": 3,
+    "severity": 1,
+    "rule": "@typescript-eslint/no-unused-vars",
+    "message": "'Cell' is defined but never used."
+  },
+  {
+    "file": "frontend/app/student/EstadisticasSection.tsx",
+    "line": 201,
+    "column": 9,
+    "severity": 1,
+    "rule": "@typescript-eslint/no-unused-vars",
+    "message": "'COLORS' is assigned a value but never used."
+  },
+  {
+    "file": "frontend/app/student/EstadisticasSection.tsx",
+    "line": 231,
+    "column": 9,
+    "severity": 1,
+    "rule": "@typescript-eslint/no-unused-vars",
+    "message": "'categoryDistribution' is assigned a value but never used."
+  },
+  {
+    "file": "frontend/app/student/EstadisticasSection.tsx",
+    "line": 297,
+    "column": 14,
+    "severity": 1,
+    "rule": "@typescript-eslint/no-unused-vars",
+    "message": "'err' is defined but never used."
+  },
+  {
+    "file": "frontend/app/student/InicioSection.tsx",
+    "line": 64,
+    "column": 20,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/student/InicioSection.tsx",
+    "line": 65,
+    "column": 20,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/student/InicioSection.tsx",
+    "line": 66,
+    "column": 20,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/student/StudentNavbar.tsx",
+    "line": 45,
+    "column": 37,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/student/StudentNavbar.tsx",
+    "line": 88,
+    "column": 38,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/student/StudentNavbar.tsx",
+    "line": 139,
+    "column": 15,
+    "severity": 1,
+    "rule": "@next/next/no-img-element",
+    "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element"
+  },
+  {
+    "file": "frontend/app/student/StudentNavbar.tsx",
+    "line": 180,
+    "column": 17,
+    "severity": 1,
+    "rule": "@next/next/no-img-element",
+    "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element"
+  },
+  {
+    "file": "frontend/app/student/StudentNavbar.tsx",
+    "line": 226,
+    "column": 25,
+    "severity": 1,
+    "rule": "@next/next/no-img-element",
+    "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element"
+  },
+  {
+    "file": "frontend/app/student/course/[courseId]/page.tsx",
+    "line": 65,
+    "column": 28,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/student/course/[courseId]/page.tsx",
+    "line": 108,
+    "column": 34,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/student/course/[courseId]/page.tsx",
+    "line": 114,
+    "column": 9,
+    "severity": 1,
+    "rule": "@typescript-eslint/no-unused-vars",
+    "message": "'initialLessonSetRef' is assigned a value but never used."
+  },
+  {
+    "file": "frontend/app/student/course/[courseId]/page.tsx",
+    "line": 137,
+    "column": 71,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/student/course/[courseId]/page.tsx",
+    "line": 189,
+    "column": 40,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/student/course/[courseId]/page.tsx",
+    "line": 201,
+    "column": 44,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/student/course/[courseId]/page.tsx",
+    "line": 204,
+    "column": 39,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/student/course/[courseId]/page.tsx",
+    "line": 261,
+    "column": 6,
+    "severity": 1,
+    "rule": "react-hooks/exhaustive-deps",
+    "message": "React Hook useEffect has a missing dependency: 'enrollmentData.last_lesson_id'. Either include it or remove the dependency array."
+  },
+  {
+    "file": "frontend/app/student/course/[courseId]/page.tsx",
+    "line": 270,
+    "column": 20,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/student/course/[courseId]/page.tsx",
+    "line": 271,
+    "column": 20,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/student/course/[courseId]/page.tsx",
+    "line": 272,
+    "column": 20,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/student/course/[courseId]/page.tsx",
+    "line": 273,
+    "column": 20,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/student/course/[courseId]/page.tsx",
+    "line": 430,
+    "column": 37,
+    "severity": 1,
+    "rule": "@typescript-eslint/no-unused-vars",
+    "message": "'reason' is defined but never used."
+  },
+  {
+    "file": "frontend/app/student/course/[courseId]/page.tsx",
+    "line": 495,
+    "column": 6,
+    "severity": 1,
+    "rule": "react-hooks/exhaustive-deps",
+    "message": "React Hook useEffect has missing dependencies: 'currentMaterial', 'persistContentView', and 'startContentView'. Either include them or remove the dependency array."
+  },
+  {
+    "file": "frontend/app/student/course/[courseId]/page.tsx",
+    "line": 503,
+    "column": 6,
+    "severity": 1,
+    "rule": "react-hooks/exhaustive-deps",
+    "message": "React Hook useEffect has a missing dependency: 'persistContentView'. Either include it or remove the dependency array."
+  },
+  {
+    "file": "frontend/app/student/course/[courseId]/page.tsx",
+    "line": 548,
+    "column": 82,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/student/course/[courseId]/page.tsx",
+    "line": 549,
+    "column": 72,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/student/course/[courseId]/page.tsx",
+    "line": 616,
+    "column": 11,
+    "severity": 2,
+    "rule": "prefer-const",
+    "message": "'rawValue' is never reassigned. Use 'const' instead."
+  },
+  {
+    "file": "frontend/app/student/course/[courseId]/page.tsx",
+    "line": 724,
+    "column": 6,
+    "severity": 1,
+    "rule": "react-hooks/exhaustive-deps",
+    "message": "React Hook useEffect has a missing dependency: 'startCamera'. Either include it or remove the dependency array."
+  },
+  {
+    "file": "frontend/app/student/course/[courseId]/page.tsx",
+    "line": 744,
+    "column": 6,
+    "severity": 1,
+    "rule": "react-hooks/exhaustive-deps",
+    "message": "React Hook useEffect has a missing dependency: 'persistProgressNow'. Either include it or remove the dependency array."
+  },
+  {
+    "file": "frontend/app/student/course/[courseId]/page.tsx",
+    "line": 875,
+    "column": 40,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/student/course/[courseId]/page.tsx",
+    "line": 982,
+    "column": 6,
+    "severity": 1,
+    "rule": "react-hooks/exhaustive-deps",
+    "message": "React Hook useEffect has a missing dependency: 'enrollmentData'. Either include it or remove the dependency array."
+  },
+  {
+    "file": "frontend/app/student/course/[courseId]/page.tsx",
+    "line": 1288,
+    "column": 65,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/student/page.tsx",
+    "line": 18,
+    "column": 10,
+    "severity": 1,
+    "rule": "@typescript-eslint/no-unused-vars",
+    "message": "'contentId' is assigned a value but never used."
+  },
+  {
+    "file": "frontend/app/student/page.tsx",
+    "line": 19,
+    "column": 10,
+    "severity": 1,
+    "rule": "@typescript-eslint/no-unused-vars",
+    "message": "'selectedCourse' is assigned a value but never used."
+  },
+  {
+    "file": "frontend/app/ui/calendar.tsx",
+    "line": 4,
+    "column": 10,
+    "severity": 1,
+    "rule": "@typescript-eslint/no-unused-vars",
+    "message": "'ChevronLeft' is defined but never used."
+  },
+  {
+    "file": "frontend/app/ui/calendar.tsx",
+    "line": 4,
+    "column": 23,
+    "severity": 1,
+    "rule": "@typescript-eslint/no-unused-vars",
+    "message": "'ChevronRight' is defined but never used."
+  },
+  {
+    "file": "frontend/app/ui/chart.tsx",
+    "line": 124,
+    "column": 13,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/ui/chart.tsx",
+    "line": 126,
+    "column": 46,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/ui/chart.tsx",
+    "line": 131,
+    "column": 11,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/ui/chart.tsx",
+    "line": 133,
+    "column": 14,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  },
+  {
+    "file": "frontend/app/ui/chart.tsx",
+    "line": 143,
+    "column": 9,
+    "severity": 1,
+    "rule": "react-hooks/exhaustive-deps",
+    "message": "The 'payloadList' logical expression could make the dependencies of useMemo Hook (at line 171) change on every render. To fix this, wrap the initialization of 'payloadList' in its own useMemo() Hook."
+  },
+  {
+    "file": "frontend/app/ui/chart.tsx",
+    "line": 274,
+    "column": 13,
+    "severity": 2,
+    "rule": "@typescript-eslint/no-explicit-any",
+    "message": "Unexpected any. Specify a different type."
+  }
+]

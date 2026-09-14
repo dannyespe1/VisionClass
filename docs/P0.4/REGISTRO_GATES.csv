@@ -1,0 +1,10 @@
+gate,decision,owner,approver,evidence_required,review_deadline,review_frequency,status,fail_action
+G04-0,Dependencias y alcance,tesista_operador,pendiente_revisor_independiente,"P0.1-P0.5 aprobados; G0 separado; hashes y árbol Git",2026-09-19,antes de cada lanzamiento,BLOCKED,no desplegar
+G04-1,Privacidad ética y seguridad,tesista_operador,pendiente_instancia_etica_privacidad,"P0.2 cerrado; consentimiento adulto; cámara; proveedores; pruebas negativas",2026-09-19,antes del piloto y ante cambios,BLOCKED,no captura ni reclutamiento
+G04-2,Capacidad SLO colas y recursos,tesista_operador,pendiente_revisor_independiente,"carga 10 rps y pico 16 rps; dashboard SLI; límites y coste",2026-09-26,mensual y por cambio de infraestructura,BLOCKED,no despliegue visual
+G04-3,Integridad cobertura y trazabilidad,tesista_operador,pendiente_metodologo,"idempotencia; reconciliación; cobertura; hashes; cero DLQ",2026-09-26,diaria durante piloto,BLOCKED,congelar ingreso y análisis
+G04-4,Constructo y validez,tesista_operador,pendiente_director_cientifico_metodologo,"P0.3 sin TBD; κ; H1/H2; muestra y SESOI",2026-10-03,antes de abrir resultados,BLOCKED,no evaluar modelo
+G04-5,Calibración y equidad,tesista_operador,pendiente_comite_revision,"holdout; IC95%; calibración; cobertura; métricas por grupo",2026-10-10,antes de expansión o uso accionable,BLOCKED,mantener shadow o suspender
+G04-6,Autorización del piloto shadow,tesista_operador,pendiente_instancia_etica_institucional,"PASS G04-0 a G04-5; runbook y guardia nominada",2026-10-11,antes de primera sesión,BLOCKED,no iniciar piloto
+G04-7,Continuidad de sesión,tesista_operador,pendiente_revisor_independiente,"checklist preflight; SLO; consentimiento; alertas; capacidad",2026-10-11,diaria y antes de cada sesión,NOT_STARTED,detener nuevas sesiones
+G04-8,Cierre rollback y eliminación,tesista_operador,pendiente_director_privacidad,"timeline; postmortem; hashes; restore; eliminación P0.2",2026-10-13,48 horas después del cierre,NOT_STARTED,no reanudar ni analizar

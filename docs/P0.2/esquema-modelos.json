@@ -1,0 +1,878 @@
+[
+  {
+    "model": "User",
+    "line": 5,
+    "bases": [
+      "AbstractUser"
+    ],
+    "fields": [
+      {
+        "field": "role",
+        "type": "CharField",
+        "line": 15,
+        "declaration": "models.CharField(max_length=20, choices=ROLE_CHOICES, default=ROLE_STUDENT)"
+      },
+      {
+        "field": "profile_image",
+        "type": "TextField",
+        "line": 16,
+        "declaration": "models.TextField(blank=True, default='')"
+      }
+    ]
+  },
+  {
+    "model": "Course",
+    "line": 22,
+    "bases": [
+      "models.Model"
+    ],
+    "fields": [
+      {
+        "field": "title",
+        "type": "CharField",
+        "line": 23,
+        "declaration": "models.CharField(max_length=255)"
+      },
+      {
+        "field": "description",
+        "type": "TextField",
+        "line": 24,
+        "declaration": "models.TextField(blank=True)"
+      },
+      {
+        "field": "category",
+        "type": "CharField",
+        "line": 25,
+        "declaration": "models.CharField(max_length=120, blank=True, default='General')"
+      },
+      {
+        "field": "owner",
+        "type": "ForeignKey",
+        "line": 26,
+        "declaration": "models.ForeignKey(User, on_delete=models.CASCADE, related_name='courses')"
+      },
+      {
+        "field": "is_active",
+        "type": "BooleanField",
+        "line": 27,
+        "declaration": "models.BooleanField(default=True)"
+      },
+      {
+        "field": "created_at",
+        "type": "DateTimeField",
+        "line": 28,
+        "declaration": "models.DateTimeField(auto_now_add=True)"
+      }
+    ]
+  },
+  {
+    "model": "CourseModule",
+    "line": 34,
+    "bases": [
+      "models.Model"
+    ],
+    "fields": [
+      {
+        "field": "course",
+        "type": "ForeignKey",
+        "line": 35,
+        "declaration": "models.ForeignKey(Course, on_delete=models.CASCADE, related_name='modules')"
+      },
+      {
+        "field": "title",
+        "type": "CharField",
+        "line": 36,
+        "declaration": "models.CharField(max_length=255)"
+      },
+      {
+        "field": "order",
+        "type": "PositiveIntegerField",
+        "line": 37,
+        "declaration": "models.PositiveIntegerField(default=0)"
+      },
+      {
+        "field": "duration_hours",
+        "type": "FloatField",
+        "line": 38,
+        "declaration": "models.FloatField(default=0)"
+      },
+      {
+        "field": "created_at",
+        "type": "DateTimeField",
+        "line": 39,
+        "declaration": "models.DateTimeField(auto_now_add=True)"
+      }
+    ]
+  },
+  {
+    "model": "CourseLesson",
+    "line": 48,
+    "bases": [
+      "models.Model"
+    ],
+    "fields": [
+      {
+        "field": "module",
+        "type": "ForeignKey",
+        "line": 49,
+        "declaration": "models.ForeignKey(CourseModule, on_delete=models.CASCADE, related_name='lessons')"
+      },
+      {
+        "field": "title",
+        "type": "CharField",
+        "line": 50,
+        "declaration": "models.CharField(max_length=255)"
+      },
+      {
+        "field": "order",
+        "type": "PositiveIntegerField",
+        "line": 51,
+        "declaration": "models.PositiveIntegerField(default=0)"
+      },
+      {
+        "field": "created_at",
+        "type": "DateTimeField",
+        "line": 52,
+        "declaration": "models.DateTimeField(auto_now_add=True)"
+      }
+    ]
+  },
+  {
+    "model": "CourseMaterial",
+    "line": 61,
+    "bases": [
+      "models.Model"
+    ],
+    "fields": [
+      {
+        "field": "lesson",
+        "type": "ForeignKey",
+        "line": 71,
+        "declaration": "models.ForeignKey(CourseLesson, on_delete=models.CASCADE, related_name='materials')"
+      },
+      {
+        "field": "material_type",
+        "type": "CharField",
+        "line": 72,
+        "declaration": "models.CharField(max_length=20, choices=TYPE_CHOICES)"
+      },
+      {
+        "field": "title",
+        "type": "CharField",
+        "line": 73,
+        "declaration": "models.CharField(max_length=255)"
+      },
+      {
+        "field": "description",
+        "type": "TextField",
+        "line": 74,
+        "declaration": "models.TextField(blank=True)"
+      },
+      {
+        "field": "url",
+        "type": "TextField",
+        "line": 75,
+        "declaration": "models.TextField(blank=True)"
+      },
+      {
+        "field": "file_name",
+        "type": "CharField",
+        "line": 76,
+        "declaration": "models.CharField(max_length=255, blank=True)"
+      },
+      {
+        "field": "file_content_type",
+        "type": "CharField",
+        "line": 77,
+        "declaration": "models.CharField(max_length=100, blank=True)"
+      },
+      {
+        "field": "file_size",
+        "type": "PositiveIntegerField",
+        "line": 78,
+        "declaration": "models.PositiveIntegerField(default=0)"
+      },
+      {
+        "field": "file_bytes",
+        "type": "BinaryField",
+        "line": 79,
+        "declaration": "models.BinaryField(blank=True, null=True)"
+      },
+      {
+        "field": "metadata",
+        "type": "JSONField",
+        "line": 80,
+        "declaration": "models.JSONField(default=dict, blank=True)"
+      },
+      {
+        "field": "created_at",
+        "type": "DateTimeField",
+        "line": 81,
+        "declaration": "models.DateTimeField(auto_now_add=True)"
+      }
+    ]
+  },
+  {
+    "model": "Enrollment",
+    "line": 90,
+    "bases": [
+      "models.Model"
+    ],
+    "fields": [
+      {
+        "field": "user",
+        "type": "ForeignKey",
+        "line": 100,
+        "declaration": "models.ForeignKey(User, on_delete=models.CASCADE, related_name='enrollments')"
+      },
+      {
+        "field": "course",
+        "type": "ForeignKey",
+        "line": 101,
+        "declaration": "models.ForeignKey(Course, on_delete=models.CASCADE, related_name='enrollments')"
+      },
+      {
+        "field": "status",
+        "type": "CharField",
+        "line": 102,
+        "declaration": "models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_ACTIVE)"
+      },
+      {
+        "field": "enrollment_data",
+        "type": "JSONField",
+        "line": 103,
+        "declaration": "models.JSONField(default=dict, blank=True)"
+      },
+      {
+        "field": "created_at",
+        "type": "DateTimeField",
+        "line": 104,
+        "declaration": "models.DateTimeField(auto_now_add=True)"
+      }
+    ]
+  },
+  {
+    "model": "Session",
+    "line": 113,
+    "bases": [
+      "models.Model"
+    ],
+    "fields": [
+      {
+        "field": "course",
+        "type": "ForeignKey",
+        "line": 114,
+        "declaration": "models.ForeignKey(Course, on_delete=models.CASCADE, related_name='sessions')"
+      },
+      {
+        "field": "student",
+        "type": "ForeignKey",
+        "line": 115,
+        "declaration": "models.ForeignKey(User, on_delete=models.CASCADE, related_name='sessions')"
+      },
+      {
+        "field": "created_by",
+        "type": "ForeignKey",
+        "line": 116,
+        "declaration": "models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_sessions')"
+      },
+      {
+        "field": "started_at",
+        "type": "DateTimeField",
+        "line": 117,
+        "declaration": "models.DateTimeField(null=True, blank=True)"
+      },
+      {
+        "field": "ended_at",
+        "type": "DateTimeField",
+        "line": 118,
+        "declaration": "models.DateTimeField(null=True, blank=True)"
+      },
+      {
+        "field": "attention_score",
+        "type": "FloatField",
+        "line": 119,
+        "declaration": "models.FloatField(null=True, blank=True)"
+      },
+      {
+        "field": "distracted_count",
+        "type": "PositiveIntegerField",
+        "line": 120,
+        "declaration": "models.PositiveIntegerField(default=0)"
+      },
+      {
+        "field": "mean_attention",
+        "type": "FloatField",
+        "line": 121,
+        "declaration": "models.FloatField(default=0)"
+      },
+      {
+        "field": "low_attention_ratio",
+        "type": "FloatField",
+        "line": 122,
+        "declaration": "models.FloatField(default=0)"
+      },
+      {
+        "field": "frame_count",
+        "type": "PositiveIntegerField",
+        "line": 123,
+        "declaration": "models.PositiveIntegerField(default=0)"
+      },
+      {
+        "field": "last_score",
+        "type": "FloatField",
+        "line": 124,
+        "declaration": "models.FloatField(null=True, blank=True)"
+      },
+      {
+        "field": "raw_metrics",
+        "type": "JSONField",
+        "line": 125,
+        "declaration": "models.JSONField(default=dict, blank=True)"
+      },
+      {
+        "field": "created_at",
+        "type": "DateTimeField",
+        "line": 126,
+        "declaration": "models.DateTimeField(auto_now_add=True)"
+      }
+    ]
+  },
+  {
+    "model": "AttentionEvent",
+    "line": 137,
+    "bases": [
+      "models.Model"
+    ],
+    "fields": [
+      {
+        "field": "session",
+        "type": "ForeignKey",
+        "line": 138,
+        "declaration": "models.ForeignKey(Session, on_delete=models.CASCADE, related_name='events')"
+      },
+      {
+        "field": "user",
+        "type": "ForeignKey",
+        "line": 139,
+        "declaration": "models.ForeignKey(User, on_delete=models.CASCADE, related_name='attention_events')"
+      },
+      {
+        "field": "timestamp",
+        "type": "DateTimeField",
+        "line": 140,
+        "declaration": "models.DateTimeField()"
+      },
+      {
+        "field": "value",
+        "type": "FloatField",
+        "line": 141,
+        "declaration": "models.FloatField()"
+      },
+      {
+        "field": "label",
+        "type": "CharField",
+        "line": 142,
+        "declaration": "models.CharField(max_length=100, blank=True)"
+      },
+      {
+        "field": "data",
+        "type": "JSONField",
+        "line": 143,
+        "declaration": "models.JSONField(default=dict, blank=True)"
+      },
+      {
+        "field": "created_at",
+        "type": "DateTimeField",
+        "line": 144,
+        "declaration": "models.DateTimeField(auto_now_add=True)"
+      }
+    ]
+  },
+  {
+    "model": "D2RSession",
+    "line": 155,
+    "bases": [
+      "models.Model"
+    ],
+    "fields": [
+      {
+        "field": "user",
+        "type": "ForeignKey",
+        "line": 156,
+        "declaration": "models.ForeignKey(User, on_delete=models.CASCADE, related_name='d2r_sessions')"
+      },
+      {
+        "field": "started_at",
+        "type": "DateTimeField",
+        "line": 157,
+        "declaration": "models.DateTimeField(null=True, blank=True)"
+      },
+      {
+        "field": "ended_at",
+        "type": "DateTimeField",
+        "line": 158,
+        "declaration": "models.DateTimeField(null=True, blank=True)"
+      },
+      {
+        "field": "attention_score",
+        "type": "FloatField",
+        "line": 159,
+        "declaration": "models.FloatField(null=True, blank=True)"
+      },
+      {
+        "field": "mean_attention",
+        "type": "FloatField",
+        "line": 160,
+        "declaration": "models.FloatField(default=0)"
+      },
+      {
+        "field": "low_attention_ratio",
+        "type": "FloatField",
+        "line": 161,
+        "declaration": "models.FloatField(default=0)"
+      },
+      {
+        "field": "frame_count",
+        "type": "PositiveIntegerField",
+        "line": 162,
+        "declaration": "models.PositiveIntegerField(default=0)"
+      },
+      {
+        "field": "last_score",
+        "type": "FloatField",
+        "line": 163,
+        "declaration": "models.FloatField(null=True, blank=True)"
+      },
+      {
+        "field": "raw_metrics",
+        "type": "JSONField",
+        "line": 164,
+        "declaration": "models.JSONField(default=dict, blank=True)"
+      },
+      {
+        "field": "created_at",
+        "type": "DateTimeField",
+        "line": 165,
+        "declaration": "models.DateTimeField(auto_now_add=True)"
+      }
+    ]
+  },
+  {
+    "model": "D2RAttentionEvent",
+    "line": 176,
+    "bases": [
+      "models.Model"
+    ],
+    "fields": [
+      {
+        "field": "d2r_session",
+        "type": "ForeignKey",
+        "line": 177,
+        "declaration": "models.ForeignKey(D2RSession, on_delete=models.CASCADE, related_name='events')"
+      },
+      {
+        "field": "user",
+        "type": "ForeignKey",
+        "line": 178,
+        "declaration": "models.ForeignKey(User, on_delete=models.CASCADE, related_name='d2r_attention_events')"
+      },
+      {
+        "field": "timestamp",
+        "type": "DateTimeField",
+        "line": 179,
+        "declaration": "models.DateTimeField()"
+      },
+      {
+        "field": "value",
+        "type": "FloatField",
+        "line": 180,
+        "declaration": "models.FloatField()"
+      },
+      {
+        "field": "label",
+        "type": "CharField",
+        "line": 181,
+        "declaration": "models.CharField(max_length=100, blank=True)"
+      },
+      {
+        "field": "data",
+        "type": "JSONField",
+        "line": 182,
+        "declaration": "models.JSONField(default=dict, blank=True)"
+      },
+      {
+        "field": "created_at",
+        "type": "DateTimeField",
+        "line": 183,
+        "declaration": "models.DateTimeField(auto_now_add=True)"
+      }
+    ]
+  },
+  {
+    "model": "ContentView",
+    "line": 194,
+    "bases": [
+      "models.Model"
+    ],
+    "fields": [
+      {
+        "field": "session",
+        "type": "ForeignKey",
+        "line": 204,
+        "declaration": "models.ForeignKey(Session, on_delete=models.CASCADE, related_name='content_views')"
+      },
+      {
+        "field": "user",
+        "type": "ForeignKey",
+        "line": 205,
+        "declaration": "models.ForeignKey(User, on_delete=models.CASCADE, related_name='content_views')"
+      },
+      {
+        "field": "content_type",
+        "type": "CharField",
+        "line": 206,
+        "declaration": "models.CharField(max_length=20, choices=TYPE_CHOICES)"
+      },
+      {
+        "field": "content_id",
+        "type": "CharField",
+        "line": 207,
+        "declaration": "models.CharField(max_length=255, help_text='Identificador de contenido (slug o id interno)')"
+      },
+      {
+        "field": "started_at",
+        "type": "DateTimeField",
+        "line": 208,
+        "declaration": "models.DateTimeField(auto_now_add=True)"
+      },
+      {
+        "field": "ended_at",
+        "type": "DateTimeField",
+        "line": 209,
+        "declaration": "models.DateTimeField(null=True, blank=True)"
+      },
+      {
+        "field": "duration_seconds",
+        "type": "FloatField",
+        "line": 210,
+        "declaration": "models.FloatField(default=0)"
+      }
+    ]
+  },
+  {
+    "model": "D2RResult",
+    "line": 216,
+    "bases": [
+      "models.Model"
+    ],
+    "fields": [
+      {
+        "field": "d2r_session",
+        "type": "ForeignKey",
+        "line": 217,
+        "declaration": "models.ForeignKey(D2RSession, on_delete=models.CASCADE, related_name='results')"
+      },
+      {
+        "field": "user",
+        "type": "ForeignKey",
+        "line": 218,
+        "declaration": "models.ForeignKey(User, on_delete=models.CASCADE, related_name='d2r_results')"
+      },
+      {
+        "field": "raw_score",
+        "type": "IntegerField",
+        "line": 219,
+        "declaration": "models.IntegerField()"
+      },
+      {
+        "field": "processing_speed",
+        "type": "FloatField",
+        "line": 220,
+        "declaration": "models.FloatField(help_text='Índice de velocidad/procesamiento')"
+      },
+      {
+        "field": "attention_span",
+        "type": "FloatField",
+        "line": 221,
+        "declaration": "models.FloatField(help_text='Indicador de atención')"
+      },
+      {
+        "field": "errors",
+        "type": "IntegerField",
+        "line": 222,
+        "declaration": "models.IntegerField(default=0)"
+      },
+      {
+        "field": "phase_data",
+        "type": "JSONField",
+        "line": 223,
+        "declaration": "models.JSONField(default=dict, blank=True)"
+      },
+      {
+        "field": "created_at",
+        "type": "DateTimeField",
+        "line": 224,
+        "declaration": "models.DateTimeField(auto_now_add=True)"
+      }
+    ]
+  },
+  {
+    "model": "QuizAttempt",
+    "line": 230,
+    "bases": [
+      "models.Model"
+    ],
+    "fields": [
+      {
+        "field": "session",
+        "type": "ForeignKey",
+        "line": 238,
+        "declaration": "models.ForeignKey(Session, on_delete=models.CASCADE, related_name='quiz_attempts')"
+      },
+      {
+        "field": "user",
+        "type": "ForeignKey",
+        "line": 239,
+        "declaration": "models.ForeignKey(User, on_delete=models.CASCADE, related_name='quiz_attempts')"
+      },
+      {
+        "field": "difficulty",
+        "type": "CharField",
+        "line": 240,
+        "declaration": "models.CharField(max_length=20, choices=DIFF_CHOICES, default=DIFF_NORMAL)"
+      },
+      {
+        "field": "score",
+        "type": "FloatField",
+        "line": 241,
+        "declaration": "models.FloatField(null=True, blank=True)"
+      },
+      {
+        "field": "reason",
+        "type": "CharField",
+        "line": 242,
+        "declaration": "models.CharField(max_length=255, blank=True)"
+      },
+      {
+        "field": "created_at",
+        "type": "DateTimeField",
+        "line": 243,
+        "declaration": "models.DateTimeField(auto_now_add=True)"
+      }
+    ]
+  },
+  {
+    "model": "D2RSchedule",
+    "line": 249,
+    "bases": [
+      "models.Model"
+    ],
+    "fields": [
+      {
+        "field": "user",
+        "type": "ForeignKey",
+        "line": 259,
+        "declaration": "models.ForeignKey(User, on_delete=models.CASCADE, related_name='d2r_schedules')"
+      },
+      {
+        "field": "scheduled_for",
+        "type": "DateTimeField",
+        "line": 260,
+        "declaration": "models.DateTimeField()"
+      },
+      {
+        "field": "status",
+        "type": "CharField",
+        "line": 261,
+        "declaration": "models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)"
+      },
+      {
+        "field": "created_at",
+        "type": "DateTimeField",
+        "line": 262,
+        "declaration": "models.DateTimeField(auto_now_add=True)"
+      }
+    ]
+  },
+  {
+    "model": "StudentReport",
+    "line": 271,
+    "bases": [
+      "models.Model"
+    ],
+    "fields": [
+      {
+        "field": "user",
+        "type": "ForeignKey",
+        "line": 272,
+        "declaration": "models.ForeignKey(User, on_delete=models.CASCADE, related_name='reports')"
+      },
+      {
+        "field": "payload",
+        "type": "JSONField",
+        "line": 273,
+        "declaration": "models.JSONField(default=dict, blank=True)"
+      },
+      {
+        "field": "created_at",
+        "type": "DateTimeField",
+        "line": 274,
+        "declaration": "models.DateTimeField(auto_now_add=True)"
+      }
+    ]
+  },
+  {
+    "model": "StudentNotification",
+    "line": 283,
+    "bases": [
+      "models.Model"
+    ],
+    "fields": [
+      {
+        "field": "recipient",
+        "type": "ForeignKey",
+        "line": 293,
+        "declaration": "models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')"
+      },
+      {
+        "field": "sender",
+        "type": "ForeignKey",
+        "line": 294,
+        "declaration": "models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='sent_notifications')"
+      },
+      {
+        "field": "course",
+        "type": "ForeignKey",
+        "line": 295,
+        "declaration": "models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, related_name='notifications')"
+      },
+      {
+        "field": "subject",
+        "type": "CharField",
+        "line": 296,
+        "declaration": "models.CharField(max_length=255)"
+      },
+      {
+        "field": "message",
+        "type": "TextField",
+        "line": 297,
+        "declaration": "models.TextField()"
+      },
+      {
+        "field": "status",
+        "type": "CharField",
+        "line": 298,
+        "declaration": "models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)"
+      },
+      {
+        "field": "error_message",
+        "type": "TextField",
+        "line": 299,
+        "declaration": "models.TextField(blank=True, default='')"
+      },
+      {
+        "field": "sent_at",
+        "type": "DateTimeField",
+        "line": 300,
+        "declaration": "models.DateTimeField(null=True, blank=True)"
+      },
+      {
+        "field": "created_at",
+        "type": "DateTimeField",
+        "line": 301,
+        "declaration": "models.DateTimeField(auto_now_add=True)"
+      }
+    ]
+  },
+  {
+    "model": "ResearchAccessRequest",
+    "line": 310,
+    "bases": [
+      "models.Model"
+    ],
+    "fields": [
+      {
+        "field": "researcher",
+        "type": "CharField",
+        "line": 320,
+        "declaration": "models.CharField(max_length=255)"
+      },
+      {
+        "field": "institution",
+        "type": "CharField",
+        "line": 321,
+        "declaration": "models.CharField(max_length=255)"
+      },
+      {
+        "field": "project",
+        "type": "CharField",
+        "line": 322,
+        "declaration": "models.CharField(max_length=255)"
+      },
+      {
+        "field": "data_requested",
+        "type": "TextField",
+        "line": 323,
+        "declaration": "models.TextField(blank=True)"
+      },
+      {
+        "field": "status",
+        "type": "CharField",
+        "line": 324,
+        "declaration": "models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)"
+      },
+      {
+        "field": "ethics_approval",
+        "type": "BooleanField",
+        "line": 325,
+        "declaration": "models.BooleanField(default=False)"
+      },
+      {
+        "field": "requested_at",
+        "type": "DateTimeField",
+        "line": 326,
+        "declaration": "models.DateTimeField(auto_now_add=True)"
+      }
+    ]
+  },
+  {
+    "model": "PrivacyPolicySetting",
+    "line": 335,
+    "bases": [
+      "models.Model"
+    ],
+    "fields": [
+      {
+        "field": "name",
+        "type": "CharField",
+        "line": 336,
+        "declaration": "models.CharField(max_length=255)"
+      },
+      {
+        "field": "description",
+        "type": "TextField",
+        "line": 337,
+        "declaration": "models.TextField(blank=True)"
+      },
+      {
+        "field": "current_value",
+        "type": "CharField",
+        "line": 338,
+        "declaration": "models.CharField(max_length=255)"
+      },
+      {
+        "field": "options",
+        "type": "JSONField",
+        "line": 339,
+        "declaration": "models.JSONField(default=list, blank=True)"
+      },
+      {
+        "field": "updated_at",
+        "type": "DateTimeField",
+        "line": 340,
+        "declaration": "models.DateTimeField(auto_now=True)"
+      }
+    ]
+  }
+]

@@ -1,0 +1,19 @@
+=== django check ===
+C:\Proyecto_WA\vision_system\.g0-backend\requests\__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+System check identified no issues (0 silenced).
+=== migration drift ===
+C:\Proyecto_WA\vision_system\.g0-backend\requests\__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+No changes detected
+=== tests api ===
+C:\Proyecto_WA\vision_system\.g0-backend\requests\__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+
+----------------------------------------------------------------------
+Ran 0 tests in 0.000s
+
+NO TESTS RAN
+Found 0 test(s).
+System check identified no issues (0 silenced).
+EXIT check=0 migrations=0 tests=0

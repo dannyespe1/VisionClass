@@ -1,0 +1,1394 @@
+{
+  "schema_version": 1,
+  "status": "IMPORTED_NOT_APPROVED",
+  "source": {
+    "document": {
+      "name": "Plan_Mejorado_Ejecucion_VisionClass_Prompts_Codex.docx",
+      "sha256": "4352015df2a874707cf725564f1e1d56cbe974fb838b414357f50f9786186134"
+    },
+    "extraction": {
+      "name": "final_extract.txt",
+      "sha256": "9be008f0a32dbe344fe9596f4ed8ced1b11cef5f62a2001347f3c69c3cb05f58"
+    },
+    "imported_at": "2026-09-13",
+    "heading_cross_check": {
+      "document_count": 41,
+      "extraction_count": 41,
+      "exact_match": true
+    }
+  },
+  "prs": [
+    {
+      "id": "PR01",
+      "title": "Registrar la arquitectura objetivo",
+      "wave": "Ola 1 Arquitectura identidad y consentimiento",
+      "owner_suggested": "Liderazgo técnico",
+      "estimate": "2 días",
+      "components": "Arquitectura y documentación",
+      "risk_level": "Bajo",
+      "control": "No",
+      "dependency_text": "Puerta G0 aprobada",
+      "repository_dependencies": [
+        "G0"
+      ],
+      "objective": "Aprobar una decisión arquitectónica que fije responsabilidades, límites de confianza y secuencia de migración.",
+      "changes": [
+        "Documentar navegador Edge, BFF de Next.js, Django REST, Redis Streams, motor temporal, PostgreSQL, registro de modelos y bóveda demográfica.",
+        "Definir qué datos pueden salir del dispositivo y qué información nunca se usa para decisiones operativas.",
+        "Registrar alternativas descartadas, consecuencias, responsables y fecha de revisión."
+      ],
+      "tests": [
+        "Revisión cruzada de frontend, backend, ML, investigación y privacidad.",
+        "Comprobar que cada componente tiene entrada, salida, propietario y límite de confianza.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "ADR versionado y aprobado por los responsables técnicos.",
+        "Diagrama lógico coherente con el ADR y con la política de no transmitir imágenes por defecto.",
+        "Backlog posterior referencia el ADR y no introduce componentes contradictorios."
+      ],
+      "risk": "Una decisión ambigua puede generar implementaciones incompatibles.",
+      "rollback": "Revertir únicamente el documento y emitir una nueva versión; no se modifica código productivo."
+    },
+    {
+      "id": "PR02",
+      "title": "Desacoplar D2R del flujo principal",
+      "wave": "Ola 2 Base segura observable",
+      "owner_suggested": "Frontend y backend",
+      "estimate": "3 días",
+      "components": "Next.js, Django REST y navegación",
+      "risk_level": "Medio",
+      "control": "Sí: d2r_enabled",
+      "dependency_text": "PR01 y el inventario de dependencias D2R de P0.1",
+      "repository_dependencies": [
+        "PR01",
+        "P0.1"
+      ],
+      "objective": "Permitir autenticación, acceso a cursos y captura sin ejecutar D2R ni depender de sus resultados.",
+      "changes": [
+        "Retirar redirecciones obligatorias y verificaciones D2R del recorrido principal.",
+        "Mantener temporalmente rutas y datos legados aislados para evitar una eliminación prematura.",
+        "Actualizar navegación, permisos y documentación de usuario."
+      ],
+      "tests": [
+        "Prueba end to end de inicio de sesión, ingreso a curso y captura con D2R deshabilitado.",
+        "Pruebas de regresión para roles de estudiante, docente y administrador.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "Ninguna llamada D2R aparece en el flujo principal.",
+        "La plataforma conserva autenticación, cursos y paneles existentes.",
+        "El flag permite restaurar temporalmente el comportamiento anterior durante la transición."
+      ],
+      "risk": "Pueden existir dependencias ocultas en permisos, rutas o reportes.",
+      "rollback": "Reactivar el feature flag y restaurar la navegación anterior sin recuperar código eliminado."
+    },
+    {
+      "id": "PR03",
+      "title": "Cerrar suplantación de identidad",
+      "wave": "Ola 1 Arquitectura identidad y consentimiento",
+      "owner_suggested": "Backend y seguridad",
+      "estimate": "4 días",
+      "components": "Next.js BFF, Django REST y JWT",
+      "risk_level": "Alto",
+      "control": "Sí: strict_event_identity",
+      "dependency_text": "PR01 y el mapa de autenticación de P0.1",
+      "repository_dependencies": [
+        "PR01",
+        "P0.1"
+      ],
+      "objective": "Impedir que el cliente atribuya observaciones o eventos a otro usuario o a una sesión ajena.",
+      "changes": [
+        "Derivar user_id y roles exclusivamente del token verificado.",
+        "Vincular session_id con usuario, curso y vigencia en el servidor.",
+        "Rechazar payloads con identificadores discordantes y registrar el intento sin incluir datos sensibles."
+      ],
+      "tests": [
+        "Pruebas negativas con tokens válidos y user_id ajenos.",
+        "Pruebas de sesiones expiradas, roles insuficientes y repetición de eventos.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "No existe endpoint de escritura que confíe en un user_id del cuerpo.",
+        "Los intentos inválidos retornan códigos consistentes y generan auditoría.",
+        "Las pruebas cubren las rutas de eventos y predicciones."
+      ],
+      "risk": "Un cambio estricto puede bloquear clientes antiguos.",
+      "rollback": "No volver a confiar en user_id enviados por el cliente. Ante incompatibilidad, bloquear escrituras afectadas o habilitar un adaptador servidor temporal que mantenga validación estricta."
+    },
+    {
+      "id": "PR04",
+      "title": "Aplicar mínimo privilegio al servicio ML",
+      "wave": "Ola 2 Base segura observable",
+      "owner_suggested": "Backend y seguridad",
+      "estimate": "3 días",
+      "components": "Django REST, FastAPI ML y secretos",
+      "risk_level": "Alto",
+      "control": "Sí: ml_service_identity",
+      "dependency_text": "PR03",
+      "repository_dependencies": [
+        "PR03"
+      ],
+      "objective": "Sustituir credenciales amplias por una identidad de servicio limitada y rotables.",
+      "changes": [
+        "Crear scopes específicos para lectura de modelos, consumo de eventos y escritura de inferencias.",
+        "Mover secretos a variables o gestor de secretos y definir rotación.",
+        "Eliminar tokens administrativos y documentar el flujo máquina a máquina."
+      ],
+      "tests": [
+        "Pruebas de autorización por endpoint y scope.",
+        "Prueba de rotación sin interrupción y rechazo de credenciales revocadas.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "La identidad ML no administra usuarios ni cursos.",
+        "No hay secretos en repositorio, imagen o logs.",
+        "Las denegaciones se auditan y no revelan información interna."
+      ],
+      "risk": "Scopes incompletos pueden detener el procesamiento.",
+      "rollback": "No restaurar credenciales administrativas amplias. Desactivar el procesamiento ML afectado o usar una identidad de emergencia de mínimo privilegio, con caducidad y auditoría."
+    },
+    {
+      "id": "PR05",
+      "title": "Controlar captura y envíos",
+      "wave": "Ola 2 Base segura observable",
+      "owner_suggested": "Frontend y backend",
+      "estimate": "4 días",
+      "components": "Next.js, WebSocket o REST y cola cliente",
+      "risk_level": "Medio",
+      "control": "Sí: bounded_capture_queue",
+      "dependency_text": "PR03 y PR07",
+      "repository_dependencies": [
+        "PR03",
+        "PR07"
+      ],
+      "objective": "Evitar acumulación ilimitada de solicitudes y mantener la interfaz estable cuando la red o el servidor se degradan.",
+      "changes": [
+        "Aplicar frecuencia máxima, cola acotada y descarte de ventanas obsoletas.",
+        "Agregar cancelación, timeout, reintentos con backoff e idempotencia.",
+        "Mostrar estado de conexión sin afirmar que se procesó una ventana no confirmada."
+      ],
+      "tests": [
+        "Simular alta latencia, pérdida de red y respuestas fuera de orden.",
+        "Medir memoria, tamaño de cola y capacidad de recuperación.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "La cola nunca supera el límite configurado.",
+        "Los eventos confirmados no se duplican y los descartados quedan contabilizados.",
+        "La UI permanece utilizable durante la degradación."
+      ],
+      "risk": "El descarte agresivo puede reducir cobertura temporal.",
+      "rollback": "Volver al perfil conservador de frecuencia y conservar métricas para reajustar límites."
+    },
+    {
+      "id": "PR06",
+      "title": "Crear pruebas y observabilidad mínima",
+      "wave": "Ola 2 Base segura observable",
+      "owner_suggested": "Equipo completo",
+      "estimate": "5 días",
+      "components": "CI, frontend, backend y ML",
+      "risk_level": "Medio",
+      "control": "No",
+      "dependency_text": "PR02, PR03, PR04, PR05 y PR07",
+      "repository_dependencies": [
+        "PR02",
+        "PR03",
+        "PR04",
+        "PR05",
+        "PR07"
+      ],
+      "objective": "Disponer de evidencia automática sobre disponibilidad, errores, latencia y recorridos críticos.",
+      "changes": [
+        "Crear health checks diferenciados de vida y preparación.",
+        "Añadir correlation_id desde navegador hasta inferencia persistida.",
+        "Configurar lint, tipos, unitarias, integración y smoke tests en CI."
+      ],
+      "tests": [
+        "Ejecutar smoke test del flujo autenticado y una prueba de fallo deliberado de dependencia.",
+        "Verificar que los logs permiten reconstruir un evento sin exponer imágenes ni tokens.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "Pipeline reproducible y verde en rama protegida.",
+        "Panel mínimo con disponibilidad, tasa de error y p95 de latencia.",
+        "Runbook breve para localizar un evento por correlation_id."
+      ],
+      "risk": "Telemetría excesiva puede almacenar datos sensibles.",
+      "rollback": "Reducir campos de log mediante configuración y borrar índices generados con esquema incorrecto."
+    },
+    {
+      "id": "PR07",
+      "title": "Formalizar protocolo y consentimiento",
+      "wave": "Ola 1 Arquitectura identidad y consentimiento",
+      "owner_suggested": "Investigación y privacidad",
+      "estimate": "5 días",
+      "components": "Frontend, Django REST y PostgreSQL",
+      "risk_level": "Alto",
+      "control": "Sí: consent_v2",
+      "dependency_text": "PR01 y aprobación inicial de privacidad, ética y tratamiento de participantes",
+      "repository_dependencies": [
+        "PR01"
+      ],
+      "objective": "Implementar consentimiento informado versionado, revocable y verificable antes de cualquier captura.",
+      "changes": [
+        "Modelar versión, finalidad, fecha, alcance, revocación y exclusión de captura.",
+        "Diseñar interfaz comprensible con opción de continuar sin participar cuando el protocolo lo permita.",
+        "Registrar cambios de consentimiento como eventos inmutables."
+      ],
+      "tests": [
+        "Pruebas de consentimiento ausente, expirado, revocado y actualizado.",
+        "Revisión de contenido por investigación, privacidad y accesibilidad.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "La captura no inicia sin consentimiento válido.",
+        "La revocación detiene eventos nuevos de forma inmediata.",
+        "La evidencia permite saber qué versión aceptó cada participante."
+      ],
+      "risk": "Un consentimiento confuso invalida el protocolo y reduce confianza.",
+      "rollback": "Suspender la captura y conservar únicamente registros administrativos permitidos. Nunca habilitar captura sin consentimiento válido."
+    },
+    {
+      "id": "PR08",
+      "title": "Separar observaciones y estados inferidos",
+      "wave": "Ola 3 Datos contratos e instrumentos",
+      "owner_suggested": "Backend y datos",
+      "estimate": "5 días",
+      "components": "Django ORM y PostgreSQL",
+      "risk_level": "Alto",
+      "control": "Sí: temporal_schema_v2",
+      "dependency_text": "PR07",
+      "repository_dependencies": [
+        "PR07"
+      ],
+      "objective": "Distinguir datos observados, ventanas agregadas, estados inferidos, incertidumbre e intervenciones.",
+      "changes": [
+        "Crear entidades de sesión, observación, ventana, estado, transición e intervención.",
+        "Registrar timestamps de captura, recepción y procesamiento.",
+        "Añadir claves de procedencia y relaciones sin acoplarse a un modelo específico."
+      ],
+      "tests": [
+        "Migraciones hacia adelante y atrás sobre copia de datos de prueba.",
+        "Pruebas de integridad, índices, zonas horarias y sesiones concurrentes.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "Una consulta separa inequívocamente señal e inferencia.",
+        "No se pierden registros existentes en la migración.",
+        "El esquema soporta estado no observable y probabilidades por estado."
+      ],
+      "risk": "Una migración extensa puede bloquear o corromper datos.",
+      "rollback": "Usar migración expandir y contraer, respaldar tablas y mantener lectura del esquema anterior durante la transición."
+    },
+    {
+      "id": "PR09",
+      "title": "Registrar modelos y artefactos",
+      "wave": "Ola 3 Datos contratos e instrumentos",
+      "owner_suggested": "Datos y ML",
+      "estimate": "4 días",
+      "components": "Django REST, almacenamiento de artefactos y ML",
+      "risk_level": "Medio",
+      "control": "Sí: model_registry",
+      "dependency_text": "PR08",
+      "repository_dependencies": [
+        "PR08"
+      ],
+      "objective": "Vincular toda inferencia con un modelo identificable, evaluado y recuperable.",
+      "changes": [
+        "Registrar versión, hash, algoritmo, características, dataset, métricas, umbrales y estado.",
+        "Definir estados candidato, validado, activo, retirado y bloqueado.",
+        "Separar metadatos en PostgreSQL de artefactos binarios."
+      ],
+      "tests": [
+        "Prueba de integridad de hash y rechazo de artefactos incompatibles.",
+        "Prueba de promoción y retirada sin alterar inferencias históricas.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "Toda inferencia referencia un model_id válido.",
+        "Un artefacto retirado no recibe tráfico nuevo.",
+        "La ficha del modelo permite reproducir su evaluación."
+      ],
+      "risk": "Promover una versión incorrecta afecta todas las sesiones.",
+      "rollback": "Reasignar el alias activo a la versión previa y conservar ambas versiones para auditoría."
+    },
+    {
+      "id": "PR10",
+      "title": "Versionar el contrato de eventos",
+      "wave": "Ola 3 Datos contratos e instrumentos",
+      "owner_suggested": "Backend y frontend",
+      "estimate": "5 días",
+      "components": "Next.js, Django REST, ML y JSON Schema",
+      "risk_level": "Alto",
+      "control": "Sí: event_contract_v2",
+      "dependency_text": "PR08 y PR09",
+      "repository_dependencies": [
+        "PR08",
+        "PR09"
+      ],
+      "objective": "Estabilizar el intercambio de características, calidad, tiempo, dispositivo y consentimiento.",
+      "changes": [
+        "Publicar JSON Schema con unidades, rangos, campos obligatorios y valores ausentes.",
+        "Añadir versionado, event_id idempotente y compatibilidad temporal entre versiones.",
+        "Generar fixtures compartidos para frontend, API y ML."
+      ],
+      "tests": [
+        "Pruebas contractuales en productores y consumidores.",
+        "Fuzzing básico de tipos, rangos, duplicados y campos desconocidos.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "CI falla ante cambios incompatibles no versionados.",
+        "Eventos inválidos se rechazan con detalle seguro.",
+        "Fixtures producen interpretación idéntica en los tres componentes."
+      ],
+      "risk": "La divergencia de contratos puede perder eventos silenciosamente.",
+      "rollback": "Mantener adaptador v1 a v2 y permitir volver al consumidor anterior mientras se corrige la incompatibilidad."
+    },
+    {
+      "id": "PR11",
+      "title": "Incorporar Redis",
+      "wave": "Ola 4 Estado distribuido retención y bóveda",
+      "owner_suggested": "Backend y plataforma",
+      "estimate": "3 días",
+      "components": "Docker, Django, FastAPI y Redis",
+      "risk_level": "Medio",
+      "control": "Sí: redis_enabled",
+      "dependency_text": "PR06",
+      "repository_dependencies": [
+        "PR06"
+      ],
+      "objective": "Introducir Redis como dependencia operativa con configuración segura y observable.",
+      "changes": [
+        "Añadir servicio, namespaces, autenticación, límites de memoria y política de expiración.",
+        "Crear health checks y configuración por entorno.",
+        "Documentar respaldo, actualización y respuesta a indisponibilidad."
+      ],
+      "tests": [
+        "Pruebas de conexión, autenticación, expiración y caída de Redis.",
+        "Smoke test en desarrollo y CI con configuración equivalente.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "Redis inicia de forma reproducible y no queda expuesto públicamente.",
+        "Las claves siguen una convención documentada.",
+        "La caída se reporta sin fallos silenciosos."
+      ],
+      "risk": "Una mala política de memoria puede expulsar estado activo.",
+      "rollback": "Desactivar uso funcional mediante flag y volver temporalmente al flujo sin procesamiento temporal."
+    },
+    {
+      "id": "PR12",
+      "title": "Persistir estado temporal distribuido",
+      "wave": "Ola 4 Estado distribuido retención y bóveda",
+      "owner_suggested": "Backend y ML",
+      "estimate": "5 días",
+      "components": "Redis, FastAPI ML y sesiones",
+      "risk_level": "Alto",
+      "control": "Sí: distributed_state",
+      "dependency_text": "PR10 y PR11",
+      "repository_dependencies": [
+        "PR10",
+        "PR11"
+      ],
+      "objective": "Mover ventanas y estado de sesión fuera de la memoria del proceso.",
+      "changes": [
+        "Crear claves por usuario, curso y sesión con TTL renovable.",
+        "Guardar posición de ventana, calidad acumulada y versión del modelo.",
+        "Aplicar bloqueo o actualización atómica para consumidores concurrentes."
+      ],
+      "tests": [
+        "Reiniciar instancias durante una sesión y comprobar continuidad.",
+        "Ejecutar sesiones simultáneas para detectar mezcla o condiciones de carrera.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "No se mezclan participantes ni cursos.",
+        "El estado activo sobrevive al reinicio previsto.",
+        "El TTL elimina sesiones abandonadas sin borrar sesiones vigentes."
+      ],
+      "risk": "Errores de claves pueden cruzar datos entre sesiones.",
+      "rollback": "Desactivar el estado distribuido, invalidar el namespace afectado y reconstruir solo desde eventos confirmados."
+    },
+    {
+      "id": "PR13",
+      "title": "Procesar eventos con Redis Streams",
+      "wave": "Ola 4 Estado distribuido retención y bóveda",
+      "owner_suggested": "Backend y plataforma",
+      "estimate": "7 días",
+      "components": "Redis Streams, Django y ML",
+      "risk_level": "Alto",
+      "control": "Sí: stream_pipeline",
+      "dependency_text": "PR12",
+      "repository_dependencies": [
+        "PR12"
+      ],
+      "objective": "Crear un flujo durable con backpressure, reintentos e idempotencia para observaciones e inferencias.",
+      "changes": [
+        "Implementar productores, grupos de consumidores, acknowledgements y reclamación de pendientes.",
+        "Añadir reintentos acotados y dead letter stream.",
+        "Propagar correlation_id, event_id y versión de contrato."
+      ],
+      "tests": [
+        "Prueba de carga con consumidores lentos, duplicados y reinicios.",
+        "Prueba de recuperación de pendientes y aislamiento de mensajes venenosos.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "No hay duplicación efectiva en persistencia.",
+        "La cola pendiente permanece bajo el umbral acordado.",
+        "Los mensajes fallidos conservan causa y pueden reprocesarse de forma controlada."
+      ],
+      "risk": "Una tormenta de reintentos puede saturar el sistema.",
+      "rollback": "Pausar consumidores, reducir concurrencia y volver al endpoint síncrono limitado mientras se drena la cola."
+    },
+    {
+      "id": "PR14",
+      "title": "Aplicar retención y eliminación",
+      "wave": "Ola 4 Estado distribuido retención y bóveda",
+      "owner_suggested": "Backend y privacidad",
+      "estimate": "5 días",
+      "components": "PostgreSQL, Redis y auditoría",
+      "risk_level": "Alto",
+      "control": "Sí: retention_jobs",
+      "dependency_text": "PR07, PR12, PR13 y PR33",
+      "repository_dependencies": [
+        "PR07",
+        "PR12",
+        "PR13",
+        "PR33"
+      ],
+      "objective": "Ejecutar retención por finalidad y eliminación verificable en todos los almacenes.",
+      "changes": [
+        "Definir plazos por observaciones, estados, telemetría y auditoría.",
+        "Crear trabajo idempotente de expiración y flujo de solicitud de eliminación.",
+        "Eliminar o seudonimizar claves relacionadas en PostgreSQL y Redis."
+      ],
+      "tests": [
+        "Prueba con usuario sintético que cubra tablas, streams, claves y exportaciones.",
+        "Verificar reintento seguro tras interrupción del trabajo.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "La solicitud produce evidencia de alcance y finalización.",
+        "No sobreviven datos operativos fuera del periodo aprobado.",
+        "Los logs de borrado no contienen los datos eliminados."
+      ],
+      "risk": "Un borrado incompleto crea exposición regulatoria; uno excesivo afecta auditoría.",
+      "rollback": "Detener el trabajo defectuoso, preservar evidencia mínima de auditoría y corregir reglas. No restaurar datos personales eliminados salvo base jurídica, autorización explícita y política de backups aprobada."
+    },
+    {
+      "id": "PR15",
+      "title": "Extraer características en el navegador",
+      "wave": "Ola 5 Edge calidad y preparación de datos",
+      "owner_suggested": "Frontend y Edge",
+      "estimate": "8 días",
+      "components": "Next.js, MediaPipe u ONNX Web",
+      "risk_level": "Alto",
+      "control": "Sí: browser_extractor",
+      "dependency_text": "PR10",
+      "repository_dependencies": [
+        "PR10"
+      ],
+      "objective": "Procesar video localmente y transmitir solo características mínimas necesarias.",
+      "changes": [
+        "Integrar detección de rostro, landmarks, mirada, pose y presencia según disponibilidad.",
+        "Liberar cámara, workers y memoria al pausar o abandonar la sesión.",
+        "Impedir subida de frames en el perfil predeterminado."
+      ],
+      "tests": [
+        "Comparar características locales con el extractor de referencia sobre fixtures consentidos.",
+        "Probar navegadores, permisos denegados, múltiples cámaras y suspensión de pestaña.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "La red no contiene imágenes ni blobs de video en modo normal.",
+        "La sesión se recupera de cambios de cámara y pestaña.",
+        "Rendimiento y compatibilidad quedan documentados por navegador."
+      ],
+      "risk": "Diferencias entre navegadores pueden alterar la señal.",
+      "rollback": "Desactivar el extractor local para navegadores no validados y usar modo sin captura, no subida automática de imágenes."
+    },
+    {
+      "id": "PR16",
+      "title": "Normalizar características",
+      "wave": "Ola 5 Edge calidad y preparación de datos",
+      "owner_suggested": "Frontend, backend y ML",
+      "estimate": "5 días",
+      "components": "Contrato de eventos y preprocesamiento",
+      "risk_level": "Alto",
+      "control": "Sí: normalized_features_v1",
+      "dependency_text": "PR15",
+      "repository_dependencies": [
+        "PR15"
+      ],
+      "objective": "Asegurar que todos los componentes interpreten las características con las mismas unidades, rangos y tiempos.",
+      "changes": [
+        "Definir coordenadas, normalización geométrica, timestamps y ventanas.",
+        "Representar valores ausentes y confianza sin usar ceros ambiguos.",
+        "Versionar extractor y preprocesamiento en cada evento."
+      ],
+      "tests": [
+        "Fixtures dorados ejecutados en TypeScript y Python.",
+        "Pruebas de cambios de resolución, orientación, FPS irregular y rostro parcial.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "La representación coincide dentro de tolerancias definidas.",
+        "Cada campo tiene unidad, rango y tratamiento de ausencia.",
+        "Un cambio futuro exige nueva versión del contrato."
+      ],
+      "risk": "Una normalización incoherente invalida modelos y comparaciones.",
+      "rollback": "Mantener el pipeline anterior por versión y enrutar eventos según feature_version."
+    },
+    {
+      "id": "PR17",
+      "title": "Crear puerta de calidad y estado no observable",
+      "wave": "Ola 5 Edge calidad y preparación de datos",
+      "owner_suggested": "Datos y ML",
+      "estimate": "6 días",
+      "components": "Navegador, contrato y motor temporal",
+      "risk_level": "Alto",
+      "control": "Sí: quality_gate_v1",
+      "dependency_text": "PR16",
+      "repository_dependencies": [
+        "PR16"
+      ],
+      "objective": "Evitar clasificaciones forzadas cuando iluminación, oclusión, confianza o continuidad temporal son insuficientes.",
+      "changes": [
+        "Calcular calidad por frame y ventana con razones explícitas.",
+        "Definir umbrales iniciales y estado no observable.",
+        "Separar ausencia de rostro, mala señal y falta de datos."
+      ],
+      "tests": [
+        "Casos controlados de oscuridad, oclusión, salida de cuadro y pérdida de frames.",
+        "Análisis de sensibilidad para evitar umbrales arbitrarios.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "Las ventanas insuficientes no activan inferencia ni intervención.",
+        "El usuario recibe explicación comprensible y no culpabilizante.",
+        "Las razones de no observabilidad pueden auditarse."
+      ],
+      "risk": "Umbrales severos reducen cobertura; umbrales laxos producen inferencias falsas.",
+      "rollback": "Volver al conjunto de umbrales validado y recalibrar en shadow mode."
+    },
+    {
+      "id": "PR18",
+      "title": "Habilitar perfiles de ejecución Edge",
+      "wave": "Ola 5 Edge calidad y preparación de datos",
+      "owner_suggested": "Frontend y plataforma",
+      "estimate": "5 días",
+      "components": "Next.js, configuración y telemetría",
+      "risk_level": "Medio",
+      "control": "Sí: edge_profiles",
+      "dependency_text": "PR17",
+      "repository_dependencies": [
+        "PR17"
+      ],
+      "objective": "Ofrecer perfiles controlados de frecuencia, resolución, características y ubicación de inferencia.",
+      "changes": [
+        "Definir perfiles bajo, balanceado y alto con límites explícitos.",
+        "Registrar cambios de perfil y motivos sin identificar al usuario.",
+        "Permitir selección remota solo dentro de capacidades consentidas."
+      ],
+      "tests": [
+        "Cambiar perfiles durante sesiones y comprobar continuidad.",
+        "Probar dispositivos lentos, pestañas en segundo plano y batería limitada.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "Cada evento identifica el perfil utilizado.",
+        "El cambio no mezcla ventanas incompatibles.",
+        "Existe un perfil seguro de respaldo para dispositivos no caracterizados."
+      ],
+      "risk": "Cambios frecuentes pueden introducir oscilación y datos incomparables.",
+      "rollback": "Fijar el perfil de respaldo y desactivar cambios automáticos hasta PR27."
+    },
+    {
+      "id": "PR19",
+      "title": "Construir baselines reproducibles",
+      "wave": "Ola 6 Modelado temporal",
+      "owner_suggested": "Datos y ML",
+      "estimate": "6 días",
+      "components": "Pipeline de datos y entrenamiento",
+      "risk_level": "Medio",
+      "control": "No",
+      "dependency_text": "PR16, PR17 y Puerta G3 de preparación de datos",
+      "repository_dependencies": [
+        "PR16",
+        "PR17",
+        "G3"
+      ],
+      "objective": "Crear referencias estáticas y heurísticas que permitan medir el valor real del modelado temporal.",
+      "changes": [
+        "Implementar regla existente y clasificador por ventana.",
+        "Particionar por participante, fijar semillas y versionar configuración.",
+        "Calcular macro-F1, balanced accuracy, calibración y cobertura."
+      ],
+      "tests": [
+        "Repetición exacta desde entorno limpio.",
+        "Prueba que detecte fuga de participantes entre entrenamiento y evaluación.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "Artefactos, métricas y splits quedan versionados.",
+        "Los resultados incluyen intervalos y matriz de confusión.",
+        "El baseline usa el mismo contrato de características que modelos posteriores."
+      ],
+      "risk": "Un baseline débil puede exagerar mejoras.",
+      "rollback": "Congelar una versión revisada y repetir comparaciones cuando cambie el pipeline."
+    },
+    {
+      "id": "PR20",
+      "title": "Implementar HMM o modelo de espacio de estados",
+      "wave": "Ola 6 Modelado temporal",
+      "owner_suggested": "Datos y ML",
+      "estimate": "10 días",
+      "components": "Entrenamiento e inferencia temporal",
+      "risk_level": "Alto",
+      "control": "Sí: state_model_v1",
+      "dependency_text": "PR19 y protocolo de evaluación congelado",
+      "repository_dependencies": [
+        "PR19"
+      ],
+      "objective": "Representar atención como estado latente con transiciones, emisiones e inferencia online.",
+      "changes": [
+        "Definir estados interpretables y tratamiento de no observabilidad.",
+        "Implementar entrenamiento, filtrado, suavizado y probabilidad posterior.",
+        "Versionar parámetros de transición y emisiones."
+      ],
+      "tests": [
+        "Secuencias sintéticas con transiciones conocidas.",
+        "Pruebas de huecos, ventanas cortas, reinicio y datos fuera de orden.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "El modelo devuelve distribución de estados e incertidumbre.",
+        "Las transiciones cumplen restricciones documentadas.",
+        "El entrenamiento y la inferencia son reproducibles."
+      ],
+      "risk": "Estados mal definidos pueden aparentar significado cognitivo inexistente.",
+      "rollback": "Retirar el modelo del alias activo y volver a baseline; revisar ontología antes de reentrenar."
+    },
+    {
+      "id": "PR21",
+      "title": "Exponer el motor temporal",
+      "wave": "Ola 6 Modelado temporal",
+      "owner_suggested": "Backend y ML",
+      "estimate": "6 días",
+      "components": "FastAPI ML, Streams y Django REST",
+      "risk_level": "Alto",
+      "control": "Sí: temporal_inference_api",
+      "dependency_text": "PR13 y PR20",
+      "repository_dependencies": [
+        "PR13",
+        "PR20"
+      ],
+      "objective": "Procesar ventanas temporalmente y persistir estados con contrato estable e idempotente.",
+      "changes": [
+        "Consumir ventanas validadas desde Streams o endpoint interno.",
+        "Persistir probabilidades, incertidumbre, calidad y model_id.",
+        "Añadir timeouts, límites de tamaño y manejo de versiones."
+      ],
+      "tests": [
+        "Pruebas contractuales y de idempotencia.",
+        "Carga con múltiples sesiones y medición p50, p95 y p99.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "Una ventana produce como máximo una inferencia efectiva.",
+        "Errores se clasifican como reintentables o definitivos.",
+        "La respuesta explica calidad y versión sin exponer parámetros sensibles."
+      ],
+      "risk": "La inferencia lenta puede retrasar toda la secuencia.",
+      "rollback": "Desactivar consumidor temporal y persistir ventanas para reprocesamiento posterior."
+    },
+    {
+      "id": "PR22",
+      "title": "Desplegar modelos con shadow mode y rollback",
+      "wave": "Ola 6 Modelado temporal",
+      "owner_suggested": "ML y plataforma",
+      "estimate": "6 días",
+      "components": "Registro, despliegue y telemetría",
+      "risk_level": "Alto",
+      "control": "Sí: model_rollout",
+      "dependency_text": "PR09 y PR21",
+      "repository_dependencies": [
+        "PR09",
+        "PR21"
+      ],
+      "objective": "Promover modelos de manera gradual y comparar candidatos sin afectar decisiones.",
+      "changes": [
+        "Implementar alias por entorno, shadow mode, canary y porcentaje de tráfico.",
+        "Registrar versión elegida y motivo de rollback.",
+        "Definir umbrales automáticos de latencia, error y calibración."
+      ],
+      "tests": [
+        "Ensayo de canary y rollback con modelo defectuoso controlado.",
+        "Comparación de salidas activas y shadow sin contaminación.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "La versión previa se restaura sin migrar datos.",
+        "Los usuarios no reciben decisiones provenientes del modelo shadow.",
+        "El despliegue deja evidencia auditable."
+      ],
+      "risk": "Un candidato defectuoso puede afectar sesiones reales.",
+      "rollback": "Mover alias al modelo estable, detener tráfico canary y reprocesar únicamente si el protocolo lo permite."
+    },
+    {
+      "id": "PR23",
+      "title": "Evaluar el modelo dinámico",
+      "wave": "Ola 6 Modelado temporal",
+      "owner_suggested": "Datos, ML e investigación",
+      "estimate": "8 días",
+      "components": "Evaluación y documentación",
+      "risk_level": "Alto",
+      "control": "No",
+      "dependency_text": "PR19, PR20, PR21, PR22 y protocolo de evaluación congelado",
+      "repository_dependencies": [
+        "PR19",
+        "PR20",
+        "PR21",
+        "PR22"
+      ],
+      "objective": "Cuantificar desempeño, calibración, detección de cambios y estabilidad sin fuga entre participantes.",
+      "changes": [
+        "Comparar HMM o estado espacial con baselines estáticos.",
+        "Medir demora de cambio, persistencia, cobertura y error por participante.",
+        "Generar intervalos de confianza y análisis de sensibilidad."
+      ],
+      "tests": [
+        "Revisión independiente de splits, métricas y scripts.",
+        "Repetición con al menos dos semillas o particiones cuando aplique.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "Informe versionado con protocolo y resultados completos.",
+        "Las conclusiones distinguen clasificación, dinámica y validez del constructo.",
+        "Se documentan fallos y condiciones donde el modelo no debe usarse."
+      ],
+      "risk": "Elegir métricas después de ver resultados puede sesgar conclusiones.",
+      "rollback": "Congelar el protocolo antes de la evaluación final y marcar cualquier análisis posterior como exploratorio."
+    },
+    {
+      "id": "PR24",
+      "title": "Añadir baseline LSTM o GRU",
+      "wave": "Ola 6 Modelado temporal",
+      "owner_suggested": "Datos y ML",
+      "estimate": "10 días",
+      "components": "Entrenamiento temporal",
+      "risk_level": "Alto",
+      "control": "Sí: neural_temporal_shadow",
+      "dependency_text": "PR19 y Puerta G3 de preparación de datos",
+      "repository_dependencies": [
+        "PR19",
+        "G3"
+      ],
+      "objective": "Comparar el modelo de estados con una alternativa neuronal entrenada bajo el mismo protocolo.",
+      "changes": [
+        "Implementar LSTM o GRU con máscara de valores ausentes.",
+        "Usar los mismos splits, características y métricas del baseline.",
+        "Registrar hiperparámetros, semillas y curvas de entrenamiento."
+      ],
+      "tests": [
+        "Prueba de fuga por participante y overfitting deliberado.",
+        "Comparación reproducible contra PR20 y PR19.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "El artefacto queda registrado como candidato, no activo.",
+        "La comparación incluye coste computacional y calibración.",
+        "Se informa variabilidad entre ejecuciones."
+      ],
+      "risk": "La red neuronal puede mejorar métricas sin ser interpretable ni estable.",
+      "rollback": "Mantenerla en shadow mode y retirar el artefacto si no supera gates predefinidos."
+    },
+    {
+      "id": "PR25",
+      "title": "Exportar inferencia local",
+      "wave": "Ola 7 Adaptación validación y equidad",
+      "owner_suggested": "ML y frontend",
+      "estimate": "8 días",
+      "components": "ONNX, WebAssembly o WebGPU",
+      "risk_level": "Alto",
+      "control": "Sí: local_temporal_model",
+      "dependency_text": "PR09, PR23, PR24 y decisión documentada de selección del modelo",
+      "repository_dependencies": [
+        "PR09",
+        "PR23",
+        "PR24"
+      ],
+      "objective": "Ejecutar un modelo elegible en el dispositivo con paridad controlada respecto al modelo de referencia.",
+      "changes": [
+        "Exportar a ONNX o formato Web y fijar opset compatible.",
+        "Cuantizar solo después de medir degradación.",
+        "Firmar artefacto y validar hash antes de cargarlo."
+      ],
+      "tests": [
+        "Pruebas de paridad numérica y decisiones sobre fixtures.",
+        "Rendimiento en CPU, WebAssembly y WebGPU disponibles.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "La desviación queda dentro del umbral aprobado.",
+        "Un artefacto incompatible no se ejecuta.",
+        "Existe fallback seguro sin enviar imágenes al servidor."
+      ],
+      "risk": "La cuantización puede degradar grupos o condiciones específicas.",
+      "rollback": "Volver al artefacto sin cuantizar o al modelo de estados y bloquear la versión degradada."
+    },
+    {
+      "id": "PR26",
+      "title": "Medir recursos del dispositivo",
+      "wave": "Ola 7 Adaptación validación y equidad",
+      "owner_suggested": "Frontend y Edge",
+      "estimate": "6 días",
+      "components": "Telemetría cliente y backend",
+      "risk_level": "Medio",
+      "control": "Sí: device_budget_telemetry",
+      "dependency_text": "PR07 y PR18",
+      "repository_dependencies": [
+        "PR07",
+        "PR18"
+      ],
+      "objective": "Medir recursos suficientes para comparar perfiles sin convertir la telemetría en identificación del usuario.",
+      "changes": [
+        "Registrar FPS, latencia, memoria disponible, red y estado energético permitido.",
+        "Agrupar clase de dispositivo y evitar identificadores persistentes.",
+        "Aplicar muestreo y retención reducida."
+      ],
+      "tests": [
+        "Validar ausencia de huellas digitales directas en payloads.",
+        "Simular CPU ocupada, red limitada y ahorro de batería.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "La telemetría se asocia al perfil y sesión, no a atributos demográficos.",
+        "El usuario puede excluirse según consentimiento.",
+        "Los valores imposibles se filtran y contabilizan."
+      ],
+      "risk": "La combinación de métricas puede facilitar fingerprinting.",
+      "rollback": "Desactivar telemetría detallada y conservar solo agregados amplios aprobados por privacidad."
+    },
+    {
+      "id": "PR27",
+      "title": "Crear scheduler adaptativo",
+      "wave": "Ola 7 Adaptación validación y equidad",
+      "owner_suggested": "ML, frontend y plataforma",
+      "estimate": "10 días",
+      "components": "Edge, configuración y motor temporal",
+      "risk_level": "Alto",
+      "control": "Sí: adaptive_scheduler",
+      "dependency_text": "PR25 y PR26",
+      "repository_dependencies": [
+        "PR25",
+        "PR26"
+      ],
+      "objective": "Seleccionar perfil, frecuencia y ubicación de inferencia según presupuesto, calidad y estabilidad.",
+      "changes": [
+        "Definir función de decisión con límites y prioridades explícitas.",
+        "Añadir histéresis, tiempo mínimo por perfil y fallback.",
+        "Registrar decisión y métricas que la justifican."
+      ],
+      "tests": [
+        "Pruebas de degradación progresiva y recuperación.",
+        "Pruebas de oscilación, sobrecarga, mala señal y pérdida de red.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "Cumple el presupuesto de latencia en escenarios objetivo.",
+        "No cambia de perfil por ruido breve.",
+        "Nunca elude calidad, consentimiento o privacidad para mantener rendimiento."
+      ],
+      "risk": "Una política inestable puede degradar experiencia y datos.",
+      "rollback": "Desactivar adaptación y fijar el perfil balanceado validado."
+    },
+    {
+      "id": "PR28",
+      "title": "Generar benchmark y frontera de Pareto",
+      "wave": "Ola 7 Adaptación validación y equidad",
+      "owner_suggested": "ML e investigación",
+      "estimate": "8 días",
+      "components": "Benchmark, análisis y documentación",
+      "risk_level": "Medio",
+      "control": "No",
+      "dependency_text": "PR23 y PR27",
+      "repository_dependencies": [
+        "PR23",
+        "PR27"
+      ],
+      "objective": "Caracterizar sistemáticamente cómo cambia el sistema bajo diferentes restricciones computacionales.",
+      "changes": [
+        "Ejecutar matriz por dispositivo, perfil, carga y ubicación de inferencia.",
+        "Medir precisión, calibración, latencia, memoria, red y energía aproximada.",
+        "Identificar configuraciones dominadas y frontera de Pareto."
+      ],
+      "tests": [
+        "Repetición de escenarios y control de temperatura y carga.",
+        "Validación del script de agregación y unidades.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "Dataset de benchmark, configuración y gráficos reproducibles.",
+        "Recomendaciones separadas por clase de dispositivo.",
+        "Resultados incluyen incertidumbre y condiciones de medición."
+      ],
+      "risk": "Benchmarks de laboratorio pueden no representar el aula.",
+      "rollback": "Etiquetar conclusiones como controladas y repetir una muestra durante el piloto antes de generalizar."
+    },
+    {
+      "id": "PR29",
+      "title": "Capturar autoinforme momentáneo",
+      "wave": "Ola 3 Datos contratos e instrumentos",
+      "owner_suggested": "Investigación y frontend",
+      "estimate": "6 días",
+      "components": "Next.js, Django y protocolo",
+      "risk_level": "Medio",
+      "control": "Sí: momentary_self_report",
+      "dependency_text": "PR07, PR08 y aprobación metodológica y ética",
+      "repository_dependencies": [
+        "PR07",
+        "PR08"
+      ],
+      "objective": "Obtener una fuente externa breve y temporalmente alineada con las ventanas de atención.",
+      "changes": [
+        "Diseñar prompts neutrales, escala, opción de omitir y frecuencia máxima.",
+        "Alinear respuesta con ventana y contexto de recurso.",
+        "Medir carga, demora y patrón de no respuesta."
+      ],
+      "tests": [
+        "Piloto cognitivo de comprensión y accesibilidad.",
+        "Pruebas de timestamps, zonas horarias, duplicados y respuestas omitidas.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "El instrumento tiene versión y justificación.",
+        "La experiencia no bloquea el curso.",
+        "Las respuestas pueden vincularse sin revelar contenido académico innecesario."
+      ],
+      "risk": "Interrumpir demasiado cambia la conducta que se intenta medir.",
+      "rollback": "Reducir frecuencia o suspender prompts mediante flag y documentar la exposición acumulada."
+    },
+    {
+      "id": "PR30",
+      "title": "Integrar interacción académica",
+      "wave": "Ola 3 Datos contratos e instrumentos",
+      "owner_suggested": "Backend y frontend",
+      "estimate": "7 días",
+      "components": "Cursos, eventos y PostgreSQL",
+      "risk_level": "Medio",
+      "control": "Sí: learning_interaction_events",
+      "dependency_text": "PR07, PR08 y PR10",
+      "repository_dependencies": [
+        "PR07",
+        "PR08",
+        "PR10"
+      ],
+      "objective": "Incorporar señales de contexto y actividad para triangular inferencias visuales.",
+      "changes": [
+        "Registrar recurso, pausa, navegación, actividad y microevaluación con timestamps.",
+        "Minimizar payload y evitar almacenar texto o respuestas cuando no sea necesario.",
+        "Definir eventos comparables entre texto, video y actividades."
+      ],
+      "tests": [
+        "Pruebas de eventos duplicados, desconexión y reanudación.",
+        "Revisión de minimización por tipo de recurso.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "Los eventos se alinean con sesiones y ventanas.",
+        "El esquema distingue actividad de aprendizaje y atención inferida.",
+        "La captura respeta consentimiento y retención."
+      ],
+      "risk": "La actividad puede confundirse con atención o desempeño.",
+      "rollback": "Mantenerla como evidencia separada y desactivar su uso en modelos hasta completar validez."
+    },
+    {
+      "id": "PR31",
+      "title": "Crear anotación de observadores",
+      "wave": "Ola 3 Datos contratos e instrumentos",
+      "owner_suggested": "Investigación y frontend",
+      "estimate": "10 días",
+      "components": "Interfaz de anotación y protocolo",
+      "risk_level": "Alto",
+      "control": "Sí: observer_annotation",
+      "dependency_text": "PR08 y aprobación metodológica y ética",
+      "repository_dependencies": [
+        "PR08"
+      ],
+      "objective": "Obtener una referencia humana independiente mediante doble anotación ciega.",
+      "changes": [
+        "Definir manual, categorías, entrenamiento y casos de práctica.",
+        "Crear asignación ciega y registro de confianza.",
+        "Seleccionar muestra sin favorecer sesiones fáciles."
+      ],
+      "tests": [
+        "Prueba piloto con discusión de desacuerdos fuera de la muestra final.",
+        "Verificación de cegamiento y completitud de doble anotación.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "Cada unidad final tiene dos evaluadores independientes.",
+        "El manual y sus revisiones quedan versionados.",
+        "La interfaz no muestra predicciones del sistema."
+      ],
+      "risk": "Categorías ambiguas reducen el acuerdo y la validez.",
+      "rollback": "Pausar anotación, revisar manual y repetir entrenamiento antes de continuar la muestra final."
+    },
+    {
+      "id": "PR32",
+      "title": "Calcular validez y acuerdo",
+      "wave": "Ola 7 Adaptación validación y equidad",
+      "owner_suggested": "Investigación y datos",
+      "estimate": "8 días",
+      "components": "Análisis estadístico",
+      "risk_level": "Alto",
+      "control": "No",
+      "dependency_text": "PR29, PR30, PR31 y evidencia de suficiencia de muestra",
+      "repository_dependencies": [
+        "PR29",
+        "PR30",
+        "PR31"
+      ],
+      "objective": "Cuantificar acuerdo entre evaluadores y convergencia entre inferencias, autoinforme, interacción y microevaluación.",
+      "changes": [
+        "Calcular kappa o alpha con intervalos y distribución de prevalencia.",
+        "Analizar asociación temporal, sensibilidad y calibración.",
+        "Examinar discrepancias y no respuesta sin presentar causalidad."
+      ],
+      "tests": [
+        "Revisión de supuestos, unidades de análisis y dependencia temporal.",
+        "Reproducción independiente de una muestra de resultados.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "Informe distingue acuerdo, validez convergente y asociación.",
+        "Los tamaños de muestra acompañan cada estimación.",
+        "Las limitaciones del constructo pasan a documentación y UI."
+      ],
+      "risk": "Una unidad de análisis incorrecta puede inflar precisión estadística.",
+      "rollback": "Recalcular por participante o sesión y retirar conclusiones que no sobrevivan al análisis corregido."
+    },
+    {
+      "id": "PR33",
+      "title": "Separar la bóveda demográfica",
+      "wave": "Ola 4 Estado distribuido retención y bóveda",
+      "owner_suggested": "Seguridad, privacidad y backend",
+      "estimate": "8 días",
+      "components": "Servicio o esquema restringido",
+      "risk_level": "Alto",
+      "control": "Sí: demographic_vault",
+      "dependency_text": "PR07, PR08 y diseño de protección de datos aprobado en P0.2",
+      "repository_dependencies": [
+        "PR07",
+        "PR08",
+        "P0.2"
+      ],
+      "objective": "Guardar atributos voluntarios en un dominio separado que no pueda influir en decisiones operativas.",
+      "changes": [
+        "Crear seudónimo de investigación distinto al identificador operativo.",
+        "Aplicar roles, acceso temporal, auditoría y cifrado.",
+        "Bloquear joins desde endpoints operativos y exportaciones generales."
+      ],
+      "tests": [
+        "Pruebas de acceso por roles y consultas prohibidas.",
+        "Revisión de reidentificación, logs y proceso de revocación.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "El motor de atención no puede leer atributos protegidos.",
+        "Todo acceso de investigación queda auditado.",
+        "La eliminación y retención cubren la bóveda."
+      ],
+      "risk": "Una separación incompleta puede permitir uso indebido o reidentificación.",
+      "rollback": "Deshabilitar la bóveda, revocar accesos y aislar datos hasta completar revisión de seguridad."
+    },
+    {
+      "id": "PR34",
+      "title": "Auditar equidad",
+      "wave": "Ola 7 Adaptación validación y equidad",
+      "owner_suggested": "Datos, ML e investigación",
+      "estimate": "10 días",
+      "components": "Evaluación y reportes",
+      "risk_level": "Alto",
+      "control": "No",
+      "dependency_text": "PR23, PR32, PR33 y evidencia de suficiencia de muestra por grupo",
+      "repository_dependencies": [
+        "PR23",
+        "PR32",
+        "PR33"
+      ],
+      "objective": "Medir cobertura, error y calibración por grupos e intersecciones con protección estadística.",
+      "changes": [
+        "Calcular falsos positivos, falsos negativos, macro-F1, calibración y no observabilidad por grupo.",
+        "Incluir intervalos, tamaños mínimos y supresión de celdas pequeñas.",
+        "Definir criterio de no despliegue y ruta de mitigación."
+      ],
+      "tests": [
+        "Revisión de denominadores, etiquetas, intersecciones y datos faltantes.",
+        "Análisis de sensibilidad a umbrales comunes y específicos, sin aplicarlos automáticamente.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "Reporte reproducible con incertidumbre y cobertura.",
+        "No se publican grupos con riesgo de reidentificación.",
+        "Un incumplimiento del gate bloquea promoción del modelo."
+      ],
+      "risk": "Muestras pequeñas pueden producir conclusiones inestables.",
+      "rollback": "No inferir ausencia de sesgo; ampliar muestra o restringir alcance antes de desplegar."
+    },
+    {
+      "id": "PR35",
+      "title": "Construir panel del estudiante",
+      "wave": "Ola 8 Producto y operación",
+      "owner_suggested": "Frontend y experiencia",
+      "estimate": "7 días",
+      "components": "Next.js y API de reportes",
+      "risk_level": "Medio",
+      "control": "Sí: student_attention_dashboard",
+      "dependency_text": "PR17, PR23 y PR32",
+      "repository_dependencies": [
+        "PR17",
+        "PR23",
+        "PR32"
+      ],
+      "objective": "Mostrar tendencias personales, incertidumbre y controles de privacidad sin lenguaje diagnóstico.",
+      "changes": [
+        "Presentar tendencia por sesión y estado no observable.",
+        "Explicar fuentes, límites y significado de las métricas.",
+        "Incluir pausa, revocación y acceso a política de datos."
+      ],
+      "tests": [
+        "Pruebas de accesibilidad, estados vacíos y datos parciales.",
+        "Sesiones de comprensión con usuarios representativos.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "El estudiante puede distinguir observación de inferencia.",
+        "No existen rankings ni etiquetas permanentes.",
+        "Los controles de privacidad funcionan desde el panel."
+      ],
+      "risk": "Una visualización puede inducir autoevaluaciones incorrectas.",
+      "rollback": "Desactivar métricas problemáticas y mantener solo información de calidad y control de consentimiento."
+    },
+    {
+      "id": "PR36",
+      "title": "Construir panel del docente",
+      "wave": "Ola 8 Producto y operación",
+      "owner_suggested": "Frontend e investigación",
+      "estimate": "7 días",
+      "components": "Next.js y reportes agregados",
+      "risk_level": "Alto",
+      "control": "Sí: teacher_group_dashboard",
+      "dependency_text": "PR23, PR32 y PR34",
+      "repository_dependencies": [
+        "PR23",
+        "PR32",
+        "PR34"
+      ],
+      "objective": "Ofrecer agregados de grupo que ayuden a interpretar actividades sin vigilancia individual.",
+      "changes": [
+        "Mostrar distribución, tendencia, cobertura e intervalos por actividad.",
+        "Aplicar tamaños mínimos y ocultar estados individuales por defecto.",
+        "Añadir contexto de calidad y advertencias de interpretación."
+      ],
+      "tests": [
+        "Pruebas de autorización, grupos pequeños y combinación de filtros.",
+        "Revisión de riesgo de reidentificación y comprensión docente.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "No se puede inferir un estudiante desde agregados.",
+        "El docente ve cobertura e incertidumbre junto a cada métrica.",
+        "No se generan rankings de alumnos."
+      ],
+      "risk": "Filtros combinados pueden reidentificar personas.",
+      "rollback": "Reducir filtros, aumentar umbral de grupo y desactivar el panel hasta corregir la agregación."
+    },
+    {
+      "id": "PR37",
+      "title": "Construir panel de investigación",
+      "wave": "Ola 8 Producto y operación",
+      "owner_suggested": "Frontend, datos y privacidad",
+      "estimate": "8 días",
+      "components": "Next.js, API y exportaciones",
+      "risk_level": "Alto",
+      "control": "Sí: research_dashboard",
+      "dependency_text": "PR28, PR32 y PR34",
+      "repository_dependencies": [
+        "PR28",
+        "PR32",
+        "PR34"
+      ],
+      "objective": "Permitir análisis trazable de modelos, calidad, validez, equidad y recursos bajo acceso restringido.",
+      "changes": [
+        "Crear filtros por cohorte, modelo, perfil y periodo.",
+        "Añadir exportación seudonimizada con propósito y caducidad.",
+        "Mostrar procedencia, versión y tamaño de muestra."
+      ],
+      "tests": [
+        "Pruebas de roles, exportaciones, supresión y auditoría.",
+        "Comparación de cifras del panel con consultas reproducibles.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "Toda cifra enlaza con modelo y versión de datos.",
+        "Las exportaciones respetan tamaños mínimos.",
+        "Acceso y descarga quedan auditados."
+      ],
+      "risk": "Una exportación flexible puede superar controles del panel.",
+      "rollback": "Deshabilitar exportación, revocar enlaces y revisar los conjuntos generados."
+    },
+    {
+      "id": "PR38",
+      "title": "Implementar intervenciones basadas en reglas",
+      "wave": "Ola 8 Producto y operación",
+      "owner_suggested": "Backend e investigación",
+      "estimate": "8 días",
+      "components": "Motor de reglas, frontend y auditoría",
+      "risk_level": "Alto",
+      "control": "Sí: conservative_interventions",
+      "dependency_text": "PR23, PR32, PR34, PR35 y aprobación de seguridad de intervención",
+      "repository_dependencies": [
+        "PR23",
+        "PR32",
+        "PR34",
+        "PR35"
+      ],
+      "objective": "Activar sugerencias solo ante evidencia persistente, observable y contextualizada.",
+      "changes": [
+        "Definir disparadores, enfriamiento, frecuencia máxima y exclusiones.",
+        "Exigir múltiples ventanas y umbral de incertidumbre.",
+        "Limitar cualquier LLM a redactar una variante aprobada; nunca clasifica atención."
+      ],
+      "tests": [
+        "Secuencias sintéticas con ruido, pérdida de señal y cambios reales.",
+        "Pruebas de frecuencia, exclusión y explicación de disparo.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "Una observación aislada nunca activa intervención.",
+        "Cada intervención conserva regla, evidencia y versión.",
+        "Existe desactivación global inmediata."
+      ],
+      "risk": "Intervenciones erróneas pueden molestar o estigmatizar.",
+      "rollback": "Apagar el flag, conservar auditoría y volver a recomendaciones manuales o generales."
+    },
+    {
+      "id": "PR39",
+      "title": "Preparar operación y pruebas de carga",
+      "wave": "Ola 8 Producto y operación",
+      "owner_suggested": "Plataforma y seguridad",
+      "estimate": "10 días",
+      "components": "Infraestructura, monitoreo y backups",
+      "risk_level": "Alto",
+      "control": "Sí: production_observability",
+      "dependency_text": "PR13, PR21, PR22, PR27 y flujos de producto integrados",
+      "repository_dependencies": [
+        "PR13",
+        "PR21",
+        "PR22",
+        "PR27"
+      ],
+      "objective": "Demostrar que el sistema mantiene SLO y se recupera de fallos previsibles.",
+      "changes": [
+        "Definir SLO, alertas, trazas, capacidad y presupuesto de error.",
+        "Ejecutar carga, caos controlado y restauración de backups.",
+        "Crear runbooks de Redis, base de datos, ML, cola y privacidad."
+      ],
+      "tests": [
+        "Carga objetivo y pico con percentiles de latencia.",
+        "Fallo de instancia, Redis, base de datos y modelo con recuperación medida.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "SLO y límites quedan aprobados.",
+        "Backups restauran datos consistentes.",
+        "Cada alerta tiene propietario y acción documentada."
+      ],
+      "risk": "Una prueba de caos sin aislamiento puede afectar datos reales.",
+      "rollback": "Ejecutar solo en entorno controlado y restaurar snapshot validado; detener ante pérdida de integridad."
+    },
+    {
+      "id": "PR40",
+      "title": "Publicar candidato de piloto",
+      "wave": "Ola 9 Piloto y cierre",
+      "owner_suggested": "Liderazgo técnico e investigación",
+      "estimate": "7 días",
+      "components": "Despliegue, protocolo y soporte",
+      "risk_level": "Alto",
+      "control": "Sí: pilot_release",
+      "dependency_text": "PR34 a PR39 y Puerta G6 aprobada",
+      "repository_dependencies": [
+        "PR34",
+        "PR35",
+        "PR36",
+        "PR37",
+        "PR38",
+        "PR39",
+        "G6"
+      ],
+      "objective": "Empaquetar una versión candidata con protocolo, soporte, criterios de suspensión y reversión ensayada.",
+      "changes": [
+        "Congelar versiones, migraciones, configuración y modelos.",
+        "Completar checklist de seguridad, privacidad, validez, equidad y rendimiento.",
+        "Definir participantes, soporte, comunicación de incidentes y criterio de suspensión."
+      ],
+      "tests": [
+        "Ensayo general del recorrido y rollback.",
+        "Verificación de consentimiento, borrado, alertas y exportación de evidencia.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "Todos los gates tienen responsable y evidencia.",
+        "No quedan riesgos críticos sin tratamiento.",
+        "La versión puede suspenderse y revertirse dentro del tiempo acordado."
+      ],
+      "risk": "La presión por iniciar puede omitir gates pendientes.",
+      "rollback": "No desplegar; mantener la versión en staging hasta cerrar o aceptar formalmente cada riesgo."
+    },
+    {
+      "id": "PR41",
+      "title": "Archivar D2R definitivamente",
+      "wave": "Ola 9 Piloto y cierre",
+      "owner_suggested": "Frontend y backend",
+      "estimate": "5 días",
+      "components": "Código, base de datos y documentación",
+      "risk_level": "Medio",
+      "control": "No",
+      "dependency_text": "PR02 y PR40",
+      "repository_dependencies": [
+        "PR02",
+        "PR40"
+      ],
+      "objective": "Eliminar los restos de D2R una vez demostrada la independencia funcional e histórica.",
+      "changes": [
+        "Inventariar rutas, componentes, permisos, tablas, jobs y documentación.",
+        "Crear migración de archivo o eliminación según retención.",
+        "Quitar dependencias, flags y configuraciones residuales."
+      ],
+      "tests": [
+        "Búsqueda estática y pruebas end to end sin referencias activas.",
+        "Ensayo de migración y restauración sobre copia.",
+        "Ejecuta además los comandos relevantes ya definidos por el repositorio: pruebas específicas, lint, typecheck, comprobación de migraciones, contratos o build según corresponda. No inventes comandos si el repositorio no los define. Si una validación no puede ejecutarse, explica la causa y la siguiente comprobación más segura."
+      ],
+      "definition_of_done": [
+        "Build, pruebas y recorridos principales funcionan sin D2R.",
+        "No quedan endpoints, permisos o tablas activas innecesarias.",
+        "El respaldo y la decisión de eliminación están documentados.",
+        "El objetivo y el alcance coinciden con la ficha aprobada.",
+        "Las pruebas automáticas y manuales están adjuntas y son reproducibles.",
+        "Las migraciones y el rollback fueron ensayados cuando aplican.",
+        "No se añadieron imágenes, atributos sensibles o secretos a logs y payloads.",
+        "El contrato, la documentación y la telemetría fueron actualizados.",
+        "El feature flag y su fecha de retirada están definidos.",
+        "La evidencia de la puerta de salida se actualizó si el PR la completa."
+      ],
+      "risk": "Eliminar antes de tiempo puede perder evidencia o romper integraciones ocultas.",
+      "rollback": "Restaurar el respaldo y el último artefacto etiquetado; no reactivar en producción sin revisión."
+    }
+  ]
+}

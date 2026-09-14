@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "tool": "pip-audit 2.9.0",
+  "command": "python -m pip_audit -r ml/requirements.txt --format json",
+  "audit_python": "3.12",
+  "repository_target_python": "3.11",
+  "status": "NOT_RESOLVED",
+  "exit_code": 1,
+  "blocking_requirement": "torch==2.1.0",
+  "reason": "No matching distribution was available to the resolver for Python 3.12.",
+  "declared_requirements": 15,
+  "pinned_requirements": 5,
+  "unpinned_requirements": [
+    "pandas",
+    "scikit-learn",
+    "xgboost",
+    "fastapi",
+    "uvicorn",
+    "joblib",
+    "httpx",
+    "python-multipart",
+    "pyarrow",
+    "onnxruntime"
+  ],
+  "interpretation": "This run does not establish vulnerability status or incompatibility with the target Python 3.11 runtime. It establishes that the audit is not reproducible with the available Python 3.12 runtime."
+}

@@ -1,0 +1,174 @@
+{
+  "schema_version": "1.0",
+  "protocol_id": "VISIONCLASS-P0.3-2026-09-12",
+  "version": "0.1",
+  "status": "FROZEN_CANDIDATE_PENDING_INDEPENDENT_RATIFICATION",
+  "frozen_at_local": "2026-09-12 America/Guayaquil",
+  "outcomes_or_model_scores_reviewed_for_this_plan": false,
+  "model_training_or_evaluation_permitted": false,
+  "scope": {
+    "country": "Ecuador",
+    "operator": "tesista",
+    "target_population": "estudiantes universitarios adultos",
+    "minimum_age_years": 18,
+    "minors_included": false,
+    "inference_frame": "Propuesto: estudiantes adultos matriculados en ESPE sede Latacunga, una sede e invitación voluntaria; requiere ratificación institucional y ética"
+  },
+  "construct": {
+    "name": "desempeño atencional en tarea digital de cancelación visual",
+    "context": "14 fases de 20 segundos",
+    "primary_measure": "F1_tarea por fase",
+    "not_equivalent_to": [
+      "atención general o rasgo estable",
+      "orientación de mirada",
+      "comprensión o aprendizaje",
+      "diagnóstico o estado clínico",
+      "motivación, intención o integridad académica",
+      "riesgo causal de abandono",
+      "d2-R estandarizado o sus baremos sin equivalencia documentada"
+    ]
+  },
+  "units": {
+    "inferential": "participante",
+    "repeated_measure": "fase de 20 segundos",
+    "nesting": ["fase", "sesión", "participante", "institución_si_aplica"],
+    "technical_only": ["evento", "frame", "ventana_deslizante"],
+    "eligible_sessions_per_participant": 1,
+    "session_selection_rule": "primera sesión elegible"
+  },
+  "task_metric": {
+    "precision": "TA / (TA + C)",
+    "recall": "TA / (TA + O)",
+    "f1_task": "2 * precision * recall / (precision + recall)",
+    "zero_denominator_rule": 0,
+    "excluded_from_primary_metric": ["velocidad", "CON", "score_cámara", "quiz", "progreso", "nota"]
+  },
+  "evidence": {
+    "primary": "desempeño de tarea por fase",
+    "convergent_self_report": {
+      "phases": [3, 6, 9, 12, 14],
+      "exact_wording": "Durante la fase que acaba de terminar, ¿tu atención estaba principalmente en la tarea?",
+      "response_levels": ["en_la_tarea", "fuera_de_la_tarea", "no_recuerdo", "prefiero_no_responder"],
+      "confidence_optional": "1_muy_baja_a_4_muy_alta"
+    },
+    "observational": {
+      "labels": ["orientado_a_tarea", "orientado_fuera_de_tarea", "no_observable"],
+      "raters": 2,
+      "blinded": true,
+      "reliability": "Cohen kappa with participant-bootstrap 95% CI",
+      "proposed_acceptance": "kappa >= 0.80 and lower 95% CI >= 0.67"
+    },
+    "model_features_role": "future predictor; never ground truth",
+    "external_academic_outcomes_role": "exploratory distal outcome"
+  },
+  "hypotheses": [
+    {
+      "id": "H1",
+      "family": "primary",
+      "statement": "En fases sondeadas, en_tarea se asocia con mayor F1_tarea concurrente que fuera_de_tarea.",
+      "direction": "positive",
+      "analysis": "mixed model: F1_tarea ~ probe_on_task + phase_index + (1|participant)",
+      "alpha": 0.05,
+      "effect_size": "adjusted mean contrast with 95% CI"
+    },
+    {
+      "id": "H2",
+      "family": "secondary",
+      "statement": "En fases observables, orientado_a_tarea se asocia positivamente con autoinforme en_tarea.",
+      "direction": "positive",
+      "analysis": "logistic mixed model: probe_on_task ~ observer_task_oriented + phase_index + (1|participant)",
+      "multiplicity": "Holm jointly with H3",
+      "effect_size": "odds ratio with 95% CI"
+    },
+    {
+      "id": "H3",
+      "family": "secondary",
+      "statement": "La pendiente lineal de F1_tarea a través de las 14 fases difiere de cero.",
+      "direction": "two-sided",
+      "analysis": "mixed model: F1_tarea ~ phase_index + (1 + phase_index|participant); simplify random slope only if singular according to frozen rule",
+      "multiplicity": "Holm jointly with H2",
+      "effect_size": "change per phase with 95% CI"
+    },
+    {
+      "id": "M1",
+      "family": "future_model_evaluation_blocked_until_G3",
+      "statement": "El score visual discrimina orientación observable en un holdout por participante.",
+      "target": "orientado_a_tarea vs orientado_fuera_de_tarea; exclude no_observable with denominator reported",
+      "metrics": ["AUROC", "AUPRC", "calibration_intercept", "calibration_slope", "Brier", "coverage"],
+      "interpretation_limit": "classification of visible orientation, not internal attention",
+      "threshold_and_minimum_effect": "TBD before G3 and before opening holdout"
+    }
+  ],
+  "sampling": {
+    "method": "consecutive volunteer recruitment with prespecified quotas where feasible",
+    "inclusion": [
+      "age >= 18 verified",
+      "current university enrollment in approved frame",
+      "Ecuador study site/window",
+      "valid study consent",
+      "separate valid camera consent if camera subset",
+      "standardized practice completed"
+    ],
+    "exclusion_before_outcomes": [
+      "minor or age cannot be verified",
+      "outside approved university frame",
+      "absent, expired or revoked consent",
+      "duplicate or technical account identified before outcomes",
+      "no task outcome can be recorded"
+    ],
+    "never_exclude_for": ["low score", "no_face", "camera denial", "device type", "disability", "partial missingness"],
+    "target_n": 80,
+    "maximum_n": 100,
+    "smallest_effect_of_interest": "Provisional: adjusted mean difference of 0.10 F1_tarea units",
+    "power": 0.8,
+    "intraparticipant_correlation": 0.4,
+    "expected_loss": 0.15,
+    "expected_nonobservable_windows": 0.2,
+    "ratification": "Simulation with blinded pilot variability required before recruitment",
+    "stopping_rule": "collect until frozen target_n or frozen maximum_n; never inspect effects to stop"
+  },
+  "missing_data": {
+    "no_observable_is_zero": false,
+    "no_response_is_off_task": false,
+    "primary": "available eligible phases in prespecified mixed model",
+    "sensitivity": [
+      "participants with all five probes complete",
+      "plausible extreme-case bounds for missing probe outcomes"
+    ],
+    "report_flow_counts": ["invited", "screened", "eligible", "consented", "started", "completed", "observable", "included", "analyzed"]
+  },
+  "analysis_rules": {
+    "confidence_level": 0.95,
+    "primary_family_alpha": 0.05,
+    "secondary_adjustment": "Holm",
+    "report_effects_and_intervals_even_if_nonsignificant": true,
+    "model_diagnostics_required": true,
+    "exploratory_label_required_for_unlisted_analysis": true,
+    "frames_count_as_independent_n": false,
+    "split_before_windowing_by_participant": true,
+    "holdout_access_logged": true,
+    "seeds_and_versions_logged": true,
+    "subgroup_rule": "descriptive coverage and uncertainty unless adequately powered and preregistered",
+    "insufficient_sample_interpretation": "insufficient evidence, never absence of bias"
+  },
+  "decisions_required_before_approval": [
+    "D01 institutional and ethics ratification of ESPE Latacunga recruitment frame",
+    "D03 independent methodological ratification of SESOI and sample simulation",
+    "D05 designation of second blinded annotator and ethics acceptance of live observation",
+    "D08 independent approver and external timestamp for Zenodo preregistration"
+  ],
+  "decisions_recorded_by_g0_form": {
+    "source_file": "Formulario_Decisiones_G0_VisionClass_COMPLETADO_Omar_Quimbita.docx",
+    "source_sha256": "267e4c8869683610a125c65471b2e3fd0cfebb6a6ef2a156e328dc4e77942349",
+    "D02": "generic visual cancellation task adopted",
+    "D04": "exact Spanish self-report and response options fixed",
+    "D06": "kappa >= 0.80 and lower participant-bootstrap 95% CI >= 0.67",
+    "D07": "confirmatory and technical covariates closed; demographics exploratory and consented"
+  },
+  "amendment_policy": {
+    "retain_prior_version": true,
+    "record_outcome_access_status": true,
+    "post_outcome_change_becomes_exploratory": true,
+    "new_data_required_to_restore_confirmatory_status": true
+  }
+}

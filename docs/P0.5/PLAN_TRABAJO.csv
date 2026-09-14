@@ -1,0 +1,54 @@
+id,work_type,epic,title,depends_on,status,detailed_scope,classification_basis,owner_suggested
+P0.1,operations,EPIC-P0,Auditoría y línea base,,EVIDENCE_DRAFT,true,prompt_versionado,tech-lead
+P0.2,operations,EPIC-P0,Datos amenazas y privacidad,,EVIDENCE_DRAFT,true,prompt_versionado,privacy-lead
+P0.3,operations,EPIC-P0,Constructo protocolo y evidencia,,EVIDENCE_DRAFT,true,prompt_versionado,research-lead
+P0.4,operations,EPIC-P0,Umbrales y suspensión,,EVIDENCE_DRAFT,true,prompt_versionado,pilot-owner
+P0.5,operations,EPIC-P0,Preparación del repositorio para Codex,P0.1|P0.2|P0.3|P0.4,EVIDENCE_COMPLETE_PENDING_REVIEW,true,prompt_versionado,repository-admin
+G0,approval,EPIC-P0,Aprobación de preparación,P0.1|P0.2|P0.3|P0.4|P0.5,BLOCKED,true,orden_en_AGENTS,research-sponsor
+PR01,code,EPIC-G1,Registrar la arquitectura objetivo,G0,BLOCKED,true,plan_fuente_2026-09-05,Liderazgo técnico
+PR03,code,EPIC-G1,Cerrar suplantación de identidad,PR01,BLOCKED,true,plan_fuente_2026-09-05,Backend y seguridad
+PR07,code,EPIC-G1,Formalizar protocolo y consentimiento,PR03,BLOCKED,true,plan_fuente_2026-09-05,Investigación y privacidad
+PR02,code,EPIC-G1,Desacoplar D2R del flujo principal,PR07,BLOCKED,true,plan_fuente_2026-09-05,Frontend y backend
+PR04,code,EPIC-G1,Aplicar mínimo privilegio al servicio ML,PR02,BLOCKED,true,plan_fuente_2026-09-05,Backend y seguridad
+PR05,code,EPIC-G1,Controlar captura y envíos,PR04,BLOCKED,true,plan_fuente_2026-09-05,Frontend y backend
+PR06,code,EPIC-G1,Crear pruebas y observabilidad mínima,PR05,BLOCKED,true,plan_fuente_2026-09-05,Equipo completo
+G1,approval,EPIC-G1,Aprobación G1,PR06,BLOCKED,true,orden_en_AGENTS,gate-owner
+PR08,code,EPIC-G2,Separar observaciones y estados inferidos,G1,BLOCKED,true,plan_fuente_2026-09-05,Backend y datos
+PR09,code,EPIC-G2,Registrar modelos y artefactos,PR08,BLOCKED,true,plan_fuente_2026-09-05,Datos y ML
+PR10,code,EPIC-G2,Versionar el contrato de eventos,PR09,BLOCKED,true,plan_fuente_2026-09-05,Backend y frontend
+PR29,code,EPIC-G2,Capturar autoinforme momentáneo,PR10,BLOCKED,true,plan_fuente_2026-09-05,Investigación y frontend
+PR30,code,EPIC-G2,Integrar interacción académica,PR29,BLOCKED,true,plan_fuente_2026-09-05,Backend y frontend
+PR31,code,EPIC-G2,Crear anotación de observadores,PR30,BLOCKED,true,plan_fuente_2026-09-05,Investigación y frontend
+G2,approval,EPIC-G2,Aprobación G2,PR31,BLOCKED,true,orden_en_AGENTS,gate-owner
+PR11,code,EPIC-G3,Incorporar Redis,G2,BLOCKED,true,plan_fuente_2026-09-05,Backend y plataforma
+PR12,code,EPIC-G3,Persistir estado temporal distribuido,PR11,BLOCKED,true,plan_fuente_2026-09-05,Backend y ML
+PR13,code,EPIC-G3,Procesar eventos con Redis Streams,PR12,BLOCKED,true,plan_fuente_2026-09-05,Backend y plataforma
+PR33,code,EPIC-G3,Separar la bóveda demográfica,PR13,BLOCKED,true,plan_fuente_2026-09-05,"Seguridad, privacidad y backend"
+PR14,code,EPIC-G3,Aplicar retención y eliminación,PR33,BLOCKED,true,plan_fuente_2026-09-05,Backend y privacidad
+PR15,code,EPIC-G3,Extraer características en el navegador,PR14,BLOCKED,true,plan_fuente_2026-09-05,Frontend y Edge
+PR16,code,EPIC-G3,Normalizar características,PR15,BLOCKED,true,plan_fuente_2026-09-05,"Frontend, backend y ML"
+PR17,code,EPIC-G3,Crear puerta de calidad y estado no observable,PR16,BLOCKED,true,plan_fuente_2026-09-05,Datos y ML
+PR18,code,EPIC-G3,Habilitar perfiles de ejecución Edge,PR17,BLOCKED,true,plan_fuente_2026-09-05,Frontend y plataforma
+G3,approval,EPIC-G3,Aprobación G3,PR18,BLOCKED,true,orden_en_AGENTS,research-lead
+PR19,code,EPIC-G4,Construir baselines reproducibles,G3,BLOCKED,true,plan_fuente_2026-09-05,Datos y ML
+PR20,code,EPIC-G4,Implementar HMM o modelo de espacio de estados,PR19,BLOCKED,true,plan_fuente_2026-09-05,Datos y ML
+PR21,code,EPIC-G4,Exponer el motor temporal,PR20,BLOCKED,true,plan_fuente_2026-09-05,Backend y ML
+PR22,code,EPIC-G4,Desplegar modelos con shadow mode y rollback,PR21,BLOCKED,true,plan_fuente_2026-09-05,ML y plataforma
+PR23,code,EPIC-G4,Evaluar el modelo dinámico,PR22,BLOCKED,true,plan_fuente_2026-09-05,"Datos, ML e investigación"
+PR24,code,EPIC-G4,Añadir baseline LSTM o GRU,PR23,BLOCKED,true,plan_fuente_2026-09-05,Datos y ML
+G4,approval,EPIC-G4,Aprobación G4,PR24,BLOCKED,true,orden_en_AGENTS,gate-owner
+PR25,code,EPIC-G5,Exportar inferencia local,G4,BLOCKED,true,plan_fuente_2026-09-05,ML y frontend
+PR26,code,EPIC-G5,Medir recursos del dispositivo,PR25,BLOCKED,true,plan_fuente_2026-09-05,Frontend y Edge
+PR27,code,EPIC-G5,Crear scheduler adaptativo,PR26,BLOCKED,true,plan_fuente_2026-09-05,"ML, frontend y plataforma"
+PR28,code,EPIC-G5,Generar benchmark y frontera de Pareto,PR27,BLOCKED,true,plan_fuente_2026-09-05,ML e investigación
+PR32,code,EPIC-G5,Calcular validez y acuerdo,PR28,BLOCKED,true,plan_fuente_2026-09-05,Investigación y datos
+PR34,code,EPIC-G5,Auditar equidad,PR32,BLOCKED,true,plan_fuente_2026-09-05,"Datos, ML e investigación"
+G5,approval,EPIC-G5,Aprobación G5,PR34,BLOCKED,true,orden_en_AGENTS,pilot-owner
+PR35,code,EPIC-G6,Construir panel del estudiante,G5,BLOCKED,true,plan_fuente_2026-09-05,Frontend y experiencia
+PR36,code,EPIC-G6,Construir panel del docente,PR35,BLOCKED,true,plan_fuente_2026-09-05,Frontend e investigación
+PR37,code,EPIC-G6,Construir panel de investigación,PR36,BLOCKED,true,plan_fuente_2026-09-05,"Frontend, datos y privacidad"
+PR38,code,EPIC-G6,Implementar intervenciones basadas en reglas,PR37,BLOCKED,true,plan_fuente_2026-09-05,Backend e investigación
+PR39,code,EPIC-G6,Preparar operación y pruebas de carga,PR38,BLOCKED,true,plan_fuente_2026-09-05,Plataforma y seguridad
+G6,approval,EPIC-G6,Aprobación G6,PR39,BLOCKED,true,orden_en_AGENTS,pilot-owner
+PR40,code,EPIC-CLOSE,Publicar candidato de piloto,G6,BLOCKED,true,plan_fuente_2026-09-05,Liderazgo técnico e investigación
+PR41,code,EPIC-CLOSE,Archivar D2R definitivamente,PR40,BLOCKED,true,plan_fuente_2026-09-05,Frontend y backend

@@ -1,0 +1,9 @@
+id,area,action,status,blocking_reason,owner_suggested,evidence_required
+T-G0-01,frontend-dependencies,Actualizar Next Axios PostCSS y transitivas vulnerables,READY_FOR_IMPLEMENTATION,"Autorizado por formulario G0; PR exclusivo DEP-FE; solo pruebas locales/sintéticas",tesista_operador,"npm audit sin vulnerabilidad crítica/alta no aceptada; lint; typecheck; build; tests; lockfile; rollback"
+T-G0-02,backend-dependencies,Actualizar nueve paquetes con avisos y generar resolución reproducible,AUTHORIZED_WAITING_DEP_FE,"Autorizado por formulario G0; no mezclar con DEP-FE",tesista_operador,"lock/resolución con hashes; pip-audit; Django check; migration check; negative auth tests"
+T-G0-03,ml-dependencies,Fijar runtime Python 3.11 y lock de requisitos ML,AUTHORIZED_WAITING_DEP_BE,"Autorizado por formulario G0; ejecutar después de DEP-BE con Python 3.11",tesista_operador,"install clean Python 3.11; lock hashes; pip-audit; import smoke test"
+T-G0-04,github-yaml,Validar workflow e issue forms con parser YAML,COMPLETED,,repository-admin,"PyYAML 6.0.2: 6 archivos válidos; 6 jobs; 4 forms"
+T-G0-05,execution-plan,Importar y verificar alcance PR01-PR41 desde el plan detallado,COMPLETED,,tech-lead,"PLAN_PR_DETALLADO.json y CATALOGO_PR.md; 41 PR únicos; hashes de DOCX y extracción; orden topológico válido"
+T-G0-06,branch-protection,Leer y aplicar protección remota,BLOCKED_EXTERNAL,"Requiere cuenta GitHub con Administration y checks publicados",repository-admin,"GET remoto; reglas aplicadas; PR negativo"
+T-G0-07,p0-approvals,Registrar revisiones P0.1-P0.5 y decisión G0,BLOCKED_HUMAN,"Codex no puede atribuir aprobación humana ética metodológica o institucional",sponsor+approvers,"actas fechadas y firmadas sobre un mismo commit"
+T-G0-08,backend-command,Delimitar descubrimiento de pruebas Django a la app api,COMPLETED,,backend+QA,"AGENTS y CI usan manage.py test api; salida inicial y repetición conservadas"

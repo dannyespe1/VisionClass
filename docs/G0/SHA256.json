@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-14",
+  "files": [
+    {
+      "path": "ACCIONES_TECNICAS.csv",
+      "sha256": "3c77891f826f58feaf62e8c9b32264c67250a7c8cf238001ec41aa233d02c5f1"
+    },
+    {
+      "path": "ACTA_G0.md",
+      "sha256": "cb3917a08f692a2f1d9b9cfa7aa6b06f3f371631b9f7b979384f7b3f3784c19c"
+    },
+    {
+      "path": "backend-verification-2026-09-13.txt",
+      "sha256": "caca14a8da19b7eef1ad1f6d91a5c113ed578aae0405d62466e544f4dae5c739"
+    },
+    {
+      "path": "backend-verification-initial-2026-09-13.txt",
+      "sha256": "1c57dd5c701b077251657361fed99937fe218eb9d2adf8a8b803b8a4fd2e64d9"
+    },
+    {
+      "path": "DECISIONES_G0_SANITIZADAS.json",
+      "sha256": "e5ee096cfd4336ff982eaa45a313da810daa60592c34ef83b25726d8f00a9354"
+    },
+    {
+      "path": "DECISIONES_G0_SANITIZADAS.md",
+      "sha256": "318fc37f55a0f2ecdda65dd71a9e91d706b5b201c3b671ef0b72cca0f1d15832"
+    },
+    {
+      "path": "DEPENDENCIAS_G0.md",
+      "sha256": "e91666f56dea8c4ccac029d4000b266feeb3e54b05657cb349c84781fb3bb166"
+    },
+    {
+      "path": "MATRIZ_G0.csv",
+      "sha256": "28478922231407f3eb036456a87567234c74bc6a643d37c7eb98a0230baf112e"
+    },
+    {
+      "path": "npm-audit-2026-09-13.json",
+      "sha256": "302c43b153b4a4fabf5e3297fc6a2e93b363d8bf95938deac821954e199b2e07"
+    },
+    {
+      "path": "npm-outdated-2026-09-13.json",
+      "sha256": "99ddd30e3da68aaa6a6f2ce9b4615291b5cdac0fd26845320e100f4fb9162ee9"
+    },
+    {
+      "path": "pip-audit-backend-2026-09-13.json",
+      "sha256": "b99169bf8ae3c263465d49c14fb7c03059390b6a484d69a96c8c34f16eec5058"
+    },
+    {
+      "path": "pip-audit-ml-2026-09-13.json",
+      "sha256": "2ae60c3945423c3564f5593f9d0c05c979253f46a38b95a946bd2031ab982176"
+    },
+    {
+      "path": "VERIFICACION.json",
+      "sha256": "912f26563250ef73154c11c840cf934583df830bc7d96e22594526ea7afc6b3b"
+    }
+  ]
+}

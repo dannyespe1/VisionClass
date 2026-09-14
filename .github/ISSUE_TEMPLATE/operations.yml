@@ -1,0 +1,31 @@
+name: Trabajo operativo
+description: Configuración externa, despliegue, datos o procedimiento sin cambio de producto.
+title: "[OPS] "
+labels: []
+body:
+  - type: input
+    id: plan_id
+    attributes:
+      label: ID del plan o gate
+    validations:
+      required: true
+  - type: textarea
+    id: procedure
+    attributes:
+      label: Procedimiento y alcance
+      description: Pasos reproducibles, entorno y resultado esperado. No incluyas secretos.
+    validations:
+      required: true
+  - type: textarea
+    id: access
+    attributes:
+      label: Acceso y responsables
+      description: Roles, cuentas de servicio y aprobadores; nunca credenciales o tokens.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidencia, verificación y rollback
+    validations:
+      required: true

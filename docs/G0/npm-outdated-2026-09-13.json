@@ -1,0 +1,338 @@
+{
+  "@radix-ui/react-accordion": {
+    "current": "1.2.12",
+    "wanted": "1.2.20",
+    "latest": "1.2.20",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@radix-ui\\react-accordion"
+  },
+  "@radix-ui/react-alert-dialog": {
+    "current": "1.1.15",
+    "wanted": "1.1.23",
+    "latest": "1.1.23",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@radix-ui\\react-alert-dialog"
+  },
+  "@radix-ui/react-aspect-ratio": {
+    "current": "1.1.8",
+    "wanted": "1.1.15",
+    "latest": "1.1.15",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@radix-ui\\react-aspect-ratio"
+  },
+  "@radix-ui/react-avatar": {
+    "current": "1.1.11",
+    "wanted": "1.2.6",
+    "latest": "1.2.6",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@radix-ui\\react-avatar"
+  },
+  "@radix-ui/react-checkbox": {
+    "current": "1.3.3",
+    "wanted": "1.3.11",
+    "latest": "1.3.11",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@radix-ui\\react-checkbox"
+  },
+  "@radix-ui/react-context-menu": {
+    "current": "2.2.16",
+    "wanted": "2.3.7",
+    "latest": "2.3.7",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@radix-ui\\react-context-menu"
+  },
+  "@radix-ui/react-dialog": {
+    "current": "1.1.15",
+    "wanted": "1.1.23",
+    "latest": "1.1.23",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@radix-ui\\react-dialog"
+  },
+  "@radix-ui/react-dropdown-menu": {
+    "current": "2.1.16",
+    "wanted": "2.1.24",
+    "latest": "2.1.24",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@radix-ui\\react-dropdown-menu"
+  },
+  "@radix-ui/react-hover-card": {
+    "current": "1.1.15",
+    "wanted": "1.1.23",
+    "latest": "1.1.23",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@radix-ui\\react-hover-card"
+  },
+  "@radix-ui/react-label": {
+    "current": "2.1.8",
+    "wanted": "2.1.15",
+    "latest": "2.1.15",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@radix-ui\\react-label"
+  },
+  "@radix-ui/react-menubar": {
+    "current": "1.1.16",
+    "wanted": "1.1.24",
+    "latest": "1.1.24",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@radix-ui\\react-menubar"
+  },
+  "@radix-ui/react-navigation-menu": {
+    "current": "1.2.14",
+    "wanted": "1.2.22",
+    "latest": "1.2.22",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@radix-ui\\react-navigation-menu"
+  },
+  "@radix-ui/react-popover": {
+    "current": "1.1.15",
+    "wanted": "1.1.23",
+    "latest": "1.1.23",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@radix-ui\\react-popover"
+  },
+  "@radix-ui/react-progress": {
+    "current": "1.1.8",
+    "wanted": "1.1.16",
+    "latest": "1.1.16",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@radix-ui\\react-progress"
+  },
+  "@radix-ui/react-radio-group": {
+    "current": "1.3.8",
+    "wanted": "1.4.7",
+    "latest": "1.4.7",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@radix-ui\\react-radio-group"
+  },
+  "@radix-ui/react-scroll-area": {
+    "current": "1.2.10",
+    "wanted": "1.2.18",
+    "latest": "1.2.18",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@radix-ui\\react-scroll-area"
+  },
+  "@radix-ui/react-select": {
+    "current": "2.2.6",
+    "wanted": "2.3.7",
+    "latest": "2.3.7",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@radix-ui\\react-select"
+  },
+  "@radix-ui/react-separator": {
+    "current": "1.1.8",
+    "wanted": "1.1.15",
+    "latest": "1.1.15",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@radix-ui\\react-separator"
+  },
+  "@radix-ui/react-slider": {
+    "current": "1.3.6",
+    "wanted": "1.4.7",
+    "latest": "1.4.7",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@radix-ui\\react-slider"
+  },
+  "@radix-ui/react-slot": {
+    "current": "1.2.4",
+    "wanted": "1.3.3",
+    "latest": "1.3.3",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@radix-ui\\react-slot"
+  },
+  "@radix-ui/react-switch": {
+    "current": "1.2.6",
+    "wanted": "1.3.7",
+    "latest": "1.3.7",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@radix-ui\\react-switch"
+  },
+  "@radix-ui/react-tabs": {
+    "current": "1.1.13",
+    "wanted": "1.1.21",
+    "latest": "1.1.21",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@radix-ui\\react-tabs"
+  },
+  "@radix-ui/react-toast": {
+    "current": "1.2.15",
+    "wanted": "1.2.23",
+    "latest": "1.2.23",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@radix-ui\\react-toast"
+  },
+  "@radix-ui/react-toggle-group": {
+    "current": "1.1.11",
+    "wanted": "1.1.19",
+    "latest": "1.1.19",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@radix-ui\\react-toggle-group"
+  },
+  "@radix-ui/react-tooltip": {
+    "current": "1.2.8",
+    "wanted": "1.2.16",
+    "latest": "1.2.16",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@radix-ui\\react-tooltip"
+  },
+  "@tailwindcss/postcss": {
+    "current": "4.1.17",
+    "wanted": "4.3.3",
+    "latest": "4.3.3",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@tailwindcss\\postcss"
+  },
+  "@types/node": {
+    "current": "20.19.24",
+    "wanted": "20.19.43",
+    "latest": "22.20.2",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@types\\node"
+  },
+  "@types/react": {
+    "current": "19.2.2",
+    "wanted": "19.3.0",
+    "latest": "19.3.0",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@types\\react"
+  },
+  "@types/react-dom": {
+    "current": "19.2.2",
+    "wanted": "19.3.0",
+    "latest": "19.3.0",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\@types\\react-dom"
+  },
+  "autoprefixer": {
+    "current": "10.4.22",
+    "wanted": "10.6.0",
+    "latest": "10.6.0",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\autoprefixer"
+  },
+  "axios": {
+    "current": "1.13.1",
+    "wanted": "1.20.0",
+    "latest": "1.20.0",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\axios"
+  },
+  "baseline-browser-mapping": {
+    "current": "2.9.2",
+    "wanted": "2.11.23",
+    "latest": "2.11.23",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\baseline-browser-mapping"
+  },
+  "eslint": {
+    "current": "9.38.0",
+    "wanted": "9.39.5",
+    "latest": "10.10.0",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\eslint"
+  },
+  "eslint-config-next": {
+    "current": "16.0.1",
+    "wanted": "16.0.1",
+    "latest": "16.3.5",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\eslint-config-next"
+  },
+  "input-otp": {
+    "current": "1.4.2",
+    "wanted": "1.5.0",
+    "latest": "1.5.0",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\input-otp"
+  },
+  "lucide-react": {
+    "current": "0.555.0",
+    "wanted": "0.555.0",
+    "latest": "1.45.0",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\lucide-react"
+  },
+  "next": {
+    "current": "16.0.1",
+    "wanted": "16.0.1",
+    "latest": "16.3.5",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\next"
+  },
+  "postcss": {
+    "current": "8.5.6",
+    "wanted": "8.5.28",
+    "latest": "8.5.28",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\postcss"
+  },
+  "react": {
+    "current": "19.2.0",
+    "wanted": "19.2.0",
+    "latest": "19.3.0",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\react"
+  },
+  "react-day-picker": {
+    "current": "9.11.2",
+    "wanted": "9.14.0",
+    "latest": "10.0.1",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\react-day-picker"
+  },
+  "react-dom": {
+    "current": "19.2.0",
+    "wanted": "19.2.0",
+    "latest": "19.3.0",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\react-dom"
+  },
+  "react-hook-form": {
+    "current": "7.65.0",
+    "wanted": "7.88.0",
+    "latest": "7.88.0",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\react-hook-form"
+  },
+  "react-resizable-panels": {
+    "current": "3.0.6",
+    "wanted": "3.0.6",
+    "latest": "4.12.4",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\react-resizable-panels"
+  },
+  "recharts": {
+    "current": "3.3.0",
+    "wanted": "3.10.1",
+    "latest": "3.10.1",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\recharts"
+  },
+  "sonner": {
+    "current": "2.0.7",
+    "wanted": "2.0.8",
+    "latest": "2.0.8",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\sonner"
+  },
+  "tailwind-merge": {
+    "current": "3.4.0",
+    "wanted": "3.7.0",
+    "latest": "3.7.0",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\tailwind-merge"
+  },
+  "tailwindcss": {
+    "current": "4.1.17",
+    "wanted": "4.3.3",
+    "latest": "4.3.3",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\tailwindcss"
+  },
+  "typescript": {
+    "current": "5.9.3",
+    "wanted": "5.9.3",
+    "latest": "7.0.2",
+    "dependent": "frontend",
+    "location": "C:\\Proyecto_WA\\vision_system\\frontend\\node_modules\\typescript"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-14",
+  "files": [
+    {
+      "path": "BRANCH_PROTECTION.json",
+      "sha256": "f9ca6e3426109cabcaf2d749a2ce25f9fada4aacc5d96e8351d73fe94e965280"
+    },
+    {
+      "path": "CATALOGO_PR.md",
+      "sha256": "e7c145b99940431d98e6e2118747d19c035d65f9ba69d82ff214c7d07d0d8c47"
+    },
+    {
+      "path": "COLISIONES_WORKTREES.csv",
+      "sha256": "fb0c87ba5433c01cb8229ce8ae6047a287a97ec3542f5e36d25dbcce3efdaf2c"
+    },
+    {
+      "path": "EPICAS.md",
+      "sha256": "a5dbfc8efcdd75198df43175dc29c8a5ba14d8c23b9eb5b655524bc625263a6b"
+    },
+    {
+      "path": "GRAFO_DEPENDENCIAS.md",
+      "sha256": "ef36999ab515118ab808362b949a6a393e32180f7f078b41ca90481289b20789"
+    },
+    {
+      "path": "INFORME_P0.5.md",
+      "sha256": "4eb5c12e8c7f7951c46474c2db014c4e6f9a9f14613136891ba8ec8f315ab61d"
+    },
+    {
+      "path": "PLAN_PR_DETALLADO.json",
+      "sha256": "328689affe97026199fda3e65646963e380a8825ffe0e14e20bacfe39dbe6b71"
+    },
+    {
+      "path": "PLAN_TRABAJO.csv",
+      "sha256": "09380e5e6c0e4dcd4daa49eabba45672f82331df47ed0cfbb49e2952bef7e761"
+    },
+    {
+      "path": "VERIFICACION.json",
+      "sha256": "de68179d5e9500f1c4d4cf812a5a8c5c8f8ca17dddaf090d990860ddd9070976"
+    }
+  ]
+}

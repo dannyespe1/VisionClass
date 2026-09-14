@@ -1,0 +1,9 @@
+docker : env file <COPIA_TEMPORAL>\backend\.env
+not found: CreateFile
+<COPIA_TEMPORAL>\backend\.env: The system cannot
+find the file specified.
+En línea: 2 Carácter: 113
++ ... tion $auditRoot; docker compose config --quiet *> compose.log; Write- ...
++                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (env file C:\Use...file specified.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError

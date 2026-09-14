@@ -1,0 +1,10 @@
+exit_code=0
+MIGRATIONS_SQLITE_EMPTY=PASS
+No changes detected
+ANONYMOUS_REGISTER_ADMIN 201 admin
+SELF_ROLE_CHANGE 200 admin
+STUDENT_PATCH_OTHER_COURSE 200 changed by student
+ML_POST_INCLUDES_AUTHORIZATION False
+D2R_SPINNING_STRING_FALSE=REJECTED_BY_INT_VALIDATOR
+<COPIA_TEMPORAL>\venv-backend\Lib\site-packages\requests\__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(

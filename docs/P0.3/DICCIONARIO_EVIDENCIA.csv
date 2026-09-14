@@ -1,0 +1,26 @@
+variable,familia,nivel,fuente,definicion_uso,rol_confirmatorio,tratamiento_faltante,prohibicion
+participant_pseudo,identificador,participante,asignacion_estudio,clave seudonima sin identidad directa,agrupacion y particion,no aplica,no publicar tabla de correspondencia
+session_id_pseudo,identificador,sesion,sistema_estudio,primera sesion elegible del participante,contexto anidado,no aplica,no elegir retrospectivamente mejor sesion
+phase,fase,fase,tarea,indice 1 a 14,ajuste temporal,no aplica,no tratar como independiente
+TA,desempeno,fase,tarea,selecciones correctas de objetivos,componente F1,NA si fase sin outcome,no llamar atencion
+C,desempeno,fase,tarea,selecciones de distractores,componente F1,NA si fase sin outcome,no llamar diagnostico
+O,desempeno,fase,tarea,objetivos no seleccionados,componente F1,NA si fase sin outcome,no confundir con ausencia de rostro
+target_count,diseno,fase,version matriz,cantidad de objetivos ofrecidos,normalizacion,NA invalida fase,no usar baremos d2-R sin equivalencia
+F1_tarea,derivado,fase,TA C O,media armonica de precision y exhaustividad,outcome primario,NA si faltan componentes,no combinar con velocidad o camara
+CON,derivado,fase,TA C,TA menos C,outcome secundario descriptivo,NA si faltan componentes,no comparar fases sin considerar oportunidades
+processing_speed,derivado,sesion,eventos y tiempo,respuestas por unidad de tiempo,secundario descriptivo,NA si reloj invalido,no sumar al F1 primario
+probe_response,autoinforme,fase,participante,en_tarea fuera_de_tarea o no_respuesta,predictor H1 y outcome H2,no_respuesta explicita,no convertir a etiqueta observacional
+probe_confidence,autoinforme,fase,participante,escala 1 a 4,descriptivo,NA permitido,no ponderar H1 sin enmienda
+orientation_label,observacion,fase,dos anotadores,orientado_a_tarea orientado_fuera_de_tarea no_observable,predictor H2 y futuro target M1,no_observable separado,no llamar atento o distraido
+reason_no_observable,calidad,fase,anotador,motivo nominal obligatorio si no_observable,cobertura,NA solo si observable,no convertir en deficit
+camera_permission,calidad,sesion,navegador,granted denied dismissed,cobertura,categoria explicita,no excluir participante de analisis de tarea
+valid_visual_fraction,calidad,fase,extractor,frames evaluables sobre esperados,cobertura M1,NA si sin consentimiento,no imputar como score
+face_present,senal_derivada,frame,extractor,rostro detectado segun version,predictor futuro,unknown si no evaluable,no asumir identidad ni atencion
+eyes_open,senal_derivada,frame,extractor,indice tecnico EAR transformado,predictor futuro,unknown si no evaluable,no inferir vigilancia o estado clinico
+gaze_center,senal_derivada,frame,extractor,desviacion estimada respecto del centro,predictor futuro,unknown si no evaluable,no inferir procesamiento cognitivo
+model_score,prediccion,ventana,modelo versionado,salida tecnica 0 a 1,evaluacion M1 bloqueada,unknown si no evaluable,no usar como ground truth diagnostico o causalidad
+quiz_score,resultado_externo,sesion,backend,resultado de cuestionario,exploratorio,NA explicito,no usar como label de atencion
+progress,resultado_externo,participante,backend,avance en curso,exploratorio,NA explicito,no inferir causalidad
+dropout,resultado_externo,participante,registro institucional,estado observado con fecha,exploratorio futuro,NA explicito,no reemplazar con risk_score
+device_class,covariable_tecnica,sesion,navegador,categoria minimizada de dispositivo,cobertura y sensibilidad,unknown permitido,no recolectar fingerprint
+accessibility_accommodation,covariable_contextual,sesion,protocolo,categoria amplia de adaptacion si participante acepta,descriptivo,prefer_not_to_answer,no inferir discapacidad especifica

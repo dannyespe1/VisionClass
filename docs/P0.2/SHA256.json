@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-14",
+  "files": [
+    {
+      "path": "CICLO_DE_VIDA.md",
+      "sha256": "0303427fb43bfa47f1475ed47b7a29f69bfa4e07b0cb0c3bb0c09c715ee91a21"
+    },
+    {
+      "path": "esquema-modelos.json",
+      "sha256": "8448f09d9a9e84b10917211b6d723055a8b857d8cad566aa60770f9b3b748443"
+    },
+    {
+      "path": "INFORME.md",
+      "sha256": "0a6360afb5010be91fdafc62fd7da81cfb0179b2a410052b81041a57cb6208d7"
+    },
+    {
+      "path": "INVENTARIO_DATOS.md",
+      "sha256": "17fd6bde15e202c2ee25517e4427f986700f9020ab00600ffcfb48a4c933bcca"
+    },
+    {
+      "path": "trazabilidad-controles.json",
+      "sha256": "ca45de36dda5d8ba7e1730d852607df19fe68f48250e47f3c11bd4fb48d5b221"
+    },
+    {
+      "path": "VERIFICACION.json",
+      "sha256": "4949bed52e04885f3181d1d95203ad9013dc157a8c3cd4c210758d9396a0d040"
+    }
+  ]
+}

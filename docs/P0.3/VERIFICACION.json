@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-09-14T00:00:00-05:00",
+  "scope": "P0.3 documentation and static repository audit only",
+  "branch": "p03-constructo-protocolo-evidencia",
+  "checks": [
+    {
+      "id": "V01",
+      "check": "Read repository instructions and existing documentation before conclusions",
+      "evidence": ["AGENTS.md", "README.md", "frontend/README.md", "gcp/README.md", "docs/P0.1/INFORME.md", "docs/P0.2/INFORME.md"],
+      "result": "pass"
+    },
+    {
+      "id": "V02",
+      "check": "Inspect Git state and preserve existing untracked work",
+      "command": "git branch --show-current; git status --short; git diff --name-only; git ls-files --others --exclude-standard",
+      "result": "pass",
+      "note": "P0.1, P0.2, AGENTS.md, current-state documentation and a Word temporary file were already untracked and were left intact. No tracked product file changed."
+    },
+    {
+      "id": "V03",
+      "check": "Static trace of construct, D2R, exporters, model training and downstream rules",
+      "command": "rg searches plus line-scoped reads in frontend/app/d2r, ml, backend/api and dataset export commands",
+      "result": "pass",
+      "note": "Evidence E01-E12 records the inspected paths and locations."
+    },
+    {
+      "id": "V04",
+      "check": "Reproduce deterministic placeholder target counts",
+      "command": "Node reproduction of mulberry32 and buildPlaceholderRow from frontend/app/d2r/d2r-rows.ts",
+      "result": "pass",
+      "observed_target_counts_by_phase": [10, 7, 15, 3, 7, 10, 6, 4, 9, 8, 6, 6, 8, 8],
+      "observed_total_targets": 107,
+      "observed_range": [3, 15]
+    },
+    {
+      "id": "V05",
+      "check": "Parse machine-readable preregistration",
+      "command": "Node JSON.parse with assertions for adults-only scope, four hypotheses and model-evaluation block",
+      "result": "pass",
+      "observed": "JSON_OK VISIONCLASS-P0.3-2026-09-12 FROZEN_CANDIDATE_PENDING_INDEPENDENT_RATIFICATION hypotheses=4"
+    },
+    {
+      "id": "V06",
+      "check": "Parse evidence dictionary",
+      "command": "PowerShell Import-Csv with row, column and model_score assertions",
+      "result": "pass",
+      "observed": "CSV_OK rows=25 columns=8"
+    },
+    {
+      "id": "V07",
+      "check": "Validate local Markdown links",
+      "command": "Node link scan for INFORME.md and PROTOCOLO.md",
+      "result": "pass",
+      "observed": "MARKDOWN_LINKS_OK"
+    },
+    {
+      "id": "V08",
+      "check": "Training and model evaluation",
+      "result": "not_run_by_design",
+      "note": "AGENTS.md prohibits training or model interpretation before G3, and P0.3 is analysis/preparation only."
+    },
+    {
+      "id": "V09",
+      "check": "Application tests, lint, types and build",
+      "result": "not_repeated",
+      "note": "No product code or configuration changed. The executed P0.1 baseline remains in docs/P0.1; P0.3 performed document-specific validation only."
+    }
+  ],
+  "g0_form_import": {
+    "source_file": "Formulario_Decisiones_G0_VisionClass_COMPLETADO_Omar_Quimbita.docx",
+    "source_sha256": "267e4c8869683610a125c65471b2e3fd0cfebb6a6ef2a156e328dc4e77942349",
+    "decided": ["D02", "D04", "D06", "D07"],
+    "pending_independent_ratification": ["D01", "D03", "D05", "D08"]
+  },
+  "approval_claim": false,
+  "approval_blockers": ["D01", "D03", "D05", "D08"]
+}

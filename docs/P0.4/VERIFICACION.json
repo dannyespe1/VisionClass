@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-09-14T00:00:00-05:00",
+  "scope": "P0.4 documentation and static audit only",
+  "branch": "p04-umbrales-gates-piloto",
+  "checks": [
+    {
+      "id": "V01",
+      "check": "Read instructions, repository documentation and P0 baselines first",
+      "evidence": ["AGENTS.md", "README.md", "frontend/README.md", "gcp/README.md", "docs/P0.1/INFORME.md", "docs/P0.2/INFORME.md", "docs/P0.3/INFORME.md", "docs/P0.3/PREREGISTRO_CONFIRMATORIO.json"],
+      "result": "pass"
+    },
+    {
+      "id": "V02",
+      "check": "Inspect Git state and preserve existing work",
+      "command": "git status --short --branch; git branch --show-current; git log -1 --oneline; git rev-list --left-right --count main...origin/main",
+      "result": "pass",
+      "observed": "branch p04-umbrales-gates-piloto; main and origin/main divergence 0/0; existing AGENTS.md and docs remained untracked"
+    },
+    {
+      "id": "V03",
+      "check": "Search queue, retry, limit, metrics, tracing, health, concurrency and resource controls",
+      "command": "rg in backend, frontend, ml, render.yaml, docker-compose.yml and cloudbuild.yaml excluding dependencies and P0 docs",
+      "result": "pass",
+      "observed": "No application queue/broker/DLQ, backpressure, rate limit, request-size limit, own SLI instrumentation or versioned runtime resource limits found"
+    },
+    {
+      "id": "V04",
+      "check": "Derive offered visual load from source",
+      "evidence": ["frontend/app/d2r/page.tsx:203-258", "frontend/app/student/course/[courseId]/page.tsx:535-709"],
+      "result": "pass",
+      "observed": "D2R 2 frames/s per participant; course 1 frame/s per participant; no in-flight guard"
+    },
+    {
+      "id": "V05",
+      "check": "Calculate ML crop buffer lower-bound per session",
+      "command": "Node calculation: 16 * 3 * 224 * 224 * 4 bytes",
+      "result": "pass",
+      "observed": {"bytes": 9633792, "mib": 9.1875},
+      "note": "Excludes ndarray/container overhead, feature deque, decoder and model working memory."
+    },
+    {
+      "id": "V06",
+      "check": "Parse thresholds and assert critical invariants",
+      "command": "Node JSON.parse; capacity=0, automated decisions=false, six SLOs, and load arithmetic",
+      "result": "pass",
+      "observed": "THRESHOLDS_JSON_OK slos=6 steady_rps=10 spike_rps=16"
+    },
+    {
+      "id": "V07",
+      "check": "Parse gate register and require owner, approver, evidence and review date",
+      "command": "PowerShell Import-Csv assertions",
+      "result": "pass",
+      "observed": "GATES_CSV_OK rows=9 blocked=7; technical owner assigned; independent approvers pending"
+    },
+    {
+      "id": "V08",
+      "check": "Validate local Markdown links",
+      "command": "Node local-link scan for INFORME.md and RUNBOOK_SUSPENSION_ROLLBACK.md",
+      "result": "pass",
+      "observed": "MARKDOWN_LINKS_OK"
+    },
+    {
+      "id": "V09",
+      "check": "Load, failure and rollback exercises",
+      "result": "not_run_no_runtime_or_approved_environment",
+      "note": "The exact synthetic procedures and thresholds are documented. No deployed environment, monitoring or approved test configuration exists; therefore capacity, SLO and rollback remain unproven."
+    },
+    {
+      "id": "V10",
+      "check": "Training and model evaluation",
+      "result": "not_run_by_design",
+      "note": "AGENTS.md blocks training/interpretation before G3; P0.3 and G3 remain open."
+    },
+    {
+      "id": "V11",
+      "check": "Application lint, types, tests and build",
+      "result": "not_repeated",
+      "note": "No product code/configuration changed. Executed baseline evidence remains versioned in docs/P0.1."
+    },
+    {
+      "id": "V12",
+      "check": "Tracked product diff",
+      "command": "git diff --name-only",
+      "result": "pass",
+      "observed": "empty"
+    }
+  ],
+  "g0_form_import": {
+    "source_file": "Formulario_Decisiones_G0_VisionClass_COMPLETADO_Omar_Quimbita.docx",
+    "source_sha256": "267e4c8869683610a125c65471b2e3fd0cfebb6a6ef2a156e328dc4e77942349",
+    "review": "APROBAR_CON_CORRECCIONES",
+    "thresholds_accepted_as_initial_requirements": true,
+    "thresholds_demonstrated": false,
+    "independent_approvers_pending": true
+  },
+  "approval_claim": false,
+  "blocked_gates": ["G04-0", "G04-1", "G04-2", "G04-3", "G04-4", "G04-5", "G04-6"],
+  "not_started_gates": ["G04-7", "G04-8"]
+}

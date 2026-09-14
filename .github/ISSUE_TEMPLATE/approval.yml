@@ -1,0 +1,43 @@
+name: Gate o aprobación
+description: Decisión formal basada en evidencia versionada.
+title: "[APPROVAL] "
+labels: []
+body:
+  - type: input
+    id: gate
+    attributes:
+      label: Gate o decisión
+      placeholder: G0
+    validations:
+      required: true
+  - type: textarea
+    id: inputs
+    attributes:
+      label: Evidencia de entrada
+      description: Enlaces inmutables, responsables y fecha de revisión.
+    validations:
+      required: true
+  - type: textarea
+    id: criteria
+    attributes:
+      label: Criterios objetivos
+      description: Condiciones PASS, FAIL y evidencia insuficiente.
+    validations:
+      required: true
+  - type: dropdown
+    id: decision
+    attributes:
+      label: Estado solicitado
+      options:
+        - Pendiente de revisión
+        - Bloqueado por evidencia
+        - Listo para decisión
+    validations:
+      required: true
+  - type: textarea
+    id: approvers
+    attributes:
+      label: Aprobadores independientes
+      description: Cuentas o roles distintos del autor de la evidencia.
+    validations:
+      required: true

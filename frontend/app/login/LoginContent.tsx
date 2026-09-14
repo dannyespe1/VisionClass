@@ -8,6 +8,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/app/ui/button";
 import { apiFetch } from "@/app/lib/api";
 import { useAuth } from "@/app/context/AuthContext";
+import { D2R_ENABLED } from "@/app/lib/features";
+import { postLoginRoute } from "@/app/lib/post-login-route.mjs";
+
+type LoginProfile = {
+  role: string;
+  is_staff: boolean;
+  is_superuser: boolean;
+};
 
 export function LoginContent() {
   const router = useRouter();
@@ -24,27 +32,22 @@ export function LoginContent() {
   };
 
   const routeByRole = useCallback(async (accessToken: string) => {
-    const profile = await apiFetch<{ role: string; is_staff: boolean; is_superuser: boolean }>(
+    const profile = await apiFetch<LoginProfile>(
       "/api/me/",
       {},
       accessToken
     );
-    if (profile.role === "admin" || profile.is_superuser || profile.is_staff) {
-      router.push("/admin");
-    } else if (profile.role === "teacher") {
-      router.push("/instructor");
-    } else {
+    let hasD2RResult = false;
+    if (D2R_ENABLED && profile.role === "student") {
       try {
         const d2rResults = await apiFetch<any[]>("/api/d2r-results/", {}, accessToken);
-        if (Array.isArray(d2rResults) && d2rResults.length > 0) {
-          router.push("/student");
-        } else {
-          router.push("/d2r");
-        }
+        hasD2RResult = Array.isArray(d2rResults) && d2rResults.length > 0;
       } catch (_) {
         router.push("/student");
+        return;
       }
     }
+    router.push(postLoginRoute(profile, { d2rEnabled: D2R_ENABLED, hasD2RResult }));
   }, [router]);
 
   const handleLogin = async (accessToken: string) => {

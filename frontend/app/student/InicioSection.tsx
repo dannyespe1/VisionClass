@@ -8,6 +8,7 @@ import { apiFetch } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import { parseCourseMeta } from "../lib/courseMeta";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
+import { D2R_ENABLED } from "../lib/features";
 
 interface InicioSectionProps {
   onCourseSelect: (courseId: number) => void;
@@ -49,7 +50,7 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
   const [lessonData, setLessonData] = useState<LessonItem[]>([]);
   const [syllabusOpen, setSyllabusOpen] = useState(false);
   const [syllabusCourseId, setSyllabusCourseId] = useState<number | null>(null);
-  const [showD2RBanner, setShowD2RBanner] = useState(true);
+  const [showD2RBanner, setShowD2RBanner] = useState(D2R_ENABLED);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { token } = useAuth();
@@ -187,7 +188,7 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
           </div>
         </div>
 
-        {showD2RBanner && (
+        {D2R_ENABLED && showD2RBanner && (
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 text-white px-6 py-6 sm:px-8 sm:py-7 shadow-md">
             <button
               type="button"

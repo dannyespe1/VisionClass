@@ -1,0 +1,12 @@
+area,recurso,estado_pr02,comportamiento_flag_off,comportamiento_flag_on,retiro_previsto
+frontend,login,desacoplado,"entra al panel sin consulta D2R","restaura consulta y gate legado",PR02
+frontend,ruta /d2r,aislado,"redirige al panel sin captura ni escritura","habilita recorrido legado",PR41
+frontend,panel estudiante inicio,aislado,"oculta recordatorio y enlace","muestra recordatorio legado",PR41
+frontend,panel estudiante estadísticas,aislado,"oculta agenda y análisis D2R","muestra histórico y agenda",PR41
+frontend,panel docente estadísticas,aislado,"omite consulta y componentes D2R","muestra histórico D2R",PR41
+backend,API D2R,solo lectura,"permite métodos seguros y rechaza escrituras","restaura escritura con permisos vigentes",PR41
+backend,admin D2R,solo lectura,"permite vista y rechaza mutaciones","restaura mutaciones administrativas",PR41
+backend,métricas de estudiante,desacoplado,"devuelve análisis D2R vacío sin consultar legado","incluye análisis legado",PR41
+backend,modelos y migraciones,conservado,"datos históricos intactos","datos históricos y nuevas escrituras",PR41
+backend,comandos de exportación,conservado,"sin invocación desde flujo principal","operación manual separada",PR41
+ml,compatibilidad d2r_session_id,conservado,"API backend rechaza escrituras D2R","procesamiento legado disponible",PR41

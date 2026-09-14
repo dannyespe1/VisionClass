@@ -76,7 +76,7 @@ from .serializers import (
     ConsentEventSerializer,
 )
 from .utils import send_mailgun_email
-from .permissions import IsAdminUserRole
+from .permissions import D2RLegacyAccessPermission, IsAdminUserRole
 from .consent import consent_status, has_capture_consent
 
 UserModel = get_user_model()
@@ -202,7 +202,11 @@ def _safe_avg(values):
 def _build_student_metrics(user):
     enrollments = Enrollment.objects.filter(user=user).exclude(course__title__iexact=BASELINE_TITLE)
     sessions = Session.objects.filter(student=user).exclude(course__title__iexact=BASELINE_TITLE)
-    d2r_results = D2RResult.objects.filter(user=user)
+    d2r_results = (
+        D2RResult.objects.filter(user=user)
+        if settings.D2R_ENABLED
+        else D2RResult.objects.none()
+    )
     quiz_attempts = QuizAttempt.objects.filter(user=user)
     content_views = ContentView.objects.filter(user=user)
     attention_events = AttentionEvent.objects.filter(user=user)
@@ -232,7 +236,11 @@ def _build_student_metrics(user):
     baseline_d2r = d2r_sorted[-1] if len(d2r_sorted) > 1 else current_d2r
     d2r_avg = _safe_avg([r.attention_span or 0 for r in d2r_results]) if d2r_results.exists() else 0
 
-    schedules = D2RSchedule.objects.filter(user=user, status=D2RSchedule.STATUS_PENDING).order_by("scheduled_for")
+    schedules = (
+        D2RSchedule.objects.filter(user=user, status=D2RSchedule.STATUS_PENDING).order_by("scheduled_for")
+        if settings.D2R_ENABLED
+        else D2RSchedule.objects.none()
+    )
     next_schedule = schedules.first()
 
     trend_value = 0
@@ -866,7 +874,7 @@ class ContentViewSet(viewsets.ModelViewSet):
 
 class D2RSessionViewSet(viewsets.ModelViewSet):
     serializer_class = D2RSessionSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, D2RLegacyAccessPermission]
 
     def get_queryset(self):
         user = self.request.user
@@ -887,7 +895,7 @@ class D2RSessionViewSet(viewsets.ModelViewSet):
 
 class D2RAttentionEventViewSet(viewsets.ModelViewSet):
     serializer_class = D2RAttentionEventSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, D2RLegacyAccessPermission]
 
     def get_queryset(self):
         user = self.request.user
@@ -933,7 +941,7 @@ class D2RAttentionEventViewSet(viewsets.ModelViewSet):
 
 class D2RResultViewSet(viewsets.ModelViewSet):
     serializer_class = D2RResultSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, D2RLegacyAccessPermission]
 
     def get_queryset(self):
         user = self.request.user
@@ -992,7 +1000,7 @@ class QuizAttemptViewSet(viewsets.ModelViewSet):
 
 class D2RScheduleViewSet(viewsets.ModelViewSet):
     serializer_class = D2RScheduleSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, D2RLegacyAccessPermission]
 
     def get_queryset(self):
         user = self.request.user

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "pr": "PR02",
+  "generated_at": "2026-09-14",
+  "branch": "wave2-pr02",
+  "source_commit": "8ae22574f6c346edb268033a2b42a49521476c6b",
+  "base_commit": "82f80da95b11bd204d4d650b94ff44e0fab9cde8",
+  "g0_status": "BLOCKED",
+  "deployed": false,
+  "real_data_used": false,
+  "checks": [
+    {"id": "V01", "command": "npm --prefix frontend ci", "status": "PASS", "result": "556 packages installed from lockfile"},
+    {"id": "V02", "command": "node --test frontend/tests/pr02-routing.test.mjs", "status": "PASS", "result": "3 tests; student teacher and administrator routing"},
+    {"id": "V03", "command": "npm --prefix frontend run typecheck", "status": "PASS"},
+    {"id": "V04", "command": "npm --prefix frontend run lint", "status": "FAIL_BASELINE", "result": "116 existing problems: 71 errors and 45 warnings across the repository"},
+    {"id": "V05", "command": "npm --prefix frontend run build", "status": "PASS_WITH_NETWORK", "result": "13 routes generated; first sandbox run could not fetch Google Fonts"},
+    {"id": "V06", "command": "python backend/manage.py check", "status": "PASS", "environment": "isolated venv; DEBUG=True; SQLite in-memory"},
+    {"id": "V07", "command": "python backend/manage.py makemigrations --check --dry-run", "status": "PASS", "result": "No changes detected"},
+    {"id": "V08", "command": "python backend/manage.py test api --noinput", "status": "PASS", "result": "20 tests including PR03 and PR07 compatibility", "environment": "isolated venv; DEBUG=True; SQLite in-memory"},
+    {"id": "V09", "command": "python scripts/verify_pr02_decoupling.py", "status": "PASS"},
+    {"id": "V10", "command": "python -m compileall -q backend scripts", "status": "PASS"},
+    {"id": "V11", "command": "git diff --check", "status": "PASS"},
+    {"id": "V12", "command": "E2E login -> course -> main journey", "status": "NOT_EXECUTED", "result": "No versioned E2E framework or isolated integrated services are available; covered by unit routing, static invariants, API tests, typecheck and build."}
+  ],
+  "preexisting_findings": [
+    "Django adds sslmode to SQLite DATABASE_URL when DEBUG=False; ephemeral verification required DEBUG=True.",
+    "Pinned requests dependencies emit a compatibility warning for urllib3/chardet/charset_normalizer.",
+    "Frontend lint baseline remains failing and is not weakened or hidden by PR02.",
+    "Next.js build depends on remote Google Fonts and fails without network access."
+  ]
+}

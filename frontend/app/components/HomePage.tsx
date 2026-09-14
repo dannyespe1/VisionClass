@@ -2,6 +2,7 @@ import { Navbar } from "@/app/components/Navbar";
 import { AboutSection } from "@/app/components/AboutSection";
 import { ContactSection } from "@/app/components/ContactSection";
 import { Footer } from "@/app/components/Footer";
+import { D2R_ENABLED } from "@/app/lib/features";
 
 interface HomePageProps {
   onNavigateToLogin: () => void;
@@ -85,12 +86,14 @@ export function HomePage({ onNavigateToLogin }: HomePageProps) {
                   <p className="text-xl font-semibold text-slate-900">Activas</p>
                 </div>
               </div>
-              <div className="rounded-xl border border-indigo-100 bg-indigo-50 px-4 py-4">
-                <p className="text-sm text-indigo-700 font-semibold">Prueba D2R integrada</p>
-                <p className="text-xs text-indigo-600">
-                  Calibra el perfil atencional inicial y adapta el contenido en minutos.
-                </p>
-              </div>
+              {D2R_ENABLED && (
+                <div className="rounded-xl border border-indigo-100 bg-indigo-50 px-4 py-4">
+                  <p className="text-sm text-indigo-700 font-semibold">Prueba D2R integrada</p>
+                  <p className="text-xs text-indigo-600">
+                    Calibra el perfil atencional inicial y adapta el contenido en minutos.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

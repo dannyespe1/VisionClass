@@ -39,6 +39,7 @@ import {
 } from "recharts";
 import { apiFetch } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext";
+import { D2R_ENABLED } from "../../lib/features";
 
 const BASELINE_TITLE = "baseline d2r";
 
@@ -166,7 +167,7 @@ export function EstadisticasProfesorAdvanced() {
         const [courseData, enrollmentData, d2rData] = await Promise.all([
           apiFetch<any[]>("/api/courses/", {}, token),
           apiFetch<any[]>("/api/enrollments/", {}, token),
-          apiFetch<any[]>("/api/d2r-results/", {}, token),
+          D2R_ENABLED ? apiFetch<any[]>("/api/d2r-results/", {}, token) : Promise.resolve([]),
         ]);
         const quizData = await apiFetch<any[]>("/api/quiz-attempts/", {}, token);
         const validCourses = (courseData || []).filter(
@@ -485,7 +486,7 @@ export function EstadisticasProfesorAdvanced() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm">
+          {D2R_ENABLED && <div className="bg-white rounded-xl p-6 shadow-sm">
             <h3 className="text-lg mb-6 flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-blue-600" />
               Correlación entre D2R y progreso
@@ -503,7 +504,7 @@ export function EstadisticasProfesorAdvanced() {
             {!correlationData.length && (
               <p className="text-sm text-gray-500 mt-4">No hay datos suficientes para graficar.</p>
             )}
-          </div>
+          </div>}
         </TabsContent>
 
         <TabsContent value="students" className="space-y-6">
@@ -538,10 +539,12 @@ export function EstadisticasProfesorAdvanced() {
                   </div>
 
                   <div className="grid md:grid-cols-4 gap-4 mb-4">
-                    <div className="bg-purple-50 rounded-lg p-3">
-                      <div className="text-xs text-gray-600 mb-1">D2R</div>
-                      <div className="text-xl text-purple-600">{student.d2rScore}%</div>
-                    </div>
+                    {D2R_ENABLED && (
+                      <div className="bg-purple-50 rounded-lg p-3">
+                        <div className="text-xs text-gray-600 mb-1">D2R</div>
+                        <div className="text-xl text-purple-600">{student.d2rScore}%</div>
+                      </div>
+                    )}
                     <div className="bg-green-50 rounded-lg p-3">
                       <div className="text-xs text-gray-600 mb-1">Atención</div>
                       <div className="text-xl text-green-600">{student.attentionAvg}%</div>
@@ -560,14 +563,16 @@ export function EstadisticasProfesorAdvanced() {
                     <Button size="sm" variant="outline">
                       Ver perfil
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={!latestD2RByUser.get(student.userId)}
-                      onClick={() => openD2RModal({ userId: student.userId, name: student.name })}
-                    >
-                      Ver D2R
-                    </Button>
+                    {D2R_ENABLED && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={!latestD2RByUser.get(student.userId)}
+                        onClick={() => openD2RModal({ userId: student.userId, name: student.name })}
+                      >
+                        Ver D2R
+                      </Button>
+                    )}
                     <Button size="sm" variant="outline" onClick={() => openMessageModal(student)}>
                       Enviar mensaje
                     </Button>
@@ -640,7 +645,7 @@ export function EstadisticasProfesorAdvanced() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={d2rOpen} onOpenChange={setD2rOpen}>
+      {D2R_ENABLED && <Dialog open={d2rOpen} onOpenChange={setD2rOpen}>
         <DialogContent className="sm:max-w-3xl">
           <DialogHeader>
             <DialogTitle>Resultados D2R (último test)</DialogTitle>
@@ -729,7 +734,7 @@ export function EstadisticasProfesorAdvanced() {
             </Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog>}
     </div>
   );
 }

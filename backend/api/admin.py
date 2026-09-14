@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.conf import settings
 
 from .models import (
     User,
@@ -17,6 +18,19 @@ from .models import (
     QuizAttempt,
     SecurityAuditEvent,
 )
+
+
+class D2RLegacyAdmin(admin.ModelAdmin):
+    """Expose legacy records for audit while respecting the transition flag."""
+
+    def has_add_permission(self, request):
+        return settings.D2R_ENABLED and super().has_add_permission(request)
+
+    def has_change_permission(self, request, obj=None):
+        return settings.D2R_ENABLED and super().has_change_permission(request, obj)
+
+    def has_delete_permission(self, request, obj=None):
+        return settings.D2R_ENABLED and super().has_delete_permission(request, obj)
 
 
 @admin.register(User)
@@ -91,13 +105,13 @@ class SecurityAuditEventAdmin(admin.ModelAdmin):
 
 
 @admin.register(D2RSession)
-class D2RSessionAdmin(admin.ModelAdmin):
+class D2RSessionAdmin(D2RLegacyAdmin):
     list_display = ('id', 'user', 'started_at', 'ended_at', 'attention_score', 'frame_count')
     search_fields = ('user__username',)
 
 
 @admin.register(D2RAttentionEvent)
-class D2RAttentionEventAdmin(admin.ModelAdmin):
+class D2RAttentionEventAdmin(D2RLegacyAdmin):
     list_display = ('id', 'd2r_session', 'user', 'timestamp', 'value', 'label')
     search_fields = ('d2r_session__id', 'user__username', 'label')
 
@@ -110,7 +124,7 @@ class ContentViewAdmin(admin.ModelAdmin):
 
 
 @admin.register(D2RResult)
-class D2RResultAdmin(admin.ModelAdmin):
+class D2RResultAdmin(D2RLegacyAdmin):
     list_display = ('user', 'd2r_session', 'raw_score', 'processing_speed', 'attention_span', 'errors', 'created_at')
     search_fields = ('user__username', 'd2r_session__id')
 

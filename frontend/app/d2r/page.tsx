@@ -8,6 +8,7 @@ import D2RWidget from "./test-widget";
 import { D2R_ROWS } from "./d2r-rows";
 import { CameraPermissionModal, type PermissionSettings } from "../student/CameraPermissionModal";
 import { recordConsent, revokeCaptureConsent } from "../lib/consent";
+import { D2R_ENABLED } from "../lib/features";
 
 type PhaseResult = { TR: number; TA: number; O: number; C: number; CON: number; targetCount?: number };
 type PhaseEvent = { phase: number; ts: number; cellId: number; isTarget: boolean };
@@ -58,6 +59,10 @@ export default function D2RPage() {
   useEffect(() => {
     if (!token) {
       router.push("/login");
+      return;
+    }
+    if (!D2R_ENABLED) {
+      router.replace("/student");
       return;
     }
     const bootstrap = async () => {
@@ -214,7 +219,7 @@ export default function D2RPage() {
 
   // Enviar frames al servicio ML mientras el test est en curso
   useEffect(() => {
-    if (!started || finished || cameraStatus !== "granted" || !sessionId || !userId) return;
+    if (!D2R_ENABLED || !started || finished || cameraStatus !== "granted" || !sessionId || !userId) return;
     const video = videoRef.current;
     const canvas = canvasRef.current;
     if (!video || !canvas) return;
@@ -275,6 +280,26 @@ export default function D2RPage() {
       stopCamera();
     };
   }, []);
+
+  if (!D2R_ENABLED) {
+    return (
+      <main className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+        <section className="max-w-lg rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+          <h1 className="text-xl font-semibold text-slate-900">Evaluación histórica deshabilitada</h1>
+          <p className="mt-3 text-sm text-slate-600">
+            El recorrido principal ya no requiere esta evaluación. Te estamos devolviendo al panel de estudiante.
+          </p>
+          <button
+            type="button"
+            onClick={() => router.replace("/student")}
+            className="mt-6 rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white"
+          >
+            Ir al panel
+          </button>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-slate-50 flex flex-col items-center">

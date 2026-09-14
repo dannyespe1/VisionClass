@@ -29,6 +29,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-me')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 STRICT_EVENT_IDENTITY = os.environ.get('STRICT_EVENT_IDENTITY', 'True').strip().lower() == 'true'
 EVENT_SESSION_MAX_AGE_MINUTES = int(os.environ.get('EVENT_SESSION_MAX_AGE_MINUTES', '480'))
+D2R_ENABLED = os.environ.get('D2R_ENABLED', 'False').strip().lower() == 'true'
 
 ALLOWED_HOSTS = [h.strip() for h in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if h.strip()]
 

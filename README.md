@@ -75,6 +75,7 @@ Backend (Django):
 - `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_CALLBACK_URL`
 - `GOOGLE_API_KEY` (generacion de tests IA)
 - `MAILGUN_API_KEY`, `MAILGUN_DOMAIN`, `MAILGUN_BASE_URL`, `MAILGUN_FROM_EMAIL`
+- `D2R_ENABLED` (`False` por defecto; conserva lecturas históricas y bloquea escrituras D2R)
 
 Frontend (Next.js):
 
@@ -82,6 +83,7 @@ Frontend (Next.js):
 - `NEXT_PUBLIC_ML_URL` (default: http://localhost:9000)
 - `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
 - `NEXT_PUBLIC_GOOGLE_REDIRECT_URI`
+- `NEXT_PUBLIC_D2R_ENABLED` (`false` por defecto; oculta y desacopla el recorrido D2R)
 
 ML (FastAPI):
 
@@ -121,10 +123,12 @@ Endpoints de autenticacion:
 - `/student`
 - `/instructor`
 - `/admin`
-- `/d2r` (test D2R)
+- `/d2r` (ruta histórica, disponible únicamente con el flag D2R habilitado)
 - `/privacidad`, `/terminos`, `/seguridad`, `/documentacion`
 
 ## Test D2R
+
+El flujo D2R está deshabilitado por defecto durante la transición. El login, acceso a cursos y paneles no requieren resultados D2R. Los endpoints conservan lectura histórica, pero rechazan escrituras mientras `D2R_ENABLED=False`. Para rollback temporal deben establecerse conjuntamente `D2R_ENABLED=True` en Django y `NEXT_PUBLIC_D2R_ENABLED=true` en el build de Next.js.
 
 - 14 fases, 15s por fase (configurable en `frontend/app/d2r/page.tsx`).
 - 47 celdas fijas por fase (definido en `frontend/app/d2r/test-widget.tsx`).
@@ -145,9 +149,9 @@ Recursos principales (DRF):
 - `GET/POST /api/sessions/`
 - `GET/POST /api/attention-events/`
 - `GET/POST /api/content-views/`
-- `GET/POST /api/d2r-results/`
+- `GET /api/d2r-results/` y escritura solo con `D2R_ENABLED=True`
 - `GET/POST /api/quiz-attempts/`
-- `GET/POST /api/d2r-schedules/`
+- `GET /api/d2r-schedules/` y escritura solo con `D2R_ENABLED=True`
 - `GET/POST /api/student-reports/`
 - `GET /api/student-metrics/`
 - `GET /api/exports/student-report/?export=pdf|csv|xlsx`

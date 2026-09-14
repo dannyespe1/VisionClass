@@ -12,6 +12,7 @@ from .models import ConsentEvent, D2RAttentionEvent, D2RSession, User
     CONSENT_V2_ENABLED=True,
     CONSENT_TEXT_APPROVED=True,
     CONSENT_CURRENT_VERSION="test-v1",
+    D2R_ENABLED=True,
 )
 class ConsentV2Tests(APITestCase):
     def setUp(self):

@@ -51,6 +51,7 @@ import {
 } from "recharts";
 import { apiFetch, BACKEND_URL } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
+import { D2R_ENABLED } from "../lib/features";
 
 type AcademicMetrics = {
   gpa: number;
@@ -281,7 +282,7 @@ export function EstadisticasSection() {
   };
 
   const handleSchedule = async () => {
-    if (!token || !scheduleDate) return;
+    if (!D2R_ENABLED || !token || !scheduleDate) return;
     setScheduleMessage(null);
     try {
       await apiFetch(
@@ -341,10 +342,12 @@ export function EstadisticasSection() {
               </div>
             )}
           </div>
-          <Button variant="outline" size="sm" onClick={() => setScheduleOpen(true)}>
-            <Calendar className="w-4 h-4 mr-2" />
-            Programar Test D2R
-          </Button>
+          {D2R_ENABLED && (
+            <Button variant="outline" size="sm" onClick={() => setScheduleOpen(true)}>
+              <Calendar className="w-4 h-4 mr-2" />
+              Programar Test D2R
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"
@@ -398,15 +401,17 @@ export function EstadisticasSection() {
                   <Switch defaultChecked />
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div className="flex-1">
-                    <div className="mb-1">Recordatorios de Tests D2R</div>
-                    <p className="text-sm text-gray-600">
-                      Notificaciones para actualizar tu perfil atencional
-                    </p>
+                {D2R_ENABLED && (
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div className="flex-1">
+                      <div className="mb-1">Recordatorios de Tests D2R</div>
+                      <p className="text-sm text-gray-600">
+                        Notificaciones para actualizar tu perfil atencional
+                      </p>
+                    </div>
+                    <Switch defaultChecked />
                   </div>
-                  <Switch defaultChecked />
-                </div>
+                )}
               </div>
             </div>
           </div>
@@ -416,7 +421,7 @@ export function EstadisticasSection() {
         </div>
       )}
 
-      {scheduleOpen && (
+      {D2R_ENABLED && scheduleOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-40 px-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
             <h3 className="text-lg mb-2">Programar Test D2R</h3>
@@ -445,7 +450,7 @@ export function EstadisticasSection() {
       <Tabs defaultValue="overview" className="space-y-8">
         <TabsList className="bg-white p-1 rounded-lg shadow-sm">
           <TabsTrigger value="overview">Resumen General</TabsTrigger>
-          <TabsTrigger value="attention">Análisis D2R</TabsTrigger>
+          {D2R_ENABLED && <TabsTrigger value="attention">Análisis D2R</TabsTrigger>}
           <TabsTrigger value="courses">Por Curso</TabsTrigger>
           <TabsTrigger value="achievements">Logros</TabsTrigger>
         </TabsList>
@@ -636,7 +641,7 @@ export function EstadisticasSection() {
             </div>
           </div>
         </TabsContent>
-        <TabsContent value="attention" className="space-y-8">
+        {D2R_ENABLED && <TabsContent value="attention" className="space-y-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white rounded-xl p-6 shadow-lg">
               <div className="flex items-center gap-3 mb-4">
@@ -733,7 +738,7 @@ export function EstadisticasSection() {
               </div>
             </div>
           </div>
-        </TabsContent>
+        </TabsContent>}
 
         <TabsContent value="courses" className="space-y-6">
           {courseBreakdown.map((course, index) => (

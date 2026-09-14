@@ -36,6 +36,38 @@ export async function POST(req: Request) {
     }
 
     const formData = await req.formData();
+    const claimedUserId = formData.get("user_id");
+    if (claimedUserId && String(claimedUserId) !== String(meData.id)) {
+      return NextResponse.json({ ok: false, detail: "Identidad discordante" }, { status: 403 });
+    }
+    const sessionId = formData.get("session_id");
+    const d2rSessionId = formData.get("d2r_session_id");
+    const sessionPath = sessionId
+      ? `/api/sessions/${sessionId}/`
+      : d2rSessionId
+        ? `/api/d2r-sessions/${d2rSessionId}/`
+        : "";
+    if (!sessionPath) {
+      return NextResponse.json({ ok: false, detail: "Sesión requerida" }, { status: 400 });
+    }
+    const sessionRes = await fetch(`${BACKEND_URL}${sessionPath}`, {
+      headers: { Authorization: authHeader },
+      cache: "no-store",
+    });
+    if (!sessionRes.ok) {
+      return NextResponse.json({ ok: false, detail: "Sesión no autorizada" }, { status: 403 });
+    }
+    const sessionData = await sessionRes.json();
+    const sessionUserId = sessionData.student?.id ?? sessionData.user?.id;
+    if (String(sessionUserId) !== String(meData.id)) {
+      return NextResponse.json({ ok: false, detail: "Sesión no autorizada" }, { status: 403 });
+    }
+    const claimedCourseId = formData.get("course_id");
+    if (claimedCourseId && sessionData.course?.id && String(claimedCourseId) !== String(sessionData.course.id)) {
+      return NextResponse.json({ ok: false, detail: "Curso discordante" }, { status: 403 });
+    }
+    formData.set("user_id", String(meData.id));
+    formData.set("idempotency_key", crypto.randomUUID());
     const target = `${ML_SERVICE_URL}/analyze/frame`;
     
     console.log("[attention-proxy] ✅ Enviando frame a ML Service", {
@@ -48,6 +80,7 @@ export async function POST(req: Request) {
     const res = await fetch(target, {
       method: "POST",
       body: formData,
+      headers: { Authorization: authHeader },
       signal: controller.signal,
     });
 

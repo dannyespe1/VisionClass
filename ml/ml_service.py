@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import uuid
 from threading import Thread
 from datetime import datetime
 from typing import Optional, Dict, Any
@@ -12,7 +13,7 @@ import numpy as np
 import httpx
 import mediapipe as mp
 import onnxruntime as ort
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, model_validator
@@ -333,8 +334,14 @@ def aggregate_temporal_score(session_id: int, frame_result: Dict[str, Any]) -> D
     }
 
 
-async def post_event_to_backend(payload: AttentionEventPayload, test_name: str = "D2R") -> None:
-    if not BACKEND_TOKEN:
+async def post_event_to_backend(
+    payload: AttentionEventPayload,
+    test_name: str = "D2R",
+    authorization: Optional[str] = None,
+    idempotency_key: Optional[str] = None,
+) -> None:
+    bearer = authorization if authorization and authorization.lower().startswith("bearer ") else ""
+    if not bearer and not BACKEND_TOKEN:
         return
     normalized_test = (test_name or "").upper()
     is_d2r = normalized_test == "D2R" or (normalized_test == "" and payload.d2r_session_id is not None)
@@ -344,9 +351,12 @@ async def post_event_to_backend(payload: AttentionEventPayload, test_name: str =
         raise HTTPException(status_code=400, detail="session_id requerido")
     endpoint = "/api/d2r-attention-events/" if is_d2r else "/api/attention-events/"
     url = f"{BACKEND_URL}{endpoint}"
-    headers = {"Authorization": f"Bearer {BACKEND_TOKEN}"}
+    headers = {
+        "Authorization": bearer or f"Bearer {BACKEND_TOKEN}",
+        "Idempotency-Key": idempotency_key or f"ml:{uuid.uuid4()}",
+    }
     async with httpx.AsyncClient(timeout=10) as client:
-        resp = await client.post(url, json=payload.model_dump())
+        resp = await client.post(url, json=payload.model_dump(), headers=headers)
         if resp.status_code >= 400:
             raise HTTPException(status_code=502, detail="Backend event post failed")
 
@@ -367,13 +377,13 @@ async def debug_status():
 
 
 @app.post("/events")
-async def receive_event(payload: AttentionEventPayload):
+async def receive_event(payload: AttentionEventPayload, authorization: Optional[str] = Header(None)):
     """
     Endpoint para recibir eventos de atención ya calculados
     (por ejemplo, desde otro proceso ML).
     """
     test_name = "D2R" if payload.d2r_session_id is not None else "COURSE"
-    await post_event_to_backend(payload, test_name=test_name)
+    await post_event_to_backend(payload, test_name=test_name, authorization=authorization)
     return {"ok": True, "forwarded": bool(BACKEND_TOKEN)}
 
 
@@ -387,6 +397,8 @@ async def analyze_frame(
     time_left: float = Form(0),
     spinning: int = Form(0),
     test_name: str = Form("D2R"),
+    idempotency_key: Optional[str] = Form(None),
+    authorization: Optional[str] = Header(None),
 ):
     """
     Recibe un frame (image/jpeg o png), calcula score y reenvía al backend.
@@ -491,7 +503,12 @@ async def analyze_frame(
             "score_baseline": result.get("value"),
         },
     )
-    await post_event_to_backend(payload, test_name=(test_name or ("D2R" if is_d2r else "COURSE")))
+    await post_event_to_backend(
+        payload,
+        test_name=(test_name or ("D2R" if is_d2r else "COURSE")),
+        authorization=authorization,
+        idempotency_key=idempotency_key,
+    )
     return JSONResponse({"ok": True, "score": temporal, "frame_score": result})
 
 

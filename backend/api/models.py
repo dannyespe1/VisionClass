@@ -19,6 +19,24 @@ class User(AbstractUser):
         return f"{self.username} ({self.role})"
 
 
+class SecurityAuditEvent(models.Model):
+    actor = models.ForeignKey(User, on_delete=models.PROTECT, related_name='security_audit_events')
+    action = models.CharField(max_length=80)
+    outcome = models.CharField(max_length=20)
+    reason_code = models.CharField(max_length=80)
+    resource_type = models.CharField(max_length=40, blank=True)
+    resource_id = models.CharField(max_length=64, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at', '-id']
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            raise ValueError("Los eventos de auditoría son inmutables.")
+        return super().save(*args, **kwargs)
+
+
 class Course(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
@@ -141,11 +159,15 @@ class AttentionEvent(models.Model):
     value = models.FloatField()
     label = models.CharField(max_length=100, blank=True)
     data = models.JSONField(default=dict, blank=True)
+    idempotency_key = models.CharField(max_length=64, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         indexes = [
             models.Index(fields=['session', 'timestamp']),
+        ]
+        constraints = [
+            models.UniqueConstraint(fields=['session', 'idempotency_key'], name='uniq_attention_event_idempotency'),
         ]
 
     def __str__(self):
@@ -180,11 +202,15 @@ class D2RAttentionEvent(models.Model):
     value = models.FloatField()
     label = models.CharField(max_length=100, blank=True)
     data = models.JSONField(default=dict, blank=True)
+    idempotency_key = models.CharField(max_length=64, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         indexes = [
             models.Index(fields=['d2r_session', 'timestamp']),
+        ]
+        constraints = [
+            models.UniqueConstraint(fields=['d2r_session', 'idempotency_key'], name='uniq_d2r_event_idempotency'),
         ]
 
     def __str__(self):

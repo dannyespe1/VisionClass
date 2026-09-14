@@ -323,7 +323,7 @@ class SessionSerializer(serializers.ModelSerializer):
     student = UserSerializer(read_only=True)
     course = CourseSerializer(read_only=True)
     course_id = serializers.PrimaryKeyRelatedField(queryset=Course.objects.all(), source='course', write_only=True)
-    student_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), source='student', write_only=True)
+    student_id = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
         model = Session
@@ -339,20 +339,20 @@ class AttentionEventSerializer(serializers.ModelSerializer):
     session = SessionSerializer(read_only=True)
     session_id = serializers.PrimaryKeyRelatedField(queryset=Session.objects.all(), source='session', write_only=True)
     user = UserSerializer(read_only=True)
-    user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), source='user', write_only=True)
+    user_id = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
         model = AttentionEvent
         fields = [
             'id', 'session', 'session_id', 'user', 'user_id',
-            'timestamp', 'value', 'label', 'data', 'created_at'
+            'timestamp', 'value', 'label', 'data', 'idempotency_key', 'created_at'
         ]
-        read_only_fields = ['id', 'session', 'user', 'created_at']
+        read_only_fields = ['id', 'session', 'user', 'idempotency_key', 'created_at']
 
 
 class D2RSessionSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
-    user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), source='user', write_only=True, required=False)
+    user_id = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
         model = D2RSession
@@ -381,7 +381,7 @@ class D2RAttentionEventSerializer(serializers.ModelSerializer):
         write_only=True,
     )
     user = UserSerializer(read_only=True)
-    user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), source='user', write_only=True)
+    user_id = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
         model = D2RAttentionEvent
@@ -395,16 +395,17 @@ class D2RAttentionEventSerializer(serializers.ModelSerializer):
             'value',
             'label',
             'data',
+            'idempotency_key',
             'created_at',
         ]
-        read_only_fields = ['id', 'd2r_session', 'user', 'created_at']
+        read_only_fields = ['id', 'd2r_session', 'user', 'idempotency_key', 'created_at']
 
 
 class ContentViewSerializer(serializers.ModelSerializer):
     session = SessionSerializer(read_only=True)
     session_id = serializers.PrimaryKeyRelatedField(queryset=Session.objects.all(), source='session', write_only=True)
     user = UserSerializer(read_only=True)
-    user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), source='user', write_only=True)
+    user_id = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
         model = ContentView
@@ -423,7 +424,7 @@ class D2RResultSerializer(serializers.ModelSerializer):
         write_only=True,
     )
     user = UserSerializer(read_only=True)
-    user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), source='user', write_only=True)
+    user_id = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
         model = D2RResult
@@ -438,7 +439,7 @@ class QuizAttemptSerializer(serializers.ModelSerializer):
     session = SessionSerializer(read_only=True)
     session_id = serializers.PrimaryKeyRelatedField(queryset=Session.objects.all(), source='session', write_only=True)
     user = UserSerializer(read_only=True)
-    user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), source='user', write_only=True)
+    user_id = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
         model = QuizAttempt
@@ -451,7 +452,7 @@ class QuizAttemptSerializer(serializers.ModelSerializer):
 
 class D2RScheduleSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
-    user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), source='user', write_only=True, required=False)
+    user_id = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
         model = D2RSchedule

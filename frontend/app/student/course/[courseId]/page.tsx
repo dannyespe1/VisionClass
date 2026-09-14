@@ -186,18 +186,6 @@ export default function CoursePage() {
         const me = await apiFetch<{ id: number }>("/api/me/", {}, token);
         const resolvedUserId = me.id || null;
         setUserId(resolvedUserId);
-        const session = await apiFetch<any>(
-          "/api/sessions/",
-          {
-            method: "POST",
-            body: JSON.stringify({ course_id: courseId, student_id: resolvedUserId }),
-          },
-          token
-        );
-        if (session.id) {
-          sessionRef.current = session.id;
-          setSessionId(session.id);
-        }
         const enrollments = await apiFetch<any[]>("/api/enrollments/", {}, token);
         let enrollment = (enrollments || []).find((e) => e.course && e.course.id === courseId);
         if (!enrollment) {
@@ -209,6 +197,18 @@ export default function CoursePage() {
             },
             token
           );
+        }
+        const session = await apiFetch<any>(
+          "/api/sessions/",
+          {
+            method: "POST",
+            body: JSON.stringify({ course_id: courseId }),
+          },
+          token
+        );
+        if (session.id) {
+          sessionRef.current = session.id;
+          setSessionId(session.id);
         }
         if (enrollment.id) {
           setEnrollmentId(enrollment.id);
@@ -463,7 +463,6 @@ export default function CoursePage() {
           method: "POST",
           body: JSON.stringify({
             session_id: sessionId,
-            user_id: userId,
             content_type: contentType,
             content_id: contentId,
           }),
@@ -862,7 +861,6 @@ export default function CoursePage() {
           method: "POST",
           body: JSON.stringify({
             session_id: sessionId,
-            user_id: userId,
             difficulty: currentMaterial.metadata.difficulty === "alta" ? "hard" : "normal",
             score,
             reason: currentMaterial.title || "Evaluación",

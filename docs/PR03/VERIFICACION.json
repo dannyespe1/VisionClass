@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "pr": "PR03",
+  "base_commit": "14b7a8b0ae6233e6c555eca68704db2f1682399d",
+  "g0_status": "BLOCKED",
+  "checks": [
+    {"command": "python backend/manage.py test api --noinput", "status": "PASS", "result": "7 negative/security tests"},
+    {"command": "python backend/manage.py makemigrations --check --dry-run", "status": "PASS"},
+    {"command": "npm --prefix frontend run typecheck", "status": "PASS"},
+    {"command": "npm --prefix frontend run build", "status": "PASS_WITH_NETWORK"},
+    {"command": "npm --prefix frontend run lint", "status": "FAIL_BASELINE", "result": "71 errors and 45 warnings, identical to P0.1"},
+    {"command": "python -m compileall -q backend ml scripts", "status": "PASS"}
+  ],
+  "real_data_used": false,
+  "deployed": false
+}

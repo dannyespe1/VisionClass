@@ -15,6 +15,7 @@ from .models import (
     ContentView,
     D2RResult,
     QuizAttempt,
+    SecurityAuditEvent,
 )
 
 
@@ -72,6 +73,21 @@ class SessionAdmin(admin.ModelAdmin):
 class AttentionEventAdmin(admin.ModelAdmin):
     list_display = ('id', 'session', 'user', 'timestamp', 'value', 'label')
     search_fields = ('session__id', 'user__username', 'label')
+
+
+@admin.register(SecurityAuditEvent)
+class SecurityAuditEventAdmin(admin.ModelAdmin):
+    list_display = ('created_at', 'action', 'outcome', 'reason_code', 'resource_type', 'resource_id')
+    readonly_fields = ('actor', 'action', 'outcome', 'reason_code', 'resource_type', 'resource_id', 'created_at')
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(D2RSession)

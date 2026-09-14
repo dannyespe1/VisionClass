@@ -100,6 +100,8 @@ ML (FastAPI):
 Roles disponibles en backend: `student`, `teacher`, `admin`.
 El login se realiza via JWT (email) o Google OAuth.
 
+La escritura de sesiones, observaciones y predicciones usa identidad estricta por defecto (`STRICT_EVENT_IDENTITY=True`). Django deriva el participante del JWT, verifica matrícula, curso, propietario y vigencia, y exige `Idempotency-Key` para eventos. Configurar el flag en `False` suspende estas escrituras; nunca restaura confianza en `user_id` enviado por el cliente.
+
 Endpoints de autenticacion:
 
 - `POST /api/auth/token/` (login con email/username)

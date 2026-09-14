@@ -1,11 +1,11 @@
 from django.contrib.auth import get_user_model
 from django.conf import settings
-from django.db import models
+from django.db import IntegrityError, models
 from django.db.models import Q
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
 from rest_framework import viewsets, permissions, mixins, status
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import APIException, PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import action
@@ -42,6 +42,7 @@ from .models import (
     D2RResult,
     QuizAttempt,
     D2RSchedule,
+    SecurityAuditEvent,
     StudentReport,
     StudentNotification,
     ResearchAccessRequest,
@@ -78,6 +79,81 @@ from .permissions import IsAdminUserRole
 UserModel = get_user_model()
 BASELINE_TITLE = "baseline d2r"
 logger = logging.getLogger(__name__)
+
+
+class ReplayConflict(APIException):
+    status_code = status.HTTP_409_CONFLICT
+    default_detail = "El evento ya fue procesado."
+    default_code = "event_replay"
+
+
+def _audit_identity(request, action, outcome, reason_code, resource_type="", resource_id=""):
+    if request.user and request.user.is_authenticated:
+        SecurityAuditEvent.objects.create(
+            actor=request.user,
+            action=action,
+            outcome=outcome,
+            reason_code=reason_code,
+            resource_type=resource_type,
+            resource_id=str(resource_id or "")[:64],
+        )
+
+
+def _deny_identity(request, action, reason_code, resource_type="", resource_id=""):
+    _audit_identity(request, action, "denied", reason_code, resource_type, resource_id)
+    raise PermissionDenied("La identidad o sesión del evento no es válida.")
+
+
+def _pop_claimed_user(serializer, field="user_id"):
+    return serializer.validated_data.pop(field, None)
+
+
+def _validate_course_session(request, session, action):
+    user = request.user
+    if not settings.STRICT_EVENT_IDENTITY:
+        _deny_identity(request, action, "strict_identity_disabled", "session", session.id)
+    if user.role != User.ROLE_STUDENT:
+        _deny_identity(request, action, "role_not_student", "session", session.id)
+    if session.student_id != user.id:
+        _deny_identity(request, action, "session_owner_mismatch", "session", session.id)
+    active_enrollment = Enrollment.objects.filter(
+        user=user,
+        course=session.course,
+        status=Enrollment.STATUS_ACTIVE,
+    ).exists()
+    if not active_enrollment:
+        _deny_identity(request, action, "inactive_enrollment", "session", session.id)
+    now = timezone.now()
+    max_age = timedelta(minutes=settings.EVENT_SESSION_MAX_AGE_MINUTES)
+    if not session.started_at or session.started_at > now or session.started_at < now - max_age or session.ended_at:
+        _deny_identity(request, action, "session_expired", "session", session.id)
+
+
+def _validate_claimed_user(request, claimed_user_id, action, resource_type, resource_id):
+    if claimed_user_id is not None and claimed_user_id != request.user.id:
+        _deny_identity(request, action, "claimed_user_mismatch", resource_type, resource_id)
+
+
+def _validate_d2r_session(request, session, action):
+    user = request.user
+    if not settings.STRICT_EVENT_IDENTITY:
+        _deny_identity(request, action, "strict_identity_disabled", "d2r_session", session.id)
+    now = timezone.now()
+    max_age = timedelta(minutes=settings.EVENT_SESSION_MAX_AGE_MINUTES)
+    if user.role != User.ROLE_STUDENT or session.user_id != user.id:
+        _deny_identity(request, action, "invalid_d2r_session", "d2r_session", session.id)
+    if not session.started_at or session.started_at > now or session.started_at < now - max_age or session.ended_at:
+        _deny_identity(request, action, "session_expired", "d2r_session", session.id)
+
+
+def _event_idempotency_key(request, model, session_field, session, action):
+    key = request.headers.get("Idempotency-Key", "").strip()
+    if not re.fullmatch(r"[A-Za-z0-9._:-]{16,64}", key):
+        _deny_identity(request, action, "invalid_idempotency_key", session_field, session.id)
+    if model.objects.filter(**{session_field: session, "idempotency_key": key}).exists():
+        _audit_identity(request, action, "rejected", "event_replay", session_field, session.id)
+        raise ReplayConflict()
+    return key
 
 
 class EmailTokenObtainPairView(TokenObtainPairView):
@@ -660,9 +736,18 @@ class SessionViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         user = self.request.user
-        # Si no se envía estudiante y es rol student, se asigna automáticamente
-        student = serializer.validated_data.get('student') or (user if user.role == User.ROLE_STUDENT else None)
-        serializer.save(created_by=user, student=student)
+        claimed_student_id = serializer.validated_data.pop('student_id', None)
+        course = serializer.validated_data.get('course')
+        if not settings.STRICT_EVENT_IDENTITY:
+            _deny_identity(self.request, "session_create", "strict_identity_disabled", "course", getattr(course, "id", ""))
+        if user.role != User.ROLE_STUDENT:
+            _deny_identity(self.request, "session_create", "role_not_student", "course", getattr(course, "id", ""))
+        _validate_claimed_user(self.request, claimed_student_id, "session_create", "course", getattr(course, "id", ""))
+        if not course or not course.is_active or not Enrollment.objects.filter(
+            user=user, course=course, status=Enrollment.STATUS_ACTIVE
+        ).exists():
+            _deny_identity(self.request, "session_create", "inactive_enrollment", "course", getattr(course, "id", ""))
+        serializer.save(created_by=user, student=user, started_at=timezone.now())
 
 
 class AttentionEventViewSet(viewsets.ModelViewSet):
@@ -679,13 +764,20 @@ class AttentionEventViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         user = self.request.user
-        target_user = serializer.validated_data.get('user')
+        claimed_user_id = _pop_claimed_user(serializer)
+        if not settings.STRICT_EVENT_IDENTITY:
+            _deny_identity(self.request, "d2r_session_create", "strict_identity_disabled")
         session = serializer.validated_data.get('session')
-        if target_user != user and user.role not in [User.ROLE_TEACHER, User.ROLE_ADMIN]:
-            raise PermissionDenied("No puedes registrar eventos para otros usuarios.")
-        if session and target_user != session.student and user.role not in [User.ROLE_TEACHER, User.ROLE_ADMIN]:
-            raise PermissionDenied("El evento debe corresponder al estudiante de la sesión.")
-        event = serializer.save()
+        _validate_claimed_user(self.request, claimed_user_id, "attention_event_create", "session", session.id)
+        _validate_course_session(self.request, session, "attention_event_create")
+        idempotency_key = _event_idempotency_key(
+            self.request, AttentionEvent, "session", session, "attention_event_create"
+        )
+        try:
+            event = serializer.save(user=user, idempotency_key=idempotency_key)
+        except IntegrityError:
+            _audit_identity(self.request, "attention_event_create", "rejected", "event_replay", "session", session.id)
+            raise ReplayConflict()
 
         # Actualizar métricas agregadas de la sesión
         if session:
@@ -762,6 +854,10 @@ class ContentViewSet(viewsets.ModelViewSet):
         return ContentView.objects.filter(user=user)
 
     def perform_create(self, serializer):
+        claimed_user_id = _pop_claimed_user(serializer)
+        session = serializer.validated_data.get('session')
+        _validate_claimed_user(self.request, claimed_user_id, "content_view_create", "session", session.id)
+        _validate_course_session(self.request, session, "content_view_create")
         serializer.save(user=self.request.user)
 
 
@@ -779,9 +875,11 @@ class D2RSessionViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         user = self.request.user
+        claimed_user_id = _pop_claimed_user(serializer)
         if user.role != User.ROLE_STUDENT:
-            raise PermissionDenied("Solo estudiantes pueden crear sesiones D2R.")
-        serializer.save(user=user)
+            _deny_identity(self.request, "d2r_session_create", "role_not_student")
+        _validate_claimed_user(self.request, claimed_user_id, "d2r_session_create", "user", user.id)
+        serializer.save(user=user, started_at=timezone.now())
 
 
 class D2RAttentionEventViewSet(viewsets.ModelViewSet):
@@ -799,12 +897,17 @@ class D2RAttentionEventViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         user = self.request.user
         d2r_session = serializer.validated_data.get('d2r_session')
-        target_user = serializer.validated_data.get('user')
-        if target_user != user and user.role not in [User.ROLE_TEACHER, User.ROLE_ADMIN]:
-            raise PermissionDenied("No puedes registrar eventos para otros usuarios.")
-        if not d2r_session or d2r_session.user_id != target_user.id:
-            raise PermissionDenied("El evento debe corresponder a la sesion del estudiante.")
-        event = serializer.save()
+        claimed_user_id = _pop_claimed_user(serializer)
+        _validate_claimed_user(self.request, claimed_user_id, "d2r_event_create", "d2r_session", d2r_session.id)
+        _validate_d2r_session(self.request, d2r_session, "d2r_event_create")
+        idempotency_key = _event_idempotency_key(
+            self.request, D2RAttentionEvent, "d2r_session", d2r_session, "d2r_event_create"
+        )
+        try:
+            event = serializer.save(user=user, idempotency_key=idempotency_key)
+        except IntegrityError:
+            _audit_identity(self.request, "d2r_event_create", "rejected", "event_replay", "d2r_session", d2r_session.id)
+            raise ReplayConflict()
 
         frames = d2r_session.frame_count or 0
         new_count = frames + 1
@@ -837,13 +940,14 @@ class D2RResultViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         user = self.request.user
+        claimed_user_id = _pop_claimed_user(serializer)
         if not user or not user.is_authenticated:
             raise PermissionDenied("Debes estar autenticado para registrar resultados.")
         if user.role != User.ROLE_STUDENT:
             raise PermissionDenied("Solo estudiantes pueden registrar resultados D2R.")
+        _validate_claimed_user(self.request, claimed_user_id, "d2r_result_create", "user", user.id)
         d2r_session = serializer.validated_data.get("d2r_session")
-        if not d2r_session or d2r_session.user_id != user.id:
-            raise PermissionDenied("La sesion debe pertenecer al estudiante autenticado.")
+        _validate_d2r_session(self.request, d2r_session, "d2r_result_create")
         result = serializer.save(user=user)
         if user.email:
             subject = "Resultado D2R registrado"
@@ -874,6 +978,10 @@ class QuizAttemptViewSet(viewsets.ModelViewSet):
         return QuizAttempt.objects.filter(user=user)
 
     def perform_create(self, serializer):
+        claimed_user_id = _pop_claimed_user(serializer)
+        session = serializer.validated_data.get('session')
+        _validate_claimed_user(self.request, claimed_user_id, "quiz_attempt_create", "session", session.id)
+        _validate_course_session(self.request, session, "quiz_attempt_create")
         serializer.save(user=self.request.user)
 
 
@@ -890,6 +998,10 @@ class D2RScheduleViewSet(viewsets.ModelViewSet):
         return D2RSchedule.objects.filter(user=user)
 
     def perform_create(self, serializer):
+        claimed_user_id = _pop_claimed_user(serializer)
+        _validate_claimed_user(
+            self.request, claimed_user_id, "d2r_schedule_create", "user", self.request.user.id
+        )
         serializer.save(user=self.request.user)
 
 
@@ -954,6 +1066,7 @@ class RecommendDifficultyView(APIView):
             session = Session.objects.get(id=session_id)
         except Session.DoesNotExist:
             return Response({"detail": "Sesion no encontrada"}, status=404)
+        _validate_course_session(request, session, "difficulty_prediction")
 
         mean_attention = session.mean_attention or 0
         low_ratio = session.low_attention_ratio or 0

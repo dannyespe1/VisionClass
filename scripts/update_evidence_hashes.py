@@ -8,6 +8,19 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+TEXT_SUFFIXES = {".md", ".txt", ".csv", ".json", ".py", ".yml", ".yaml"}
+
+
+def evidence_digest(path: Path) -> str:
+    raw = path.read_bytes()
+    if path.suffix.lower() in TEXT_SUFFIXES:
+        try:
+            text = raw.decode("utf-8-sig")
+        except UnicodeDecodeError:
+            pass
+        else:
+            raw = text.replace("\r\n", "\n").replace("\r", "\n").encode("utf-8")
+    return hashlib.sha256(raw).hexdigest()
 
 
 def update_manifest(relative_directory: str, generated_at: str) -> int:
@@ -17,7 +30,7 @@ def update_manifest(relative_directory: str, generated_at: str) -> int:
         "schema_version": 1,
         "generated_at": generated_at,
         "files": [
-            {"path": path.name, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()} for path in files
+            {"path": path.name, "sha256": evidence_digest(path)} for path in files
         ],
     }
     (directory / "SHA256.json").write_text(
@@ -29,6 +42,6 @@ def update_manifest(relative_directory: str, generated_at: str) -> int:
 if __name__ == "__main__":
     counts = {
         name: update_manifest(f"docs/{name}", "2026-09-14")
-        for name in ("P0.1", "P0.2", "P0.3", "P0.4", "P0.5", "G0")
+        for name in ("P0.1", "P0.2", "P0.3", "P0.4", "P0.5", "G0", "PR01")
     }
     print("Manifiestos actualizados: " + "; ".join(f"{name}={count}" for name, count in counts.items()))

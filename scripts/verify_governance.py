@@ -9,6 +9,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+TEXT_SUFFIXES = {".md", ".txt", ".csv", ".json", ".py", ".yml", ".yaml"}
 REQUIRED_FILES = (
     "AGENTS.md",
     ".github/CODEOWNERS",
@@ -32,6 +33,18 @@ REQUIRED_FILES = (
     "scripts/import_execution_plan.py",
     "scripts/update_evidence_hashes.py",
 )
+
+
+def evidence_digest(path: Path) -> str:
+    raw = path.read_bytes()
+    if path.suffix.lower() in TEXT_SUFFIXES:
+        try:
+            text = raw.decode("utf-8-sig")
+        except UnicodeDecodeError:
+            pass
+        else:
+            raw = text.replace("\r\n", "\n").replace("\r", "\n").encode("utf-8")
+    return hashlib.sha256(raw).hexdigest()
 
 
 def require_files() -> None:
@@ -136,7 +149,7 @@ def validate_checksums() -> None:
     if recorded_files != expected_files:
         raise SystemExit("SHA256.json no cubre exactamente los artefactos P0.5")
     for item in manifest["files"]:
-        digest = hashlib.sha256((checksum_path.parent / item["path"]).read_bytes()).hexdigest()
+        digest = evidence_digest(checksum_path.parent / item["path"])
         if digest != item["sha256"]:
             raise SystemExit(f"Checksum inválido: {item['path']}")
 

@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "pr": "PR01",
+  "generated_at": "2026-09-14",
+  "branch": "pr01-arquitectura-objetivo-v2",
+  "base_commit": "eab043c31b5270552f7a0ba9e76f4c32ff9599d6",
+  "status": "CANDIDATE_BLOCKED_G0",
+  "approval_claim": false,
+  "product_behavior_changed": false,
+  "checks": [
+    {"id": "V01", "check": "ADR sections and G0 dependency", "status": "PASS"},
+    {"id": "V02", "check": "Mermaid logical components and prohibited raw flows", "status": "PASS"},
+    {"id": "V03", "check": "Component inputs outputs owners sources of truth and boundaries", "status": "PASS", "components": 9},
+    {"id": "V04", "check": "D2R migration sequence and downstream PR references", "status": "PASS"},
+    {"id": "V05", "check": "Local Markdown links", "status": "PASS"},
+    {"id": "V06", "check": "Secrets PII and personal contact scan", "status": "PASS"},
+    {"id": "V07", "check": "P0.5 governance verifier", "status": "PASS"},
+    {"id": "V08", "check": "G0 verifier", "status": "PASS", "observed": "BLOQUEADA"},
+    {"id": "V09", "check": "Application lint types tests and build", "status": "NOT_REPEATED", "reason": "PR01 changes documentation only; existing P0 baseline is preserved."}
+  ],
+  "open_conditions": [
+    "G0 approval",
+    "independent cross-review by frontend backend ML research and privacy",
+    "provider and institutional ratification",
+    "implementation and evidence in downstream PRs"
+  ]
+}

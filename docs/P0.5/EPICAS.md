@@ -2,6 +2,8 @@
 
 Estos cuerpos separan código, operación y aprobación. Las casillas no representan aprobación ni ejecución.
 
+Los PR de código posteriores deben ser compatibles con [ADR-0001](../PR01/ADR-0001-ARQUITECTURA-OBJETIVO.md). Mientras G0 siga bloqueada, la referencia describe una arquitectura candidata y no autoriza implementación o exposición.
+
 ## EPIC-P0 — Preparación y G0
 
 **Resultado:** reunir evidencia P0.1–P0.5 y decidir G0 antes de cualquier PR de producto.

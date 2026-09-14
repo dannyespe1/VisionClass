@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-14",
+  "files": [
+    {
+      "path": "ADR-0001-ARQUITECTURA-OBJETIVO.md",
+      "sha256": "a3d860cf998dbf459a40d98dd1a29ab8098ec7bb92acee21ecdc718cb6b2f475"
+    },
+    {
+      "path": "COMPONENTES_ARQUITECTURA.csv",
+      "sha256": "cbad2d2c382d90e2fee0dd9a27467fad88534a53134f62405a4d0b94d619634d"
+    },
+    {
+      "path": "VERIFICACION.json",
+      "sha256": "602a4ec679b3f9cb9a4ba5c770a477c3e7170acdde370a93a3c19963344222fb"
+    }
+  ]
+}

@@ -9,6 +9,19 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+TEXT_SUFFIXES = {".md", ".txt", ".csv", ".json", ".py", ".yml", ".yaml"}
+
+
+def evidence_digest(path: Path) -> str:
+    raw = path.read_bytes()
+    if path.suffix.lower() in TEXT_SUFFIXES:
+        try:
+            text = raw.decode("utf-8-sig")
+        except UnicodeDecodeError:
+            pass
+        else:
+            raw = text.replace("\r\n", "\n").replace("\r", "\n").encode("utf-8")
+    return hashlib.sha256(raw).hexdigest()
 
 
 def load_json(path: Path):
@@ -29,7 +42,7 @@ def verify_p0_manifest(name: str) -> int:
             path = ROOT / path
         if not path.is_file():
             raise SystemExit(f"Falta evidencia {name}: {entry['path']}")
-        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        digest = evidence_digest(path)
         if digest.lower() != entry["sha256"].lower():
             raise SystemExit(f"Checksum inválido {name}: {entry['path']}")
     return len(entries)
@@ -44,7 +57,7 @@ def verify_g0_manifest() -> int:
         raise SystemExit(f"Manifiesto G0 incompleto: esperado={sorted(expected)}, registrado={sorted(recorded)}")
     for entry in manifest["files"]:
         path = directory / entry["path"]
-        if hashlib.sha256(path.read_bytes()).hexdigest() != entry["sha256"]:
+        if evidence_digest(path) != entry["sha256"]:
             raise SystemExit(f"Checksum inválido G0: {entry['path']}")
     return len(recorded)
 

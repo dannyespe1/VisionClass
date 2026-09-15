@@ -28,6 +28,7 @@ from datetime import timedelta
 from google import genai
 from google.genai import types
 from django.db import connection
+from .redis_client import redis_health
 
 from .models import (
     Course,
@@ -64,13 +65,19 @@ class HealthReadyView(APIView):
     permission_classes = []
 
     def get(self, request):
+        checks = {"database": "ok"}
         try:
             with connection.cursor() as cursor:
                 cursor.execute("SELECT 1")
-            return Response({"status": "ready", "checks": {"database": "ok"}})
+            redis_result = redis_health()
+            checks["redis"] = redis_result["status"]
+            if redis_result["status"] == "error":
+                return Response({"status": "not_ready", "checks": checks}, status=503)
+            return Response({"status": "ready", "checks": checks})
         except Exception:
             logging.getLogger(__name__).exception("readiness_check_failed")
-            return Response({"status": "not_ready", "checks": {"database": "error"}}, status=503)
+            checks["database"] = "error"
+            return Response({"status": "not_ready", "checks": checks}, status=503)
 from .serializers import (
     UserSerializer,
     RegisterSerializer,

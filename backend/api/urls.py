@@ -25,12 +25,14 @@ router.register(r'admin/users', views.AdminUserViewSet, basename='admin-user')
 router.register(r'admin/courses', views.AdminCourseViewSet, basename='admin-course')
 router.register(r'admin/research-permissions', views.AdminResearchPermissionViewSet, basename='admin-research')
 router.register(r'admin/privacy-policies', views.AdminPrivacyPolicyViewSet, basename='admin-privacy')
+router.register(r'consents', views.ConsentEventViewSet, basename='consent')
 
 
 urlpatterns = [
     path('auth/token/', views.EmailTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('auth/google/', views.GoogleLogin.as_view(), name='google_login'),
+    path('consents/status/', views.ConsentStatusView.as_view(), name='consent-status'),
     path('', include(router.urls)),
     path('me/', views.MeView.as_view(), name='me'),
     path('student-metrics/', views.StudentMetricsView.as_view(), name='student_metrics'),

@@ -1,0 +1,18 @@
+{
+  "evaluated_at": "2026-09-14",
+  "base_commit": "14b7a8b0ae6233e6c555eca68704db2f1682399d",
+  "status": "CANDIDATE_BLOCKED_HUMAN",
+  "checks": [
+    {"name": "backend_check", "status": "PASS", "command": "python backend/manage.py check"},
+    {"name": "migration_drift", "status": "PASS", "command": "python backend/manage.py makemigrations --check --dry-run"},
+    {"name": "backend_api_tests", "status": "PASS", "command": "python backend/manage.py test api --noinput", "tests": 9},
+    {"name": "python_compile", "status": "PASS", "command": "python -m compileall -q backend/api ml"},
+    {"name": "frontend_typecheck", "status": "PASS", "command": "npm --prefix frontend run typecheck"},
+    {"name": "frontend_build", "status": "PASS", "command": "npm --prefix frontend run build", "note": "repetido con red para descargar Geist"},
+    {"name": "frontend_lint", "status": "FAIL_BASELINE", "command": "npm --prefix frontend run lint", "errors": 70, "warnings": 44, "baseline_errors": 71, "baseline_warnings": 45},
+    {"name": "pr07_static_verifier", "status": "PASS", "command": "python scripts/verify_pr07_consent.py"},
+    {"name": "ethical_privacy_copy_review", "status": "BLOCKED_HUMAN"},
+    {"name": "participant_authorization", "status": "BLOCKED_HUMAN", "authorized_participants": 0}
+  ],
+  "gate_g0": "BLOCKED"
+}

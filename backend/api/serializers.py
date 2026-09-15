@@ -12,6 +12,7 @@ from allauth.socialaccount.providers.oauth2.client import OAuth2Error
 import inspect
 import json
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.utils import timezone
 
 from .models import (
     Course,
@@ -31,6 +32,7 @@ from .models import (
     CourseMaterial,
     ResearchAccessRequest,
     PrivacyPolicySetting,
+    ConsentEvent,
 )
 
 User = get_user_model()
@@ -685,3 +687,20 @@ class PrivacyPolicySettingSerializer(serializers.ModelSerializer):
         model = PrivacyPolicySetting
         fields = ['id', 'name', 'description', 'current_value', 'options', 'updated_at']
         read_only_fields = ['id', 'updated_at']
+
+
+class ConsentEventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConsentEvent
+        fields = ['id', 'version', 'purpose', 'action', 'expires_at', 'source', 'created_at']
+        read_only_fields = ['id', 'source', 'created_at']
+
+    def validate_expires_at(self, value):
+        if value is not None and value <= timezone.now():
+            raise serializers.ValidationError('La expiración debe estar en el futuro.')
+        return value
+
+    def validate(self, attrs):
+        if attrs.get('action') == ConsentEvent.ACTION_GRANT and attrs.get('expires_at') is None:
+            raise serializers.ValidationError({'expires_at': 'Todo otorgamiento debe expirar.'})
+        return attrs

@@ -47,6 +47,7 @@ from .models import (
     StudentNotification,
     ResearchAccessRequest,
     PrivacyPolicySetting,
+    ConsentEvent,
 )
 from .serializers import (
     UserSerializer,
@@ -72,9 +73,11 @@ from .serializers import (
     AdminCourseSerializer,
     ResearchAccessRequestSerializer,
     PrivacyPolicySettingSerializer,
+    ConsentEventSerializer,
 )
 from .utils import send_mailgun_email
 from .permissions import IsAdminUserRole
+from .consent import consent_status, has_capture_consent
 
 UserModel = get_user_model()
 BASELINE_TITLE = "baseline d2r"
@@ -731,7 +734,7 @@ class SessionViewSet(viewsets.ModelViewSet):
         if user.role == User.ROLE_ADMIN:
             return Session.objects.all()
         if user.role == User.ROLE_TEACHER:
-            return Session.objects.filter(course__owner=user)
+            return Session.objects.none()
         return Session.objects.filter(student=user)
 
     def perform_create(self, serializer):
@@ -759,17 +762,17 @@ class AttentionEventViewSet(viewsets.ModelViewSet):
         if user.role == User.ROLE_ADMIN:
             return AttentionEvent.objects.all()
         if user.role == User.ROLE_TEACHER:
-            return AttentionEvent.objects.filter(session__course__owner=user)
+            return AttentionEvent.objects.none()
         return AttentionEvent.objects.filter(user=user)
 
     def perform_create(self, serializer):
         user = self.request.user
         claimed_user_id = _pop_claimed_user(serializer)
-        if not settings.STRICT_EVENT_IDENTITY:
-            _deny_identity(self.request, "d2r_session_create", "strict_identity_disabled")
         session = serializer.validated_data.get('session')
         _validate_claimed_user(self.request, claimed_user_id, "attention_event_create", "session", session.id)
         _validate_course_session(self.request, session, "attention_event_create")
+        if not has_capture_consent(user):
+            _deny_identity(self.request, "attention_event_create", "consent_not_valid", "session", session.id)
         idempotency_key = _event_idempotency_key(
             self.request, AttentionEvent, "session", session, "attention_event_create"
         )
@@ -870,7 +873,7 @@ class D2RSessionViewSet(viewsets.ModelViewSet):
         if user.role == User.ROLE_ADMIN:
             return D2RSession.objects.all()
         if user.role == User.ROLE_TEACHER:
-            return D2RSession.objects.filter(user__enrollments__course__owner=user).distinct()
+            return D2RSession.objects.none()
         return D2RSession.objects.filter(user=user)
 
     def perform_create(self, serializer):
@@ -891,7 +894,7 @@ class D2RAttentionEventViewSet(viewsets.ModelViewSet):
         if user.role == User.ROLE_ADMIN:
             return D2RAttentionEvent.objects.all()
         if user.role == User.ROLE_TEACHER:
-            return D2RAttentionEvent.objects.filter(d2r_session__user__enrollments__course__owner=user).distinct()
+            return D2RAttentionEvent.objects.none()
         return D2RAttentionEvent.objects.filter(user=user)
 
     def perform_create(self, serializer):
@@ -900,6 +903,8 @@ class D2RAttentionEventViewSet(viewsets.ModelViewSet):
         claimed_user_id = _pop_claimed_user(serializer)
         _validate_claimed_user(self.request, claimed_user_id, "d2r_event_create", "d2r_session", d2r_session.id)
         _validate_d2r_session(self.request, d2r_session, "d2r_event_create")
+        if not has_capture_consent(user):
+            _deny_identity(self.request, "d2r_event_create", "consent_not_valid", "d2r_session", d2r_session.id)
         idempotency_key = _event_idempotency_key(
             self.request, D2RAttentionEvent, "d2r_session", d2r_session, "d2r_event_create"
         )
@@ -935,7 +940,7 @@ class D2RResultViewSet(viewsets.ModelViewSet):
         if user.role == User.ROLE_ADMIN:
             return D2RResult.objects.all()
         if user.role == User.ROLE_TEACHER:
-            return D2RResult.objects.filter(user__enrollments__course__owner=user).distinct()
+            return D2RResult.objects.none()
         return D2RResult.objects.filter(user=user)
 
     def perform_create(self, serializer):
@@ -1747,3 +1752,33 @@ class AdminPrivacyPolicyViewSet(viewsets.ModelViewSet):
     serializer_class = PrivacyPolicySettingSerializer
     permission_classes = [IsAdminUserRole]
     queryset = PrivacyPolicySetting.objects.all().order_by("name", "id")
+
+
+class ConsentEventViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
+    serializer_class = ConsentEventSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return ConsentEvent.objects.filter(participant=self.request.user)
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        if user.role != User.ROLE_STUDENT:
+            raise PermissionDenied("Solo el participante puede decidir su consentimiento.")
+        action_value = serializer.validated_data["action"]
+        version = serializer.validated_data["version"]
+        if action_value == ConsentEvent.ACTION_GRANT:
+            if not settings.CONSENT_V2_ENABLED or not settings.CONSENT_TEXT_APPROVED:
+                raise PermissionDenied("El texto de consentimiento está pendiente de aprobación.")
+            if version != settings.CONSENT_CURRENT_VERSION:
+                raise PermissionDenied("La versión de consentimiento no está vigente.")
+        serializer.save(participant=user, source="web")
+
+
+class ConsentStatusView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        if request.user.role != User.ROLE_STUDENT:
+            raise PermissionDenied("Estado disponible solo para participantes.")
+        return Response(consent_status(request.user), status=status.HTTP_200_OK)

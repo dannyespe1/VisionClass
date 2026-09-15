@@ -1,0 +1,6 @@
+id,decision,owner_suggested,evidence,status,review_date
+PR07-D01,Aprobar texto y versión del consentimiento,Ética y privacidad,Documento firmado y versionado,BLOCKED_HUMAN,PENDIENTE
+PR07-D02,Ratificar participantes universitarios adultos,Dirección del estudio,Protocolo y criterios de inclusión firmados,BLOCKED_HUMAN,PENDIENTE
+PR07-D03,Aprobar retención y seudonimización del historial,Privacidad y custodio,Política de retención y prueba de borrado en backups,BLOCKED_HUMAN,PENDIENTE
+PR07-D04,Aprobar comprensión y accesibilidad,Investigación y accesibilidad,Lista de comprobación y revisión independiente,BLOCKED_HUMAN,PENDIENTE
+PR07-D05,Aprobar frontera de procesamiento sin frames crudos,Frontend ML y privacidad,Prueba negativa de red y acta de arquitectura,BLOCKED_HUMAN,PENDIENTE

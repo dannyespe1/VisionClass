@@ -26,6 +26,7 @@ import { apiFetch, BACKEND_URL, postFrameToML, checkMLServiceHealth } from "../.
 import { useAuth } from "../../../context/AuthContext";
 import { Button } from "../../../ui/button";
 import { CameraPermissionModal, PermissionSettings } from "../../CameraPermissionModal";
+import { recordConsent, revokeCaptureConsent } from "../../../lib/consent";
 import {
   Dialog,
   DialogContent,
@@ -144,6 +145,7 @@ export default function CoursePage() {
     enableAttentionTracking: false,
     saveAnalytics: false,
     shareWithInstructor: false,
+    researchUse: false,
   });
   const [showCameraSettings, setShowCameraSettings] = useState(false);
   const [openModules, setOpenModules] = useState<Record<number, boolean>>({});
@@ -578,6 +580,10 @@ export default function CoursePage() {
       
       // Validar respuesta
       if (!resp?.ok) {
+        if (String(resp?.detail || resp?.error || "").includes("Consentimiento")) {
+          stopCamera();
+          setPermissionSettings((current) => ({ ...current, enableCamera: false }));
+        }
         console.warn("[sendFrame] Respuesta de ML no válida", {
           ok: resp?.ok,
           error: resp?.error,
@@ -743,13 +749,20 @@ export default function CoursePage() {
   }, []);
 
   const requestCamera = async (settings: PermissionSettings) => {
-    setPermissionSettings(settings);
+    if (!token) return;
     if (!settings.enableCamera) {
       stopCamera();
       setPermissionOpen(false);
       return;
     }
     try {
+      const consent = await recordConsent(token, {
+        local_processing: settings.enableCamera && settings.enableAttentionTracking,
+        derived_persistence: settings.saveAnalytics,
+        research: settings.researchUse,
+      });
+      if (!consent.capture_allowed) throw new Error("Consentimiento no vigente");
+      setPermissionSettings(settings);
       console.log("[requestCamera] Verificando permisos de cámara...");
       await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
       console.log("[requestCamera] Permisos de cámara otorgados");
@@ -766,8 +779,9 @@ export default function CoursePage() {
         console.log("[requestCamera] Servicio ML disponible");
       }
     } catch (err) {
-      console.error("[requestCamera] Error al acceder a la cámara:", err instanceof Error ? err.message : err);
-      // No lanzar error, permitir continuar sin cámara
+      console.error("[requestCamera] No se habilitó la cámara:", err instanceof Error ? err.message : err);
+      stopCamera();
+      setPermissionSettings((current) => ({ ...current, enableCamera: false }));
     } finally {
       setPermissionOpen(false);
     }
@@ -1424,8 +1438,10 @@ export default function CoursePage() {
       {permissionOpen && (
         <CameraPermissionModal
           onAllow={(settings) => requestCamera(settings)}
-          onDeny={() => {
+          onDeny={async () => {
             stopCamera();
+            if (token) await revokeCaptureConsent(token).catch(() => undefined);
+            setPermissionSettings((current) => ({ ...current, enableCamera: false }));
             setPermissionOpen(false);
           }}
         />

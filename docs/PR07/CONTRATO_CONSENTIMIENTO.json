@@ -1,0 +1,18 @@
+{
+  "schema_version": "consent-v2-candidate-1",
+  "legal_text_status": "PENDING_ETHICS_AND_PRIVACY_APPROVAL",
+  "population": "adult_university_students_only",
+  "purposes": {
+    "local_processing": {"required_for_capture": true},
+    "derived_persistence": {"required_for_capture": true},
+    "research": {"required_for_capture": false}
+  },
+  "actions": ["grant", "decline", "revoke"],
+  "capture_policy": {
+    "default": "deny",
+    "requires_all": ["feature_enabled", "approved_text", "current_version", "unexpired_local_processing", "unexpired_derived_persistence"],
+    "teacher_access": false,
+    "images_stored": false
+  },
+  "rollback": "disable consent_v2 and capture; retain only permitted administrative evidence"
+}

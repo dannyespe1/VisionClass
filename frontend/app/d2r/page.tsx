@@ -6,6 +6,8 @@ import { apiFetch } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import D2RWidget from "./test-widget";
 import { D2R_ROWS } from "./d2r-rows";
+import { CameraPermissionModal, type PermissionSettings } from "../student/CameraPermissionModal";
+import { recordConsent, revokeCaptureConsent } from "../lib/consent";
 
 type PhaseResult = { TR: number; TA: number; O: number; C: number; CON: number; targetCount?: number };
 type PhaseEvent = { phase: number; ts: number; cellId: number; isTarget: boolean };
@@ -32,6 +34,7 @@ export default function D2RPage() {
 
   const [status, setStatus] = useState("");
   const [cameraStatus, setCameraStatus] = useState<"pending" | "granted" | "denied">("pending");
+  const [permissionOpen, setPermissionOpen] = useState(true);
   const [started, setStarted] = useState(false);
   const [finished, setFinished] = useState(false);
   const [practiceOpen, setPracticeOpen] = useState(false);
@@ -76,7 +79,6 @@ export default function D2RPage() {
           setStatus("No se pudo crear sesión para el test D2R.");
         }
 
-        await requestCamera();
       } catch (err: any) {
         setStatus(err.message || "Error iniciando sesión D2R");
       }
@@ -176,8 +178,15 @@ export default function D2RPage() {
     }
   };
 
-  const requestCamera = async () => {
+  const requestCamera = async (settings: PermissionSettings) => {
+    if (!token) return;
     try {
+      const consent = await recordConsent(token, {
+        local_processing: settings.enableCamera && settings.enableAttentionTracking,
+        derived_persistence: settings.saveAnalytics,
+        research: settings.researchUse,
+      });
+      if (!consent.capture_allowed) throw new Error("Consentimiento no vigente");
       const media = await navigator.mediaDevices.getUserMedia({ video: true });
       streamRef.current = media;
       setCameraStatus("granted");
@@ -187,6 +196,9 @@ export default function D2RPage() {
       }
     } catch (err) {
       setCameraStatus("denied");
+      setStatus(err instanceof Error ? err.message : "No se habilitó la cámara");
+    } finally {
+      setPermissionOpen(false);
     }
   };
 
@@ -410,7 +422,7 @@ export default function D2RPage() {
 
             <div className="flex flex-col sm:flex-row gap-3">
               <button
-                onClick={requestCamera}
+                onClick={() => setPermissionOpen(true)}
                 className="px-5 py-3 rounded-xl bg-slate-900 text-white text-sm font-semibold shadow hover:bg-black"
               >
                 {cameraStatus === "pending"
@@ -420,7 +432,7 @@ export default function D2RPage() {
                     : "Reintentar cámara"}
               </button>
               <button
-                disabled={cameraStatus !== "granted" || !practiceDone}
+                disabled={!practiceDone}
                 onClick={() => {
                   setPracticeOpen(false);
                   setStarted(true);
@@ -434,6 +446,9 @@ export default function D2RPage() {
               <p className="text-xs text-slate-500">
                 Completa la práctica para habilitar el inicio del test.
               </p>
+            )}
+            {practiceDone && cameraStatus !== "granted" && (
+              <p className="text-xs text-slate-500">Puedes comenzar y completar el test sin cámara.</p>
             )}
             {cameraStatus === "denied" && (
               <p className="text-sm text-red-600">No pudimos acceder a la cámara. Revisa permisos en el navegador.</p>
@@ -531,6 +546,18 @@ export default function D2RPage() {
             </div>
           </div>
         </section>
+      )}
+
+      {permissionOpen && (
+        <CameraPermissionModal
+          onAllow={requestCamera}
+          onDeny={async () => {
+            stopCamera();
+            if (token) await revokeCaptureConsent(token).catch(() => undefined);
+            setCameraStatus("denied");
+            setPermissionOpen(false);
+          }}
+        />
       )}
 
       {/* video oculto para mantener la cmara activa */}

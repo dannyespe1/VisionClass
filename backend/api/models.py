@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.db import models
 
 
@@ -370,3 +371,42 @@ class PrivacyPolicySetting(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class ConsentEvent(models.Model):
+    PURPOSE_LOCAL_PROCESSING = "local_processing"
+    PURPOSE_DERIVED_PERSISTENCE = "derived_persistence"
+    PURPOSE_RESEARCH = "research"
+    PURPOSE_CHOICES = [
+        (PURPOSE_LOCAL_PROCESSING, "Procesamiento local"),
+        (PURPOSE_DERIVED_PERSISTENCE, "Persistencia de datos derivados"),
+        (PURPOSE_RESEARCH, "Uso en investigación"),
+    ]
+    ACTION_GRANT = "grant"
+    ACTION_DECLINE = "decline"
+    ACTION_REVOKE = "revoke"
+    ACTION_CHOICES = [
+        (ACTION_GRANT, "Otorgar"),
+        (ACTION_DECLINE, "Rechazar"),
+        (ACTION_REVOKE, "Revocar"),
+    ]
+
+    participant = models.ForeignKey(User, on_delete=models.PROTECT, related_name="consent_events")
+    version = models.CharField(max_length=64)
+    purpose = models.CharField(max_length=32, choices=PURPOSE_CHOICES)
+    action = models.CharField(max_length=16, choices=ACTION_CHOICES)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    source = models.CharField(max_length=32, default="web")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at", "id"]
+        indexes = [models.Index(fields=["participant", "purpose", "created_at"])]
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            raise ValidationError("Los eventos de consentimiento son inmutables.")
+        return super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValidationError("Los eventos de consentimiento son inmutables.")

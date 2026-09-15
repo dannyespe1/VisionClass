@@ -154,6 +154,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'api.User'
 SITE_ID = int(os.environ.get('SITE_ID', '1'))
+CONSENT_V2_ENABLED = os.environ.get('CONSENT_V2_ENABLED', 'True') == 'True'
+CONSENT_TEXT_APPROVED = os.environ.get('CONSENT_TEXT_APPROVED', 'False') == 'True'
+CONSENT_CURRENT_VERSION = os.environ.get('CONSENT_CURRENT_VERSION', 'PENDING-ETHICS-APPROVAL')
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',

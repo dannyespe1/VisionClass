@@ -66,6 +66,17 @@ export async function POST(req: Request) {
     if (claimedCourseId && sessionData.course?.id && String(claimedCourseId) !== String(sessionData.course.id)) {
       return NextResponse.json({ ok: false, detail: "Curso discordante" }, { status: 403 });
     }
+    const consentRes = await fetch(`${BACKEND_URL}/api/consents/status/`, {
+      headers: { Authorization: authHeader },
+      cache: "no-store",
+    });
+    const consent = await consentRes.json().catch(() => null);
+    if (!consentRes.ok || consent?.capture_allowed !== true) {
+      return NextResponse.json(
+        { ok: false, detail: "Consentimiento ausente, vencido o revocado" },
+        { status: 403 },
+      );
+    }
     formData.set("user_id", String(meData.id));
     formData.set("idempotency_key", crypto.randomUUID());
     const target = `${ML_SERVICE_URL}/analyze/frame`;

@@ -69,6 +69,9 @@ Backend (Django):
 - `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`
 - `ACCESS_TOKEN_MINUTES`, `REFRESH_TOKEN_DAYS`
 - `SITE_ID`
+- `CONSENT_V2_ENABLED` (por defecto `True`; si se desactiva, falla cerrado)
+- `CONSENT_TEXT_APPROVED` (por defecto `False`; impide otorgamientos mientras el texto siga pendiente)
+- `CONSENT_CURRENT_VERSION` (versión exacta que el participante debe aceptar)
 - `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_CALLBACK_URL`
 - `GOOGLE_API_KEY` (generacion de tests IA)
 - `MAILGUN_API_KEY`, `MAILGUN_DOMAIN`, `MAILGUN_BASE_URL`, `MAILGUN_FROM_EMAIL`
@@ -108,6 +111,8 @@ Endpoints de autenticacion:
 - `POST /api/auth/token/refresh/`
 - `POST /api/auth/google/`
 - `GET /api/me/` (perfil y rol)
+- `GET /api/consents/status/` (vigencia por finalidad del participante autenticado)
+- `GET/POST /api/consents/` (historial inmutable y decisiones propias)
 
 ## Rutas principales (frontend)
 

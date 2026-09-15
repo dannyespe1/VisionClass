@@ -1,0 +1,20 @@
+{
+  "pr": "PR08",
+  "base": "08dff65",
+  "status": "TECHNICAL_PASS",
+  "feature_flag": "TEMPORAL_SCHEMA_V2=false",
+  "checks": {
+    "django_check": "PASS",
+    "migration_drift": "PASS_NO_CHANGES",
+    "targeted_tests": "PASS_3_OF_3",
+    "python_compile": "PASS",
+    "migration_forward_backward_forward": "PASS_SQLITE_TEST_DATABASE",
+    "diff_check": "PASS"
+  },
+  "privacy": {
+    "real_data_used": false,
+    "raw_frames_added": false,
+    "participants_authorized": 0
+  },
+  "runtime_note": "Validated with isolated Python 3.12 environment; target Python 3.11 CI remains required."
+}

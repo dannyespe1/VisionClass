@@ -410,3 +410,156 @@ class ConsentEvent(models.Model):
 
     def delete(self, *args, **kwargs):
         raise ValidationError("Los eventos de consentimiento son inmutables.")
+
+
+class TemporalSession(models.Model):
+    """Stable envelope that keeps observations separate from interpretations."""
+
+    participant = models.ForeignKey(User, on_delete=models.PROTECT, related_name="temporal_sessions")
+    course_session = models.OneToOneField(
+        Session, on_delete=models.PROTECT, null=True, blank=True, related_name="temporal_session"
+    )
+    d2r_session = models.OneToOneField(
+        D2RSession, on_delete=models.PROTECT, null=True, blank=True, related_name="temporal_session"
+    )
+    started_at = models.DateTimeField()
+    ended_at = models.DateTimeField(null=True, blank=True)
+    provenance = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["participant", "started_at"])]
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    (models.Q(course_session__isnull=False) & models.Q(d2r_session__isnull=True))
+                    | (models.Q(course_session__isnull=True) & models.Q(d2r_session__isnull=False))
+                ),
+                name="temporal_session_exactly_one_source",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(ended_at__isnull=True) | models.Q(ended_at__gte=models.F("started_at")),
+                name="temporal_session_valid_range",
+            ),
+        ]
+
+
+class Observation(models.Model):
+    temporal_session = models.ForeignKey(TemporalSession, on_delete=models.CASCADE, related_name="observations")
+    event_id = models.UUIDField(unique=True)
+    kind = models.CharField(max_length=64)
+    captured_at = models.DateTimeField()
+    received_at = models.DateTimeField()
+    processed_at = models.DateTimeField(null=True, blank=True)
+    values = models.JSONField(default=dict)
+    quality = models.JSONField(default=dict, blank=True)
+    provenance = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["temporal_session", "captured_at"])]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(received_at__gte=models.F("captured_at")),
+                name="observation_received_after_capture",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(processed_at__isnull=True) | models.Q(processed_at__gte=models.F("received_at")),
+                name="observation_processed_after_received",
+            ),
+        ]
+
+
+class ObservationWindow(models.Model):
+    temporal_session = models.ForeignKey(TemporalSession, on_delete=models.CASCADE, related_name="windows")
+    started_at = models.DateTimeField()
+    ended_at = models.DateTimeField()
+    aggregation_version = models.CharField(max_length=64)
+    features = models.JSONField(default=dict)
+    quality = models.JSONField(default=dict, blank=True)
+    provenance = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["temporal_session", "started_at"])]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(ended_at__gt=models.F("started_at")),
+                name="observation_window_positive_duration",
+            )
+        ]
+
+
+class InferredState(models.Model):
+    STATE_NO_OBSERVABLE = "no_observable"
+    STATE_UNKNOWN = "unknown"
+    STATE_ATTENTIVE = "attentive"
+    STATE_DISTRACTED = "distracted"
+    STATE_CHOICES = [
+        (STATE_NO_OBSERVABLE, "No observable"),
+        (STATE_UNKNOWN, "Unknown"),
+        (STATE_ATTENTIVE, "Attentive"),
+        (STATE_DISTRACTED, "Distracted"),
+    ]
+
+    window = models.ForeignKey(ObservationWindow, on_delete=models.PROTECT, related_name="inferred_states")
+    state = models.CharField(max_length=32, choices=STATE_CHOICES)
+    probabilities = models.JSONField(default=dict)
+    uncertainty = models.FloatField(null=True, blank=True)
+    model_reference = models.CharField(max_length=128, blank=True)
+    inference_version = models.CharField(max_length=64)
+    inferred_at = models.DateTimeField()
+    provenance = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["window", "inferred_at"])]
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    (models.Q(uncertainty__isnull=True))
+                    | (models.Q(uncertainty__gte=0.0) & models.Q(uncertainty__lte=1.0))
+                ),
+                name="inferred_state_uncertainty_unit_range",
+            )
+        ]
+
+
+class StateTransition(models.Model):
+    temporal_session = models.ForeignKey(TemporalSession, on_delete=models.CASCADE, related_name="transitions")
+    from_state = models.ForeignKey(
+        InferredState, on_delete=models.PROTECT, null=True, blank=True, related_name="outgoing_transitions"
+    )
+    to_state = models.ForeignKey(InferredState, on_delete=models.PROTECT, related_name="incoming_transitions")
+    occurred_at = models.DateTimeField()
+    reason = models.CharField(max_length=128, blank=True)
+    provenance = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["temporal_session", "occurred_at"])]
+
+
+class InterventionRecord(models.Model):
+    STATUS_PROPOSED = "proposed"
+    STATUS_SUPPRESSED = "suppressed"
+    STATUS_PRESENTED = "presented"
+    STATUS_CHOICES = [
+        (STATUS_PROPOSED, "Proposed"),
+        (STATUS_SUPPRESSED, "Suppressed"),
+        (STATUS_PRESENTED, "Presented"),
+    ]
+
+    temporal_session = models.ForeignKey(TemporalSession, on_delete=models.CASCADE, related_name="interventions")
+    triggering_state = models.ForeignKey(
+        InferredState, on_delete=models.PROTECT, null=True, blank=True, related_name="interventions"
+    )
+    intervention_type = models.CharField(max_length=64)
+    status = models.CharField(max_length=16, choices=STATUS_CHOICES, default=STATUS_PROPOSED)
+    occurred_at = models.DateTimeField()
+    policy_version = models.CharField(max_length=64)
+    provenance = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["temporal_session", "occurred_at"])]

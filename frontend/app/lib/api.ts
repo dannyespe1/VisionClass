@@ -39,16 +39,24 @@ export async function apiFetch<T>(
   return JSON.parse(text) as T;
 }
 
-export async function postFrameToML(form: FormData, token?: string) {
+export async function postFrameToML(
+  form: FormData,
+  token?: string,
+  options: { signal?: AbortSignal; idempotencyKey?: string } = {},
+) {
   try {
     const headers: Record<string, string> = {};
     if (token) {
       headers.Authorization = `Bearer ${token}`;
     }
+    if (options.idempotencyKey) {
+      headers["Idempotency-Key"] = options.idempotencyKey;
+    }
     const res = await fetch(`/api/attention-proxy`, {
       method: "POST",
       body: form,
       headers,
+      signal: options.signal,
     });
     if (!res.ok) {
       const text = await res.text();
@@ -57,6 +65,7 @@ export async function postFrameToML(form: FormData, token?: string) {
     const data = await res.json().catch(() => ({}));
     return { ok: true, ...data };
   } catch (err) {
+    if (options.signal?.aborted) throw err;
     const message = err instanceof Error ? err.message : "Failed to fetch";
     return { ok: false, error: message };
   }

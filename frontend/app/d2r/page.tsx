@@ -8,7 +8,8 @@ import D2RWidget from "./test-widget";
 import { D2R_ROWS } from "./d2r-rows";
 import { CameraPermissionModal, type PermissionSettings } from "../student/CameraPermissionModal";
 import { recordConsent, revokeCaptureConsent } from "../lib/consent";
-import { D2R_ENABLED } from "../lib/features";
+import { BoundedCaptureQueue } from "../lib/bounded-capture-queue.mjs";
+import { BOUNDED_CAPTURE_QUEUE_ENABLED, CAPTURE_DEADLINE_MS } from "../lib/capture-features";
 
 type PhaseResult = { TR: number; TA: number; O: number; C: number; CON: number; targetCount?: number };
 type PhaseEvent = { phase: number; ts: number; cellId: number; isTarget: boolean };
@@ -48,6 +49,7 @@ export default function D2RPage() {
   const phaseRef = useRef<number>(phase);
   const timeLeftRef = useRef<number>(durationSeconds);
   const spinningRef = useRef<boolean>(false);
+  const captureQueueRef = useRef<BoundedCaptureQueue | null>(null);
   const phaseTimingRef = useRef<Record<number, { start: number; end: number; summary: PhaseResult }>>({});
   const phaseEventsRef = useRef<PhaseEvent[]>([]);
 
@@ -59,10 +61,6 @@ export default function D2RPage() {
   useEffect(() => {
     if (!token) {
       router.push("/login");
-      return;
-    }
-    if (!D2R_ENABLED) {
-      router.replace("/student");
       return;
     }
     const bootstrap = async () => {
@@ -208,6 +206,8 @@ export default function D2RPage() {
   };
 
   const stopCamera = () => {
+    captureQueueRef.current?.stop();
+    captureQueueRef.current = null;
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
@@ -219,24 +219,38 @@ export default function D2RPage() {
 
   // Enviar frames al servicio ML mientras el test est en curso
   useEffect(() => {
-    if (!D2R_ENABLED || !started || finished || cameraStatus !== "granted" || !sessionId || !userId) return;
+    if (!started || finished || cameraStatus !== "granted" || !sessionId || !userId) return;
+    if (!BOUNDED_CAPTURE_QUEUE_ENABLED) {
+      setStatus("Captura detenida: transporte acotado no disponible.");
+      return;
+    }
     const video = videoRef.current;
     const canvas = canvasRef.current;
     if (!video || !canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let cancelled = false;
+    const queue = new BoundedCaptureQueue({
+      timeoutMs: CAPTURE_DEADLINE_MS,
+      onState: (state) => {
+        if (state === "queued") setStatus("Red lenta: solo se conserva la ventana más reciente.");
+        if (state === "sending") setStatus("Enviando ventana para análisis...");
+      },
+    });
+    captureQueueRef.current = queue;
 
-    const sendFrame = async () => {
-      if (cancelled) return;
-      if (!video.videoWidth || !video.videoHeight) return;
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      canvas.toBlob(
-        async (blob) => {
-          if (!blob || cancelled) return;
+    const sendFrame = () => {
+      queue.enqueue(async ({ signal, idempotencyKey }) => {
+          if (!video.videoWidth || !video.videoHeight) {
+            return { ok: false, detail: "Cámara todavía no preparada" };
+          }
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const blob = await new Promise<Blob | null>((resolve) =>
+            canvas.toBlob(resolve, "image/jpeg", 0.6),
+          );
+          if (!blob) return { ok: false, detail: "Captura no disponible" };
           const form = new FormData();
           form.append("file", blob, "frame.jpg");
           form.append("d2r_session_id", sessionId);
@@ -251,27 +265,33 @@ export default function D2RPage() {
           if (phaseEventsRef.current.length) {
             form.append("events", JSON.stringify(phaseEventsRef.current.slice(-50)));
           }
-          try {
-            await fetch("/api/attention-proxy", {
-              method: "POST",
-              headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-              body: form,
-            });
-          } catch (_) {
-            // Silenciar errores de red para no romper el test
-          }
-        },
-        "image/jpeg",
-        0.6
-      );
+          const headers: Record<string, string> = { "Idempotency-Key": idempotencyKey };
+          if (token) headers.Authorization = `Bearer ${token}`;
+          const response = await fetch("/api/attention-proxy", {
+            method: "POST",
+            headers,
+            body: form,
+            signal,
+          });
+          return response.json().catch(() => ({ ok: false }));
+      }).then((outcome) => {
+        if (outcome.status === "confirmed") {
+          setStatus(outcome.value?.ok
+            ? "Ventana confirmada por el servicio."
+            : "Ventana sin confirmar; no se registró una medición.");
+        } else if (outcome.status === "failed" || outcome.status === "timed_out") {
+          setStatus("Servicio degradado; la ventana no fue confirmada ni reintentada.");
+        }
+      });
     };
 
     const interval = setInterval(sendFrame, 500);
     sendFrame();
 
     return () => {
-      cancelled = true;
       clearInterval(interval);
+      queue.stop();
+      if (captureQueueRef.current === queue) captureQueueRef.current = null;
     };
   }, [started, finished, cameraStatus, sessionId, userId, token]);
 
@@ -280,26 +300,6 @@ export default function D2RPage() {
       stopCamera();
     };
   }, []);
-
-  if (!D2R_ENABLED) {
-    return (
-      <main className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
-        <section className="max-w-lg rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <h1 className="text-xl font-semibold text-slate-900">Evaluación histórica deshabilitada</h1>
-          <p className="mt-3 text-sm text-slate-600">
-            El recorrido principal ya no requiere esta evaluación. Te estamos devolviendo al panel de estudiante.
-          </p>
-          <button
-            type="button"
-            onClick={() => router.replace("/student")}
-            className="mt-6 rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white"
-          >
-            Ir al panel
-          </button>
-        </section>
-      </main>
-    );
-  }
 
   return (
     <main className="min-h-screen bg-slate-50 flex flex-col items-center">

@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "pr": "PR05",
+  "date": "2026-09-14",
+  "base": "82f80da95b11bd204d4d650b94ff44e0fab9cde8",
+  "status": "CANDIDATE_TECHNICAL",
+  "g0": "BLOCKED",
+  "participants_authorized": 0,
+  "limits": {
+    "active_frames": 1,
+    "pending_frames": 1,
+    "visual_retry_count": 0,
+    "visual_dlq": false,
+    "visual_disk_persistence": false,
+    "default_deadline_ms": 4500,
+    "max_frame_bytes": 1500000
+  },
+  "checks": {
+    "queue_unit": "PASS_4_OF_4",
+    "frontend_typecheck": "PASS",
+    "frontend_build": "PASS_WITH_NETWORK_GOOGLE_FONTS",
+    "frontend_lint": "FAIL_BASELINE_69_ERRORS_43_WARNINGS",
+    "python_ml_compile": "PASS",
+    "static_verifier": "PASS",
+    "diff_check": "PASS",
+    "browser_e2e_latency_heap": "BLOCKED_ENV",
+    "independent_privacy_review": "BLOCKED_HUMAN"
+  }
+}

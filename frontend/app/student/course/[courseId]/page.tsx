@@ -27,6 +27,11 @@ import { useAuth } from "../../../context/AuthContext";
 import { Button } from "../../../ui/button";
 import { CameraPermissionModal, PermissionSettings } from "../../CameraPermissionModal";
 import { recordConsent, revokeCaptureConsent } from "../../../lib/consent";
+import { BoundedCaptureQueue } from "../../../lib/bounded-capture-queue.mjs";
+import {
+  BOUNDED_CAPTURE_QUEUE_ENABLED,
+  CAPTURE_DEADLINE_MS,
+} from "../../../lib/capture-features";
 import {
   Dialog,
   DialogContent,
@@ -96,6 +101,23 @@ const toYoutubeEmbed = (url: string) => {
   return url;
 };
 
+type MLFrameScore = {
+  label?: string;
+  state?: string;
+  face?: boolean;
+  value?: number;
+  data?: { face?: boolean };
+};
+
+type MLFrameResponse = {
+  ok?: boolean;
+  detail?: string;
+  error?: string;
+  frame_score?: MLFrameScore;
+  score?: MLFrameScore;
+  value?: number;
+};
+
 export default function CoursePage() {
   const router = useRouter();
   const params = useParams();
@@ -105,6 +127,7 @@ export default function CoursePage() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const frameTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const captureQueueRef = useRef<BoundedCaptureQueue | null>(null);
   const cameraActiveRef = useRef(false);
   const faceDetectorRef = useRef<any | null>(null);
   const sessionRef = useRef<number | null>(null);
@@ -160,6 +183,9 @@ export default function CoursePage() {
   const [courseCompletedOpen, setCourseCompletedOpen] = useState(false);
   const [attentionStatus, setAttentionStatus] = useState<"ok" | "no_face" | "pending" | "error">("pending");
   const [mlServiceStatus, setMlServiceStatus] = useState<"checking" | "available" | "unavailable" | null>(null);
+  const [captureTransportStatus, setCaptureTransportStatus] = useState<
+    "idle" | "queued" | "sending" | "degraded" | "stopped"
+  >("stopped");
 
   useEffect(() => {
     if (!token) {
@@ -514,32 +540,85 @@ export default function CoursePage() {
       videoRef.current.srcObject = null;
     }
     cameraActiveRef.current = false;
+    captureQueueRef.current?.stop();
+    captureQueueRef.current = null;
+    setCaptureTransportStatus("stopped");
     setAttentionStatus("pending");
   };
 
-  const sendFrame = async () => {
+  const applyConfirmedFrame = (resp: MLFrameResponse) => {
+    if (!resp?.ok) {
+      if (String(resp?.detail || resp?.error || "").includes("Consentimiento")) {
+        stopCamera();
+        setPermissionSettings((current) => ({ ...current, enableCamera: false }));
+      }
+      setCaptureTransportStatus("degraded");
+      return;
+    }
+
+    const frameScore = resp.frame_score || resp.score || {};
+    const frameLabel = frameScore.label || frameScore.state;
+    const hasFace = frameScore.data?.face ?? frameScore.face ?? false;
+    if (frameLabel === "no_face" || hasFace === false) {
+      setAttentionStatus("no_face");
+      setAttentionScore(0);
+      return;
+    }
+
+    setAttentionStatus("ok");
+    const rawValue = frameScore.value ?? resp.score?.value ?? resp.value ?? null;
+    if (rawValue === null || rawValue === undefined) return;
+    const rounded = Math.round(rawValue > 1 ? rawValue : rawValue * 100);
+    setAttentionScore(rounded);
+
+    if (enrollmentId && token) {
+      attentionAggRef.current.sum += rounded;
+      attentionAggRef.current.count += 1;
+      const now = Date.now();
+      if (now - attentionAggRef.current.lastSent > 10000) {
+        attentionAggRef.current.lastSent = now;
+        const avg = attentionAggRef.current.count
+          ? Math.round(attentionAggRef.current.sum / attentionAggRef.current.count)
+          : 0;
+        const nextData = {
+          ...enrollmentData,
+          attention_avg: avg,
+          attention_frames: attentionAggRef.current.count,
+          attention_last: rounded,
+          attention_updated_at: new Date().toISOString(),
+          last_attention_at: new Date().toISOString(),
+        };
+        setEnrollmentData(nextData);
+        apiFetch(
+          `/api/enrollments/${enrollmentId}/`,
+          { method: "PATCH", body: JSON.stringify({ enrollment_data: nextData }) },
+          token,
+        ).catch(() => setCaptureTransportStatus("degraded"));
+      }
+    }
+  };
+
+  const sendFrame = () => {
     if (!videoRef.current || !canvasRef.current) return;
     if (!sessionId || !userId) return;
-    try {
+    const queue = captureQueueRef.current;
+    if (!queue) return;
+
+    queue.enqueue<MLFrameResponse>(async ({ signal, idempotencyKey }) => {
       const video = videoRef.current;
       const canvas = canvasRef.current;
+      if (!video || !canvas) throw new Error("capture_stopped");
       
       // Validar que el video tiene contenido
       if (!video.videoWidth || !video.videoHeight) {
-        console.warn("[sendFrame] Video no tiene dimensiones aún", {
-          videoWidth: video.videoWidth,
-          videoHeight: video.videoHeight,
-          readyState: video.readyState,
-        });
-        return;
+        return { ok: false, detail: "Cámara todavía no preparada" };
       }
       
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       const ctx = canvas.getContext("2d");
       if (!ctx) {
-        console.warn("[sendFrame] No se puede obtener contexto 2D del canvas");
-        return;
+        return { ok: false, detail: "Captura no disponible" };
       }
       
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -549,10 +628,7 @@ export default function CoursePage() {
           if (!faceDetectorRef.current) faceDetectorRef.current = new (window as any).FaceDetector();
           const faces = await faceDetectorRef.current.detect(canvas as any);
           if (!faces || faces.length === 0) {
-            console.log("[sendFrame] Client-side FaceDetector: no faces detected");
-            setAttentionStatus("no_face");
-            setAttentionScore(0);
-            return;
+            return { ok: true, frame_score: { label: "no_face", data: { face: false } } };
           }
         } catch (err) {
           console.warn("[sendFrame] FaceDetector error, falling back to server", err);
@@ -563,8 +639,7 @@ export default function CoursePage() {
         canvas.toBlob(resolve, "image/jpeg", 0.8)
       );
       if (!blob) {
-        console.warn("[sendFrame] No se pudo crear blob de la imagen");
-        return;
+        return { ok: false, detail: "Captura no disponible" };
       }
 
       const form = new FormData();
@@ -576,112 +651,24 @@ export default function CoursePage() {
       if (selectedLessonId) form.append("lesson_id", String(selectedLessonId));
       if (currentMaterial?.materialType) form.append("material_type", currentMaterial.materialType);
 
-      const resp = await postFrameToML(form, token || undefined);
-      
-      // Validar respuesta
-      if (!resp?.ok) {
-        if (String(resp?.detail || resp?.error || "").includes("Consentimiento")) {
-          stopCamera();
-          setPermissionSettings((current) => ({ ...current, enableCamera: false }));
-        }
-        console.warn("[sendFrame] Respuesta de ML no válida", {
-          ok: resp?.ok,
-          error: resp?.error,
-          detail: resp?.detail,
-        });
-        // No cambiar el estado, mantener en "pending" mientras se intenta
-        return;
+      return postFrameToML(form, token || undefined, { signal, idempotencyKey });
+    }).then((outcome) => {
+      if (outcome.status === "confirmed") applyConfirmedFrame(outcome.value);
+      if (outcome.status === "failed" || outcome.status === "timed_out") {
+        setCaptureTransportStatus("degraded");
+        setAttentionStatus("error");
       }
-      
-      // Extraer datos de frame_score de forma segura
-      const frameScore = resp.frame_score || resp.score || {};
-      const frameLabel = frameScore.label || frameScore.state;
-      const hasFace = frameScore.data?.face ?? frameScore.face ?? false;
-      
-      console.log("[sendFrame] Frame procesado", {
-        has_frame_score: !!resp.frame_score,
-        has_score: !!resp.score,
-        label: frameLabel,
-        hasFace,
-        frameScoreKeys: resp.frame_score ? Object.keys(resp.frame_score) : [],
-        frameScoreDataKeys: resp.frame_score?.data ? Object.keys(resp.frame_score.data) : [],
-        frameValue: frameScore.value,
-      });
-      
-      if (frameLabel === "no_face" || hasFace === false) {
-        console.log("[sendFrame] Sin rostro detectado");
-        setAttentionStatus("no_face");
-        setAttentionScore(0);
-        return;
-      }
-      
-      setAttentionStatus("ok");
-      
-      // Extraer valor de atención con múltiples fallbacks
-      let rawValue = frameScore.value ?? resp.score?.value ?? resp.value ?? null;
-      
-      console.log("[sendFrame] Valores extraídos", {
-        frameScore_value: frameScore.value,
-        score_value: resp.score?.value,
-        resp_value: resp.value,
-        rawValue,
-      });
-      
-      if (rawValue !== null && rawValue !== undefined) {
-        const normalized = rawValue > 1 ? rawValue : rawValue * 100;
-        const rounded = Math.round(normalized);
-        console.log("[sendFrame] Atención calculada", {
-          rawValue,
-          normalized,
-          rounded,
-        });
-        setAttentionScore(rounded);
-        
-        if (enrollmentId && token) {
-          attentionAggRef.current.sum += rounded;
-          attentionAggRef.current.count += 1;
-          const now = Date.now();
-          if (now - attentionAggRef.current.lastSent > 10000) {
-            attentionAggRef.current.lastSent = now;
-            const avg = attentionAggRef.current.count
-              ? Math.round(attentionAggRef.current.sum / attentionAggRef.current.count)
-              : 0;
-            const nextData = {
-              ...enrollmentData,
-              attention_avg: avg,
-              attention_frames: attentionAggRef.current.count,
-              attention_last: rounded,
-              attention_updated_at: new Date().toISOString(),
-              last_attention_at: new Date().toISOString(),
-            };
-            setEnrollmentData(nextData);
-            console.log("[sendFrame] Enviando datos de atención al backend", {
-              avg,
-              frames: attentionAggRef.current.count,
-            });
-            apiFetch(
-              `/api/enrollments/${enrollmentId}/`,
-              {
-                method: "PATCH",
-                body: JSON.stringify({ enrollment_data: nextData }),
-              },
-              token
-            ).catch((err) => console.error("[sendFrame] Error actualizando enrollments", err));
-          }
-        }
-      } else {
-        console.warn("[sendFrame] No se pudo extraer valor de atención de la respuesta", {
-          resp,
-        });
-      }
-    } catch (err) {
-      console.error("[sendFrame] Error en sendFrame:", err instanceof Error ? err.message : err);
-    }
+    });
   };
 
   const startCamera = async () => {
     if (cameraActiveRef.current) return;
     if (!videoRef.current) return;
+    if (!BOUNDED_CAPTURE_QUEUE_ENABLED) {
+      setCaptureTransportStatus("stopped");
+      setAttentionStatus("error");
+      return;
+    }
     setAttentionStatus("pending");
     try {
       console.log("[startCamera] Iniciando cámara...");
@@ -704,6 +691,10 @@ export default function CoursePage() {
       
       await videoRef.current.play();
       cameraActiveRef.current = true;
+      captureQueueRef.current = new BoundedCaptureQueue({
+        timeoutMs: CAPTURE_DEADLINE_MS,
+        onState: (state) => setCaptureTransportStatus(state),
+      });
       console.log("[startCamera] Cámara iniciada correctamente");
       
       // Comenzar a capturar frames cada 1 segundo
@@ -1131,6 +1122,17 @@ export default function CoursePage() {
                       </span>
                     </div>
                   )}
+                  <p className="text-xs text-slate-500" aria-live="polite">
+                    Transporte de captura: {captureTransportStatus === "sending"
+                      ? "enviando"
+                      : captureTransportStatus === "queued"
+                        ? "red lenta; se conserva solo la ventana más reciente"
+                        : captureTransportStatus === "degraded"
+                          ? "sin confirmación; no se actualizó la medición"
+                          : captureTransportStatus === "idle"
+                            ? "listo"
+                            : "detenido"}
+                  </p>
                 </>
               )}
               <div className="text-sm text-slate-600">

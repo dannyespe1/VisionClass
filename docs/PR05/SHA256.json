@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "algorithm": "SHA-256",
+  "generated_at": "2026-09-15",
+  "files": {
+    "docs/PR05/INFORME.md": "ac6dc51b3220f61b0f5067e0b7997cebfa10876c75c918336b85f77f67a547b1",
+    "docs/PR05/VERIFICACION.json": "b10f9519ea854798ae3d1835f386809171893a4ce6078dd72b787150f07e569f",
+    "frontend/app/lib/bounded-capture-queue.mjs": "abb99b6b9602f3de9aa626b76b35cc36504984da98abf839a1b92527635547f1",
+    "frontend/app/lib/bounded-capture-queue.d.mts": "cbef61b6f53cc72844100b8b2aa59a3fa931e429dff278285596fb2c0e5e7c10",
+    "frontend/app/lib/capture-features.ts": "067d37df072df72d2b3b5ba84b26208ccf94309c09114435c5d733117d26e3da",
+    "frontend/tests/pr05-bounded-capture.test.mjs": "86702d6d7ba710a1b3f3e2ef0c8522925b3b760f0005fdb70db20d69d17500ce",
+    "scripts/verify_pr05_capture.py": "76e1c9607ac6c895d4c84a93e40f5b9ea62397ad93cd13b7104279e442d6a6df"
+  }
+}

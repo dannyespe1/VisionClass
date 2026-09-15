@@ -1,0 +1,36 @@
+{
+  "wave": "Ola 3 Datos contratos e instrumentos",
+  "evaluated_at": "2026-09-15",
+  "base_wave2": "7449b07250a513f02aebc57203a70ec05cac9256",
+  "g1_evidence": "08dff65",
+  "g1_status": "USER_AUTHORIZED_TECHNICAL_ADVANCE",
+  "integrated_code_head": "4a6ce27",
+  "integrated": {
+    "PR08": {"source": "3d306e2", "integrated": "b889620"},
+    "PR09": {"source": "dfc1feb", "integrated": "c02f75d"},
+    "PR10": {"source": "aab4704", "integrated": "4a6ce27"}
+  },
+  "checks": {
+    "django_check": "PASS",
+    "migration_drift": "PASS_NO_CHANGES",
+    "backend_tests": "PASS_39_OF_39",
+    "migration_forward_backward_forward": "PASS_SQLITE_TEMPORARY",
+    "frontend_tests": "PASS_9_OF_9",
+    "ml_tests": "PASS_5_OF_5",
+    "frontend_typecheck": "PASS",
+    "frontend_build": "PASS",
+    "python_compile": "PASS",
+    "frontend_lint": "FAIL_BASELINE_69_ERRORS_43_WARNINGS",
+    "compose_config": "NOT_EXECUTED_MISSING_LOCAL_ENV_FILES",
+    "npm_audit_inventory": "17_VULNERABILITIES_1_LOW_4_MODERATE_11_HIGH_1_CRITICAL"
+  },
+  "feature_flags": {
+    "TEMPORAL_SCHEMA_V2": false,
+    "MODEL_REGISTRY": false,
+    "EVENT_CONTRACT_V2": false
+  },
+  "authorized_participants": 0,
+  "real_data_used": false,
+  "deployed": false,
+  "wave3": "TECHNICAL_PASS_BLOCKED_HUMAN"
+}

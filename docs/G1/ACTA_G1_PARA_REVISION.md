@@ -2,7 +2,7 @@
 
 **Fecha de preparación:** 2026-09-15  
 **Commit evaluado de Ola 2:** `7449b07250a513f02aebc57203a70ec05cac9256`  
-**Estado:** `BLOCKED_HUMAN` — este documento prepara la decisión; no constituye aprobación.
+**Estado actualizado:** `USER_AUTHORIZED_TECHNICAL_ADVANCE` — el usuario autorizó continuar PR08–PR10 el 2026-09-15. La revisión ética, institucional y de privacidad independiente permanece `BLOCKED_HUMAN`; no se autorizan participantes, datos reales ni despliegue.
 
 ## Alcance evaluado
 

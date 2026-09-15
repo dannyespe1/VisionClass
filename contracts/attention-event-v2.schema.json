@@ -32,7 +32,8 @@
         "class": {"enum": ["desktop", "laptop", "tablet", "mobile", "unknown"]},
         "browser_family": {"type": "string", "maxLength": 32},
         "extractor_version": {"type": "string", "minLength": 1, "maxLength": 64},
-        "preprocessing_version": {"type": "string", "minLength": 1, "maxLength": 64}
+        "preprocessing_version": {"type": "string", "minLength": 1, "maxLength": 64},
+        "execution_profile": {"enum": ["low", "balanced", "high"]}
       }
     },
     "consent": {

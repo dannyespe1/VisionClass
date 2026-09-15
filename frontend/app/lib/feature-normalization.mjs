@@ -66,13 +66,14 @@ export function buildNormalizedEvent(sample, context) {
     session_type: "course",
     session_id: context.sessionId,
     captured_at: normalized.captured_at,
-    features: normalized.features,
+    features: { ...normalized.features, profile_generation: context.profileGeneration ?? 0 },
     quality: normalized.quality,
     device: {
       class: context.deviceClass || "unknown",
       browser_family: context.browserFamily || "unknown",
       extractor_version: sample.extractor_version,
       preprocessing_version: FEATURE_CONTRACT_VERSION,
+      execution_profile: context.executionProfile || "low",
     },
     consent: { version: context.consentVersion, purposes: [...context.purposes].sort() },
   };

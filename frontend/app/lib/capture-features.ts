@@ -14,3 +14,6 @@ export const NORMALIZED_FEATURES_V1_ENABLED =
 
 export const QUALITY_GATE_V1_ENABLED =
   process.env.NEXT_PUBLIC_QUALITY_GATE_V1?.trim().toLowerCase() === "true";
+
+export const EDGE_PROFILES_ENABLED =
+  process.env.NEXT_PUBLIC_EDGE_PROFILES?.trim().toLowerCase() === "true";

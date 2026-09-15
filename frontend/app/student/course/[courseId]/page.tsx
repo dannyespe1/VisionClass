@@ -32,13 +32,16 @@ import {
   BROWSER_EXTRACTOR_ENABLED,
   BOUNDED_CAPTURE_QUEUE_ENABLED,
   CAPTURE_DEADLINE_MS,
+  EDGE_PROFILES_ENABLED,
   NORMALIZED_FEATURES_V1_ENABLED,
   QUALITY_GATE_V1_ENABLED,
 } from "../../../lib/capture-features";
-import { BrowserFeatureExtractor, cameraConstraints } from "../../../lib/browser-feature-extractor.mjs";
+import { BrowserFeatureExtractor } from "../../../lib/browser-feature-extractor.mjs";
 import { buildNormalizedEvent } from "../../../lib/feature-normalization.mjs";
 import type { AttentionEventV2 } from "../../../lib/event-contract.mjs";
 import { evaluateFrame, evaluateWindow } from "../../../lib/quality-gate.mjs";
+import { constraintsForProfile, EDGE_PROFILES, EdgeProfileController } from "../../../lib/edge-profiles.mjs";
+import type { EdgeProfileName } from "../../../lib/edge-profiles.mjs";
 import {
   Dialog,
   DialogContent,
@@ -122,6 +125,7 @@ export default function CoursePage() {
   const consentVersionRef = useRef<string | null>(null);
   const latestNormalizedEventRef = useRef<AttentionEventV2 | null>(null);
   const qualityWindowRef = useRef<Array<Awaited<ReturnType<BrowserFeatureExtractor["extract"]>>>>([]);
+  const edgeProfileControllerRef = useRef<EdgeProfileController | null>(null);
   const sessionRef = useRef<number | null>(null);
   const progressSyncRef = useRef<{ lessonId: number | null; completed: number }>({
     lessonId: null,
@@ -174,6 +178,7 @@ export default function CoursePage() {
     "idle" | "queued" | "sending" | "degraded" | "stopped"
   >("stopped");
   const [qualityMessage, setQualityMessage] = useState<string | null>(null);
+  const [edgeProfile, setEdgeProfile] = useState<EdgeProfileName>("low");
 
   useEffect(() => {
     if (!token) {
@@ -556,6 +561,8 @@ export default function CoursePage() {
             consentVersion: consentVersionRef.current,
             purposes: ["local_processing", ...(permissionSettings.saveAnalytics ? ["derived_persistence"] : [])],
             browserFamily: navigator.userAgent.includes("Firefox") ? "firefox" : "chromium",
+            executionProfile: edgeProfileControllerRef.current?.current || edgeProfile,
+            profileGeneration: edgeProfileControllerRef.current?.generation || 0,
           });
         }
         setAttentionStatus(sample.quality.observable ? "ok" : "no_face");
@@ -584,7 +591,18 @@ export default function CoursePage() {
     setAttentionStatus("pending");
     try {
       console.log("[startCamera] Iniciando cámara...");
-      const media = await navigator.mediaDevices.getUserMedia(cameraConstraints());
+      edgeProfileControllerRef.current ||= new EdgeProfileController({ remoteSelection: false });
+      const selection = EDGE_PROFILES_ENABLED
+        ? edgeProfileControllerRef.current.selectForEnvironment({
+            hardwareConcurrency: navigator.hardwareConcurrency,
+            deviceMemory: (navigator as Navigator & { deviceMemory?: number }).deviceMemory || 0,
+            hidden: document.visibilityState === "hidden",
+          })
+        : edgeProfileControllerRef.current.select("low", { source: "local", reason: "safe_fallback" });
+      if (selection.resetWindow) qualityWindowRef.current = [];
+      setEdgeProfile(selection.profile);
+      const profile = EDGE_PROFILES[selection.profile];
+      const media = await navigator.mediaDevices.getUserMedia(constraintsForProfile(selection.profile));
       videoRef.current.srcObject = media;
       
       // Esperar a que el video esté listo antes de empezar a capturar frames
@@ -611,7 +629,7 @@ export default function CoursePage() {
         if (cameraActiveRef.current && videoRef.current?.readyState === videoRef.current?.HAVE_ENOUGH_DATA) {
           processLocalFrame();
         }
-      }, 1000);
+      }, profile.sampleIntervalMs);
     } catch (err) {
       console.error("[startCamera] Error al iniciar cámara:", err instanceof Error ? err.message : err);
       cameraActiveRef.current = false;
@@ -631,6 +649,11 @@ export default function CoursePage() {
   useEffect(() => {
     const handleVisibility = () => {
       if (document.visibilityState === "hidden") {
+        if (EDGE_PROFILES_ENABLED) {
+          edgeProfileControllerRef.current?.select("low", { source: "environment", reason: "background_tab" });
+          setEdgeProfile("low");
+          qualityWindowRef.current = [];
+        }
         persistProgressNow();
         stopCamera();
       }
@@ -670,7 +693,7 @@ export default function CoursePage() {
       }
       setPermissionSettings(settings);
       console.log("[requestCamera] Verificando permisos de cámara...");
-      const permissionStream = await navigator.mediaDevices.getUserMedia(cameraConstraints());
+      const permissionStream = await navigator.mediaDevices.getUserMedia(constraintsForProfile(edgeProfile));
       permissionStream.getTracks().forEach((track) => track.stop());
       console.log("[requestCamera] Permisos de cámara otorgados");
     } catch (err) {
@@ -928,6 +951,9 @@ export default function CoursePage() {
                       ? (qualityMessage || "Comprobando si la señal es observable.")
                       : "El seguimiento está preparado, pero sus controles permanecen desactivados."}
                   </p>
+                )}
+                {EDGE_PROFILES_ENABLED && (
+                  <p className="text-xs text-slate-600">Perfil Edge: {edgeProfile}</p>
                 )}
               </div>
             </TooltipContent>

@@ -11,6 +11,7 @@ export type AttentionEventV2 = {
     browser_family?: string;
     extractor_version?: string;
     preprocessing_version?: string;
+    execution_profile?: "low" | "balanced" | "high";
   };
   consent: { version: string; purposes: Array<"local_processing" | "derived_persistence" | "research"> };
 };

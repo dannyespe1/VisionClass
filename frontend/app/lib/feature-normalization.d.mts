@@ -18,4 +18,6 @@ export function buildNormalizedEvent(sample: BrowserFeatureSample, context: {
   windowMs?: number;
   deviceClass?: string;
   browserFamily?: string;
+  executionProfile?: "low" | "balanced" | "high";
+  profileGeneration?: number;
 }): AttentionEventV2;

@@ -1,14 +1,19 @@
 {
   "algorithm": "SHA-256",
   "files": {
-    "backend/api/models.py": "c066d881a0d2a22ba6a84ecae46428f60c323e94c48f7f5c1a284330009eb6b1",
+    "backend/api/models.py": "c69af02af8f31a01b3b6b227f09c8dd2ecf06c9a5cbd3dba3856b5a39c97f669",
     "backend/api/migrations/0015_observationwindow_inferredstate_temporalsession_and_more.py": "64355d22696b2fff2c65e6fc831248d979b17b56aadcf3652e04441dc000ef33",
     "backend/api/migrations/0016_modelartifact_inferredstate_model_artifact.py": "58731908cd3cec7bcbe17bea4b5ae0c54961e6dec3f8db58bf73e957f5fd53cc",
+    "backend/api/migrations/0017_momentaryselfreport.py": "48f6504801b2a7f88106a6531c74cf28a8cbec0a7b56fd01d132cafd77912aa8",
+    "backend/api/migrations/0018_learninginteractionevent.py": "2c380c943a3b2c5357a42277a7139e9f237ea6ea7e2f678764b403406e03932c",
+    "backend/api/migrations/0019_observerassignment_observerannotation_and_more.py": "6a95d52636d12f01abb730aef7876e74736a667b753a2d5cbe2c17254df8cda5",
     "backend/api/event_contract.py": "42e9a82af024f8f480118e501cfe1fa78ded234b6c09bb5ead6a328cd1bca195",
     "contracts/attention-event-v2.schema.json": "c3e557508099bb7ebd0721c106f221d6be2e6d20a21bdc6f5c8c0a6908986fef",
     "contracts/fixtures/attention-event-v2.valid.json": "48f8767f0d97e89ad190f83ce399b805c8720f2301d57e67686d7b7a1a257ddf",
     "contracts/fixtures/attention-event-v2.invalid.json": "1a092c1ad13eb73b7d54913fd4d0f77cd5e1f290dc613731623de7f36b3d74db",
-    "docs/WAVE3/REGISTRO_OLA3.md": "7e6ae219c180964668835616b344244d3da3fd5925ee4708c2360997917017d7",
-    "docs/WAVE3/VERIFICACION.json": "fd6595c2dfa6fc63095548bafe90d160d505b69a106031225b4d52a5733a9f15"
+    "docs/WAVE3/REGISTRO_OLA3.md": "01bf6ec2ce5d286c5be59d27318ad30aa60f82a6443586aa770d9c12c363ae66",
+    "docs/WAVE3/VERIFICACION.json": "bd63b3980521a3b4c11f22d9804d8c57299b7053c084ea7728dd12b4578b0c85",
+    "docs/G2/ACTA_G2_TECNICA.md": "761c8410af9162c68af4782117b3cb00f155ebac37afb8a57616023e9b3eda42",
+    "docs/G2/VERIFICACION.json": "76d1b3daafb2d3e32c2aa930232f4ee8de84186a719133ba02cba9269e417fae"
   }
 }

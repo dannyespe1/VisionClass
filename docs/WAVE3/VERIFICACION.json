@@ -4,16 +4,19 @@
   "base_wave2": "7449b07250a513f02aebc57203a70ec05cac9256",
   "g1_evidence": "08dff65",
   "g1_status": "USER_AUTHORIZED_TECHNICAL_ADVANCE",
-  "integrated_code_head": "4a6ce27",
+  "integrated_code_head": "7d98084",
   "integrated": {
     "PR08": {"source": "3d306e2", "integrated": "b889620"},
     "PR09": {"source": "dfc1feb", "integrated": "c02f75d"},
-    "PR10": {"source": "aab4704", "integrated": "4a6ce27"}
+    "PR10": {"source": "aab4704", "integrated": "4a6ce27"},
+    "PR29": {"source": "037e6a2", "integrated": "dfb4d4f"},
+    "PR30": {"source": "1ed67a5", "integrated": "d01466c"},
+    "PR31": {"source": "82243c0", "integrated": "7d98084"}
   },
   "checks": {
     "django_check": "PASS",
     "migration_drift": "PASS_NO_CHANGES",
-    "backend_tests": "PASS_39_OF_39",
+    "backend_tests": "PASS_49_OF_49",
     "migration_forward_backward_forward": "PASS_SQLITE_TEMPORARY",
     "frontend_tests": "PASS_9_OF_9",
     "ml_tests": "PASS_5_OF_5",
@@ -27,7 +30,10 @@
   "feature_flags": {
     "TEMPORAL_SCHEMA_V2": false,
     "MODEL_REGISTRY": false,
-    "EVENT_CONTRACT_V2": false
+    "EVENT_CONTRACT_V2": false,
+    "MOMENTARY_SELF_REPORT": false,
+    "LEARNING_INTERACTION_EVENTS": false,
+    "OBSERVER_ANNOTATION": false
   },
   "authorized_participants": 0,
   "real_data_used": false,

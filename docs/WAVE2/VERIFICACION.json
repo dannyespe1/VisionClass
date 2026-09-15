@@ -1,1 +1,1 @@
-{"wave":"Ola 2","base":"82f80da95b11bd204d4d650b94ff44e0fab9cde8","head":"pending","prs":{"PR02":"f13b535","PR04":"1cad92b","PR05":"c8d4c1f","PR06":"working-tree"},"status":"TECHNICAL_PASS_WITH_ENVIRONMENT_LIMITATION","human_gate":"BLOCKED_G0","real_data":false,"deployed":false}
+{"wave":"Ola 2","base":"82f80da95b11bd204d4d650b94ff44e0fab9cde8","head":"bac912c","prs":{"PR02":"f13b535","PR04":"1cad92b","PR05":"c8d4c1f","PR06":"bac912c"},"status":"TECHNICAL_PASS_WITH_ENVIRONMENT_LIMITATION","human_gate":"BLOCKED_G0","real_data":false,"deployed":false}

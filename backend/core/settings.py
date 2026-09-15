@@ -30,6 +30,16 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 STRICT_EVENT_IDENTITY = os.environ.get('STRICT_EVENT_IDENTITY', 'True').strip().lower() == 'true'
 EVENT_SESSION_MAX_AGE_MINUTES = int(os.environ.get('EVENT_SESSION_MAX_AGE_MINUTES', '480'))
 D2R_ENABLED = os.environ.get('D2R_ENABLED', 'False').strip().lower() == 'true'
+ML_SERVICE_IDENTITY = os.environ.get('ML_SERVICE_IDENTITY', 'True').strip().lower() == 'true'
+ML_SERVICE_NAME = os.environ.get('ML_SERVICE_NAME', 'visionclass-ml').strip()
+ML_SERVICE_TOKEN = os.environ.get('ML_SERVICE_TOKEN', '').strip()
+ML_SERVICE_PREVIOUS_TOKEN = os.environ.get('ML_SERVICE_PREVIOUS_TOKEN', '').strip()
+ML_SERVICE_SCOPES = tuple(
+    scope.strip()
+    for scope in os.environ.get('ML_SERVICE_SCOPES', 'events:write').split(',')
+    if scope.strip()
+)
+ML_EVENT_MAX_BYTES = int(os.environ.get('ML_EVENT_MAX_BYTES', '16384'))
 
 ALLOWED_HOSTS = [h.strip() for h in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if h.strip()]
 

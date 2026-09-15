@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "pr": "PR04",
+  "date": "2026-09-14",
+  "base": "82f80da95b11bd204d4d650b94ff44e0fab9cde8",
+  "status": "CANDIDATE_TECHNICAL",
+  "g0": "BLOCKED",
+  "participants_authorized": 0,
+  "checks": {
+    "backend_targeted": "PASS_10_OF_10",
+    "backend_combined": "PASS_26_OF_26",
+    "ml_identity_unit": "PASS_3_OF_3",
+    "python_compile": "PASS",
+    "django_check": "PASS",
+    "migration_drift": "PASS",
+    "frontend_typecheck": "PASS",
+    "frontend_lint": "FAIL_BASELINE_70_ERRORS_44_WARNINGS",
+    "frontend_build_sandbox": "BLOCKED_ENV_GOOGLE_FONTS_NETWORK",
+    "static_verifier": "PASS",
+    "rotation_deployed": "BLOCKED_ENV",
+    "independent_security_review": "BLOCKED_HUMAN"
+  }
+}

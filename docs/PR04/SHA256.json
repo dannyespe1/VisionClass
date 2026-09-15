@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "algorithm": "SHA-256",
+  "generated_at": "2026-09-15",
+  "files": {
+    "docs/PR04/INFORME.md": "62cc7e36abe77a14e0f4fb6e2f3ea964cfa652bc1407ffef41e5b07fdea63837",
+    "docs/PR04/RUNBOOK_ROTACION.md": "12f7e7ceba7b382c22c275c28ec7fc01d0d3014e3b8d29343c08c90448345a3f",
+    "docs/PR04/VERIFICACION.json": "c577c35e153c056db8b93150f15c78e10aa796dc6cd845d0dc3a61d55529996a",
+    "backend/api/service_identity.py": "6f329f8508e5411277dbfe5acdc2183545ddec988c9379e0c0efb1fa183cc006",
+    "backend/api/service_views.py": "564df486ce65073487a71f3bbccb92e10366341b30f291448e6d07cc30ea6157",
+    "backend/api/tests_pr04_ml_service.py": "96e501af485ad0952d63987f5b68e144b711cd4a4cf5424fff53116d6984394f",
+    "ml/service_identity.py": "15df3e09b4916a7fb9d0a98d1bbe0083cc952ce5459f7eecaf0328f5e8141a26",
+    "ml/test_service_identity.py": "a423b6da071c47c7df680d7c2907d09e8306258495f859a124c2ce9d8154436a",
+    "scripts/verify_pr04_ml_identity.py": "3b6291d62d1351f2d86ec33ca48d5b96b44eb4781fd91d5448319b401c17b8e2"
+  }
+}

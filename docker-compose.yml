@@ -28,6 +28,8 @@ services:
       - ./frontend:/app
     ports:
       - "3000:3000"
+    environment:
+      - ML_BFF_SERVICE_TOKEN=${ML_BFF_SERVICE_TOKEN:-}
     depends_on:
       - backend
   ml:
@@ -35,7 +37,11 @@ services:
     command: python ml_service.py
     environment:
       - BACKEND_URL=http://backend:8000
-      - BACKEND_TOKEN=${ML_BACKEND_TOKEN:-}
+      - ML_SERVICE_IDENTITY=1
+      - ML_BACKEND_SERVICE_TOKEN=${ML_BACKEND_SERVICE_TOKEN:-}
+      - BFF_SERVICE_TOKEN=${ML_BFF_SERVICE_TOKEN:-}
+      - BFF_PREVIOUS_SERVICE_TOKEN=${ML_BFF_PREVIOUS_SERVICE_TOKEN:-}
+      - BFF_SERVICE_SCOPES=frames:analyze,events:consume,models:read
       - SEQUENCE_LENGTH=16
     volumes:
       - ./ml:/app

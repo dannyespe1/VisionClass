@@ -39,6 +39,14 @@ services:
         value: "https://visionclass-frontend.onrender.com/login"
       - key: SITE_ID
         value: "1"
+      - key: ML_SERVICE_IDENTITY
+        value: "True"
+      - key: ML_SERVICE_TOKEN
+        sync: false
+      - key: ML_SERVICE_PREVIOUS_TOKEN
+        sync: false
+      - key: ML_SERVICE_SCOPES
+        value: events:write
 
   - type: web
     name: visionclass-ml
@@ -54,6 +62,16 @@ services:
         value: "224"
       - key: TRAIN_ON_START
         value: "0"
+      - key: ML_SERVICE_IDENTITY
+        value: "1"
+      - key: ML_BACKEND_SERVICE_TOKEN
+        sync: false
+      - key: BFF_SERVICE_TOKEN
+        sync: false
+      - key: BFF_PREVIOUS_SERVICE_TOKEN
+        sync: false
+      - key: BFF_SERVICE_SCOPES
+        value: frames:analyze,events:consume,models:read
 
   - type: web
     name: visionclass-frontend
@@ -69,6 +87,8 @@ services:
         value: https://visionclass-ml.onrender.com
       - key: BACKEND_URL
         value: https://visionclass-backend.onrender.com
+      - key: ML_BFF_SERVICE_TOKEN
+        sync: false
       - key: NEXT_PUBLIC_GOOGLE_CLIENT_ID
         sync: false
       - key: NEXT_PUBLIC_GOOGLE_REDIRECT_URI

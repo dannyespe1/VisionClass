@@ -2,6 +2,7 @@ import os
 import sys
 import subprocess
 import uuid
+import logging
 from threading import Thread
 from datetime import datetime
 from typing import Optional, Dict, Any
@@ -19,9 +20,24 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, model_validator
 import uvicorn
 
+from service_identity import ServiceIdentityConfig, ServiceIdentityError, authorize_service
+
+
+logger = logging.getLogger("visionclass.ml")
+
 
 BACKEND_URL = os.environ.get("BACKEND_URL", "http://backend:8000")
-BACKEND_TOKEN = os.environ.get("BACKEND_TOKEN", "")
+ML_BACKEND_SERVICE_TOKEN = os.environ.get("ML_BACKEND_SERVICE_TOKEN", "").strip()
+ML_SERVICE_IDENTITY = os.environ.get("ML_SERVICE_IDENTITY", "1") == "1"
+BFF_SERVICE_IDENTITY = ServiceIdentityConfig.build(
+    enabled=ML_SERVICE_IDENTITY,
+    current_token=os.environ.get("BFF_SERVICE_TOKEN", ""),
+    previous_token=os.environ.get("BFF_PREVIOUS_SERVICE_TOKEN", ""),
+    scopes=os.environ.get(
+        "BFF_SERVICE_SCOPES",
+        "frames:analyze,events:consume,models:read",
+    ).split(","),
+)
 SEQUENCE_LENGTH = int(os.environ.get("SEQUENCE_LENGTH", "16"))
 MODEL_PATH = os.environ.get("MODEL_PATH", "checkpoints/cnn_lstm.onnx")
 MODEL_IMG_SIZE = int(os.environ.get("MODEL_IMG_SIZE", "224"))
@@ -58,10 +74,10 @@ if mp_face_mesh is not None:
         min_detection_confidence=0.5,
         min_tracking_confidence=0.5,
     )
-    print("✅ [INIT] MediaPipe FaceMesh initialized successfully")
+    logger.info("ml_component component=face_mesh status=ready")
 else:
     face_mesh = None
-    print("⚠️  [INIT] MediaPipe FaceMesh initialization FAILED - face_mesh=None")
+    logger.warning("ml_component component=face_mesh status=unavailable")
 
 # Fallback: Haar cascade face detector (lighter, more portable)
 cascade = None
@@ -71,9 +87,9 @@ try:
     cascade = cv2.CascadeClassifier(cascade_path)
     if cascade.empty():
         cascade = None
-        print(f"⚠️  [INIT] Haar cascade exists but failed to load: {cascade_path}")
+        logger.warning("ml_component component=haar status=unavailable")
     else:
-        print(f"✅ [INIT] Haar cascade loaded from: {cascade_path}")
+        logger.info("ml_component component=haar status=ready")
         
     # Load eye cascade for attention scoring (when MediaPipe unavailable)
     eye_cascade_path = cv2.data.haarcascades + "haarcascade_eye.xml"
@@ -81,11 +97,11 @@ try:
     if eye_cascade.empty():
         eye_cascade = None
     else:
-        print(f"✅ [INIT] Eye cascade loaded")
-except Exception as e:
+        logger.info("ml_component component=eye_cascade status=ready")
+except Exception:
     cascade = None
     eye_cascade = None
-    print(f"⚠️  [INIT] Haar cascade initialization error: {e}")
+    logger.warning("ml_component component=haar status=error")
 session_sequences: Dict[int, deque] = defaultdict(lambda: deque(maxlen=SEQUENCE_LENGTH))
 session_frame_buffers: Dict[int, deque] = defaultdict(lambda: deque(maxlen=SEQUENCE_LENGTH))
 
@@ -116,7 +132,6 @@ _start_background_training()
 class AttentionEventPayload(BaseModel):
     session_id: Optional[int] = None
     d2r_session_id: Optional[int] = None
-    user_id: int
     timestamp: Optional[datetime] = Field(default_factory=datetime.utcnow)
     value: float = Field(..., description="Attention score between 0 and 1")
     label: Optional[str] = "attention_score"
@@ -151,7 +166,6 @@ def compute_attention_score(image: np.ndarray) -> Dict[str, Any]:
                 detected = None
                 for scaleFactor, minNeighbors, minSize in params:
                     faces = cascade.detectMultiScale(gray, scaleFactor=scaleFactor, minNeighbors=minNeighbors, minSize=minSize)
-                    print(f"[compute_attention_score] Haar try sf={scaleFactor} mn={minNeighbors} ms={minSize} -> found={len(faces)}")
                     if len(faces) > 0:
                         detected = faces[0]
                         used_params = (scaleFactor, minNeighbors, minSize)
@@ -192,7 +206,6 @@ def compute_attention_score(image: np.ndarray) -> Dict[str, Any]:
                     # Composite score: 70% face area + 20% eye detection + 10% confidence
                     score = float(np.clip(0.7 * face_area_score + 0.2 * eye_score + 0.1 * confidence_score, 0.0, 1.0))
                     
-                    print(f"[compute_attention_score] ✅ Haar detected bbox={bbox} area={area:.4f} face_s={face_area_score:.2f} eye_s={eye_score:.2f} conf={confidence_score:.2f} → score={score:.2f}")
                     return {
                         "value": score,
                         "label": "attention_score",
@@ -207,12 +220,9 @@ def compute_attention_score(image: np.ndarray) -> Dict[str, Any]:
                             "params": used_params
                         },
                     }
-            except Exception as e:
-                print(f"[compute_attention_score] ⚠️ Haar detection error: {e}")
-        # If no face detected or no cascade available, log image stats
-        img_stats = {"shape": image.shape, "min": int(image.min()), "max": int(image.max()), "mean": int(image.mean())}
-        print(f"[compute_attention_score] ⚠️  NO DETECTADO: {img_stats} face_mesh={face_mesh is not None} cascade={cascade is not None}")
-        return {"value": None, "label": "no_face", "data": {"face": False, "image_stats": img_stats}}
+            except Exception:
+                logger.warning("ml_analysis outcome=failed reason=haar_processing_error")
+        return {"value": None, "label": "no_face", "data": {"face": False}}
 
     h, w, _ = image.shape
     rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -337,28 +347,37 @@ def aggregate_temporal_score(session_id: int, frame_result: Dict[str, Any]) -> D
 async def post_event_to_backend(
     payload: AttentionEventPayload,
     test_name: str = "D2R",
-    authorization: Optional[str] = None,
     idempotency_key: Optional[str] = None,
 ) -> None:
-    bearer = authorization if authorization and authorization.lower().startswith("bearer ") else ""
-    if not bearer and not BACKEND_TOKEN:
-        return
+    if not ML_SERVICE_IDENTITY or len(ML_BACKEND_SERVICE_TOKEN) < 32:
+        raise HTTPException(status_code=503, detail="Identidad de servicio no disponible")
     normalized_test = (test_name or "").upper()
     is_d2r = normalized_test == "D2R" or (normalized_test == "" and payload.d2r_session_id is not None)
     if is_d2r and not payload.d2r_session_id:
         raise HTTPException(status_code=400, detail="d2r_session_id requerido")
     if not is_d2r and not payload.session_id:
         raise HTTPException(status_code=400, detail="session_id requerido")
-    endpoint = "/api/d2r-attention-events/" if is_d2r else "/api/attention-events/"
-    url = f"{BACKEND_URL}{endpoint}"
+    url = f"{BACKEND_URL}/api/internal/ml/events/"
     headers = {
-        "Authorization": bearer or f"Bearer {BACKEND_TOKEN}",
+        "Authorization": f"Service {ML_BACKEND_SERVICE_TOKEN}",
         "Idempotency-Key": idempotency_key or f"ml:{uuid.uuid4()}",
     }
     async with httpx.AsyncClient(timeout=10) as client:
-        resp = await client.post(url, json=payload.model_dump(), headers=headers)
+        resp = await client.post(url, json=payload.model_dump(exclude_none=True), headers=headers)
         if resp.status_code >= 400:
             raise HTTPException(status_code=502, detail="Backend event post failed")
+
+
+def require_service_scope(authorization: Optional[str], required_scope: str) -> str:
+    try:
+        return authorize_service(authorization, required_scope, BFF_SERVICE_IDENTITY)
+    except ServiceIdentityError as exc:
+        logger.warning(
+            "security_event action=ml_service_auth outcome=denied "
+            "reason=%s",
+            exc.reason,
+        )
+        raise HTTPException(status_code=exc.status_code, detail="Identidad de servicio no válida")
 
 
 @app.get("/health")
@@ -367,7 +386,8 @@ async def health():
 
 
 @app.get("/debug/status")
-async def debug_status():
+async def debug_status(authorization: Optional[str] = Header(None)):
+    require_service_scope(authorization, "models:read")
     return {
         "mediapipe_initialized": face_mesh is not None,
         "haar_cascade_loaded": cascade is not None,
@@ -382,9 +402,10 @@ async def receive_event(payload: AttentionEventPayload, authorization: Optional[
     Endpoint para recibir eventos de atención ya calculados
     (por ejemplo, desde otro proceso ML).
     """
+    require_service_scope(authorization, "events:consume")
     test_name = "D2R" if payload.d2r_session_id is not None else "COURSE"
-    await post_event_to_backend(payload, test_name=test_name, authorization=authorization)
-    return {"ok": True, "forwarded": bool(BACKEND_TOKEN)}
+    await post_event_to_backend(payload, test_name=test_name)
+    return {"ok": True, "forwarded": True}
 
 
 @app.post("/analyze/frame")
@@ -392,7 +413,6 @@ async def analyze_frame(
     file: UploadFile = File(...),
     d2r_session_id: Optional[int] = Form(None),
     session_id: Optional[int] = Form(None),
-    user_id: int = Form(...),
     phase: int = Form(0),
     time_left: float = Form(0),
     spinning: int = Form(0),
@@ -404,6 +424,7 @@ async def analyze_frame(
     Recibe un frame (image/jpeg o png), calcula score y reenvía al backend.
     Pensado para ser llamado desde el frontend (captura de cámara).
     """
+    require_service_scope(authorization, "frames:analyze")
     if not d2r_session_id and not session_id:
         raise HTTPException(status_code=422, detail="session_id o d2r_session_id requerido")
     session_key = d2r_session_id if d2r_session_id is not None else session_id
@@ -416,14 +437,6 @@ async def analyze_frame(
 
     result = compute_attention_score(image)
     temporal = aggregate_temporal_score(session_key, result)
-
-    # LOG DETALLADO para debugging
-    has_face = result.get("data", {}).get("face", False)
-    frame_score = result.get("value")
-    temporal_score = temporal.get("value")
-    frame_score_str = f"{frame_score:.2f}" if frame_score is not None else "None"
-    temporal_score_str = f"{temporal_score:.2f}" if temporal_score is not None else "None"
-    print(f"[analyze/frame] session={session_key}, face={has_face}, frame_score={frame_score_str}, temporal={temporal_score_str}")
 
     # Opcional: guardar frame para dataset (no es video, solo imágenes sueltas)
     frame_path = None
@@ -461,8 +474,8 @@ async def analyze_frame(
             crop = crop.astype("float32") / 255.0
             crop = np.transpose(crop, (2, 0, 1))  # C,H,W
             session_frame_buffers[session_key].append(crop)
-        except Exception as e:
-            print(f"[analyze/frame] Error procesando frame para modelo: {e}")
+        except Exception:
+            logger.warning("ml_analysis outcome=degraded reason=frame_preparation_error")
 
         if ort_session and len(session_frame_buffers[session_key]) >= SEQUENCE_LENGTH and int(spinning) == 0:
             try:
@@ -471,9 +484,8 @@ async def analyze_frame(
                 ort_out = ort_session.run(None, {"frames": arr, "mask": None})
                 if ort_out:
                     model_score = float(np.clip(np.ravel(ort_out[0])[0], 0.0, 1.0))
-                    print(f"[analyze/frame] Modelo CNN-LSTM calculado: {model_score:.4f}")
-            except Exception as e:
-                print(f"[analyze/frame] Error ejecutando modelo CNN-LSTM: {e}")
+            except Exception:
+                logger.warning("ml_analysis outcome=degraded reason=model_inference_error")
                 model_score = None
 
     label = "attention_model" if model_score is not None else (
@@ -486,7 +498,6 @@ async def analyze_frame(
     payload = AttentionEventPayload(
         d2r_session_id=session_key if is_d2r else None,
         session_id=None if is_d2r else session_key,
-        user_id=user_id,
         value=value,
         label=label,
         data={
@@ -498,7 +509,7 @@ async def analyze_frame(
             },
             "state": "no_face" if not result.get("data", {}).get("face", False) else "ok",
             "temporal": temporal.get("data", {}),
-            "frame": result.get("data", {}),
+            "observation": result.get("data", {}),
             "score_model": model_score,
             "score_baseline": result.get("value"),
         },
@@ -506,7 +517,6 @@ async def analyze_frame(
     await post_event_to_backend(
         payload,
         test_name=(test_name or ("D2R" if is_d2r else "COURSE")),
-        authorization=authorization,
         idempotency_key=idempotency_key,
     )
     return JSONResponse({"ok": True, "score": temporal, "frame_score": result})

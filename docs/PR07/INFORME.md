@@ -1,8 +1,8 @@
 # PR07 — Protocolo y consentimiento v2
 
-**Estado técnico:** CANDIDATO LOCAL  
-**Estado humano:** `BLOCKED_HUMAN`  
-**Fecha:** 2026-09-14  
+**Estado técnico:** CANDIDATO LOCAL
+**Estado humano:** `BLOCKED_HUMAN`
+**Fecha:** 2026-09-14
 **Base:** PR01 `14b7a8b0ae6233e6c555eca68704db2f1682399d`
 
 ## Resultado comprobado

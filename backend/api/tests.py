@@ -5,10 +5,16 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from .models import AttentionEvent, Course, Enrollment, SecurityAuditEvent, Session, User
+from .models import AttentionEvent, ConsentEvent, Course, Enrollment, SecurityAuditEvent, Session, User
 
 
-@override_settings(STRICT_EVENT_IDENTITY=True, EVENT_SESSION_MAX_AGE_MINUTES=480)
+@override_settings(
+    STRICT_EVENT_IDENTITY=True,
+    EVENT_SESSION_MAX_AGE_MINUTES=480,
+    CONSENT_V2_ENABLED=True,
+    CONSENT_TEXT_APPROVED=True,
+    CONSENT_CURRENT_VERSION="test-v1",
+)
 class StrictEventIdentityTests(APITestCase):
     def setUp(self):
         self.student = User.objects.create_user(username="student-a", role=User.ROLE_STUDENT)
@@ -23,6 +29,17 @@ class StrictEventIdentityTests(APITestCase):
             created_by=self.student,
             started_at=timezone.now(),
         )
+        for purpose in (
+            ConsentEvent.PURPOSE_LOCAL_PROCESSING,
+            ConsentEvent.PURPOSE_DERIVED_PERSISTENCE,
+        ):
+            ConsentEvent.objects.create(
+                participant=self.student,
+                version="test-v1",
+                purpose=purpose,
+                action=ConsentEvent.ACTION_GRANT,
+                expires_at=timezone.now() + timedelta(days=1),
+            )
         self.client.force_authenticate(self.student)
 
     def event_payload(self, session=None, user_id=None):

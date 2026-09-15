@@ -1,18 +1,18 @@
 [
   {
     "path": "docs/PR07/CONTRATO_CONSENTIMIENTO.json",
-    "sha256": "59fa71b30406d3be7c55957b4f831a043f38e88b0dfa83a11468cf46e1535d8a"
+    "sha256": "98e9f8c4e7eee2456ef38d1ed5c5ccc841b4459f97d45567a0f9f90b5d089d5c"
   },
   {
     "path": "docs/PR07/DECISIONES.csv",
-    "sha256": "e38e6baf08480727c590c5a7f340979b2b6a89a8ed47c4ba416f3bc7fc16b6c9"
+    "sha256": "416ee1361b05668ef4308d0793ec5d11b0a0757740965c2489e0359c19c0019b"
   },
   {
     "path": "docs/PR07/INFORME.md",
-    "sha256": "9c76a9a47fe93388ebad1068d80852c175a475e91bd1ef0364f6ba2be0bf170a"
+    "sha256": "95388f88ab14ac54e6339f8fbf8b73defff9dae0ca0131e8fafe65ee50a0d630"
   },
   {
     "path": "docs/PR07/VERIFICACION.json",
-    "sha256": "d47f9a0addd7c8bd73aea7b29d594810d5a489ce36a0aab0ce1a931bd91272dd"
+    "sha256": "f2157918911ad37313796c1dab5ec25aa71100c031c51155c0faf868b3e07105"
   }
 ]

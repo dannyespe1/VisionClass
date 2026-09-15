@@ -1,0 +1,37 @@
+{
+  "evaluated_at": "2026-09-14",
+  "branch": "wave1-integracion",
+  "base": "14b7a8b0ae6233e6c555eca68704db2f1682399d",
+  "integrated": {
+    "PR01": "14b7a8b0ae6233e6c555eca68704db2f1682399d",
+    "PR03_source": "baba50bd9c8d08a33204dddd0cd9c5e2e09e8881",
+    "PR03_cherry_pick": "89ece8874ff446619f83ce0dd6b176b54ad4897c",
+    "PR07_source": "03a17e3dc96d016b3e360dc113307427f9d672a6",
+    "PR07_source_before_document_normalization": "191c5da1a21efcd73eaca9cffa66c4199adc6430",
+    "PR07_cherry_pick": "96eb7dd674c76de0a7d036c5b3ae221a641e2f24"
+  },
+  "parked": {"PR02": "8ae22574f6c346edb268033a2b42a49521476c6b"},
+  "checks": {
+    "local_runtimes": {"python": "3.12.14", "node": "22.17.1", "npm": "10.9.2"},
+    "target_runtime_ci": {"status": "BLOCKED_ENV", "python": "3.11", "node": "20"},
+    "backend_tests": {"status": "PASS", "passed": 16, "failed": 0},
+    "migration_drift": "PASS",
+    "python_compile": "PASS",
+    "frontend_typecheck": "PASS",
+    "frontend_build": "PASS",
+    "frontend_lint": {"status": "FAIL_BASELINE", "errors": 70, "warnings": 44, "baseline_errors": 71, "baseline_warnings": 45},
+    "targeted_lint": "PASS",
+    "compose_config": "PASS",
+    "pr01_verifier": "PASS",
+    "pr03_verifier": "PASS",
+    "pr07_verifier": "PASS",
+    "governance_verifier": "PASS",
+    "g0_verifier": "PASS_BLOCKED",
+    "secret_pii_scan": "PASS",
+    "deployment": "NOT_RUN_OUT_OF_SCOPE"
+  },
+  "authorized_participants": 0,
+  "g0": "BLOCKED",
+  "wave1": "TECHNICAL_PASS_BLOCKED_HUMAN",
+  "wave1_closed": false
+}

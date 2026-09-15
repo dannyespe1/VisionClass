@@ -1,0 +1,6 @@
+{
+  "pr": "PR06",
+  "status": "TECHNICAL_PASS_WITH_ENVIRONMENT_LIMITATION",
+  "checks": {"diff_check": "PASS", "health_live_ready_routes": "PASS_BY_INSPECTION", "python_compile": "BLOCKED_PYTHON_RUNTIME_UNAVAILABLE"},
+  "human_gates": ["G0 remains blocked until independent review and privacy/ethics approvals"]
+}

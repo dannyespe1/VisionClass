@@ -23,9 +23,11 @@ import re
 from urllib.parse import urlparse, parse_qs
 import io
 import csv
+import uuid
 from datetime import timedelta
 from google import genai
 from google.genai import types
+from django.db import connection
 
 from .models import (
     Course,
@@ -49,6 +51,26 @@ from .models import (
     PrivacyPolicySetting,
     ConsentEvent,
 )
+
+
+class HealthLiveView(APIView):
+    permission_classes = []
+
+    def get(self, request):
+        return Response({"status": "ok", "correlation_id": request.headers.get("X-Correlation-ID", str(uuid.uuid4()))})
+
+
+class HealthReadyView(APIView):
+    permission_classes = []
+
+    def get(self, request):
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT 1")
+            return Response({"status": "ready", "checks": {"database": "ok"}})
+        except Exception:
+            logging.getLogger(__name__).exception("readiness_check_failed")
+            return Response({"status": "not_ready", "checks": {"database": "error"}}, status=503)
 from .serializers import (
     UserSerializer,
     RegisterSerializer,

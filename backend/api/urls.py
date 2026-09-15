@@ -30,6 +30,8 @@ router.register(r'consents', views.ConsentEventViewSet, basename='consent')
 
 
 urlpatterns = [
+    path('health/live/', views.HealthLiveView.as_view(), name='health_live'),
+    path('health/ready/', views.HealthReadyView.as_view(), name='health_ready'),
     path('auth/token/', views.EmailTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('auth/google/', views.GoogleLogin.as_view(), name='google_login'),

@@ -22,12 +22,12 @@
     "python_compile": "PASS",
     "diff_check": "PASS",
     "compose_config": "PASS_WITH_DISPOSABLE_LOCAL_ENV",
-    "redis_smoke": "BLOCKED_ENV_DOCKER_DESKTOP_NOT_RUNNING",
+    "redis_smoke": "PASS_LOCAL_DISPOSABLE_AUTH_TTL_HEALTH_NO_PUBLISHED_PORT",
     "frontend_lint": "UNCHANGED_BASELINE_69_ERRORS_43_WARNINGS"
   },
   "feature_flags": {"REDIS_ENABLED": false, "DISTRIBUTED_STATE": false, "STREAM_PIPELINE": false, "DEMOGRAPHIC_VAULT": false, "RETENTION_JOBS": false},
   "authorized_participants": 0,
   "real_data_used": false,
   "deployed": false,
-  "wave4": "TECHNICAL_PASS_WITH_ENVIRONMENT_AND_HUMAN_BLOCKERS"
+  "wave4": "TECHNICAL_PASS_WITH_HUMAN_BLOCKERS"
 }

@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-09-15  
 **Base:** `226b269` (Ola 3 completa y G2 técnico)  
-**Estado:** `TECHNICAL_PASS_WITH_ENVIRONMENT_AND_HUMAN_BLOCKERS`
+**Estado:** `TECHNICAL_PASS_WITH_HUMAN_BLOCKERS`
 
 ## Commits
 
@@ -22,7 +22,7 @@
 - Migraciones: sin deriva; `0020` y `0021` aplican, revierten hasta `0019` y reaplican correctamente.
 - Python compile y `git diff --check`: PASS.
 - Compose config: PASS con valores locales desechables.
-- Smoke Redis: NO EJECUTADO; Docker Desktop no estaba iniciado y no se creó contenedor.
+- Smoke Redis: PASS en entorno local desechable. Se verificaron autenticación obligatoria, `PING` autenticado, clave con TTL, estado `healthy` y ausencia de puertos publicados. El contenedor, la red y el volumen de prueba fueron eliminados al terminar.
 - Lint: no se modificó código frontend sujeto a la deuda global; permanece la línea base conocida de 69 errores/43 advertencias.
 - Dependencias npm: se mantienen las 17 vulnerabilidades ya registradas; no se ejecutó una actualización fuera de alcance.
 
@@ -30,4 +30,4 @@
 
 Los flags `REDIS_ENABLED`, `DISTRIBUTED_STATE`, `STREAM_PIPELINE`, `DEMOGRAPHIC_VAULT` y `RETENTION_JOBS` permanecen en `False`. No hubo despliegue ni datos reales.
 
-Antes de activar: smoke Redis con Docker/CI, carga y reinicios, rol PostgreSQL separado para la bóveda, revisión de reidentificación, inventario de backups/exportaciones y aprobaciones independientes de privacidad/ética.
+Antes de activar: repetir smoke Redis en CI, ejecutar carga y reinicios, crear un rol PostgreSQL separado para la bóveda, revisar reidentificación, inventariar backups/exportaciones y obtener aprobaciones independientes de privacidad/ética.

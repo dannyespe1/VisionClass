@@ -619,3 +619,45 @@ class InterventionRecord(models.Model):
 
     class Meta:
         indexes = [models.Index(fields=["temporal_session", "occurred_at"])]
+
+
+class MomentarySelfReport(models.Model):
+    RESPONSE_FOCUSED = "focused"
+    RESPONSE_DISTRACTED = "distracted"
+    RESPONSE_UNSURE = "unsure"
+    RESPONSE_OMITTED = "omitted"
+    RESPONSE_CHOICES = [
+        (RESPONSE_FOCUSED, "Focused"),
+        (RESPONSE_DISTRACTED, "Distracted"),
+        (RESPONSE_UNSURE, "Unsure"),
+        (RESPONSE_OMITTED, "Omitted"),
+    ]
+
+    request_id = models.UUIDField(unique=True)
+    temporal_session = models.ForeignKey(TemporalSession, on_delete=models.CASCADE, related_name="self_reports")
+    window = models.ForeignKey(ObservationWindow, on_delete=models.PROTECT, null=True, blank=True, related_name="self_reports")
+    participant = models.ForeignKey(User, on_delete=models.PROTECT, related_name="momentary_self_reports")
+    prompt_version = models.CharField(max_length=64)
+    response = models.CharField(max_length=16, choices=RESPONSE_CHOICES)
+    requested_at = models.DateTimeField()
+    responded_at = models.DateTimeField(null=True, blank=True)
+    latency_ms = models.PositiveIntegerField(null=True, blank=True)
+    resource_kind = models.CharField(max_length=32, blank=True)
+    resource_reference = models.CharField(max_length=64, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["temporal_session", "requested_at"])]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(responded_at__isnull=True) | models.Q(responded_at__gte=models.F("requested_at")),
+                name="self_report_response_after_request",
+            )
+        ]
+
+    def clean(self):
+        super().clean()
+        if self.participant_id and self.temporal_session_id and self.participant_id != self.temporal_session.participant_id:
+            raise ValidationError("El participante no corresponde a la sesión temporal.")
+        if self.response == self.RESPONSE_OMITTED and self.responded_at is not None:
+            raise ValidationError("Una omisión no debe registrar tiempo de respuesta.")

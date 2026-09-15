@@ -1,0 +1,1 @@
+{"pr":"PR29","status":"TECHNICAL_PASS_BLOCKED_HUMAN","feature_flag":"MOMENTARY_SELF_REPORT=false","checks":{"targeted_tests":"PASS_3_OF_3","migration_drift":"PASS","python_compile":"PASS","diff_check":"PASS","cognitive_pilot":"BLOCKED_HUMAN"},"real_data_used":false}

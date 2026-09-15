@@ -33,6 +33,7 @@ D2R_ENABLED = os.environ.get('D2R_ENABLED', 'False').strip().lower() == 'true'
 TEMPORAL_SCHEMA_V2 = os.environ.get('TEMPORAL_SCHEMA_V2', 'False').strip().lower() == 'true'
 MODEL_REGISTRY = os.environ.get('MODEL_REGISTRY', 'False').strip().lower() == 'true'
 EVENT_CONTRACT_V2 = os.environ.get('EVENT_CONTRACT_V2', 'False').strip().lower() == 'true'
+MOMENTARY_SELF_REPORT = os.environ.get('MOMENTARY_SELF_REPORT', 'False').strip().lower() == 'true'
 ML_SERVICE_IDENTITY = os.environ.get('ML_SERVICE_IDENTITY', 'True').strip().lower() == 'true'
 ML_SERVICE_NAME = os.environ.get('ML_SERVICE_NAME', 'visionclass-ml').strip()
 ML_SERVICE_TOKEN = os.environ.get('ML_SERVICE_TOKEN', '').strip()

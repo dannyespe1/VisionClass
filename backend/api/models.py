@@ -490,6 +490,59 @@ class ObservationWindow(models.Model):
         ]
 
 
+class ModelArtifact(models.Model):
+    STATUS_CANDIDATE = "candidate"
+    STATUS_VALIDATED = "validated"
+    STATUS_ACTIVE = "active"
+    STATUS_RETIRED = "retired"
+    STATUS_BLOCKED = "blocked"
+    STATUS_CHOICES = [
+        (STATUS_CANDIDATE, "Candidate"),
+        (STATUS_VALIDATED, "Validated"),
+        (STATUS_ACTIVE, "Active"),
+        (STATUS_RETIRED, "Retired"),
+        (STATUS_BLOCKED, "Blocked"),
+    ]
+
+    name = models.CharField(max_length=128)
+    version = models.CharField(max_length=64)
+    artifact_sha256 = models.CharField(max_length=64)
+    artifact_uri = models.CharField(max_length=512)
+    algorithm = models.CharField(max_length=128)
+    feature_contract = models.CharField(max_length=64)
+    dataset_reference = models.CharField(max_length=128)
+    code_revision = models.CharField(max_length=64)
+    metrics = models.JSONField(default=dict)
+    thresholds = models.JSONField(default=dict, blank=True)
+    evaluation = models.JSONField(default=dict)
+    status = models.CharField(max_length=16, choices=STATUS_CHOICES, default=STATUS_CANDIDATE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["name", "version"], name="uniq_model_name_version"),
+            models.UniqueConstraint(fields=["artifact_sha256"], name="uniq_model_artifact_sha256"),
+            models.UniqueConstraint(
+                fields=["name"], condition=models.Q(status="active"), name="uniq_active_model_per_name"
+            ),
+        ]
+        indexes = [models.Index(fields=["name", "status"])]
+
+    def clean(self):
+        super().clean()
+        digest = self.artifact_sha256.lower()
+        if len(digest) != 64 or any(character not in "0123456789abcdef" for character in digest):
+            raise ValidationError({"artifact_sha256": "Debe ser un SHA-256 hexadecimal de 64 caracteres."})
+        self.artifact_sha256 = digest
+        if self.status in {self.STATUS_VALIDATED, self.STATUS_ACTIVE} and not self.evaluation:
+            raise ValidationError({"evaluation": "Un modelo validado o activo requiere evidencia de evaluación."})
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+
 class InferredState(models.Model):
     STATE_NO_OBSERVABLE = "no_observable"
     STATE_UNKNOWN = "unknown"
@@ -507,6 +560,9 @@ class InferredState(models.Model):
     probabilities = models.JSONField(default=dict)
     uncertainty = models.FloatField(null=True, blank=True)
     model_reference = models.CharField(max_length=128, blank=True)
+    model_artifact = models.ForeignKey(
+        ModelArtifact, on_delete=models.PROTECT, null=True, blank=True, related_name="inferences"
+    )
     inference_version = models.CharField(max_length=64)
     inferred_at = models.DateTimeField()
     provenance = models.JSONField(default=dict, blank=True)

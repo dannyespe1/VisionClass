@@ -1,0 +1,1 @@
+{"pr":"PR12","status":"TECHNICAL_PASS_WITH_REDIS_SMOKE_PENDING","feature_flag":"DISTRIBUTED_STATE=false","checks":{"ml_accumulated_tests":"PASS_8_OF_8","django_check":"PASS","migration_drift":"PASS","python_compile":"PASS","diff_check":"PASS","real_redis_restart_and_concurrency":"NOT_RUN_CONTAINER_NOT_STARTED"},"real_data_used":false}

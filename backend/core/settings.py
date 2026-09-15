@@ -40,6 +40,7 @@ REDIS_ENABLED = os.environ.get('REDIS_ENABLED', 'False').strip().lower() == 'tru
 REDIS_URL = os.environ.get('REDIS_URL', 'redis://redis:6379/0').strip()
 REDIS_NAMESPACE = os.environ.get('REDIS_NAMESPACE', 'visionclass:v1').strip()
 REDIS_DEFAULT_TTL_SECONDS = int(os.environ.get('REDIS_DEFAULT_TTL_SECONDS', '3600'))
+DISTRIBUTED_STATE = os.environ.get('DISTRIBUTED_STATE', 'False').strip().lower() == 'true'
 ML_SERVICE_IDENTITY = os.environ.get('ML_SERVICE_IDENTITY', 'True').strip().lower() == 'true'
 ML_SERVICE_NAME = os.environ.get('ML_SERVICE_NAME', 'visionclass-ml').strip()
 ML_SERVICE_TOKEN = os.environ.get('ML_SERVICE_TOKEN', '').strip()

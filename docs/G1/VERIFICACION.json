@@ -1,0 +1,18 @@
+{
+  "gate": "G1",
+  "prepared_at": "2026-09-15",
+  "evaluated_commit": "7449b07250a513f02aebc57203a70ec05cac9256",
+  "status": "BLOCKED_HUMAN",
+  "authorized_participants": 0,
+  "deployment_authorized": false,
+  "real_data_authorized": false,
+  "pr08_authorized": false,
+  "blocking_evidence": [
+    "G0 independent approval missing",
+    "ethics and privacy approval missing",
+    "target-runtime CI evidence missing",
+    "browser E2E privacy evidence missing",
+    "integrated PR06 SLO evidence missing",
+    "independent G1 approver missing"
+  ]
+}

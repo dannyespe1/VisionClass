@@ -661,3 +661,45 @@ class MomentarySelfReport(models.Model):
             raise ValidationError("El participante no corresponde a la sesión temporal.")
         if self.response == self.RESPONSE_OMITTED and self.responded_at is not None:
             raise ValidationError("Una omisión no debe registrar tiempo de respuesta.")
+
+
+class LearningInteractionEvent(models.Model):
+    TYPE_RESOURCE_OPEN = "resource_open"
+    TYPE_PAUSE = "pause"
+    TYPE_RESUME = "resume"
+    TYPE_NAVIGATION = "navigation"
+    TYPE_ACTIVITY = "activity"
+    TYPE_MICRO_ASSESSMENT = "micro_assessment"
+    TYPE_CHOICES = [
+        (TYPE_RESOURCE_OPEN, "Resource open"),
+        (TYPE_PAUSE, "Pause"),
+        (TYPE_RESUME, "Resume"),
+        (TYPE_NAVIGATION, "Navigation"),
+        (TYPE_ACTIVITY, "Activity"),
+        (TYPE_MICRO_ASSESSMENT, "Micro assessment"),
+    ]
+    RESOURCE_CHOICES = [("text", "Text"), ("video", "Video"), ("activity", "Activity")]
+    FORBIDDEN_METADATA_KEYS = {"text", "answer", "response", "email", "name", "title"}
+
+    event_id = models.UUIDField(unique=True)
+    temporal_session = models.ForeignKey(TemporalSession, on_delete=models.CASCADE, related_name="learning_events")
+    window = models.ForeignKey(ObservationWindow, on_delete=models.PROTECT, null=True, blank=True, related_name="learning_events")
+    event_type = models.CharField(max_length=32, choices=TYPE_CHOICES)
+    resource_kind = models.CharField(max_length=16, choices=RESOURCE_CHOICES)
+    resource_reference = models.CharField(max_length=64)
+    occurred_at = models.DateTimeField()
+    duration_ms = models.PositiveIntegerField(null=True, blank=True)
+    metadata = models.JSONField(default=dict, blank=True)
+    consent_version = models.CharField(max_length=64)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["temporal_session", "occurred_at"])]
+
+    def clean(self):
+        super().clean()
+        if not isinstance(self.metadata, dict):
+            raise ValidationError({"metadata": "Debe ser un objeto."})
+        forbidden = self.FORBIDDEN_METADATA_KEYS & {str(key).lower() for key in self.metadata}
+        if forbidden:
+            raise ValidationError({"metadata": f"Campos no permitidos: {', '.join(sorted(forbidden))}."})

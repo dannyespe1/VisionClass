@@ -703,3 +703,51 @@ class LearningInteractionEvent(models.Model):
         forbidden = self.FORBIDDEN_METADATA_KEYS & {str(key).lower() for key in self.metadata}
         if forbidden:
             raise ValidationError({"metadata": f"Campos no permitidos: {', '.join(sorted(forbidden))}."})
+
+
+class ObserverAssignment(models.Model):
+    assignment_id = models.UUIDField(unique=True)
+    window = models.ForeignKey(ObservationWindow, on_delete=models.PROTECT, related_name="observer_assignments")
+    observer = models.ForeignKey(User, on_delete=models.PROTECT, related_name="observer_assignments")
+    manual_version = models.CharField(max_length=64)
+    sample_stratum = models.CharField(max_length=64)
+    assigned_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["window", "observer"], name="uniq_observer_per_window")
+        ]
+        indexes = [models.Index(fields=["observer", "assigned_at"])]
+
+    def clean(self):
+        super().clean()
+        if self.observer_id and self.window_id and self.observer_id == self.window.temporal_session.participant_id:
+            raise ValidationError("El participante no puede observar su propia ventana.")
+
+
+class ObserverAnnotation(models.Model):
+    CATEGORY_ATTENTIVE = "attentive"
+    CATEGORY_DISTRACTED = "distracted"
+    CATEGORY_NO_OBSERVABLE = "no_observable"
+    CATEGORY_UNCERTAIN = "uncertain"
+    CATEGORY_CHOICES = [
+        (CATEGORY_ATTENTIVE, "Attentive"),
+        (CATEGORY_DISTRACTED, "Distracted"),
+        (CATEGORY_NO_OBSERVABLE, "No observable"),
+        (CATEGORY_UNCERTAIN, "Uncertain"),
+    ]
+
+    assignment = models.OneToOneField(ObserverAssignment, on_delete=models.PROTECT, related_name="annotation")
+    category = models.CharField(max_length=32, choices=CATEGORY_CHOICES)
+    confidence = models.FloatField()
+    notes_code = models.CharField(max_length=64, blank=True)
+    completed_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(confidence__gte=0.0) & models.Q(confidence__lte=1.0),
+                name="observer_annotation_confidence_range",
+            )
+        ]

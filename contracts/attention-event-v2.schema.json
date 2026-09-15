@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://visionclass.local/contracts/attention-event-v2.schema.json",
+  "title": "VisionClass Attention Event v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "event_id", "session_type", "session_id", "captured_at", "features", "quality", "consent"],
+  "properties": {
+    "contract_version": {"const": "2.0"},
+    "event_id": {"type": "string", "format": "uuid"},
+    "session_type": {"enum": ["course", "d2r"]},
+    "session_id": {"type": "integer", "minimum": 1},
+    "captured_at": {"type": "string", "format": "date-time"},
+    "features": {
+      "type": "object",
+      "additionalProperties": {"type": ["number", "null"]}
+    },
+    "quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["observable", "confidence"],
+      "properties": {
+        "observable": {"type": "boolean"},
+        "confidence": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "reason": {"type": ["string", "null"], "maxLength": 64}
+      }
+    },
+    "device": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "class": {"enum": ["desktop", "laptop", "tablet", "mobile", "unknown"]},
+        "browser_family": {"type": "string", "maxLength": 32}
+      }
+    },
+    "consent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "purposes"],
+      "properties": {
+        "version": {"type": "string", "minLength": 1, "maxLength": 64},
+        "purposes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"enum": ["local_processing", "derived_persistence", "research"]}
+        }
+      }
+    }
+  }
+}

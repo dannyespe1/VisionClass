@@ -13,6 +13,7 @@ import inspect
 import json
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.utils import timezone
+from .event_contract import validate_attention_event_v2
 
 from .models import (
     Course,
@@ -351,6 +352,11 @@ class AttentionEventSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'session', 'user', 'idempotency_key', 'created_at']
 
+    def validate_data(self, value):
+        if isinstance(value, dict) and value.get("contract_version") is not None:
+            return validate_attention_event_v2(value)
+        return value
+
 
 class D2RSessionSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
@@ -401,6 +407,11 @@ class D2RAttentionEventSerializer(serializers.ModelSerializer):
             'created_at',
         ]
         read_only_fields = ['id', 'd2r_session', 'user', 'idempotency_key', 'created_at']
+
+    def validate_data(self, value):
+        if isinstance(value, dict) and value.get("contract_version") is not None:
+            return validate_attention_event_v2(value)
+        return value
 
 
 class ContentViewSerializer(serializers.ModelSerializer):

@@ -1,0 +1,11 @@
+{
+  "contract_version": "2.0",
+  "event_id": "not-a-uuid",
+  "session_type": "course",
+  "session_id": 0,
+  "captured_at": "not-a-date",
+  "features": {"eye_ratio_mean": "high"},
+  "quality": {"observable": true, "confidence": 1.5},
+  "consent": {"version": "", "purposes": ["unsupported"]},
+  "user_email": "must-not-be-accepted@example.invalid"
+}

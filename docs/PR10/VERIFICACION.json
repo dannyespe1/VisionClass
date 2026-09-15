@@ -1,0 +1,25 @@
+{
+  "pr": "PR10",
+  "base": "dfc1feb",
+  "status": "TECHNICAL_PASS",
+  "feature_flag": "EVENT_CONTRACT_V2=false",
+  "checks": {
+    "schema_json_parse": "PASS",
+    "django_check": "PASS",
+    "migration_drift": "PASS_NO_CHANGES",
+    "backend_accumulated_tests": "PASS_9_OF_9",
+    "ml_contract_tests": "PASS_2_OF_2",
+    "frontend_contract_tests": "PASS_2_OF_2",
+    "frontend_typecheck": "PASS",
+    "frontend_build": "PASS",
+    "python_compile": "PASS",
+    "diff_check": "PASS",
+    "targeted_lint": "NOT_COMPLETED_PROCESS_HUNG"
+  },
+  "compatibility": {
+    "v1_adapter_retained": true,
+    "v2_unknown_fields_rejected": true,
+    "shared_fixtures": true
+  },
+  "real_data_used": false
+}

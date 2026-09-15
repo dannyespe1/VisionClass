@@ -1,0 +1,11 @@
+{
+  "contract_version": "2.0",
+  "event_id": "123e4567-e89b-42d3-a456-426614174000",
+  "session_type": "course",
+  "session_id": 42,
+  "captured_at": "2026-09-15T12:00:00Z",
+  "features": {"eye_ratio_mean": 0.42, "gaze_offset": null},
+  "quality": {"observable": true, "confidence": 0.91, "reason": null},
+  "device": {"class": "laptop", "browser_family": "chromium"},
+  "consent": {"version": "pending-review-v1", "purposes": ["local_processing", "derived_persistence"]}
+}

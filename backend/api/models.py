@@ -751,3 +751,42 @@ class ObserverAnnotation(models.Model):
                 name="observer_annotation_confidence_range",
             )
         ]
+
+
+class ResearchPseudonymMap(models.Model):
+    participant = models.OneToOneField(User, on_delete=models.PROTECT, related_name="research_pseudonym_map")
+    research_pseudonym = models.UUIDField(unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "vault_research_pseudonym_map"
+
+
+class DemographicVaultRecord(models.Model):
+    research_pseudonym = models.UUIDField(unique=True)
+    encrypted_payload = models.BinaryField()
+    consent_version = models.CharField(max_length=64)
+    retention_until = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "vault_demographic_record"
+
+
+class DemographicVaultAudit(models.Model):
+    actor = models.ForeignKey(User, on_delete=models.PROTECT, related_name="demographic_vault_audit")
+    action = models.CharField(max_length=32)
+    outcome = models.CharField(max_length=16)
+    reason_code = models.CharField(max_length=64)
+    pseudonym_digest = models.CharField(max_length=64)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "vault_demographic_audit"
+        ordering = ["-created_at", "-id"]
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            raise ValidationError("La auditoría de bóveda es inmutable.")
+        return super().save(*args, **kwargs)

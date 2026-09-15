@@ -1,0 +1,33 @@
+{
+  "wave": "Ola 4 Estado distribuido retención y bóveda",
+  "evaluated_at": "2026-09-15",
+  "base": "226b269",
+  "integrated_code_head": "e5be836",
+  "integrated": {
+    "PR11": {"source": "907fdbd", "integrated": "1a95825"},
+    "PR12": {"source": "d6b65f1", "integrated": "8adfe4e"},
+    "PR13": {"source": "c5fbfae", "integrated": "9a2e12a"},
+    "PR33": {"source": "9b0c700", "integrated": "d5cc9cc"},
+    "PR14": {"source": "75dad01", "integrated": "e5be836"}
+  },
+  "checks": {
+    "django_check": "PASS",
+    "migration_drift": "PASS_NO_CHANGES",
+    "backend_tests": "PASS_62_OF_62",
+    "migration_forward_backward_forward": "PASS_SQLITE_TEMPORARY",
+    "ml_tests": "PASS_8_OF_8",
+    "frontend_tests": "PASS_9_OF_9",
+    "frontend_typecheck": "PASS",
+    "frontend_build": "PASS",
+    "python_compile": "PASS",
+    "diff_check": "PASS",
+    "compose_config": "PASS_WITH_DISPOSABLE_LOCAL_ENV",
+    "redis_smoke": "BLOCKED_ENV_DOCKER_DESKTOP_NOT_RUNNING",
+    "frontend_lint": "UNCHANGED_BASELINE_69_ERRORS_43_WARNINGS"
+  },
+  "feature_flags": {"REDIS_ENABLED": false, "DISTRIBUTED_STATE": false, "STREAM_PIPELINE": false, "DEMOGRAPHIC_VAULT": false, "RETENTION_JOBS": false},
+  "authorized_participants": 0,
+  "real_data_used": false,
+  "deployed": false,
+  "wave4": "TECHNICAL_PASS_WITH_ENVIRONMENT_AND_HUMAN_BLOCKERS"
+}

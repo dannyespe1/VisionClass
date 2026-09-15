@@ -22,16 +22,18 @@ import {
   Video,
   Volume2,
 } from "lucide-react";
-import { apiFetch, BACKEND_URL, postFrameToML, checkMLServiceHealth } from "../../../lib/api";
+import { apiFetch, BACKEND_URL } from "../../../lib/api";
 import { useAuth } from "../../../context/AuthContext";
 import { Button } from "../../../ui/button";
 import { CameraPermissionModal, PermissionSettings } from "../../CameraPermissionModal";
 import { recordConsent, revokeCaptureConsent } from "../../../lib/consent";
 import { BoundedCaptureQueue } from "../../../lib/bounded-capture-queue.mjs";
 import {
+  BROWSER_EXTRACTOR_ENABLED,
   BOUNDED_CAPTURE_QUEUE_ENABLED,
   CAPTURE_DEADLINE_MS,
 } from "../../../lib/capture-features";
+import { BrowserFeatureExtractor, cameraConstraints } from "../../../lib/browser-feature-extractor.mjs";
 import {
   Dialog,
   DialogContent,
@@ -101,23 +103,6 @@ const toYoutubeEmbed = (url: string) => {
   return url;
 };
 
-type MLFrameScore = {
-  label?: string;
-  state?: string;
-  face?: boolean;
-  value?: number;
-  data?: { face?: boolean };
-};
-
-type MLFrameResponse = {
-  ok?: boolean;
-  detail?: string;
-  error?: string;
-  frame_score?: MLFrameScore;
-  score?: MLFrameScore;
-  value?: number;
-};
-
 export default function CoursePage() {
   const router = useRouter();
   const params = useParams();
@@ -125,22 +110,16 @@ export default function CoursePage() {
   const courseId = Number(params.courseId);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const frameTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const captureQueueRef = useRef<BoundedCaptureQueue | null>(null);
   const cameraActiveRef = useRef(false);
-  const faceDetectorRef = useRef<any | null>(null);
+  const browserExtractorRef = useRef<BrowserFeatureExtractor | null>(null);
   const sessionRef = useRef<number | null>(null);
   const progressSyncRef = useRef<{ lessonId: number | null; completed: number }>({
     lessonId: null,
     completed: -1,
   });
   const initialLessonSetRef = useRef(false);
-  const attentionAggRef = useRef<{ sum: number; count: number; lastSent: number }>({
-    sum: 0,
-    count: 0,
-    lastSent: 0,
-  });
   const contentViewRef = useRef<{
     id: number | null;
     startedAt: number;
@@ -173,7 +152,7 @@ export default function CoursePage() {
   const [showCameraSettings, setShowCameraSettings] = useState(false);
   const [openModules, setOpenModules] = useState<Record<number, boolean>>({});
 
-  const [attentionScore, setAttentionScore] = useState(85);
+  const [attentionScore] = useState(85);
   const [readingTime, setReadingTime] = useState(0);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [quizAnswers, setQuizAnswers] = useState<Record<number, string>>({});
@@ -192,19 +171,8 @@ export default function CoursePage() {
       router.push("/login");
     }
     
-    // Verificar disponibilidad del ML Service
-    const checkML = async () => {
-      setMlServiceStatus("checking");
-      const health = await checkMLServiceHealth();
-      if (health.ok) {
-        console.log("✅ ML Service disponible");
-        setMlServiceStatus("available");
-      } else {
-        console.error("❌ ML Service no disponible:", health.message);
-        setMlServiceStatus("unavailable");
-      }
-    };
-    checkML();
+    // PR15 procesa en el navegador. No se consulta ni se usa el servicio de frames.
+    setMlServiceStatus(BROWSER_EXTRACTOR_ENABLED ? "available" : null);
   }, [token, router]);
 
   useEffect(() => {
@@ -542,118 +510,28 @@ export default function CoursePage() {
     cameraActiveRef.current = false;
     captureQueueRef.current?.stop();
     captureQueueRef.current = null;
+    browserExtractorRef.current?.close();
+    browserExtractorRef.current = null;
     setCaptureTransportStatus("stopped");
     setAttentionStatus("pending");
   };
 
-  const applyConfirmedFrame = (resp: MLFrameResponse) => {
-    if (!resp?.ok) {
-      if (String(resp?.detail || resp?.error || "").includes("Consentimiento")) {
-        stopCamera();
-        setPermissionSettings((current) => ({ ...current, enableCamera: false }));
-      }
-      setCaptureTransportStatus("degraded");
-      return;
-    }
-
-    const frameScore = resp.frame_score || resp.score || {};
-    const frameLabel = frameScore.label || frameScore.state;
-    const hasFace = frameScore.data?.face ?? frameScore.face ?? false;
-    if (frameLabel === "no_face" || hasFace === false) {
-      setAttentionStatus("no_face");
-      setAttentionScore(0);
-      return;
-    }
-
-    setAttentionStatus("ok");
-    const rawValue = frameScore.value ?? resp.score?.value ?? resp.value ?? null;
-    if (rawValue === null || rawValue === undefined) return;
-    const rounded = Math.round(rawValue > 1 ? rawValue : rawValue * 100);
-    setAttentionScore(rounded);
-
-    if (enrollmentId && token) {
-      attentionAggRef.current.sum += rounded;
-      attentionAggRef.current.count += 1;
-      const now = Date.now();
-      if (now - attentionAggRef.current.lastSent > 10000) {
-        attentionAggRef.current.lastSent = now;
-        const avg = attentionAggRef.current.count
-          ? Math.round(attentionAggRef.current.sum / attentionAggRef.current.count)
-          : 0;
-        const nextData = {
-          ...enrollmentData,
-          attention_avg: avg,
-          attention_frames: attentionAggRef.current.count,
-          attention_last: rounded,
-          attention_updated_at: new Date().toISOString(),
-          last_attention_at: new Date().toISOString(),
-        };
-        setEnrollmentData(nextData);
-        apiFetch(
-          `/api/enrollments/${enrollmentId}/`,
-          { method: "PATCH", body: JSON.stringify({ enrollment_data: nextData }) },
-          token,
-        ).catch(() => setCaptureTransportStatus("degraded"));
-      }
-    }
-  };
-
-  const sendFrame = () => {
-    if (!videoRef.current || !canvasRef.current) return;
-    if (!sessionId || !userId) return;
+  const processLocalFrame = () => {
+    if (!videoRef.current) return;
     const queue = captureQueueRef.current;
     if (!queue) return;
 
-    queue.enqueue<MLFrameResponse>(async ({ signal, idempotencyKey }) => {
+    queue.enqueue(async () => {
       const video = videoRef.current;
-      const canvas = canvasRef.current;
-      if (!video || !canvas) throw new Error("capture_stopped");
-      
-      // Validar que el video tiene contenido
-      if (!video.videoWidth || !video.videoHeight) {
-        return { ok: false, detail: "Cámara todavía no preparada" };
-      }
-      
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) {
-        return { ok: false, detail: "Captura no disponible" };
-      }
-      
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      // Client-side face detection using FaceDetector API when available
-      if (typeof window !== "undefined" && "FaceDetector" in window) {
-        try {
-          if (!faceDetectorRef.current) faceDetectorRef.current = new (window as any).FaceDetector();
-          const faces = await faceDetectorRef.current.detect(canvas as any);
-          if (!faces || faces.length === 0) {
-            return { ok: true, frame_score: { label: "no_face", data: { face: false } } };
-          }
-        } catch (err) {
-          console.warn("[sendFrame] FaceDetector error, falling back to server", err);
-        }
-      }
-
-      const blob = await new Promise<Blob | null>((resolve) =>
-        canvas.toBlob(resolve, "image/jpeg", 0.8)
-      );
-      if (!blob) {
-        return { ok: false, detail: "Captura no disponible" };
-      }
-
-      const form = new FormData();
-      form.append("file", blob, "frame.jpg");
-      form.append("session_id", String(sessionId));
-      form.append("user_id", String(userId));
-      form.append("test_name", "COURSE");
-      form.append("course_id", String(courseId));
-      if (selectedLessonId) form.append("lesson_id", String(selectedLessonId));
-      if (currentMaterial?.materialType) form.append("material_type", currentMaterial.materialType);
-
-      return postFrameToML(form, token || undefined, { signal, idempotencyKey });
+      if (!video) throw new Error("capture_stopped");
+      browserExtractorRef.current ||= new BrowserFeatureExtractor();
+      return browserExtractorRef.current.extract(video);
     }).then((outcome) => {
-      if (outcome.status === "confirmed") applyConfirmedFrame(outcome.value);
+      if (outcome.status === "confirmed") {
+        // PR16 añadirá el contrato normalizado y su transporte. PR15 no transmite píxeles.
+        setAttentionStatus(outcome.value.quality.observable ? "ok" : "no_face");
+        setCaptureTransportStatus("idle");
+      }
       if (outcome.status === "failed" || outcome.status === "timed_out") {
         setCaptureTransportStatus("degraded");
         setAttentionStatus("error");
@@ -669,13 +547,15 @@ export default function CoursePage() {
       setAttentionStatus("error");
       return;
     }
+    if (!BROWSER_EXTRACTOR_ENABLED) {
+      setCaptureTransportStatus("stopped");
+      setAttentionStatus("pending");
+      return;
+    }
     setAttentionStatus("pending");
     try {
       console.log("[startCamera] Iniciando cámara...");
-      const media = await navigator.mediaDevices.getUserMedia({
-        video: { width: 640, height: 480 },
-        audio: false,
-      });
+      const media = await navigator.mediaDevices.getUserMedia(cameraConstraints());
       videoRef.current.srcObject = media;
       
       // Esperar a que el video esté listo antes de empezar a capturar frames
@@ -700,7 +580,7 @@ export default function CoursePage() {
       // Comenzar a capturar frames cada 1 segundo
       frameTimerRef.current = setInterval(() => {
         if (cameraActiveRef.current && videoRef.current?.readyState === videoRef.current?.HAVE_ENOUGH_DATA) {
-          sendFrame();
+          processLocalFrame();
         }
       }, 1000);
     } catch (err) {
@@ -753,22 +633,16 @@ export default function CoursePage() {
         research: settings.researchUse,
       });
       if (!consent.capture_allowed) throw new Error("Consentimiento no vigente");
+      if (!BROWSER_EXTRACTOR_ENABLED) {
+        setPermissionSettings({ ...settings, enableCamera: false, enableAttentionTracking: false });
+        setCaptureTransportStatus("stopped");
+        return;
+      }
       setPermissionSettings(settings);
       console.log("[requestCamera] Verificando permisos de cámara...");
-      await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      const permissionStream = await navigator.mediaDevices.getUserMedia(cameraConstraints());
+      permissionStream.getTracks().forEach((track) => track.stop());
       console.log("[requestCamera] Permisos de cámara otorgados");
-      
-      // Verificar disponibilidad del servicio ML
-      console.log("[requestCamera] Verificando disponibilidad del servicio ML...");
-      const healthCheck = await checkMLServiceHealth();
-      if (!healthCheck.ok) {
-        console.warn("[requestCamera] Servicio ML no disponible. Algunos datos pueden no procesarse.", {
-          service_url: healthCheck.url,
-          message: healthCheck.message,
-        });
-      } else {
-        console.log("[requestCamera] Servicio ML disponible");
-      }
     } catch (err) {
       console.error("[requestCamera] No se habilitó la cámara:", err instanceof Error ? err.message : err);
       stopCamera();
@@ -1435,7 +1309,6 @@ export default function CoursePage() {
       </div>
 
       <video ref={videoRef} style={{ display: "none" }} />
-      <canvas ref={canvasRef} style={{ display: "none" }} />
 
       {permissionOpen && (
         <CameraPermissionModal

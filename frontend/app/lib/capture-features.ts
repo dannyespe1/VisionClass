@@ -5,3 +5,6 @@ export const CAPTURE_DEADLINE_MS = Math.max(
   500,
   Number(process.env.NEXT_PUBLIC_CAPTURE_DEADLINE_MS || "4500"),
 );
+
+export const BROWSER_EXTRACTOR_ENABLED =
+  process.env.NEXT_PUBLIC_BROWSER_EXTRACTOR?.trim().toLowerCase() === "true";

@@ -8,3 +8,6 @@ export const CAPTURE_DEADLINE_MS = Math.max(
 
 export const BROWSER_EXTRACTOR_ENABLED =
   process.env.NEXT_PUBLIC_BROWSER_EXTRACTOR?.trim().toLowerCase() === "true";
+
+export const NORMALIZED_FEATURES_V1_ENABLED =
+  process.env.NEXT_PUBLIC_NORMALIZED_FEATURES_V1?.trim().toLowerCase() === "true";

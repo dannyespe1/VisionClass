@@ -6,7 +6,12 @@ export type AttentionEventV2 = {
   captured_at: string;
   features: Record<string, number | null>;
   quality: { observable: boolean; confidence: number | null; reason?: string | null };
-  device?: { class?: "desktop" | "laptop" | "tablet" | "mobile" | "unknown"; browser_family?: string };
+  device?: {
+    class?: "desktop" | "laptop" | "tablet" | "mobile" | "unknown";
+    browser_family?: string;
+    extractor_version?: string;
+    preprocessing_version?: string;
+  };
   consent: { version: string; purposes: Array<"local_processing" | "derived_persistence" | "research"> };
 };
 export function validateAttentionEventV2(value: unknown): string[];

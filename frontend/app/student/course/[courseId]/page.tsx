@@ -32,8 +32,11 @@ import {
   BROWSER_EXTRACTOR_ENABLED,
   BOUNDED_CAPTURE_QUEUE_ENABLED,
   CAPTURE_DEADLINE_MS,
+  NORMALIZED_FEATURES_V1_ENABLED,
 } from "../../../lib/capture-features";
 import { BrowserFeatureExtractor, cameraConstraints } from "../../../lib/browser-feature-extractor.mjs";
+import { buildNormalizedEvent } from "../../../lib/feature-normalization.mjs";
+import type { AttentionEventV2 } from "../../../lib/event-contract.mjs";
 import {
   Dialog,
   DialogContent,
@@ -114,6 +117,8 @@ export default function CoursePage() {
   const captureQueueRef = useRef<BoundedCaptureQueue | null>(null);
   const cameraActiveRef = useRef(false);
   const browserExtractorRef = useRef<BrowserFeatureExtractor | null>(null);
+  const consentVersionRef = useRef<string | null>(null);
+  const latestNormalizedEventRef = useRef<AttentionEventV2 | null>(null);
   const sessionRef = useRef<number | null>(null);
   const progressSyncRef = useRef<{ lessonId: number | null; completed: number }>({
     lessonId: null,
@@ -512,6 +517,7 @@ export default function CoursePage() {
     captureQueueRef.current = null;
     browserExtractorRef.current?.close();
     browserExtractorRef.current = null;
+    latestNormalizedEventRef.current = null;
     setCaptureTransportStatus("stopped");
     setAttentionStatus("pending");
   };
@@ -528,7 +534,14 @@ export default function CoursePage() {
       return browserExtractorRef.current.extract(video);
     }).then((outcome) => {
       if (outcome.status === "confirmed") {
-        // PR16 añadirá el contrato normalizado y su transporte. PR15 no transmite píxeles.
+        if (NORMALIZED_FEATURES_V1_ENABLED && sessionId && consentVersionRef.current) {
+          latestNormalizedEventRef.current = buildNormalizedEvent(outcome.value, {
+            sessionId,
+            consentVersion: consentVersionRef.current,
+            purposes: ["local_processing", ...(permissionSettings.saveAnalytics ? ["derived_persistence"] : [])],
+            browserFamily: navigator.userAgent.includes("Firefox") ? "firefox" : "chromium",
+          });
+        }
         setAttentionStatus(outcome.value.quality.observable ? "ok" : "no_face");
         setCaptureTransportStatus("idle");
       }
@@ -633,6 +646,7 @@ export default function CoursePage() {
         research: settings.researchUse,
       });
       if (!consent.capture_allowed) throw new Error("Consentimiento no vigente");
+      consentVersionRef.current = consent.current_version;
       if (!BROWSER_EXTRACTOR_ENABLED) {
         setPermissionSettings({ ...settings, enableCamera: false, enableAttentionTracking: false });
         setCaptureTransportStatus("stopped");
@@ -1316,6 +1330,7 @@ export default function CoursePage() {
           onDeny={async () => {
             stopCamera();
             if (token) await revokeCaptureConsent(token).catch(() => undefined);
+            consentVersionRef.current = null;
             setPermissionSettings((current) => ({ ...current, enableCamera: false }));
             setPermissionOpen(false);
           }}

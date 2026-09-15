@@ -1,0 +1,1 @@
+{"extractor_version":"browser-face-detector-v1","captured_at":"2026-09-15T12:00:02.250Z","features":{"face_present":1,"face_count":1,"face_center_x":0.25,"face_center_y":0.4,"face_width":0.5,"face_height":0.4,"eye_span":0.2,"head_roll":0.1,"gaze_horizontal_proxy":0.55,"pose_available":1,"gaze_available":1},"quality":{"observable":true,"confidence":0.8,"reason":null}}

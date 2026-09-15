@@ -1,0 +1,1 @@
+{"pr":"PR14","status":"TECHNICAL_PASS_WITH_EXTERNAL_STORES_PENDING","feature_flag":"RETENTION_JOBS=false","checks":{"retention_vault_redis_tests":"PASS_13_OF_13","django_check":"PASS","migration_drift":"PASS","python_compile":"PASS","diff_check":"PASS","backup_export_erasure":"NOT_RUN_EXTERNAL_INVENTORY_REQUIRED"},"real_data_used":false}

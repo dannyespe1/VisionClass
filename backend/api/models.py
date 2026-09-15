@@ -790,3 +790,22 @@ class DemographicVaultAudit(models.Model):
         if self.pk:
             raise ValidationError("La auditoría de bóveda es inmutable.")
         return super().save(*args, **kwargs)
+
+
+class RetentionRun(models.Model):
+    STATUS_PLANNED = "planned"
+    STATUS_COMPLETED = "completed"
+    STATUS_FAILED = "failed"
+    STATUS_CHOICES = [(STATUS_PLANNED, "Planned"), (STATUS_COMPLETED, "Completed"), (STATUS_FAILED, "Failed")]
+
+    run_id = models.UUIDField(unique=True)
+    operation = models.CharField(max_length=32)
+    subject_digest = models.CharField(max_length=64, blank=True)
+    status = models.CharField(max_length=16, choices=STATUS_CHOICES)
+    counts = models.JSONField(default=dict)
+    started_at = models.DateTimeField()
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = "retention_run"
+        ordering = ["-started_at"]

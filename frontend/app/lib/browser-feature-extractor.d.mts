@@ -3,7 +3,7 @@ export type BrowserFeatureSample = {
   captured_at: string;
   frame: { width: number; height: number };
   features: Record<string, number | null>;
-  quality: { observable: boolean; reason: string | null };
+  quality: { observable: boolean; confidence?: number | null; reason: string | null };
 };
 
 export class BrowserFeatureExtractor {
@@ -14,3 +14,4 @@ export class BrowserFeatureExtractor {
 
 export function cameraConstraints(deviceId?: string): MediaStreamConstraints;
 export function summarizeDetectedFace(face: any, frameWidth: number, frameHeight: number): Record<string, number | null> | null;
+export function summarizeLuminance(imageData: ImageData): { luminance_mean: number | null; luminance_std: number | null };

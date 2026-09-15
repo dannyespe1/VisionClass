@@ -33,10 +33,12 @@ import {
   BOUNDED_CAPTURE_QUEUE_ENABLED,
   CAPTURE_DEADLINE_MS,
   NORMALIZED_FEATURES_V1_ENABLED,
+  QUALITY_GATE_V1_ENABLED,
 } from "../../../lib/capture-features";
 import { BrowserFeatureExtractor, cameraConstraints } from "../../../lib/browser-feature-extractor.mjs";
 import { buildNormalizedEvent } from "../../../lib/feature-normalization.mjs";
 import type { AttentionEventV2 } from "../../../lib/event-contract.mjs";
+import { evaluateFrame, evaluateWindow } from "../../../lib/quality-gate.mjs";
 import {
   Dialog,
   DialogContent,
@@ -119,6 +121,7 @@ export default function CoursePage() {
   const browserExtractorRef = useRef<BrowserFeatureExtractor | null>(null);
   const consentVersionRef = useRef<string | null>(null);
   const latestNormalizedEventRef = useRef<AttentionEventV2 | null>(null);
+  const qualityWindowRef = useRef<Array<Awaited<ReturnType<BrowserFeatureExtractor["extract"]>>>>([]);
   const sessionRef = useRef<number | null>(null);
   const progressSyncRef = useRef<{ lessonId: number | null; completed: number }>({
     lessonId: null,
@@ -170,6 +173,7 @@ export default function CoursePage() {
   const [captureTransportStatus, setCaptureTransportStatus] = useState<
     "idle" | "queued" | "sending" | "degraded" | "stopped"
   >("stopped");
+  const [qualityMessage, setQualityMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) {
@@ -518,6 +522,8 @@ export default function CoursePage() {
     browserExtractorRef.current?.close();
     browserExtractorRef.current = null;
     latestNormalizedEventRef.current = null;
+    qualityWindowRef.current = [];
+    setQualityMessage(null);
     setCaptureTransportStatus("stopped");
     setAttentionStatus("pending");
   };
@@ -534,15 +540,25 @@ export default function CoursePage() {
       return browserExtractorRef.current.extract(video);
     }).then((outcome) => {
       if (outcome.status === "confirmed") {
+        let sample = outcome.value;
+        if (QUALITY_GATE_V1_ENABLED) {
+          const frameQuality = evaluateFrame(sample);
+          sample = { ...sample, quality: { observable: frameQuality.observable, confidence: frameQuality.confidence, reason: frameQuality.reason } };
+          const cutoff = Date.parse(sample.captured_at) - 5000;
+          qualityWindowRef.current = [...qualityWindowRef.current, sample].filter((item) => Date.parse(item.captured_at) >= cutoff);
+          const windowQuality = evaluateWindow(qualityWindowRef.current);
+          sample = { ...sample, quality: { observable: windowQuality.observable, confidence: windowQuality.confidence, reason: windowQuality.reason } };
+          setQualityMessage(windowQuality.message);
+        }
         if (NORMALIZED_FEATURES_V1_ENABLED && sessionId && consentVersionRef.current) {
-          latestNormalizedEventRef.current = buildNormalizedEvent(outcome.value, {
+          latestNormalizedEventRef.current = buildNormalizedEvent(sample, {
             sessionId,
             consentVersion: consentVersionRef.current,
             purposes: ["local_processing", ...(permissionSettings.saveAnalytics ? ["derived_persistence"] : [])],
             browserFamily: navigator.userAgent.includes("Firefox") ? "firefox" : "chromium",
           });
         }
-        setAttentionStatus(outcome.value.quality.observable ? "ok" : "no_face");
+        setAttentionStatus(sample.quality.observable ? "ok" : "no_face");
         setCaptureTransportStatus("idle");
       }
       if (outcome.status === "failed" || outcome.status === "timed_out") {
@@ -908,7 +924,9 @@ export default function CoursePage() {
                 </p>
                 {permissionSettings.enableAttentionTracking && (
                   <p className="text-xs text-slate-600">
-                    El seguimiento de atención esta recopilando datos de forma segura.
+                    {QUALITY_GATE_V1_ENABLED
+                      ? (qualityMessage || "Comprobando si la señal es observable.")
+                      : "El seguimiento está preparado, pero sus controles permanecen desactivados."}
                   </p>
                 )}
               </div>
@@ -1090,7 +1108,7 @@ export default function CoursePage() {
                         <span>Tiempo: {Math.floor(readingTime / 60)}:{String(readingTime % 60).padStart(2, "0")}</span>
                       </div>
                     </div>
-                    {permissionSettings.enableAttentionTracking && (
+                    {permissionSettings.enableAttentionTracking && !QUALITY_GATE_V1_ENABLED && (
                       <div className="flex items-center gap-2">
                         <Eye className="w-4 h-4 text-blue-600" />
                         <span>Concentración promedio: {Math.round(attentionScore)}%</span>
@@ -1118,7 +1136,7 @@ export default function CoursePage() {
                     </div>
                   )}
 
-                  {permissionSettings.enableAttentionTracking && (
+                  {permissionSettings.enableAttentionTracking && !QUALITY_GATE_V1_ENABLED && (
                     <div className="absolute top-4 right-4 bg-black/70 rounded-lg px-4 py-2 flex items-center gap-2">
                       <Eye className="w-4 h-4 text-white" />
                       <span className="text-white text-sm">{Math.round(attentionScore)}%</span>
@@ -1130,7 +1148,7 @@ export default function CoursePage() {
                     </div>
                   )}
 
-                  {permissionSettings.enableAttentionTracking && attentionScore < 65 && (
+                  {permissionSettings.enableAttentionTracking && !QUALITY_GATE_V1_ENABLED && attentionScore < 65 && (
                     <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-amber-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2">
                       <AlertCircle className="w-5 h-5" />
                       <span>Tu atención ha disminuido. Considera una pausa.</span>
@@ -1149,7 +1167,14 @@ export default function CoursePage() {
                   </div>
                 </div>
 
-                {permissionSettings.enableAttentionTracking && (
+                {permissionSettings.enableAttentionTracking && QUALITY_GATE_V1_ENABLED && (
+                  <div className="p-4 border-t bg-slate-50 text-sm text-slate-700" role="status">
+                    <strong>{attentionStatus === "ok" ? "Señal observable" : "No observable"}.</strong>{" "}
+                    {qualityMessage || "Se necesitan más muestras antes de interpretar esta ventana."}
+                  </div>
+                )}
+
+                {permissionSettings.enableAttentionTracking && !QUALITY_GATE_V1_ENABLED && (
                   <div className="p-6 border-t">
                     <h3 className="mb-4 flex items-center gap-2">
                       <TrendingUp className="w-5 h-5 text-blue-600" />

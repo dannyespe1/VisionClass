@@ -21,6 +21,7 @@ export function summarizeDetectedFace(face, frameWidth, frameHeight) {
   const gazeX = nose && leftEye && rightEye
     ? clamp01((nose.x - Math.min(leftEye.x, rightEye.x)) / Math.max(1, Math.abs(rightEye.x - leftEye.x)))
     : null;
+  const edgeMargin = Math.min(box.x, box.y, frameWidth - box.x - box.width, frameHeight - box.y - box.height);
 
   return {
     face_present: 1,
@@ -32,9 +33,30 @@ export function summarizeDetectedFace(face, frameWidth, frameHeight) {
     eye_span: eyeSpan === null ? null : clamp01(eyeSpan),
     head_roll: roll,
     gaze_horizontal_proxy: gazeX,
+    face_edge_margin: clamp01(edgeMargin / Math.min(frameWidth, frameHeight)),
+    detection_confidence: Number.isFinite(face.confidence) ? clamp01(face.confidence) : null,
     pose_available: roll === null ? 0 : 1,
     gaze_available: gazeX === null ? 0 : 1,
   };
+}
+
+export function summarizeLuminance(imageData) {
+  const data = imageData?.data;
+  if (!data?.length) return { luminance_mean: null, luminance_std: null };
+  const pixelCount = data.length / 4;
+  const stride = Math.max(1, Math.floor(pixelCount / 1024));
+  let count = 0;
+  let sum = 0;
+  let squared = 0;
+  for (let pixel = 0; pixel < pixelCount; pixel += stride) {
+    const offset = pixel * 4;
+    const luminance = (0.2126 * data[offset] + 0.7152 * data[offset + 1] + 0.0722 * data[offset + 2]) / 255;
+    sum += luminance;
+    squared += luminance * luminance;
+    count += 1;
+  }
+  const mean = sum / count;
+  return { luminance_mean: mean, luminance_std: Math.sqrt(Math.max(0, squared / count - mean * mean)) };
 }
 
 export class BrowserFeatureExtractor {
@@ -70,12 +92,15 @@ export class BrowserFeatureExtractor {
       if (!faces?.length) return this.unobservable("face_absent", width, height);
       const features = summarizeDetectedFace(faces[0], width, height);
       if (!features) return this.unobservable("invalid_detection", width, height);
+      const luminance = typeof context.getImageData === "function"
+        ? summarizeLuminance(context.getImageData(0, 0, width, height))
+        : { luminance_mean: null, luminance_std: null };
       return {
         extractor_version: "browser-face-detector-v1",
         captured_at: new Date().toISOString(),
         frame: { width, height },
-        features,
-        quality: { observable: true, reason: null },
+        features: { ...features, ...luminance },
+        quality: { observable: true, confidence: features.detection_confidence, reason: null },
       };
     } catch {
       return this.unobservable("detector_error", width, height);

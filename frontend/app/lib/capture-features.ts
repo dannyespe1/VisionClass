@@ -11,3 +11,6 @@ export const BROWSER_EXTRACTOR_ENABLED =
 
 export const NORMALIZED_FEATURES_V1_ENABLED =
   process.env.NEXT_PUBLIC_NORMALIZED_FEATURES_V1?.trim().toLowerCase() === "true";
+
+export const QUALITY_GATE_V1_ENABLED =
+  process.env.NEXT_PUBLIC_QUALITY_GATE_V1?.trim().toLowerCase() === "true";

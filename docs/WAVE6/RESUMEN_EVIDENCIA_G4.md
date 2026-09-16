@@ -4,7 +4,7 @@
 
 **Tramo evaluado:** PR19–PR24
 
-**Estado propuesto:** revisión del gate pendiente
+**Estado:** `CONDITIONAL_ENGINEERING_GO`, aprobado por revisor externo el 2026-09-16
 
 ## Estado técnico
 
@@ -56,4 +56,4 @@ Esta selección no declara que PR20 sea científicamente superior ni autoriza pr
 6. conservar como pendientes la evaluación real y revisión independiente de PR23;
 7. exigir una nueva decisión antes de piloto, intervención o afirmaciones de validez.
 
-La alternativa conservadora es mantener G4 bloqueado hasta completar evaluación confirmatoria real y revisión independiente. La elección debe registrarla el revisor o propietario del gate.
+El revisor externo aprobó esta decisión condicional el 2026-09-16, respetando todas las condiciones del expediente. La aprobación habilita únicamente el trabajo de ingeniería de PR25; no resuelve los pendientes confirmatorios ni autoriza producción, piloto, intervención o afirmaciones de validez.

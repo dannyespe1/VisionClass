@@ -3,7 +3,7 @@
   "gate": "G4",
   "evidence_cutoff": "2026-09-16",
   "scope": "PR19-PR24",
-  "status": "PENDING_REVIEWER_DECISION",
+  "status": "CONDITIONAL_ENGINEERING_GO",
   "technical_evidence": {
     "pr19_through_pr24_integrated": true,
     "final_ml_suite_passed": true,
@@ -35,8 +35,8 @@
     "real confirmatory evaluation and independent PR23 review remain open",
     "a new approval is required before pilot or product use"
   ],
-  "reviewer_decision": null,
-  "reviewer_role": null,
-  "decision_date": null,
-  "notes": null
+  "reviewer_decision": "CONDITIONAL_ENGINEERING_GO",
+  "reviewer_role": "external_reviewer",
+  "decision_date": "2026-09-16",
+  "notes": "Approved by the external reviewer subject to every condition in this decision package."
 }

@@ -1,0 +1,18 @@
+{
+  "schema_version": "g4-attestation-v1",
+  "gate": "G4",
+  "decision": "CONDITIONAL_ENGINEERING_GO",
+  "decision_date": "2026-09-16",
+  "reviewer_role": "external_reviewer",
+  "evidence_status": "OWNER_RELAYED_EXTERNAL_REVIEWER_ATTESTATION",
+  "conditions_document": "docs/WAVE6/DECISION_G4.json",
+  "all_documented_conditions_accepted": true,
+  "authorized_next_work": "PR25 engineering only",
+  "selected_reference": "observable-evidence-hmm-v1",
+  "gru_status": "SHADOW_ONLY_INACTIVE",
+  "production_authorized": false,
+  "pilot_authorized": false,
+  "intervention_authorized": false,
+  "construct_validity_claim_authorized": false,
+  "private_document_or_hash_required": false
+}

@@ -20,3 +20,6 @@ export const EDGE_PROFILES_ENABLED =
 
 export const DEVICE_BUDGET_TELEMETRY_ENABLED =
   process.env.NEXT_PUBLIC_DEVICE_BUDGET_TELEMETRY?.trim().toLowerCase() === "true";
+
+export const ADAPTIVE_SCHEDULER_ENABLED =
+  process.env.NEXT_PUBLIC_ADAPTIVE_SCHEDULER?.trim().toLowerCase() === "true";

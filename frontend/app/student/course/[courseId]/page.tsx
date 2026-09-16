@@ -32,6 +32,7 @@ import {
   BROWSER_EXTRACTOR_ENABLED,
   BOUNDED_CAPTURE_QUEUE_ENABLED,
   CAPTURE_DEADLINE_MS,
+  ADAPTIVE_SCHEDULER_ENABLED,
   EDGE_PROFILES_ENABLED,
   DEVICE_BUDGET_TELEMETRY_ENABLED,
   NORMALIZED_FEATURES_V1_ENABLED,
@@ -44,6 +45,7 @@ import { evaluateFrame, evaluateWindow } from "../../../lib/quality-gate.mjs";
 import { constraintsForProfile, EDGE_PROFILES, EdgeProfileController } from "../../../lib/edge-profiles.mjs";
 import type { EdgeProfileName } from "../../../lib/edge-profiles.mjs";
 import { DeviceBudgetCollector } from "../../../lib/device-budget-telemetry.mjs";
+import { AdaptiveScheduler } from "../../../lib/adaptive-scheduler.mjs";
 import {
   Dialog,
   DialogContent,
@@ -154,6 +156,7 @@ export default function CoursePage() {
   const qualityWindowRef = useRef<Array<Awaited<ReturnType<BrowserFeatureExtractor["extract"]>>>>([]);
   const edgeProfileControllerRef = useRef<EdgeProfileController | null>(null);
   const deviceBudgetCollectorRef = useRef<DeviceBudgetCollector | null>(null);
+  const adaptiveSchedulerRef = useRef<AdaptiveScheduler | null>(null);
   const batteryLevelRef = useRef<number | null>(null);
   const sessionRef = useRef<number | null>(null);
   const progressSyncRef = useRef<{ lessonId: number | null; completed: number }>({
@@ -579,11 +582,21 @@ export default function CoursePage() {
     browserExtractorRef.current = null;
     latestNormalizedEventRef.current = null;
     deviceBudgetCollectorRef.current = null;
+    adaptiveSchedulerRef.current = null;
     batteryLevelRef.current = null;
     qualityWindowRef.current = [];
     setQualityMessage(null);
     setCaptureTransportStatus("stopped");
     setAttentionStatus("pending");
+  };
+
+  const startFrameTimer = (intervalMs: number) => {
+    if (frameTimerRef.current) clearInterval(frameTimerRef.current);
+    frameTimerRef.current = setInterval(() => {
+      if (cameraActiveRef.current && videoRef.current?.readyState === videoRef.current?.HAVE_ENOUGH_DATA) {
+        processLocalFrame();
+      }
+    }, intervalMs);
   };
 
   const processLocalFrame = () => {
@@ -598,7 +611,7 @@ export default function CoursePage() {
       browserExtractorRef.current ||= new BrowserFeatureExtractor();
       return browserExtractorRef.current.extract(video);
     }).then((outcome) => {
-      if (DEVICE_BUDGET_TELEMETRY_ENABLED && permissionSettings.saveAnalytics) {
+      if (ADAPTIVE_SCHEDULER_ENABLED || (DEVICE_BUDGET_TELEMETRY_ENABLED && permissionSettings.saveAnalytics)) {
         deviceBudgetCollectorRef.current ||= new DeviceBudgetCollector();
         deviceBudgetCollectorRef.current.record({
           at: performance.now(),
@@ -614,7 +627,52 @@ export default function CoursePage() {
           online: navigator.onLine,
           energy: { level: batteryLevelRef.current },
         });
-        if (payload && token) {
+        if (payload && ADAPTIVE_SCHEDULER_ENABLED) {
+          const qualitySamples = qualityWindowRef.current;
+          const coverage = qualitySamples.length
+            ? qualitySamples.filter((item) => item.quality?.observable === true).length / qualitySamples.length
+            : null;
+          const qualityConfidences = qualitySamples
+            .map((item) => item.quality?.confidence)
+            .filter((value): value is number => typeof value === "number" && Number.isFinite(value));
+          const uncertainty = qualityConfidences.length
+            ? 1 - qualityConfidences.reduce((sum, value) => sum + value, 0) / qualityConfidences.length
+            : null;
+          adaptiveSchedulerRef.current ||= new AdaptiveScheduler({
+            initialProfile: edgeProfileControllerRef.current?.current || "balanced",
+          });
+          const decision = adaptiveSchedulerRef.current.evaluate({
+            latencyBucket: payload.latency_bucket,
+            energyBucket: payload.energy_bucket,
+            networkBucket: payload.network_bucket,
+            cpuLoadBucket: payload.cpu_load_bucket,
+            coverage,
+            uncertainty,
+            qualityAllowed: QUALITY_GATE_V1_ENABLED,
+            consentGranted: Boolean(consentVersionRef.current && permissionSettings.enableAttentionTracking),
+            privacyAllowed: true,
+          });
+          if (decision.enabled && decision.changed && decision.sampleIntervalMs) {
+            const selection = edgeProfileControllerRef.current?.select(decision.profile, {
+              source: "local",
+              reason: `adaptive_${decision.reason}`,
+            });
+            if (selection?.changed) {
+              qualityWindowRef.current = [];
+              setEdgeProfile(selection.profile);
+              startFrameTimer(decision.sampleIntervalMs);
+              const videoConstraints = constraintsForProfile(selection.profile).video;
+              const track = (videoRef.current?.srcObject as MediaStream | null)?.getVideoTracks()[0];
+              if (track && typeof videoConstraints === "object") {
+                void track.applyConstraints(videoConstraints).catch(() => {
+                  stopCamera();
+                  setAttentionStatus("error");
+                });
+              }
+            }
+          }
+        }
+        if (payload && token && DEVICE_BUDGET_TELEMETRY_ENABLED && permissionSettings.saveAnalytics) {
           void apiFetch("/api/device-budget-telemetry/", { method: "POST", body: JSON.stringify(payload) }, token)
             .catch(() => undefined);
         }
@@ -731,12 +789,7 @@ export default function CoursePage() {
       });
       console.log("[startCamera] Cámara iniciada correctamente");
       
-      // Comenzar a capturar frames cada 1 segundo
-      frameTimerRef.current = setInterval(() => {
-        if (cameraActiveRef.current && videoRef.current?.readyState === videoRef.current?.HAVE_ENOUGH_DATA) {
-          processLocalFrame();
-        }
-      }, profile.sampleIntervalMs);
+      startFrameTimer(profile.sampleIntervalMs);
     } catch (err) {
       console.error("[startCamera] Error al iniciar cámara:", err instanceof Error ? err.message : err);
       if (generation === cameraGenerationRef.current) {

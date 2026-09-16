@@ -1,0 +1,36 @@
+{
+  "pr": "PR27",
+  "status": "TECHNICAL_PASS_WITH_BASELINE_FAILURES",
+  "control": "adaptive_scheduler",
+  "feature_flag": "NEXT_PUBLIC_ADAPTIVE_SCHEDULER=false",
+  "real_data_used": false,
+  "policy": {
+    "latency_budget": "under_100_ms_bucket",
+    "minimum_coverage": 0.7,
+    "recovery_coverage": 0.85,
+    "maximum_uncertainty": 0.7,
+    "recovery_uncertainty": 0.45,
+    "degrade_windows": 2,
+    "recover_windows": 3,
+    "minimum_dwell_ms": 30000,
+    "remote_inference_allowed": false
+  },
+  "checks": {
+    "wave7_targeted_tests": "PASS_13_OF_13",
+    "pr27_tests": "PASS_5_OF_5",
+    "frontend_suite": "PASS_43_OF_45_WITH_2_PREEXISTING_PR25_FAILURES",
+    "frontend_typecheck": "PASS",
+    "frontend_build": "PASS",
+    "targeted_lint": "PASS",
+    "page_lint": "BASELINE_11_ERRORS_8_WARNINGS",
+    "migration_check": "NOT_APPLICABLE_NO_BACKEND_OR_SCHEMA_CHANGE"
+  },
+  "safety": {
+    "consent_fail_closed": true,
+    "privacy_fail_closed": true,
+    "quality_bypass": false,
+    "raw_media_transmission": false,
+    "remote_inference": false,
+    "bounded_local_decision_log": true
+  }
+}

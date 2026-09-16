@@ -1,0 +1,110 @@
+{
+  "events": [
+    {
+      "observable": true,
+      "probability": 0.15,
+      "timestamp_ms": 0
+    },
+    {
+      "observable": true,
+      "probability": 0.22,
+      "timestamp_ms": 5000
+    },
+    {
+      "observable": true,
+      "probability": 0.78,
+      "timestamp_ms": 10000
+    },
+    {
+      "observable": false,
+      "probability": null,
+      "timestamp_ms": 15000
+    },
+    {
+      "observable": true,
+      "probability": 0.82,
+      "timestamp_ms": 20000
+    },
+    {
+      "observable": true,
+      "probability": 0.18,
+      "timestamp_ms": 30000
+    }
+  ],
+  "expected": [
+    {
+      "allow_intervention": false,
+      "evidence_state": "off_task_evidence",
+      "interpretation": "observable_evidence_not_internal_attention",
+      "model_version": "observable-evidence-hmm-v1",
+      "posterior": {
+        "off_task_evidence": 1.0,
+        "task_oriented_evidence": 2.0101986213355305e-38
+      },
+      "reset_reason": null,
+      "uncertainty": 2.5172899093518564e-36
+    },
+    {
+      "allow_intervention": false,
+      "evidence_state": "off_task_evidence",
+      "interpretation": "observable_evidence_not_internal_attention",
+      "model_version": "observable-evidence-hmm-v1",
+      "posterior": {
+        "off_task_evidence": 1.0,
+        "task_oriented_evidence": 1.391942105792966e-31
+      },
+      "reset_reason": null,
+      "uncertainty": 1.4267778474313108e-29
+    },
+    {
+      "allow_intervention": false,
+      "evidence_state": "task_oriented_evidence",
+      "interpretation": "observable_evidence_not_internal_attention",
+      "model_version": "observable-evidence-hmm-v1",
+      "posterior": {
+        "off_task_evidence": 3.479855264482259e-30,
+        "task_oriented_evidence": 1.0
+      },
+      "reset_reason": null,
+      "uncertainty": 3.4053451444832586e-28
+    },
+    {
+      "allow_intervention": false,
+      "evidence_state": "no_observable",
+      "interpretation": "observable_evidence_not_internal_attention",
+      "model_version": "observable-evidence-hmm-v1",
+      "posterior": {
+        "off_task_evidence": 0.13157894736842105,
+        "task_oriented_evidence": 0.868421052631579
+      },
+      "reset_reason": null,
+      "uncertainty": 0.5617526078313283
+    },
+    {
+      "allow_intervention": false,
+      "evidence_state": "task_oriented_evidence",
+      "interpretation": "observable_evidence_not_internal_attention",
+      "model_version": "observable-evidence-hmm-v1",
+      "posterior": {
+        "off_task_evidence": 3.4228661470359496e-35,
+        "task_oriented_evidence": 1.0
+      },
+      "reset_reason": null,
+      "uncertainty": 3.918917439862266e-33
+    },
+    {
+      "allow_intervention": false,
+      "evidence_state": "off_task_evidence",
+      "interpretation": "observable_evidence_not_internal_attention",
+      "model_version": "observable-evidence-hmm-v1",
+      "posterior": {
+        "off_task_evidence": 1.0,
+        "task_oriented_evidence": 3.422866147035948e-35
+      },
+      "reset_reason": "gap_reset",
+      "uncertainty": 3.9189174398622646e-33
+    }
+  ],
+  "fixture_version": "local-temporal-parity-v1",
+  "numeric_tolerance": 1e-12
+}

@@ -1,0 +1,13 @@
+{
+  "artifact_filename": "temporal-reference.v1.json",
+  "artifact_version": "observable-evidence-hmm-v1",
+  "byte_length": 926,
+  "deployment_eligibility": "engineering_parity_only",
+  "feature_flag": "NEXT_PUBLIC_LOCAL_TEMPORAL_MODEL",
+  "format_version": "visionclass-temporal-web-v1",
+  "manifest_version": "local-temporal-manifest-v1",
+  "quantized": false,
+  "sha256": "831c8b46d4ca5280541b4fe23ade1a19323c3b1e8692626919cf181c33ddaa40",
+  "signature": null,
+  "signature_status": "not_signed_engineering_only"
+}

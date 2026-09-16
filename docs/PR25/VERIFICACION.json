@@ -1,0 +1,91 @@
+{
+  "pr": "PR25",
+  "base_commit": "bc70da9",
+  "verification_date": "2026-09-16",
+  "selected_reference": "observable-evidence-hmm-v1",
+  "scope": "conditional_engineering_only",
+  "results": {
+    "python_specific": {
+      "command": "python -m unittest ml.test_export_state_model_web -v",
+      "passed": 4,
+      "failed": 0,
+      "status": "pass"
+    },
+    "frontend_specific_node20": {
+      "command": "node --test frontend/tests/pr25-local-temporal-model.test.mjs",
+      "passed": 6,
+      "failed": 0,
+      "status": "pass"
+    },
+    "frontend_suite": {
+      "command": "node --test frontend/tests/*.test.mjs",
+      "passed": 36,
+      "failed": 0,
+      "status": "pass"
+    },
+    "frontend_targeted_lint": {
+      "command": "npx eslint app/lib/local-temporal-model.mjs tests/pr25-local-temporal-model.test.mjs",
+      "status": "pass"
+    },
+    "frontend_full_lint": {
+      "command": "npm --prefix frontend run lint",
+      "status": "fail_preexisting_baseline",
+      "errors": 66,
+      "warnings": 43,
+      "note": "All reported findings are in pre-existing files outside the PR25 diff; they were not hidden or modified in this PR."
+    },
+    "frontend_typecheck": {
+      "command": "npm --prefix frontend run typecheck",
+      "status": "pass"
+    },
+    "frontend_build": {
+      "command": "npm --prefix frontend run build",
+      "status": "pass",
+      "note": "Baseline browser mapping emitted an informational stale-data warning."
+    },
+    "ml_suite": {
+      "command": "python -m unittest discover -s ml -p test_*.py -v",
+      "passed": 66,
+      "failed": 0,
+      "status": "pass"
+    },
+    "ml_compile": {
+      "command": "python -m compileall -q ml",
+      "status": "pass"
+    },
+    "cpu_benchmark": {
+      "runtime": "Node.js 20.20.2 CPU",
+      "updates": 10000,
+      "budget_ms": 500,
+      "observed_ms_approx": 23,
+      "status": "pass"
+    },
+    "wasm_benchmark": {
+      "status": "not_executed_not_applicable_to_selected_web_format"
+    },
+    "webgpu_benchmark": {
+      "status": "not_executed_no_approved_device_browser_harness"
+    }
+  },
+  "artifacts": {
+    "web_sha256": "831c8b46d4ca5280541b4fe23ade1a19323c3b1e8692626919cf181c33ddaa40",
+    "manifest_sha256": "ec6fe2059a893e29a116dd9f339f3a5c4394b1f8b408c0d842f649a80171ce67",
+    "parity_fixture_sha256": "19e0c512777d9cea118031333c3f938d92ac1359f17826257b5801e70b04661e",
+    "signature_status": "not_signed_engineering_only",
+    "deployment_eligibility": "engineering_parity_only",
+    "quantized": false
+  },
+  "verified_controls": [
+    "python_to_javascript_numeric_parity_with_1e-12_tolerance",
+    "decision_and_gap_reset_parity",
+    "same_origin_only_fetch",
+    "sha256_and_length_before_parse",
+    "incompatible_and_tampered_artifact_rejection",
+    "engineering_artifact_rejected_by_default",
+    "feature_disabled_by_default",
+    "safe_local_no_observable_fallback",
+    "no_raw_media_or_remote_inference_fallback",
+    "no_quantization",
+    "no_intervention"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "events": [
+    {"timestamp_ms": 0, "observable": true, "probability": 0.15},
+    {"timestamp_ms": 5000, "observable": true, "probability": 0.22},
+    {"timestamp_ms": 10000, "observable": true, "probability": 0.78},
+    {"timestamp_ms": 15000, "observable": false, "probability": null},
+    {"timestamp_ms": 20000, "observable": true, "probability": 0.82},
+    {"timestamp_ms": 30000, "observable": true, "probability": 0.18}
+  ]
+}

@@ -3,7 +3,7 @@
 **Fecha:** 2026-09-15  
 **Base:** `571f709` (Ola 4 con smoke Redis completo)  
 **Código integrado:** `bb687ac`
-**Estado:** `TECHNICAL_COMPLETE_G3_BLOCKED_HUMAN_AND_SCIENTIFIC`
+**Estado:** `COMPLETE_G3_APPROVED_REVIEWER_ATTESTED`
 
 ## Commits
 
@@ -23,7 +23,7 @@
 - Python compile y `git diff --check`: PASS.
 - Lint global: 66 errores y 43 advertencias; la línea base anterior era 69/43. La Ola 5 no añade deuda y elimina tres errores previos del flujo de cámara.
 - Dependencias npm: permanecen 17 vulnerabilidades informadas por la instalación bloqueada; actualizarlas queda fuera del alcance de esta ola.
-- Pruebas manuales con cámara, múltiples dispositivos, suspensión real y navegadores objetivo: pendientes; requieren hardware/interacción y consentimiento aplicable.
+- Matriz manual: aprobada por atestación de revisor externo del 2026-09-15; los detalles por plataforma no fueron suministrados y no se infirieron.
 
 ## Seguridad y activación
 
@@ -33,4 +33,4 @@ La canalización genera un sobre JSON v2 con números o `null`, razón de calida
 
 ## Salida
 
-El código local de PR15–PR18 está integrado y probado. La Ola 5 queda técnicamente completa, pero no habilita operación ni abre G3. Antes de iniciar PR19 deben resolverse las decisiones científicas e institucionales de `G3_DECISION_REQUIRED.md` y las pruebas manuales de compatibilidad.
+El código local de PR15–PR18 está integrado y probado. Las decisiones científicas e institucionales fueron atestadas y un revisor externo aprobó G3 el 2026-09-15. PR19 puede comenzar bajo P0.3 v0.2; la aprobación no activa flags ni autoriza usos fuera del protocolo.

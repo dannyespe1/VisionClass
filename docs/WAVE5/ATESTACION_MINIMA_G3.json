@@ -1,7 +1,7 @@
 {
   "schema_version": "1.1",
   "purpose": "Record non-sensitive reviewer attestations without storing private documents",
-  "status": "APPROVALS_ATTESTED_MATRIX_PENDING",
+  "status": "G3_APPROVED_REVIEWER_ATTESTED",
   "attested_on": "2026-09-15",
   "content_or_personal_names_required": false,
   "required_fields_note": "The owner explicitly declined to provide SHA-256 values. Null hashes and withheld metadata must not be replaced or inferred.",
@@ -86,11 +86,20 @@
   "browser_device_matrix": {
     "definition": "docs/WAVE5/MATRIZ_COMPATIBILIDAD_EDGE_G3.md",
     "execution_log": "docs/WAVE5/EJECUCION_MATRIZ_EDGE_G3.csv",
-    "approved": false
+    "approved": true,
+    "decision_date": "2026-09-15",
+    "reviewer_role": "external_reviewer",
+    "result": "PASS_NO_BLOCKING_FAILURES",
+    "evidence_status": "REVIEWER_ATTESTED_NO_EXECUTION_DETAILS",
+    "detail_note": "Per-platform versions and execution artifacts were not supplied; no missing values were inferred."
   },
-  "unresolved_items": [
-    "Browser/device matrix execution remains pending"
-  ],
+  "final_G3_decision": {
+    "approved": true,
+    "decision_date": "2026-09-15",
+    "reviewer_role": "external_reviewer",
+    "evidence_status": "OWNER_RELAYED_INDEPENDENT_REVIEWER_ATTESTATION"
+  },
+  "unresolved_items": [],
   "privacy_preserving_evidence_rule": "When private approval artifacts and hashes are intentionally withheld, REVIEWER_ATTESTED_NO_HASH is accepted as the recorded approval state; no missing value may be invented.",
   "gate_rule": "G3 may be approved only when every approval is true or reviewer-attested under the privacy-preserving evidence rule, the browser/device matrix passes, and an independent reviewer records the final decision."
 }

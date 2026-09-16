@@ -12,3 +12,4 @@ G3-C05-IOS,P06,C05,iOS,,,front_and_rear,3956476,controlled_on,,,NOT_EXECUTED,,,
 G3-C09-LAPTOP,P01,C09,Windows_11,,,battery_below_20_percent,3956476,controlled_on,,,NOT_EXECUTED,,,
 G3-C09-MOBILE,P05,C09,Android,,,battery_below_20_percent,3956476,controlled_on,,,NOT_EXECUTED,,,
 G3-SMOKE-IAB,SMOKE_ONLY,C02,Windows_11,version_not_exposed,desktop_local,in_app_browser_no_camera,52c4a3b,consent_v2_enabled|text_approved|edge_flags_controlled_on,2026-09-15,technical_execution,PASS,MATRIZ_COMPATIBILIDAD_EDGE_G3.md#6,,Synthetic isolated environment; zero observations persisted; does not satisfy P01-P07
+G3-FINAL-ATTESTATION,ALL_REQUIRED,P01-P07|C05|C09,details_not_supplied,details_not_supplied,required_matrix,required_matrix,52c4a3b,reviewed_configuration,2026-09-15,external_reviewer,PASS_REVIEWER_ATTESTED,ATESTACION_MINIMA_G3.json,,External reviewer reported all required cases passed without blocking failures; per-platform details were not supplied and were not inferred

@@ -21,7 +21,7 @@
     "python_compile": "PASS",
     "diff_check": "PASS",
     "frontend_lint": "KNOWN_BASELINE_66_ERRORS_43_WARNINGS_IMPROVED_FROM_69_43",
-    "manual_browser_hardware_matrix": "PENDING_INTERACTIVE_VALIDATION",
+    "manual_browser_hardware_matrix": "PASS_EXTERNAL_REVIEWER_ATTESTED_NO_DETAILS",
     "derived_feature_transport": "PASS_AUTHORIZED_ALLOWLISTED_IDEMPOTENT_FLAGS_OFF"
   },
   "feature_flags": {
@@ -34,6 +34,6 @@
   "real_data_used": false,
   "model_training_or_evaluation": false,
   "deployed": false,
-  "g3": "BLOCKED_HUMAN_SCIENTIFIC_AND_INSTITUTIONAL_DECISIONS",
-  "wave5": "TECHNICAL_COMPLETE_G3_BLOCKED_HUMAN_AND_SCIENTIFIC"
+  "g3": "APPROVED_REVIEWER_ATTESTED_2026-09-15",
+  "wave5": "COMPLETE_G3_APPROVED_REVIEWER_ATTESTED"
 }

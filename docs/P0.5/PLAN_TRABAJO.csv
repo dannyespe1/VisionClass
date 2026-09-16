@@ -29,8 +29,8 @@ PR15,code,EPIC-G3,Extraer características en el navegador,PR14,BLOCKED,true,pla
 PR16,code,EPIC-G3,Normalizar características,PR15,BLOCKED,true,plan_fuente_2026-09-05,"Frontend, backend y ML"
 PR17,code,EPIC-G3,Crear puerta de calidad y estado no observable,PR16,BLOCKED,true,plan_fuente_2026-09-05,Datos y ML
 PR18,code,EPIC-G3,Habilitar perfiles de ejecución Edge,PR17,BLOCKED,true,plan_fuente_2026-09-05,Frontend y plataforma
-G3,approval,EPIC-G3,Aprobación G3,PR18,BLOCKED,true,orden_en_AGENTS,research-lead
-PR19,code,EPIC-G4,Construir baselines reproducibles,G3,BLOCKED,true,plan_fuente_2026-09-05,Datos y ML
+G3,approval,EPIC-G3,Aprobación G3,PR18,APPROVED,true,external_reviewer_attestation_2026-09-15,research-lead
+PR19,code,EPIC-G4,Construir baselines reproducibles,G3,READY,true,plan_fuente_2026-09-05,Datos y ML
 PR20,code,EPIC-G4,Implementar HMM o modelo de espacio de estados,PR19,BLOCKED,true,plan_fuente_2026-09-05,Datos y ML
 PR21,code,EPIC-G4,Exponer el motor temporal,PR20,BLOCKED,true,plan_fuente_2026-09-05,Backend y ML
 PR22,code,EPIC-G4,Desplegar modelos con shadow mode y rollback,PR21,BLOCKED,true,plan_fuente_2026-09-05,ML y plataforma

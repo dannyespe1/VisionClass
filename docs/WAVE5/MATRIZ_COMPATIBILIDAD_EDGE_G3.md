@@ -1,7 +1,7 @@
 # Matriz de compatibilidad Edge para G3
 
 **Fecha de diseño:** 2026-09-15  
-**Estado:** preparada; correcciones B01–B08 implementadas en `pr18b-g3-compat`; smoke test local aprobado; ejecución manual multiplataforma pendiente  
+**Estado:** G3 aprobado por atestación de revisor externo el 2026-09-15; detalles por plataforma no suministrados
 **Alcance:** cámara consentida, extracción local, calidad, `no_observable`, perfiles Edge y persistencia derivada autorizada. No usa participantes ni datos reales.
 
 ## 1. Plataformas mínimas
@@ -95,9 +95,15 @@ El 2026-09-15 se ejecutó un smoke test adicional en un entorno Docker aislado, 
 - almacenamiento/transmisión de imagen: no autorizados y no observados en este flujo;
 - limitación: la versión exacta del navegador integrado no fue expuesta y el permiso físico de cámara no pudo completarse de forma automatizada.
 
-El resultado acredita únicamente el camino C02 y el control negativo de persistencia en el entorno de smoke. G3 continúa pendiente hasta completar P01–P07, C05, C09 y la revisión independiente final.
+El resultado acredita únicamente el camino C02 y el control negativo de persistencia en el entorno de smoke.
 
-## 7. Fuentes de compatibilidad
+## 7. Decisión externa de G3
+
+El propietario comunicó el 2026-09-15 que un revisor externo ejecutó y aprobó P01–P07, C05 y C09 sin fallos bloqueantes. La decisión agregada se registra en `EJECUCION_MATRIZ_EDGE_G3.csv` y `ATESTACION_MINIMA_G3.json`.
+
+No se suministraron versiones, capturas ni resultados individuales. Las filas detalladas se conservan como `NOT_EXECUTED` en el repositorio para evitar fabricar evidencia; la apertura de G3 descansa en la atestación independiente comunicada, no en esos campos vacíos.
+
+## 8. Fuentes de compatibilidad
 
 - `getUserMedia` es ampliamente soportado, pero requiere HTTPS y permiso: https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
 - Page Visibility es ampliamente soportado y los navegadores limitan timers en segundo plano: https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API

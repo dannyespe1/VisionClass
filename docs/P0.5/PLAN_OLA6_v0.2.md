@@ -1,7 +1,7 @@
 # Ola 6 v0.2 — Ejecución condicionada por G3
 
 **Fecha:** 2026-09-15  
-**Estado:** definición preparada; ejecución bloqueada hasta aprobación verificable de G3  
+**Estado:** G3 aprobado por atestación de revisor externo; PR19 habilitado
 **Orden:** `PR19 → PR20 → PR21 → PR22 → PR23 → PR24`
 
 ## Contrato común
@@ -52,4 +52,3 @@ GRU o LSTM como baseline temporal bajo exactamente los mismos splits, señales, 
 - PR34: auditoría de equidad.
 
 Este documento no abre G3. La evidencia pendiente se mantiene en `../WAVE5/G3_DECISION_REQUIRED.md`.
-

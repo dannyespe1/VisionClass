@@ -111,6 +111,30 @@ const toYoutubeEmbed = (url: string) => {
   return url;
 };
 
+type CameraOption = { deviceId: string; label: string };
+type BatteryManagerLike = { level: number };
+
+const browserFamilyFromUserAgent = (userAgent: string) => {
+  if (/firefox/i.test(userAgent)) return "firefox";
+  if (/edg/i.test(userAgent)) return "edge";
+  if (/chrome|chromium|crios/i.test(userAgent)) return "chromium";
+  if (/safari/i.test(userAgent)) return "safari";
+  return "unknown";
+};
+
+const readBatteryLevel = async () => {
+  const getBattery = (navigator as Navigator & { getBattery?: () => Promise<BatteryManagerLike> }).getBattery;
+  if (!getBattery) return null;
+  try {
+    const battery = await getBattery.call(navigator);
+    return Number.isFinite(battery.level) ? battery.level : null;
+  } catch {
+    return null;
+  }
+};
+
+const pageIsHidden = () => document.visibilityState === "hidden";
+
 export default function CoursePage() {
   const router = useRouter();
   const params = useParams();
@@ -121,6 +145,7 @@ export default function CoursePage() {
   const frameTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const captureQueueRef = useRef<BoundedCaptureQueue | null>(null);
   const cameraActiveRef = useRef(false);
+  const cameraGenerationRef = useRef(0);
   const browserExtractorRef = useRef<BrowserFeatureExtractor | null>(null);
   const consentVersionRef = useRef<string | null>(null);
   const latestNormalizedEventRef = useRef<AttentionEventV2 | null>(null);
@@ -179,6 +204,8 @@ export default function CoursePage() {
   >("stopped");
   const [qualityMessage, setQualityMessage] = useState<string | null>(null);
   const [edgeProfile, setEdgeProfile] = useState<EdgeProfileName>("low");
+  const [availableCameras, setAvailableCameras] = useState<CameraOption[]>([]);
+  const [selectedCameraId, setSelectedCameraId] = useState("");
 
   useEffect(() => {
     if (!token) {
@@ -512,6 +539,7 @@ export default function CoursePage() {
   }, []);
 
   const stopCamera = () => {
+    cameraGenerationRef.current += 1;
     if (frameTimerRef.current) {
       clearInterval(frameTimerRef.current);
       frameTimerRef.current = null;
@@ -560,7 +588,7 @@ export default function CoursePage() {
             sessionId,
             consentVersion: consentVersionRef.current,
             purposes: ["local_processing", ...(permissionSettings.saveAnalytics ? ["derived_persistence"] : [])],
-            browserFamily: navigator.userAgent.includes("Firefox") ? "firefox" : "chromium",
+            browserFamily: browserFamilyFromUserAgent(navigator.userAgent),
             executionProfile: edgeProfileControllerRef.current?.current || edgeProfile,
             profileGeneration: edgeProfileControllerRef.current?.generation || 0,
           });
@@ -571,7 +599,9 @@ export default function CoursePage() {
             .catch(() => setCaptureTransportStatus("degraded"));
         }
         setAttentionStatus(sample.quality.observable ? "ok" : "no_face");
-        setCaptureTransportStatus("idle");
+        if (!(NORMALIZED_FEATURES_V1_ENABLED && QUALITY_GATE_V1_ENABLED && sessionId && consentVersionRef.current)) {
+          setCaptureTransportStatus("idle");
+        }
       }
       if (outcome.status === "failed" || outcome.status === "timed_out") {
         setCaptureTransportStatus("degraded");
@@ -594,25 +624,44 @@ export default function CoursePage() {
       return;
     }
     setAttentionStatus("pending");
+    const generation = ++cameraGenerationRef.current;
     try {
       console.log("[startCamera] Iniciando cámara...");
       edgeProfileControllerRef.current ||= new EdgeProfileController({ remoteSelection: false });
+      const batteryLevel = await readBatteryLevel();
+      if (generation !== cameraGenerationRef.current || pageIsHidden()) return;
       const selection = EDGE_PROFILES_ENABLED
         ? edgeProfileControllerRef.current.selectForEnvironment({
             hardwareConcurrency: navigator.hardwareConcurrency,
             deviceMemory: (navigator as Navigator & { deviceMemory?: number }).deviceMemory || 0,
-            hidden: document.visibilityState === "hidden",
+            batteryLevel: batteryLevel ?? undefined,
+            hidden: pageIsHidden(),
           })
         : edgeProfileControllerRef.current.select("low", { source: "local", reason: "safe_fallback" });
       if (selection.resetWindow) qualityWindowRef.current = [];
       setEdgeProfile(selection.profile);
       const profile = EDGE_PROFILES[selection.profile];
-      const media = await navigator.mediaDevices.getUserMedia(constraintsForProfile(selection.profile));
+      const media = await navigator.mediaDevices.getUserMedia(constraintsForProfile(selection.profile, selectedCameraId || undefined));
+      if (generation !== cameraGenerationRef.current || pageIsHidden()) {
+        media.getTracks().forEach((track) => track.stop());
+        return;
+      }
+      media.getVideoTracks().forEach((track) => {
+        track.addEventListener("ended", () => {
+          if (generation === cameraGenerationRef.current) {
+            stopCamera();
+            setAttentionStatus("error");
+          }
+        }, { once: true });
+      });
       videoRef.current.srcObject = media;
       
       // Esperar a que el video esté listo antes de empezar a capturar frames
       await new Promise<void>((resolve, reject) => {
-        const timeout = setTimeout(() => reject(new Error("Timeout esperando video")), 5000);
+        const timeout = setTimeout(() => {
+          videoRef.current?.removeEventListener("canplay", handleCanPlay);
+          reject(new Error("Timeout esperando video"));
+        }, 5000);
         const handleCanPlay = () => {
           clearTimeout(timeout);
           videoRef.current?.removeEventListener("canplay", handleCanPlay);
@@ -622,6 +671,11 @@ export default function CoursePage() {
       });
       
       await videoRef.current.play();
+      if (generation !== cameraGenerationRef.current || pageIsHidden()) {
+        media.getTracks().forEach((track) => track.stop());
+        if (videoRef.current?.srcObject === media) videoRef.current.srcObject = null;
+        return;
+      }
       cameraActiveRef.current = true;
       captureQueueRef.current = new BoundedCaptureQueue({
         timeoutMs: CAPTURE_DEADLINE_MS,
@@ -637,8 +691,10 @@ export default function CoursePage() {
       }, profile.sampleIntervalMs);
     } catch (err) {
       console.error("[startCamera] Error al iniciar cámara:", err instanceof Error ? err.message : err);
-      cameraActiveRef.current = false;
-      setAttentionStatus("pending");
+      if (generation === cameraGenerationRef.current) {
+        stopCamera();
+        setAttentionStatus("error");
+      }
     }
   };
 
@@ -649,7 +705,7 @@ export default function CoursePage() {
     }
     stopCamera();
     return undefined;
-  }, [permissionSettings.enableCamera, sessionId, userId]);
+  }, [permissionSettings.enableCamera, sessionId, userId, selectedCameraId]);
 
   useEffect(() => {
     const handleVisibility = () => {
@@ -661,6 +717,8 @@ export default function CoursePage() {
         }
         persistProgressNow();
         stopCamera();
+      } else if (permissionSettings.enableCamera) {
+        void startCamera();
       }
     };
     const handleUnload = () => {
@@ -674,7 +732,7 @@ export default function CoursePage() {
       document.removeEventListener("visibilitychange", handleVisibility);
       stopCamera();
     };
-  }, []);
+  }, [permissionSettings.enableCamera, sessionId, userId, selectedCameraId]);
 
   const requestCamera = async (settings: PermissionSettings) => {
     if (!token) return;
@@ -696,10 +754,16 @@ export default function CoursePage() {
         setCaptureTransportStatus("stopped");
         return;
       }
-      setPermissionSettings(settings);
       console.log("[requestCamera] Verificando permisos de cámara...");
-      const permissionStream = await navigator.mediaDevices.getUserMedia(constraintsForProfile(edgeProfile));
+      const permissionStream = await navigator.mediaDevices.getUserMedia(constraintsForProfile(edgeProfile, selectedCameraId || undefined));
       permissionStream.getTracks().forEach((track) => track.stop());
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const cameras = devices
+        .filter((device) => device.kind === "videoinput")
+        .map((device, index) => ({ deviceId: device.deviceId, label: device.label || `Cámara ${index + 1}` }));
+      setAvailableCameras(cameras);
+      if (!selectedCameraId && cameras[0]) setSelectedCameraId(cameras[0].deviceId);
+      setPermissionSettings(settings);
       console.log("[requestCamera] Permisos de cámara otorgados");
     } catch (err) {
       console.error("[requestCamera] No se habilitó la cámara:", err instanceof Error ? err.message : err);
@@ -981,6 +1045,20 @@ export default function CoursePage() {
             </button>
           </div>
           <div className="space-y-4">
+            {permissionSettings.enableCamera && availableCameras.length > 0 && (
+              <label className="block p-3 bg-slate-50 rounded-lg">
+                <span className="block text-sm mb-2">Cámara seleccionada</span>
+                <select
+                  value={selectedCameraId}
+                  onChange={(event) => setSelectedCameraId(event.target.value)}
+                  className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+                >
+                  {availableCameras.map((camera) => (
+                    <option key={camera.deviceId} value={camera.deviceId}>{camera.label}</option>
+                  ))}
+                </select>
+              </label>
+            )}
             {[
               { label: "Habilitar Cámara", value: permissionSettings.enableCamera },
               { label: "Seguimiento de Atención", value: permissionSettings.enableAttentionTracking },

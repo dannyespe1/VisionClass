@@ -1,3 +1,5 @@
+import { createLocalFaceDetector } from "./mediapipe-face-detector.mjs";
+
 const clamp01 = (value) => Math.min(1, Math.max(0, value));
 
 const pointFor = (landmarks, type) => {
@@ -61,11 +63,7 @@ export function summarizeLuminance(imageData) {
 
 export class BrowserFeatureExtractor {
   constructor({ detectorFactory, canvasFactory } = {}) {
-    this.detectorFactory = detectorFactory || (() => {
-      const Detector = globalThis.FaceDetector;
-      if (!Detector) return null;
-      return new Detector({ fastMode: true, maxDetectedFaces: 1 });
-    });
+    this.detectorFactory = detectorFactory || createLocalFaceDetector;
     this.canvasFactory = canvasFactory || (() => document.createElement("canvas"));
     this.detector = null;
     this.canvas = null;
@@ -77,7 +75,13 @@ export class BrowserFeatureExtractor {
     const width = Number(video?.videoWidth || 0);
     const height = Number(video?.videoHeight || 0);
     if (!width || !height) return this.unobservable("video_not_ready", width, height);
-    if (!this.detector) this.detector = this.detectorFactory();
+    if (!this.detector) {
+      try {
+        this.detector = await this.detectorFactory();
+      } catch {
+        return this.unobservable("detector_unavailable", width, height);
+      }
+    }
     if (!this.detector) return this.unobservable("detector_unavailable", width, height);
 
     this.canvas ||= this.canvasFactory();
@@ -96,7 +100,7 @@ export class BrowserFeatureExtractor {
         ? summarizeLuminance(context.getImageData(0, 0, width, height))
         : { luminance_mean: null, luminance_std: null };
       return {
-        extractor_version: "browser-face-detector-v1",
+        extractor_version: this.detector.backend || "browser-face-detector-v1",
         captured_at: new Date().toISOString(),
         frame: { width, height },
         features: { ...features, ...luminance },

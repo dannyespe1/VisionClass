@@ -14,8 +14,9 @@ test("selects conservative profiles for slow background and low battery devices"
   assert.equal(profileForEnvironment({ hardwareConcurrency: 2, deviceMemory: 2 }), "low");
   assert.equal(profileForEnvironment({ hardwareConcurrency: 8, deviceMemory: 8, hidden: true }), "low");
   assert.equal(profileForEnvironment({ hardwareConcurrency: 8, deviceMemory: 8, batteryLevel: 0.1 }), "low");
-  assert.equal(profileForEnvironment({ hardwareConcurrency: 4, deviceMemory: 4 }), "balanced");
-  assert.equal(profileForEnvironment({ hardwareConcurrency: 8, deviceMemory: 8 }), "high");
+  assert.equal(profileForEnvironment({ hardwareConcurrency: 8, deviceMemory: 8 }), "low");
+  assert.equal(profileForEnvironment({ hardwareConcurrency: 4, deviceMemory: 4, batteryLevel: 0.8 }), "balanced");
+  assert.equal(profileForEnvironment({ hardwareConcurrency: 8, deviceMemory: 8, batteryLevel: 0.8 }), "high");
 });
 
 test("rejects remote selection unless consented and constrains device capability", () => {

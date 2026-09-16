@@ -3,13 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "prepare:mediapipe": "node scripts/prepare-mediapipe-assets.mjs",
+    "predev": "npm run prepare:mediapipe",
     "dev": "next dev",
+    "prebuild": "npm run prepare:mediapipe",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@mediapipe/tasks-vision": "1.0.1",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-aspect-ratio": "^1.1.8",

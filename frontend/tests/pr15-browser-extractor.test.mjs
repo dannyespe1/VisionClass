@@ -53,6 +53,28 @@ test("fails closed when the browser detector is unavailable", async () => {
   assert.equal(result.features.face_present, null);
 });
 
+test("fails closed when the local fallback cannot initialize", async () => {
+  const extractor = new BrowserFeatureExtractor({ detectorFactory: async () => { throw new Error("asset missing"); } });
+  const result = await extractor.extract({ videoWidth: 640, videoHeight: 480 });
+  assert.equal(result.quality.observable, false);
+  assert.equal(result.quality.reason, "detector_unavailable");
+});
+
+test("supports an asynchronous local fallback factory and records its backend", async () => {
+  const extractor = new BrowserFeatureExtractor({
+    detectorFactory: async () => ({ backend: "mediapipe-local", detect: () => [face] }),
+    canvasFactory: () => ({
+      width: 0,
+      height: 0,
+      getContext: () => ({ drawImage: () => {} }),
+      remove: () => {},
+    }),
+  });
+  const result = await extractor.extract({ videoWidth: 640, videoHeight: 480 });
+  assert.equal(result.extractor_version, "mediapipe-local");
+  assert.equal(result.quality.observable, true);
+});
+
 test("pins a selected camera and limits resolution and frame rate", () => {
   const selected = cameraConstraints("camera-b");
   assert.deepEqual(selected.video.deviceId, { exact: "camera-b" });

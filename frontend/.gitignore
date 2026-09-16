@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# generated and checksum-verified by scripts/prepare-mediapipe-assets.mjs
+/public/vendor/mediapipe/

@@ -6,8 +6,8 @@ export const EDGE_PROFILES = Object.freeze({
 export const SAFE_EDGE_PROFILE = "low";
 const rank = { low: 0, balanced: 1, high: 2 };
 
-export function profileForEnvironment({ hardwareConcurrency = 0, deviceMemory = 0, batteryLevel = 1, hidden = false } = {}) {
-  if (hidden || batteryLevel < 0.2 || hardwareConcurrency <= 2) return "low";
+export function profileForEnvironment({ hardwareConcurrency = 0, deviceMemory = 0, batteryLevel = null, hidden = false } = {}) {
+  if (hidden || batteryLevel === null || batteryLevel < 0.2 || hardwareConcurrency <= 2) return "low";
   if (hardwareConcurrency >= 8 && deviceMemory >= 8) return "high";
   return "balanced";
 }

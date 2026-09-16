@@ -1,0 +1,31 @@
+{
+  "pr": "PR26",
+  "status": "TECHNICAL_PASS_WITH_BASELINE_FAILURES",
+  "control": "device_budget_telemetry",
+  "feature_flags": {
+    "DEVICE_BUDGET_TELEMETRY": false,
+    "NEXT_PUBLIC_DEVICE_BUDGET_TELEMETRY": false
+  },
+  "retention_hours": 24,
+  "real_data_used": false,
+  "checks": {
+    "backend_targeted": "PASS_13_OF_13",
+    "frontend_pr26_and_pr18": "PASS_8_OF_8",
+    "frontend_suite": "PASS_38_OF_40_WITH_2_PREEXISTING_PR25_FAILURES",
+    "backend_suite": "PASS_84_OF_90_WITH_6_PREEXISTING_PR22_FAILURES",
+    "migration_drift": "PASS_NO_CHANGES",
+    "python_compile": "PASS",
+    "frontend_typecheck": "PASS",
+    "frontend_build": "PASS",
+    "targeted_lint_new_files": "PASS",
+    "page_lint": "BASELINE_11_ERRORS_8_WARNINGS"
+  },
+  "privacy": {
+    "persistent_device_identifier": false,
+    "direct_fingerprint_fields": false,
+    "demographics": false,
+    "raw_media": false,
+    "consent_required": true,
+    "authenticated_session_required": true
+  }
+}

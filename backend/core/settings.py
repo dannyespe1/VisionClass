@@ -52,6 +52,11 @@ RETENTION_AUDIT_SECRET = os.environ.get('RETENTION_AUDIT_SECRET', '').strip()
 OBSERVATION_RETENTION_DAYS = int(os.environ.get('OBSERVATION_RETENTION_DAYS', '30'))
 STATE_RETENTION_DAYS = int(os.environ.get('STATE_RETENTION_DAYS', '90'))
 TELEMETRY_RETENTION_DAYS = int(os.environ.get('TELEMETRY_RETENTION_DAYS', '30'))
+DEVICE_BUDGET_TELEMETRY = os.environ.get('DEVICE_BUDGET_TELEMETRY', 'False').strip().lower() == 'true'
+DEVICE_BUDGET_TELEMETRY_TTL_HOURS = int(os.environ.get('DEVICE_BUDGET_TELEMETRY_TTL_HOURS', '24'))
+DEVICE_BUDGET_TELEMETRY_MIN_INTERVAL_SECONDS = int(
+    os.environ.get('DEVICE_BUDGET_TELEMETRY_MIN_INTERVAL_SECONDS', '30')
+)
 ML_SERVICE_IDENTITY = os.environ.get('ML_SERVICE_IDENTITY', 'True').strip().lower() == 'true'
 ML_SERVICE_NAME = os.environ.get('ML_SERVICE_NAME', 'visionclass-ml').strip()
 ML_SERVICE_TOKEN = os.environ.get('ML_SERVICE_TOKEN', '').strip()

@@ -472,6 +472,32 @@ class Observation(models.Model):
         ]
 
 
+class DeviceBudgetTelemetry(models.Model):
+    """Short-lived, coarse resource telemetry without a device identifier."""
+
+    course_session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name="device_budget_samples")
+    profile = models.CharField(max_length=16)
+    profile_generation = models.PositiveIntegerField()
+    device_class = models.CharField(max_length=16)
+    fps_bucket = models.CharField(max_length=16)
+    latency_bucket = models.CharField(max_length=16)
+    memory_bucket = models.CharField(max_length=16)
+    network_bucket = models.CharField(max_length=16)
+    cpu_load_bucket = models.CharField(max_length=16)
+    energy_bucket = models.CharField(max_length=16)
+    sample_count = models.PositiveSmallIntegerField()
+    invalid_sample_count = models.PositiveSmallIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    class Meta:
+        ordering = ["-created_at", "id"]
+        indexes = [
+            models.Index(fields=["course_session", "profile", "created_at"], name="api_deviceb_course__61278d_idx"),
+            models.Index(fields=["expires_at"], name="api_deviceb_expires_548521_idx"),
+        ]
+
+
 class ObservationWindow(models.Model):
     temporal_session = models.ForeignKey(TemporalSession, on_delete=models.CASCADE, related_name="windows")
     started_at = models.DateTimeField()

@@ -54,6 +54,7 @@ from .models import (
     ConsentEvent,
     TemporalSession,
     Observation,
+    DeviceBudgetTelemetry,
 )
 
 
@@ -255,6 +256,68 @@ class ObservationIngestView(APIView):
             },
         )
         return Response({"event_id": str(observation.event_id), "duplicate": False}, status=201)
+
+
+class DeviceBudgetTelemetryView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    allowed_fields = {
+        "session_id", "profile", "profile_generation", "device_class", "fps_bucket",
+        "latency_bucket", "memory_bucket", "network_bucket", "cpu_load_bucket",
+        "energy_bucket", "sample_count", "invalid_sample_count",
+    }
+    choices = {
+        "profile": {"low", "balanced", "high"},
+        "device_class": {"constrained", "standard", "capable", "unknown"},
+        "fps_bucket": {"under_5", "5_to_9", "10_to_14", "15_plus", "unknown"},
+        "latency_bucket": {"under_50", "50_to_99", "100_to_249", "250_plus", "unknown"},
+        "memory_bucket": {"up_to_2", "3_to_4", "5_to_8", "over_8", "unknown"},
+        "network_bucket": {"offline", "slow", "standard", "fast", "unknown"},
+        "cpu_load_bucket": {"normal", "busy", "saturated", "unknown"},
+        "energy_bucket": {"charging", "low", "normal", "saver", "unknown"},
+    }
+
+    def post(self, request):
+        if not settings.DEVICE_BUDGET_TELEMETRY:
+            return Response({"detail": "Telemetría de dispositivo desactivada."}, status=503)
+        supplied = set(request.data.keys())
+        if supplied != self.allowed_fields:
+            return Response({"detail": "Contrato de telemetría inválido."}, status=400)
+        try:
+            session_id = int(request.data["session_id"])
+            generation = int(request.data["profile_generation"])
+            sample_count = int(request.data["sample_count"])
+            invalid_count = int(request.data["invalid_sample_count"])
+        except (TypeError, ValueError):
+            return Response({"detail": "Contadores de telemetría inválidos."}, status=400)
+        if generation < 0 or not 1 <= sample_count <= 120 or not 0 <= invalid_count <= 120:
+            return Response({"detail": "Contadores de telemetría fuera de rango."}, status=400)
+        if any(request.data.get(field) not in allowed for field, allowed in self.choices.items()):
+            return Response({"detail": "Categoría de telemetría no permitida."}, status=400)
+        source = Session.objects.filter(pk=session_id).first()
+        if not source:
+            return Response({"detail": "Sesión no autorizada."}, status=403)
+        _validate_course_session(request, source, "device_budget_telemetry")
+        if not has_capture_consent(request.user):
+            return Response({"detail": "Consentimiento ausente, vencido o revocado."}, status=403)
+        cutoff = timezone.now() - timedelta(seconds=settings.DEVICE_BUDGET_TELEMETRY_MIN_INTERVAL_SECONDS)
+        if DeviceBudgetTelemetry.objects.filter(course_session=source, created_at__gte=cutoff).exists():
+            return Response({"detail": "Muestreo demasiado frecuente."}, status=429)
+        sample = DeviceBudgetTelemetry.objects.create(
+            course_session=source,
+            profile=request.data["profile"],
+            profile_generation=generation,
+            device_class=request.data["device_class"],
+            fps_bucket=request.data["fps_bucket"],
+            latency_bucket=request.data["latency_bucket"],
+            memory_bucket=request.data["memory_bucket"],
+            network_bucket=request.data["network_bucket"],
+            cpu_load_bucket=request.data["cpu_load_bucket"],
+            energy_bucket=request.data["energy_bucket"],
+            sample_count=sample_count,
+            invalid_sample_count=invalid_count,
+            expires_at=timezone.now() + timedelta(hours=settings.DEVICE_BUDGET_TELEMETRY_TTL_HOURS),
+        )
+        return Response({"accepted": True, "expires_at": sample.expires_at}, status=201)
 
 
 class EmailTokenObtainPairView(TokenObtainPairView):

@@ -11,7 +11,7 @@ from .models import (
     AttentionEvent, DemographicVaultRecord, D2RAttentionEvent, InferredState,
     InterventionRecord, LearningInteractionEvent, MomentarySelfReport, Observation,
     ObservationWindow, ObserverAnnotation, ObserverAssignment, ResearchPseudonymMap,
-    RetentionRun, StateTransition, TemporalSession,
+    RetentionRun, StateTransition, TemporalSession, DeviceBudgetTelemetry,
 )
 
 
@@ -40,6 +40,7 @@ def _counts_for(participant):
         "temporal_sessions": temporal.count(),
         "legacy_attention_events": AttentionEvent.objects.filter(user=participant).count(),
         "legacy_d2r_events": D2RAttentionEvent.objects.filter(user=participant).count(),
+        "device_budget_samples": DeviceBudgetTelemetry.objects.filter(course_session__student=participant).count(),
         "vault_records": int(bool(mapping and DemographicVaultRecord.objects.filter(research_pseudonym=mapping.research_pseudonym).exists())),
         "pseudonym_maps": int(mapping is not None),
     }
@@ -67,6 +68,7 @@ def delete_participant_derived(participant, redis_client=None, execute=False):
     temporal.delete()
     AttentionEvent.objects.filter(user=participant).delete()
     D2RAttentionEvent.objects.filter(user=participant).delete()
+    DeviceBudgetTelemetry.objects.filter(course_session__student=participant).delete()
     mapping = ResearchPseudonymMap.objects.filter(participant=participant).first()
     if mapping:
         DemographicVaultRecord.objects.filter(research_pseudonym=mapping.research_pseudonym).delete()
@@ -87,6 +89,7 @@ def expire_due(now=None, execute=False):
         "learning_events": LearningInteractionEvent.objects.filter(occurred_at__lt=now - timedelta(days=settings.TELEMETRY_RETENTION_DAYS)),
         "self_reports": MomentarySelfReport.objects.filter(requested_at__lt=now - timedelta(days=settings.STATE_RETENTION_DAYS)),
         "observations": Observation.objects.filter(captured_at__lt=now - timedelta(days=settings.OBSERVATION_RETENTION_DAYS)),
+        "device_budget_samples": DeviceBudgetTelemetry.objects.filter(expires_at__lt=now),
     }
     counts = {name: queryset.count() for name, queryset in querysets.items()}
     run = RetentionRun.objects.create(run_id=uuid.uuid4(), operation="scheduled_expiry", status=RetentionRun.STATUS_PLANNED, counts=counts, started_at=now)

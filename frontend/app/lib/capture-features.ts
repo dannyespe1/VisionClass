@@ -17,3 +17,6 @@ export const QUALITY_GATE_V1_ENABLED =
 
 export const EDGE_PROFILES_ENABLED =
   process.env.NEXT_PUBLIC_EDGE_PROFILES?.trim().toLowerCase() === "true";
+
+export const DEVICE_BUDGET_TELEMETRY_ENABLED =
+  process.env.NEXT_PUBLIC_DEVICE_BUDGET_TELEMETRY?.trim().toLowerCase() === "true";

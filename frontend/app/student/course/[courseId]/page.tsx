@@ -33,6 +33,7 @@ import {
   BOUNDED_CAPTURE_QUEUE_ENABLED,
   CAPTURE_DEADLINE_MS,
   EDGE_PROFILES_ENABLED,
+  DEVICE_BUDGET_TELEMETRY_ENABLED,
   NORMALIZED_FEATURES_V1_ENABLED,
   QUALITY_GATE_V1_ENABLED,
 } from "../../../lib/capture-features";
@@ -42,6 +43,7 @@ import type { AttentionEventV2 } from "../../../lib/event-contract.mjs";
 import { evaluateFrame, evaluateWindow } from "../../../lib/quality-gate.mjs";
 import { constraintsForProfile, EDGE_PROFILES, EdgeProfileController } from "../../../lib/edge-profiles.mjs";
 import type { EdgeProfileName } from "../../../lib/edge-profiles.mjs";
+import { DeviceBudgetCollector } from "../../../lib/device-budget-telemetry.mjs";
 import {
   Dialog,
   DialogContent,
@@ -151,6 +153,8 @@ export default function CoursePage() {
   const latestNormalizedEventRef = useRef<AttentionEventV2 | null>(null);
   const qualityWindowRef = useRef<Array<Awaited<ReturnType<BrowserFeatureExtractor["extract"]>>>>([]);
   const edgeProfileControllerRef = useRef<EdgeProfileController | null>(null);
+  const deviceBudgetCollectorRef = useRef<DeviceBudgetCollector | null>(null);
+  const batteryLevelRef = useRef<number | null>(null);
   const sessionRef = useRef<number | null>(null);
   const progressSyncRef = useRef<{ lessonId: number | null; completed: number }>({
     lessonId: null,
@@ -574,6 +578,8 @@ export default function CoursePage() {
     browserExtractorRef.current?.close();
     browserExtractorRef.current = null;
     latestNormalizedEventRef.current = null;
+    deviceBudgetCollectorRef.current = null;
+    batteryLevelRef.current = null;
     qualityWindowRef.current = [];
     setQualityMessage(null);
     setCaptureTransportStatus("stopped");
@@ -585,12 +591,34 @@ export default function CoursePage() {
     const queue = captureQueueRef.current;
     if (!queue) return;
 
+    const resourceSampleStartedAt = performance.now();
     queue.enqueue(async () => {
       const video = videoRef.current;
       if (!video) throw new Error("capture_stopped");
       browserExtractorRef.current ||= new BrowserFeatureExtractor();
       return browserExtractorRef.current.extract(video);
     }).then((outcome) => {
+      if (DEVICE_BUDGET_TELEMETRY_ENABLED && permissionSettings.saveAnalytics) {
+        deviceBudgetCollectorRef.current ||= new DeviceBudgetCollector();
+        deviceBudgetCollectorRef.current.record({
+          at: performance.now(),
+          latencyMs: outcome.status === "confirmed" ? performance.now() - resourceSampleStartedAt : -1,
+        });
+        const connection = (navigator as Navigator & { connection?: { effectiveType?: string } }).connection;
+        const payload = deviceBudgetCollectorRef.current.take({
+          sessionId: sessionId || 0,
+          profile: edgeProfileControllerRef.current?.current || edgeProfile,
+          profileGeneration: edgeProfileControllerRef.current?.generation || 0,
+          deviceMemory: (navigator as Navigator & { deviceMemory?: number }).deviceMemory,
+          effectiveType: connection?.effectiveType,
+          online: navigator.onLine,
+          energy: { level: batteryLevelRef.current },
+        });
+        if (payload && token) {
+          void apiFetch("/api/device-budget-telemetry/", { method: "POST", body: JSON.stringify(payload) }, token)
+            .catch(() => undefined);
+        }
+      }
       if (outcome.status === "confirmed") {
         let sample = outcome.value;
         if (QUALITY_GATE_V1_ENABLED) {
@@ -648,6 +676,7 @@ export default function CoursePage() {
       console.log("[startCamera] Iniciando cámara...");
       edgeProfileControllerRef.current ||= new EdgeProfileController({ remoteSelection: false });
       const batteryLevel = await readBatteryLevel();
+      batteryLevelRef.current = batteryLevel;
       if (generation !== cameraGenerationRef.current || pageIsHidden()) return;
       const selection = EDGE_PROFILES_ENABLED
         ? edgeProfileControllerRef.current.selectForEnvironment({

@@ -2,9 +2,9 @@
 
 G3 no está aprobado por la integración técnica. Antes de PR19 se requiere evidencia humana e institucional independiente.
 
-## Autorización del flujo de características
+## Autorización del flujo de características — resuelta técnicamente
 
-Debe aprobarse explícitamente si VisionClass puede enviar y persistir desde el navegador el siguiente sobre derivado:
+El usuario autorizó explícitamente el 2026-09-15 que VisionClass envíe y persista desde el navegador el siguiente sobre derivado:
 
 - destino: backend autenticado de VisionClass;
 - finalidad: persistir observaciones normalizadas para ventanas temporales y evaluación posterior, nunca vigilancia o decisiones operativas;
@@ -12,7 +12,7 @@ Debe aprobarse explícitamente si VisionClass puede enviar y persistir desde el 
 - exclusiones: imágenes, video, audio, blobs, correo, nombre, `user_id` declarado por el cliente y etiquetas de estado interno;
 - controles: consentimiento vigente para procesamiento local y persistencia derivada, sesión autenticada, idempotencia, retención/borrado de PR14 y feature flags apagados por defecto.
 
-La autorización debe indicar también periodo de retención, acceso por rol y si se permite conservar eventos `no_observable` para auditoría de calidad.
+La implementación queda sometida a la retención y eliminación de PR14, acceso autenticado del propio participante y conservación de eventos `no_observable` únicamente para auditoría de calidad. Los flags permanecen apagados hasta completar las aprobaciones siguientes.
 
 ## Pendientes científicos e institucionales
 

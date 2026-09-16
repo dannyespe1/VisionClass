@@ -2,17 +2,17 @@
   "wave": "Ola 5 Edge calidad y preparación de datos",
   "evaluated_at": "2026-09-15",
   "base": "571f709",
-  "integrated_code_head": "8669dcd",
+  "integrated_code_head": "bb687ac",
   "integrated": {
     "PR15": {"source": ["fe32188"], "integrated": ["ae56bf5"]},
     "PR16": {"source": ["cf30af0"], "integrated": ["d866fba"]},
     "PR17": {"source": ["e8bdf22"], "integrated": ["2e1e251"]},
-    "PR18": {"source": ["17576df", "7afc212"], "integrated": ["5ca7e61", "8669dcd"]}
+    "PR18": {"source": ["17576df", "7afc212", "b028544"], "integrated": ["5ca7e61", "8669dcd", "bb687ac"]}
   },
   "checks": {
     "django_check": "PASS",
     "migration_drift": "PASS_NO_CHANGES",
-    "backend_tests": "PASS_62_OF_62_SQLITE_MEMORY",
+    "backend_tests": "PASS_66_OF_66_SQLITE_MEMORY",
     "migration_forward_backward_forward": "PASS_SQLITE_TEMPORARY_REMOVED",
     "ml_tests": "PASS_13_OF_13_SYNTHETIC",
     "frontend_tests": "PASS_25_OF_25",
@@ -22,7 +22,7 @@
     "diff_check": "PASS",
     "frontend_lint": "KNOWN_BASELINE_66_ERRORS_43_WARNINGS_IMPROVED_FROM_69_43",
     "manual_browser_hardware_matrix": "PENDING_INTERACTIVE_VALIDATION",
-    "derived_feature_transport": "NOT_IMPLEMENTED_REQUIRES_EXPLICIT_DATA_FLOW_AUTHORIZATION"
+    "derived_feature_transport": "PASS_AUTHORIZED_ALLOWLISTED_IDEMPOTENT_FLAGS_OFF"
   },
   "feature_flags": {
     "NEXT_PUBLIC_BROWSER_EXTRACTOR": false,
@@ -34,6 +34,6 @@
   "real_data_used": false,
   "model_training_or_evaluation": false,
   "deployed": false,
-  "g3": "BLOCKED_HUMAN_SCIENTIFIC_AND_DATA_FLOW_DECISIONS",
-  "wave5": "TECHNICAL_PASS_WITH_DATA_FLOW_AUTHORIZATION_AND_G3_BLOCKERS"
+  "g3": "BLOCKED_HUMAN_SCIENTIFIC_AND_INSTITUTIONAL_DECISIONS",
+  "wave5": "TECHNICAL_COMPLETE_G3_BLOCKED_HUMAN_AND_SCIENTIFIC"
 }

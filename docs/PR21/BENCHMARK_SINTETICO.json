@@ -1,0 +1,13 @@
+{
+  "data_classification": "synthetic",
+  "command": "python -m ml.benchmark_temporal_api --sessions 100 --windows-per-session 10",
+  "environment": "vision_system-ml:latest local container",
+  "sessions": 100,
+  "windows": 1000,
+  "latency_ms": {
+    "p50": 0.22626849931839388,
+    "p95": 0.3332233012770302,
+    "p99": 0.5714103221180266
+  },
+  "scope_note": "Measures in-process synthetic engine latency only; excludes network, Redis and database latency and is not a production capacity claim."
+}

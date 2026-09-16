@@ -1,7 +1,7 @@
 import json
 from django.test import SimpleTestCase
 
-from .stream_pipeline import StreamPipeline
+from .stream_pipeline import DefinitiveStreamError, StreamPipeline
 
 
 class FakeRedis:
@@ -45,3 +45,15 @@ class StreamPipelineTests(SimpleTestCase):
     def test_contract_and_ids_are_required(self):
         invalid = payload(); invalid["event_id"] = "short"
         with self.assertRaises(ValueError): self.pipeline.publish(invalid)
+
+    def test_definitive_failure_skips_retries_and_is_classified(self):
+        result = self.pipeline.process(
+            "workers",
+            "1-0",
+            self.encoded(payload()),
+            lambda _value: (_ for _ in ()).throw(DefinitiveStreamError()),
+        )
+        self.assertEqual(result, "dead_letter")
+        self.assertEqual(len(self.redis.streams.get(self.pipeline.events_stream, [])), 0)
+        dead = json.loads(self.redis.streams[self.pipeline.dead_stream][0]["payload"])
+        self.assertEqual(dead["failure_classification"], "definitive")

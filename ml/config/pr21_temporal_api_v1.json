@@ -1,0 +1,14 @@
+{
+  "contract_version": "1.0",
+  "inference_version": "observable-evidence-hmm-v1",
+  "maximum_events_per_window": 128,
+  "maximum_payload_bytes": 16384,
+  "timeout_ms": 250,
+  "backend_timeout_ms": 5000,
+  "allow_intervention": false,
+  "accepted_states": [
+    "no_observable",
+    "off_task_evidence",
+    "task_oriented_evidence"
+  ]
+}

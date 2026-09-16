@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 import subprocess
@@ -15,8 +16,25 @@ import onnxruntime as ort
 from fastapi import FastAPI, UploadFile, File, Form, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, ValidationError as PydanticValidationError, model_validator
 import uvicorn
+
+try:
+    from ml.service_identity import ServiceIdentityConfig, ServiceIdentityError, authorize_service
+    from ml.temporal_api import (
+        TemporalInferenceEngine,
+        TemporalInferenceError,
+        TemporalInferenceRequest,
+        load_state_artifact,
+    )
+except ImportError:  # Supports `python ml_service.py` inside the image.
+    from service_identity import ServiceIdentityConfig, ServiceIdentityError, authorize_service
+    from temporal_api import (
+        TemporalInferenceEngine,
+        TemporalInferenceError,
+        TemporalInferenceRequest,
+        load_state_artifact,
+    )
 
 
 BACKEND_URL = os.environ.get("BACKEND_URL", "http://backend:8000")
@@ -27,6 +45,11 @@ MODEL_IMG_SIZE = int(os.environ.get("MODEL_IMG_SIZE", "224"))
 MAX_FRAME_BYTES = int(os.environ.get("MAX_FRAME_BYTES", "1500000"))
 TRAIN_ON_START = os.environ.get("TRAIN_ON_START", "0") == "1"
 TRAINING_SCRIPT = os.environ.get("TRAINING_SCRIPT", "train_model.py")
+TEMPORAL_MODEL_PATH = os.environ.get("TEMPORAL_MODEL_PATH", "").strip()
+TEMPORAL_MAX_EVENTS = int(os.environ.get("TEMPORAL_MAX_EVENTS", "128"))
+TEMPORAL_TIMEOUT_MS = int(os.environ.get("TEMPORAL_TIMEOUT_MS", "250"))
+TEMPORAL_MAX_BYTES = int(os.environ.get("TEMPORAL_MAX_BYTES", "16384"))
+ML_BACKEND_SERVICE_TOKEN = os.environ.get("ML_BACKEND_SERVICE_TOKEN", "").strip()
 
 app = FastAPI(title="ML Attention Service", version="0.1.0")
 
@@ -111,6 +134,64 @@ def _start_background_training() -> None:
 
 
 _start_background_training()
+
+temporal_engine = None
+
+
+def _temporal_identity_config() -> ServiceIdentityConfig:
+    return ServiceIdentityConfig.build(
+        enabled=os.environ.get("ML_SERVICE_IDENTITY", "1") == "1",
+        current_token=os.environ.get("BFF_SERVICE_TOKEN", ""),
+        previous_token=os.environ.get("BFF_PREVIOUS_SERVICE_TOKEN", ""),
+        scopes=os.environ.get("BFF_SERVICE_SCOPES", "").split(","),
+    )
+
+
+def _get_temporal_engine() -> TemporalInferenceEngine:
+    global temporal_engine
+    if temporal_engine is None:
+        if not TEMPORAL_MODEL_PATH:
+            raise TemporalInferenceError(
+                "model_unavailable", retryable=True, status_code=503
+            )
+        try:
+            temporal_engine = TemporalInferenceEngine(
+                load_state_artifact(TEMPORAL_MODEL_PATH),
+                max_events=TEMPORAL_MAX_EVENTS,
+                timeout_ms=TEMPORAL_TIMEOUT_MS,
+            )
+        except (OSError, KeyError, TypeError, ValueError) as exc:
+            raise TemporalInferenceError(
+                "model_unavailable", retryable=True, status_code=503
+            ) from exc
+    return temporal_engine
+
+
+async def _persist_temporal_result(result: dict[str, Any]) -> bool:
+    if not ML_BACKEND_SERVICE_TOKEN:
+        raise TemporalInferenceError(
+            "persistence_unconfigured", retryable=True, status_code=503
+        )
+    try:
+        async with httpx.AsyncClient(timeout=5) as client:
+            response = await client.post(
+                f"{BACKEND_URL}/api/internal/ml/temporal-inferences/",
+                json=result,
+                headers={"Authorization": f"Service {ML_BACKEND_SERVICE_TOKEN}"},
+            )
+    except httpx.RequestError as exc:
+        raise TemporalInferenceError(
+            "backend_unavailable", retryable=True, status_code=503
+        ) from exc
+    if response.status_code >= 500:
+        raise TemporalInferenceError(
+            "backend_unavailable", retryable=True, status_code=503
+        )
+    if response.status_code >= 400:
+        raise TemporalInferenceError(
+            "backend_rejected_inference", retryable=False, status_code=502
+        )
+    return True
 
 
 class AttentionEventPayload(BaseModel):
@@ -374,6 +455,38 @@ async def debug_status():
         "onnx_model_loaded": ort_session is not None,
         "sequence_length": SEQUENCE_LENGTH,
     }
+
+
+@app.post("/internal/temporal/infer")
+async def infer_temporal_window(
+    payload: Dict[str, Any],
+    authorization: Optional[str] = Header(None),
+):
+    try:
+        authorize_service(authorization, "temporal:infer", _temporal_identity_config())
+        if len(json.dumps(payload, separators=(",", ":")).encode("utf-8")) > TEMPORAL_MAX_BYTES:
+            raise TemporalInferenceError(
+                "payload_too_large", retryable=False, status_code=413
+            )
+        try:
+            request = TemporalInferenceRequest.model_validate(payload)
+        except PydanticValidationError as exc:
+            raise TemporalInferenceError(
+                "invalid_contract", retryable=False, status_code=422
+            ) from exc
+        result = _get_temporal_engine().infer(request)
+        persisted = await _persist_temporal_result(result)
+    except ServiceIdentityError as exc:
+        return JSONResponse(
+            {"error": {"classification": "definitive", "code": exc.reason}},
+            status_code=exc.status_code,
+        )
+    except TemporalInferenceError as exc:
+        return JSONResponse(
+            {"error": {"classification": exc.classification, "code": exc.code}},
+            status_code=exc.status_code,
+        )
+    return {**result, "persisted": persisted}
 
 
 @app.post("/events")

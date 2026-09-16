@@ -3,7 +3,7 @@ from rest_framework import routers
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from . import views
-from .service_views import MLServiceEventView
+from .service_views import MLServiceEventView, MLTemporalInferenceView
 
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet, basename='user')
@@ -37,6 +37,7 @@ urlpatterns = [
     path('auth/google/', views.GoogleLogin.as_view(), name='google_login'),
     path('consents/status/', views.ConsentStatusView.as_view(), name='consent-status'),
     path('internal/ml/events/', MLServiceEventView.as_view(), name='ml-service-event'),
+    path('internal/ml/temporal-inferences/', MLTemporalInferenceView.as_view(), name='ml-temporal-inference'),
     path('observations/', views.ObservationIngestView.as_view(), name='observation-ingest'),
     path('', include(router.urls)),
     path('me/', views.MeView.as_view(), name='me'),

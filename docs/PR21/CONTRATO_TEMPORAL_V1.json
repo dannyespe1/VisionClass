@@ -1,0 +1,51 @@
+{
+  "contract_version": "1.0",
+  "ml_endpoint": "/internal/temporal/infer",
+  "backend_persistence_endpoint": "/api/internal/ml/temporal-inferences/",
+  "request_example": {
+    "contract_version": "1.0",
+    "inference_id": "22222222-2222-4222-8222-222222222222",
+    "window_id": 42,
+    "model_id": "observable-evidence-hmm-v1",
+    "events": [
+      {
+        "timestamp_ms": 0,
+        "observable": true,
+        "probability": 0.81
+      }
+    ]
+  },
+  "persistence_example": {
+    "contract_version": "1.0",
+    "inference_id": "22222222-2222-4222-8222-222222222222",
+    "window_id": 42,
+    "model_id": "observable-evidence-hmm-v1",
+    "inference_version": "observable-evidence-hmm-v1",
+    "state": "task_oriented_evidence",
+    "probabilities": {
+      "off_task_evidence": 0.1,
+      "task_oriented_evidence": 0.9
+    },
+    "uncertainty": 0.2,
+    "quality": {
+      "observable": true,
+      "confidence": 0.8,
+      "reason": null,
+      "sample_count": 1
+    },
+    "allow_intervention": false,
+    "interpretation": "observable_evidence_not_internal_attention"
+  },
+  "error_example": {
+    "error": {
+      "classification": "definitive",
+      "code": "invalid_contract"
+    }
+  },
+  "limits": {
+    "maximum_payload_bytes": 16384,
+    "maximum_events_per_window": 128,
+    "inference_timeout_ms": 250,
+    "backend_timeout_ms": 5000
+  }
+}

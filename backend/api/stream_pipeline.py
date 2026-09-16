@@ -6,6 +6,10 @@ SAFE_ID = re.compile(r"^[A-Za-z0-9._:-]{8,128}$")
 ALLOWED_PAYLOAD_FIELDS = {"contract_version", "event_id", "correlation_id", "event_type", "data", "retry"}
 
 
+class DefinitiveStreamError(Exception):
+    retryable = False
+
+
 class StreamPipeline:
     def __init__(self, client, namespace="visionclass:v1", max_retries=3, max_length=10000):
         self.client = client
@@ -43,8 +47,14 @@ class StreamPipeline:
         except Exception as exc:
             retry = int(payload.get("retry", 0)) + 1
             safe_reason = type(exc).__name__
-            if retry > self.max_retries:
-                dead = dict(payload, retry=retry, failure_reason=safe_reason)
+            retryable = getattr(exc, "retryable", True) is not False
+            if not retryable or retry > self.max_retries:
+                dead = dict(
+                    payload,
+                    retry=retry,
+                    failure_reason=safe_reason,
+                    failure_classification="retryable_exhausted" if retryable else "definitive",
+                )
                 self.client.xadd(self.dead_stream, {"payload": json.dumps(dead, separators=(",", ":"))}, maxlen=self.max_length, approximate=True)
                 result = "dead_letter"
             else:

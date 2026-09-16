@@ -546,19 +546,25 @@ class ModelArtifact(models.Model):
 class InferredState(models.Model):
     STATE_NO_OBSERVABLE = "no_observable"
     STATE_UNKNOWN = "unknown"
+    STATE_OFF_TASK_EVIDENCE = "off_task_evidence"
+    STATE_TASK_ORIENTED_EVIDENCE = "task_oriented_evidence"
     STATE_ATTENTIVE = "attentive"
     STATE_DISTRACTED = "distracted"
     STATE_CHOICES = [
         (STATE_NO_OBSERVABLE, "No observable"),
         (STATE_UNKNOWN, "Unknown"),
+        (STATE_OFF_TASK_EVIDENCE, "Off-task observable evidence"),
+        (STATE_TASK_ORIENTED_EVIDENCE, "Task-oriented observable evidence"),
         (STATE_ATTENTIVE, "Attentive"),
         (STATE_DISTRACTED, "Distracted"),
     ]
 
     window = models.ForeignKey(ObservationWindow, on_delete=models.PROTECT, related_name="inferred_states")
+    inference_id = models.UUIDField(null=True, blank=True, unique=True)
     state = models.CharField(max_length=32, choices=STATE_CHOICES)
     probabilities = models.JSONField(default=dict)
     uncertainty = models.FloatField(null=True, blank=True)
+    quality = models.JSONField(default=dict, blank=True)
     model_reference = models.CharField(max_length=128, blank=True)
     model_artifact = models.ForeignKey(
         ModelArtifact, on_delete=models.PROTECT, null=True, blank=True, related_name="inferences"
@@ -577,7 +583,12 @@ class InferredState(models.Model):
                     | (models.Q(uncertainty__gte=0.0) & models.Q(uncertainty__lte=1.0))
                 ),
                 name="inferred_state_uncertainty_unit_range",
-            )
+            ),
+            models.UniqueConstraint(
+                fields=["window", "model_reference", "inference_version"],
+                condition=models.Q(inference_id__isnull=False),
+                name="uniq_effective_inference_per_window_model",
+            ),
         ]
 
 

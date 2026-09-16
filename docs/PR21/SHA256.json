@@ -1,0 +1,26 @@
+{
+  "algorithm": "SHA-256",
+  "files": {
+    "backend/.env.example": "aecf9046b89740cc947b2a47864a38151d1abc18af9f8b1b80ae88c89483b0be",
+    "backend/api/migrations/0022_pr21_temporal_inference_contract.py": "50fcee33140ac8a48217bc2fe467a018d3d212dff308aaa62a8b216d86f7ccc9",
+    "backend/api/models.py": "07a69c2fb987cafa7dada96ab33910cc8d96d993ce11e6ae1608b8c1299b4f72",
+    "backend/api/service_views.py": "011ec68ddde08f5a5976169ef220095facbafac54793aba028590620d85e4ffc",
+    "backend/api/stream_pipeline.py": "fc9859a32d3ef28655c62124a895690123873b7aef49851273a1516ed00573c6",
+    "backend/api/temporal_inference.py": "2d5149442b674cf0995bd60c2c2e23c1625135b3c0e26ee7dd5ceb36a6f81c04",
+    "backend/api/tests_pr13_stream_pipeline.py": "92c9c3d24743d61500f0bcc1d528fe6aa98c8f382ac5402f7a73e7861e22e437",
+    "backend/api/tests_pr21_temporal_inference.py": "69ff5631fea8ab5da7e8dbcf539f16f19be434b991d700bfa4baf28567733caa",
+    "backend/api/urls.py": "4be68f90b6136186a8617688f82ec14767f07d1eed169fdb77ff6ffede2fd147",
+    "backend/core/settings.py": "5cccd42fbb5c279dbc4dd73831330873ab4a155a8094575a06d7c0830348eaad",
+    "docs/PR21/BENCHMARK_SINTETICO.json": "3f181de19a3a1a0c23d6e9ff9640bc59d145b73825d4dea9bbcfa834a86e7c1b",
+    "docs/PR21/CONTRATO_TEMPORAL_V1.json": "2a633f90ed32acd93801c3a98bc4eee9862686e64cc773d2bc7b41a33367db8f",
+    "docs/PR21/README.md": "40e22b3b066ab6772461fcfdaa47fbce3dc283d1a9db42fc461b1b11ac0ae797",
+    "docs/PR21/VERIFICACION.json": "19db85434c039605b367dedec12fb57a5299ac5f81cb271fa552e61123f39c05",
+    "ml/.env.example": "24037464aaf429be162591a67e93582e7b9b9b2c2072db5daf71ea03d3064342",
+    "ml/benchmark_temporal_api.py": "4941c3e60d12237cb0efea53917a5151633759252b243db480b1b022db535eb5",
+    "ml/config/pr21_temporal_api_v1.json": "b701eb29ac5ed0f444c65e157bf11310ffb28724144097ca2a1099556c0fb671",
+    "ml/ml_service.py": "d148854a5b3b9570c6a2f142af4e054e91ceb878728e112c5e1a17447da2240b",
+    "ml/temporal_api.py": "5683d5e05cf9fd2639adad7fb35505b24d60a86ca823b8f08da0c4ad8c5e1e5b",
+    "ml/test_temporal_api.py": "642407f8d9e62adc790a80663329ed7624c57ed41726f0d83b906b858c628ef8",
+    "ml/test_temporal_service.py": "2245be2c3006d94836ea40ff23d5d2414b2a5c5d4a173286ec69ad90b334b07c"
+  }
+}

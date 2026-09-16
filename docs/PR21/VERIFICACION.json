@@ -1,0 +1,54 @@
+{
+  "pr": "PR21",
+  "base_commit": "1af4046",
+  "verification_date": "2026-09-16",
+  "data_classification": "synthetic",
+  "real_participant_data_used": false,
+  "results": {
+    "ml_suite": {
+      "command": "python -m unittest discover -s ml -p test_*.py -v",
+      "passed": 38,
+      "failed": 0,
+      "status": "pass"
+    },
+    "backend_suite": {
+      "command": "python manage.py test api --noinput -v 1",
+      "passed": 75,
+      "failed": 0,
+      "status": "pass"
+    },
+    "migration_drift": {
+      "command": "python manage.py makemigrations --check --dry-run",
+      "status": "pass",
+      "result": "No changes detected"
+    },
+    "static_compilation": {
+      "command": "python -m compileall -q ml backend/api backend/core",
+      "status": "pass"
+    },
+    "synthetic_latency": {
+      "command": "python -m ml.benchmark_temporal_api --sessions 100 --windows-per-session 10",
+      "sessions": 100,
+      "windows": 1000,
+      "p50_ms": 0.22626849931839388,
+      "p95_ms": 0.3332233012770302,
+      "p99_ms": 0.5714103221180266,
+      "status": "pass"
+    }
+  },
+  "verified_controls": [
+    "service_identity_and_minimum_scope",
+    "stable_versioned_contract",
+    "idempotent_persistence",
+    "conflicting_replay_rejection",
+    "one_effective_inference_per_window_model_version",
+    "retryable_and_definitive_error_classification",
+    "bounded_payload_window_and_timeout",
+    "explicit_no_observable_state",
+    "raw_media_rejection",
+    "no_model_parameter_exposure",
+    "safe_feature_flag_rollback",
+    "stream_dead_letter_classification"
+  ],
+  "scope_note": "Latency measures the in-process engine with synthetic data; network, Redis and database capacity require environment-specific load testing before production."
+}

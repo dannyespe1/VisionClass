@@ -4,7 +4,7 @@ import re
 from datetime import timedelta
 
 from django.conf import settings
-from django.db import IntegrityError, transaction
+from django.db import DatabaseError, IntegrityError, transaction
 from django.utils import timezone
 from rest_framework import permissions, status
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -15,6 +15,12 @@ from .consent import has_capture_consent
 from .models import AttentionEvent, D2RAttentionEvent, D2RSession, Enrollment, Session
 from .serializers import AttentionEventSerializer, D2RAttentionEventSerializer
 from .service_identity import authenticate_ml_service
+from .temporal_inference import (
+    TemporalInferenceConflict,
+    TemporalInferenceSerializer,
+    inference_response,
+    persist_temporal_inference,
+)
 
 
 logger = logging.getLogger("visionclass.security")
@@ -194,3 +200,61 @@ class MLServiceEventView(APIView):
         _update_aggregate(session, event)
         _audit("allowed", f"scope_events_write_{principal.key_slot}")
         return Response({"ok": True, "event_id": event.id}, status=status.HTTP_201_CREATED)
+
+
+class MLTemporalInferenceView(APIView):
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
+
+    @transaction.atomic
+    def post(self, request):
+        if not getattr(settings, "TEMPORAL_INFERENCE_API", False):
+            return Response(
+                {"error": {"classification": "retryable", "code": "feature_disabled"}},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+        principal = authenticate_ml_service(request, "temporal:write")
+        try:
+            encoded = json.dumps(request.data, separators=(",", ":")).encode("utf-8")
+        except (TypeError, ValueError):
+            encoded = b""
+        if not encoded or len(encoded) > getattr(settings, "TEMPORAL_INFERENCE_MAX_BYTES", 16384):
+            return Response(
+                {"error": {"classification": "definitive", "code": "payload_size_invalid"}},
+                status=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            )
+        if _contains_raw_media(request.data):
+            return Response(
+                {"error": {"classification": "definitive", "code": "raw_media_rejected"}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        serializer = TemporalInferenceSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(
+                {"error": {"classification": "definitive", "code": "invalid_contract"}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            result = persist_temporal_inference(
+                serializer.validated_data,
+                service_name=principal.name,
+            )
+        except TemporalInferenceConflict as exc:
+            return Response(
+                {"error": {"classification": "definitive", "code": str(exc)}},
+                status=status.HTTP_409_CONFLICT,
+            )
+        except ValidationError:
+            return Response(
+                {"error": {"classification": "definitive", "code": "window_invalid"}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except DatabaseError:
+            return Response(
+                {"error": {"classification": "retryable", "code": "persistence_unavailable"}},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+        return Response(
+            inference_response(result),
+            status=status.HTTP_200_OK if result.duplicate else status.HTTP_201_CREATED,
+        )

@@ -1,3 +1,5 @@
+import uuid
+
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -541,6 +543,86 @@ class ModelArtifact(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         return super().save(*args, **kwargs)
+
+
+class ModelAlias(models.Model):
+    MODE_STABLE = "stable"
+    MODE_SHADOW = "shadow"
+    MODE_CANARY = "canary"
+    MODE_PAUSED = "paused"
+    MODE_CHOICES = [
+        (MODE_STABLE, "Stable"),
+        (MODE_SHADOW, "Shadow"),
+        (MODE_CANARY, "Canary"),
+        (MODE_PAUSED, "Paused"),
+    ]
+
+    environment = models.CharField(max_length=32)
+    name = models.CharField(max_length=64)
+    active_model = models.ForeignKey(ModelArtifact, on_delete=models.PROTECT, related_name="active_aliases")
+    candidate_model = models.ForeignKey(
+        ModelArtifact, on_delete=models.PROTECT, null=True, blank=True, related_name="candidate_aliases"
+    )
+    previous_model = models.ForeignKey(
+        ModelArtifact, on_delete=models.PROTECT, null=True, blank=True, related_name="previous_aliases"
+    )
+    mode = models.CharField(max_length=16, choices=MODE_CHOICES, default=MODE_STABLE)
+    canary_percentage = models.PositiveSmallIntegerField(default=0)
+    thresholds = models.JSONField(default=dict)
+    revision = models.PositiveIntegerField(default=1)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["environment", "name"], name="uniq_model_alias_environment_name"),
+            models.CheckConstraint(
+                condition=models.Q(canary_percentage__gte=0) & models.Q(canary_percentage__lte=100),
+                name="model_alias_canary_percentage_range",
+            ),
+        ]
+
+    def clean(self):
+        super().clean()
+        if self.mode in {self.MODE_SHADOW, self.MODE_CANARY} and not self.candidate_model_id:
+            raise ValidationError({"candidate_model": "Shadow y canary requieren candidato."})
+        if self.mode == self.MODE_CANARY and not 1 <= self.canary_percentage <= 50:
+            raise ValidationError({"canary_percentage": "Canary debe estar entre 1 y 50%."})
+        if self.mode != self.MODE_CANARY and self.canary_percentage != 0:
+            raise ValidationError({"canary_percentage": "Solo canary admite porcentaje."})
+        if self.candidate_model_id and self.candidate_model_id == self.active_model_id:
+            raise ValidationError({"candidate_model": "El candidato debe diferir del activo."})
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+
+class ModelRolloutEvent(models.Model):
+    event_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    alias = models.ForeignKey(ModelAlias, on_delete=models.PROTECT, related_name="events")
+    action = models.CharField(max_length=32)
+    from_model = models.ForeignKey(
+        ModelArtifact, on_delete=models.PROTECT, null=True, blank=True, related_name="rollout_events_from"
+    )
+    to_model = models.ForeignKey(
+        ModelArtifact, on_delete=models.PROTECT, null=True, blank=True, related_name="rollout_events_to"
+    )
+    reason_code = models.CharField(max_length=64)
+    metrics = models.JSONField(default=dict, blank=True)
+    configuration = models.JSONField(default=dict)
+    recorded_by = models.CharField(max_length=64)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["alias", "created_at"])]
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            raise ValidationError("Los eventos de rollout son inmutables.")
+        return super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValidationError("Los eventos de rollout son inmutables.")
 
 
 class InferredState(models.Model):

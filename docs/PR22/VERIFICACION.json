@@ -1,0 +1,49 @@
+{
+  "pr": "PR22",
+  "base_commit": "04e85a5",
+  "verification_date": "2026-09-16",
+  "data_classification": "synthetic",
+  "real_participant_data_used": false,
+  "results": {
+    "ml_suite": {
+      "command": "python -m unittest discover -s ml -p test_*.py -v",
+      "passed": 43,
+      "failed": 0,
+      "status": "pass"
+    },
+    "backend_suite": {
+      "command": "python manage.py test api --noinput -v 1",
+      "passed": 85,
+      "failed": 0,
+      "status": "pass"
+    },
+    "migration_drift": {
+      "command": "python manage.py makemigrations --check --dry-run",
+      "status": "pass",
+      "result": "No changes detected"
+    },
+    "static_compilation": {
+      "command": "python -m compileall -q ml backend/api backend/core",
+      "status": "pass"
+    },
+    "container_import": {
+      "command": "python -c import_ml_service",
+      "status": "pass"
+    }
+  },
+  "verified_controls": [
+    "shadow_output_isolation",
+    "deterministic_bounded_canary",
+    "candidate_failure_active_fallback",
+    "stable_mode_skips_candidate",
+    "controlled_defective_canary_rollback",
+    "promotion_requires_minimum_evidence",
+    "previous_version_restoration_without_data_migration",
+    "immutable_rollout_audit",
+    "backend_alias_revision_and_role_validation",
+    "no_shadow_decision_persisted_as_effective",
+    "latency_error_and_calibration_thresholds",
+    "operational_command_omits_secrets"
+  ],
+  "scope_note": "The rollout remains disabled until operators create an alias, configure matching artifact paths and revisions, and explicitly enable the PR21 inference endpoint."
+}

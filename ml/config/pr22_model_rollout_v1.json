@@ -1,0 +1,14 @@
+{
+  "schema_version": "model-rollout-v1",
+  "default_mode": "stable",
+  "maximum_canary_percentage": 50,
+  "thresholds": {
+    "maximum_p95_latency_ms": 250.0,
+    "maximum_error_rate": 0.02,
+    "maximum_calibration_error": 0.1,
+    "minimum_samples": 100
+  },
+  "shadow_output_may_be_effective": false,
+  "candidate_error_fallback": "active",
+  "automatic_rollback": true
+}

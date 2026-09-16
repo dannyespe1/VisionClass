@@ -21,6 +21,7 @@ import uvicorn
 
 try:
     from ml.service_identity import ServiceIdentityConfig, ServiceIdentityError, authorize_service
+    from ml.model_rollout import RolloutConfig, RolloutCoordinator
     from ml.temporal_api import (
         TemporalInferenceEngine,
         TemporalInferenceError,
@@ -29,6 +30,7 @@ try:
     )
 except ImportError:  # Supports `python ml_service.py` inside the image.
     from service_identity import ServiceIdentityConfig, ServiceIdentityError, authorize_service
+    from model_rollout import RolloutConfig, RolloutCoordinator
     from temporal_api import (
         TemporalInferenceEngine,
         TemporalInferenceError,
@@ -50,6 +52,12 @@ TEMPORAL_MAX_EVENTS = int(os.environ.get("TEMPORAL_MAX_EVENTS", "128"))
 TEMPORAL_TIMEOUT_MS = int(os.environ.get("TEMPORAL_TIMEOUT_MS", "250"))
 TEMPORAL_MAX_BYTES = int(os.environ.get("TEMPORAL_MAX_BYTES", "16384"))
 ML_BACKEND_SERVICE_TOKEN = os.environ.get("ML_BACKEND_SERVICE_TOKEN", "").strip()
+TEMPORAL_CANDIDATE_MODEL_PATH = os.environ.get("TEMPORAL_CANDIDATE_MODEL_PATH", "").strip()
+MODEL_ROLLOUT_ENVIRONMENT = os.environ.get("MODEL_ROLLOUT_ENVIRONMENT", "development").strip()
+MODEL_ROLLOUT_ALIAS = os.environ.get("MODEL_ROLLOUT_ALIAS", "temporal-default").strip()
+MODEL_ROLLOUT_MODE = os.environ.get("MODEL_ROLLOUT_MODE", "stable").strip()
+MODEL_ROLLOUT_CANARY_PERCENT = int(os.environ.get("MODEL_ROLLOUT_CANARY_PERCENT", "0"))
+MODEL_ROLLOUT_REVISION = int(os.environ.get("MODEL_ROLLOUT_REVISION", "1"))
 
 app = FastAPI(title="ML Attention Service", version="0.1.0")
 
@@ -155,10 +163,28 @@ def _get_temporal_engine() -> TemporalInferenceEngine:
                 "model_unavailable", retryable=True, status_code=503
             )
         try:
-            temporal_engine = TemporalInferenceEngine(
+            active_engine = TemporalInferenceEngine(
                 load_state_artifact(TEMPORAL_MODEL_PATH),
                 max_events=TEMPORAL_MAX_EVENTS,
                 timeout_ms=TEMPORAL_TIMEOUT_MS,
+            )
+            candidate_engine = None
+            if TEMPORAL_CANDIDATE_MODEL_PATH:
+                candidate_engine = TemporalInferenceEngine(
+                    load_state_artifact(TEMPORAL_CANDIDATE_MODEL_PATH),
+                    max_events=TEMPORAL_MAX_EVENTS,
+                    timeout_ms=TEMPORAL_TIMEOUT_MS,
+                )
+            temporal_engine = RolloutCoordinator(
+                active_engine,
+                candidate_engine,
+                RolloutConfig(
+                    environment=MODEL_ROLLOUT_ENVIRONMENT,
+                    alias=MODEL_ROLLOUT_ALIAS,
+                    mode=MODEL_ROLLOUT_MODE,
+                    canary_percentage=MODEL_ROLLOUT_CANARY_PERCENT,
+                    revision=MODEL_ROLLOUT_REVISION,
+                ),
             )
         except (OSError, KeyError, TypeError, ValueError) as exc:
             raise TemporalInferenceError(

@@ -1,0 +1,19 @@
+{
+  "data_classification": "synthetic",
+  "scenario": "controlled_defective_canary",
+  "candidate_fault": {
+    "sample_count": 100,
+    "p95_latency_ms": 20.0,
+    "error_rate": 0.25,
+    "calibration_error": 0.05
+  },
+  "expected_violation": "error_threshold",
+  "expected_outcome": {
+    "mode": "stable",
+    "active_model_unchanged": true,
+    "candidate_removed": true,
+    "audit_event": "rolled_back",
+    "data_migration_required": false
+  },
+  "test": "api.tests_pr22_model_rollout.ModelRolloutTests.test_defective_canary_rolls_back_without_changing_stable_model"
+}

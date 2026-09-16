@@ -1,0 +1,20 @@
+{
+  "algorithm": "SHA-256",
+  "files": {
+    "backend/api/management/commands/manage_model_rollout.py": "57d7a7d416215074ab3ebe041a78514b992a222157a6afb2691f33fea851affb",
+    "backend/api/migrations/0023_pr22_model_rollout.py": "168aa8bd1629f2360f23e8eb4c665e4ce79ba7219dff5ad6f2cbc2c3e57af007",
+    "backend/api/model_rollout.py": "baaade87bb931f3e6105a2c5712d29cc60a96ec12834ecc865f5e8cb5e1eb558",
+    "backend/api/models.py": "857d6ca1d12387d0170a106e3bed42584566405cdcb325999a22e056dd05f444",
+    "backend/api/temporal_inference.py": "a8605bb77ed6a5645efa801978f41a2da1f2469c32d419664fcb0e67be8f44e1",
+    "backend/api/tests_pr22_model_rollout.py": "5aca2a4d8e569d6ca62ae1aa28e8e6f5174606223e90c2246172f245c3834662",
+    "docs/PR22/ENSAYO_ROLLBACK.json": "e7f8f1ab79f3958ae38b401496c54c7dd5a197009e1167afafeea533862f927c",
+    "docs/PR22/README.md": "381a8e392b12a90fd31155fd6b8a1487943dc8790741e465ccb921b5c6b63e00",
+    "docs/PR22/RUNBOOK_ROLLBACK.md": "1a92f5e44d4a86699b5e593d140c6e67f71fa4ecc23a3e2ab39d47abfbac8041",
+    "docs/PR22/VERIFICACION.json": "1a4c9cb4f62a18752e2f05c4bbf27615b16422f396b3c9ff3c51a18039785626",
+    "ml/.env.example": "a0e2f8da15ce2d4194c08c92a8846750a70e54f827ae9314667dd817df7f0be4",
+    "ml/config/pr22_model_rollout_v1.json": "742fc2a2f618673ff2e5e1bb826c147ffa211cc24a17389c4bcaeeb00a17321b",
+    "ml/ml_service.py": "e2619187ee6a374f058a4518b689b99e5ec250a34c6bd8e15e99d53515b4d877",
+    "ml/model_rollout.py": "8a12e31baf40fd9c882d84adcb3f8ba4a352c411c69655ba02b7e8e4bbcef077",
+    "ml/test_model_rollout.py": "368a1d2ef309adb9b3f092d08346a6d4049b42497038030e594d16cd56a4182f"
+  }
+}

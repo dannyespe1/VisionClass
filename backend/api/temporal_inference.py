@@ -8,7 +8,7 @@ from django.db import IntegrityError, transaction
 from django.utils import timezone
 from rest_framework import serializers
 
-from .models import InferredState, ObservationWindow
+from .models import InferredState, ModelAlias, ObservationWindow
 from .stream_pipeline import DefinitiveStreamError
 
 
@@ -35,6 +35,7 @@ class TemporalInferenceSerializer(serializers.Serializer):
     interpretation = serializers.ChoiceField(
         choices=["observable_evidence_not_internal_attention"]
     )
+    rollout = serializers.DictField(required=False)
 
     def validate_probabilities(self, value):
         if set(value) != POSTERIOR_STATES:
@@ -64,6 +65,38 @@ class TemporalInferenceSerializer(serializers.Serializer):
         reason = value.get("reason")
         if reason is not None and (not isinstance(reason, str) or len(reason) > 64):
             raise serializers.ValidationError("Razón de calidad inválida.")
+        return value
+
+    def validate_rollout(self, value):
+        required = {
+            "environment", "alias", "mode", "revision", "active_model_id",
+            "candidate_model_id", "effective_model_id", "selected_role",
+            "selection_reason", "active_latency_ms", "candidate_latency_ms",
+            "candidate_error", "outputs_agree",
+        }
+        if not isinstance(value, dict) or set(value) != required:
+            raise serializers.ValidationError("Telemetría de rollout inválida.")
+        if value["mode"] not in {"stable", "shadow", "canary"}:
+            raise serializers.ValidationError("Modo de rollout inválido.")
+        if value["selected_role"] not in {"active", "candidate"}:
+            raise serializers.ValidationError("Rol efectivo inválido.")
+        if not isinstance(value["revision"], int) or value["revision"] < 1:
+            raise serializers.ValidationError("Revisión inválida.")
+        for key in ("active_latency_ms", "candidate_latency_ms"):
+            item = value[key]
+            if item is not None and (
+                isinstance(item, bool) or not isinstance(item, (int, float)) or not 0 <= item <= 10_000
+            ):
+                raise serializers.ValidationError("Latencia inválida.")
+        if not isinstance(value["candidate_error"], bool):
+            raise serializers.ValidationError("Indicador de error inválido.")
+        if value["outputs_agree"] is not None and not isinstance(value["outputs_agree"], bool):
+            raise serializers.ValidationError("Comparación inválida.")
+        for key in ("environment", "alias", "active_model_id", "effective_model_id", "selection_reason"):
+            if not isinstance(value[key], str) or not 1 <= len(value[key]) <= 128:
+                raise serializers.ValidationError("Identificador de rollout inválido.")
+        if value["candidate_model_id"] is not None and not isinstance(value["candidate_model_id"], str):
+            raise serializers.ValidationError("Candidato inválido.")
         return value
 
     def validate(self, attrs):
@@ -107,6 +140,46 @@ def persist_temporal_inference(validated: dict, *, service_name: str) -> Persist
         "model_reference": validated["model_id"],
         "inference_version": validated["inference_version"],
     }
+    rollout = validated.get("rollout")
+    effective_artifact = None
+    if rollout:
+        try:
+            alias = ModelAlias.objects.select_for_update().select_related(
+                "active_model", "candidate_model"
+            ).get(environment=rollout["environment"], name=rollout["alias"])
+        except ModelAlias.DoesNotExist as exc:
+            raise serializers.ValidationError("Alias de modelo no encontrado.") from exc
+        if alias.revision != rollout["revision"]:
+            raise serializers.ValidationError("Revisión de alias obsoleta.")
+        allowed = {alias.active_model.version}
+        if alias.candidate_model:
+            allowed.add(alias.candidate_model.version)
+        if (
+            rollout["mode"] != alias.mode
+            or
+            rollout["effective_model_id"] != validated["model_id"]
+            or validated["model_id"] not in allowed
+            or rollout["active_model_id"] != alias.active_model.version
+            or rollout["candidate_model_id"] != (
+                alias.candidate_model.version if alias.candidate_model else None
+            )
+        ):
+            raise serializers.ValidationError("Selección de modelo inconsistente.")
+        if (
+            (rollout["selected_role"] == "active" and validated["model_id"] != alias.active_model.version)
+            or (
+                rollout["selected_role"] == "candidate"
+                and (not alias.candidate_model or validated["model_id"] != alias.candidate_model.version)
+            )
+        ):
+            raise serializers.ValidationError("Rol de rollout inconsistente.")
+        if alias.mode == ModelAlias.MODE_SHADOW and validated["model_id"] != alias.active_model.version:
+            raise serializers.ValidationError("Shadow no puede producir la salida efectiva.")
+        effective_artifact = (
+            alias.active_model
+            if validated["model_id"] == alias.active_model.version
+            else alias.candidate_model
+        )
     existing_by_id = InferredState.objects.filter(
         inference_id=validated["inference_id"]
     ).first()
@@ -119,6 +192,7 @@ def persist_temporal_inference(validated: dict, *, service_name: str) -> Persist
             and existing_by_id.probabilities == validated["probabilities"]
             and existing_by_id.uncertainty == validated["uncertainty"]
             and existing_by_id.quality == validated["quality"]
+            and existing_by_id.provenance.get("rollout") == rollout
         ):
             return PersistenceResult(existing_by_id, True)
         raise TemporalInferenceConflict("inference_id_conflict")
@@ -135,6 +209,7 @@ def persist_temporal_inference(validated: dict, *, service_name: str) -> Persist
             probabilities=validated["probabilities"],
             uncertainty=validated["uncertainty"],
             quality=validated["quality"],
+            model_artifact=effective_artifact,
             inferred_at=timezone.now(),
             provenance={
                 "contract_version": validated["contract_version"],
@@ -142,6 +217,7 @@ def persist_temporal_inference(validated: dict, *, service_name: str) -> Persist
                 "service": service_name,
                 "interpretation": validated["interpretation"],
                 "allow_intervention": False,
+                "rollout": rollout,
             },
         )
     except IntegrityError as exc:
@@ -151,7 +227,7 @@ def persist_temporal_inference(validated: dict, *, service_name: str) -> Persist
 
 def inference_response(result: PersistenceResult) -> dict:
     inference = result.inference
-    return {
+    response = {
         "contract_version": CONTRACT_VERSION,
         "inference_id": str(inference.inference_id),
         "window_id": inference.window_id,
@@ -165,6 +241,9 @@ def inference_response(result: PersistenceResult) -> dict:
         "allow_intervention": False,
         "interpretation": "observable_evidence_not_internal_attention",
     }
+    if inference.provenance.get("rollout"):
+        response["rollout"] = inference.provenance["rollout"]
+    return response
 
 
 def process_temporal_stream_event(payload: dict, *, service_name: str = "stream-consumer") -> PersistenceResult:

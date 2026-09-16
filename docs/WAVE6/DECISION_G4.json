@@ -1,0 +1,42 @@
+{
+  "schema_version": "g4-decision-v1",
+  "gate": "G4",
+  "evidence_cutoff": "2026-09-16",
+  "scope": "PR19-PR24",
+  "status": "PENDING_REVIEWER_DECISION",
+  "technical_evidence": {
+    "pr19_through_pr24_integrated": true,
+    "final_ml_suite_passed": true,
+    "final_ml_suite_tests": 62,
+    "real_participant_data_used_in_versioned_evidence": false
+  },
+  "scientific_evidence": {
+    "protocol_frozen_and_g3_ratified": true,
+    "real_confirmatory_evaluation_executed": false,
+    "pr23_independent_script_review_executed": false,
+    "construct_validity_established": false,
+    "fairness_established": false
+  },
+  "model_selection_recommendation": {
+    "reference_for_pr25_engineering": "observable-evidence-hmm-v1",
+    "purpose": "local_export_and_parity_testing_only",
+    "scientific_superiority_claimed": false,
+    "gru_status": "SHADOW_ONLY_NOT_PROMOTABLE",
+    "gru_synthetic_specificity": 0.75,
+    "minimum_specificity": 0.8
+  },
+  "recommended_decision": "CONDITIONAL_ENGINEERING_GO",
+  "conditions": [
+    "PR25 exports PR20 only as a disabled local reference",
+    "hash compatibility parity and safe fallback are mandatory",
+    "raw media never leaves the device",
+    "no model activation intervention diagnosis or validity claim",
+    "GRU remains inactive and thresholds are not tuned on holdout",
+    "real confirmatory evaluation and independent PR23 review remain open",
+    "a new approval is required before pilot or product use"
+  ],
+  "reviewer_decision": null,
+  "reviewer_role": null,
+  "decision_date": null,
+  "notes": null
+}

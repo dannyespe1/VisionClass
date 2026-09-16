@@ -1,11 +1,11 @@
 {
   "algorithm": "SHA-256",
   "files": {
-    "frontend/app/lib/browser-feature-extractor.mjs": "a33fc18e9c919ee0df6a8056bfa8c9b976767220f59f216e6b717fa315246a54",
+    "frontend/app/lib/browser-feature-extractor.mjs": "600f9477df8986ad37711482d23afcb8f534b1453a6f5c4d4505cf63a60b9c88",
     "frontend/app/lib/feature-normalization.mjs": "c6edb53c13065ec68cf18237fd99abaae93e356b476cb5e6fbc3f50efff09064",
     "frontend/app/lib/quality-gate.mjs": "221c55776b38ae1c619aebbdc470c9f160a80308c9b491e2505e9b347ee9161d",
-    "frontend/app/lib/edge-profiles.mjs": "219299c7c5f7fd8d3a47a62881c0e1114354764a2f787fff9c235a79747fb4d8",
-    "frontend/app/student/course/[courseId]/page.tsx": "f4cf1b9e6aeb9ed645d7dcc663c7f23a5ff425af49b489b9e7b08f49debdf915",
+    "frontend/app/lib/edge-profiles.mjs": "35450a46a6a66bb3a21afe5be2c0a0d3155c466c6b078c8beaae3da69a043ce8",
+    "frontend/app/student/course/[courseId]/page.tsx": "ae22ddb47aa19a240a0449779bd480f282cf3eab27b008d55dfeff65815604ab",
     "backend/api/views.py": "8fd4d76c69e55422470688d80e025998ec34311770baa5d17ea0fa62b880b3e3",
     "backend/api/urls.py": "b1de4e350864b18f92a0927e7d269ab45996112647ba17b0a38a0b08cba619a3",
     "backend/core/settings.py": "469a0b1c51572c34d5d62aa3fccebfa6a7c8e59dfd9c85f8aed9ca89e7215cca",

@@ -1,1 +1,25 @@
-{"algorithm":"SHA-256","files":{"frontend/app/lib/browser-feature-extractor.mjs":"a33fc18e9c919ee0df6a8056bfa8c9b976767220f59f216e6b717fa315246a54","frontend/app/lib/feature-normalization.mjs":"c6edb53c13065ec68cf18237fd99abaae93e356b476cb5e6fbc3f50efff09064","frontend/app/lib/quality-gate.mjs":"221c55776b38ae1c619aebbdc470c9f160a80308c9b491e2505e9b347ee9161d","frontend/app/lib/edge-profiles.mjs":"219299c7c5f7fd8d3a47a62881c0e1114354764a2f787fff9c235a79747fb4d8","frontend/app/student/course/[courseId]/page.tsx":"f4cf1b9e6aeb9ed645d7dcc663c7f23a5ff425af49b489b9e7b08f49debdf915","backend/api/views.py":"8fd4d76c69e55422470688d80e025998ec34311770baa5d17ea0fa62b880b3e3","backend/api/urls.py":"b1de4e350864b18f92a0927e7d269ab45996112647ba17b0a38a0b08cba619a3","backend/core/settings.py":"469a0b1c51572c34d5d62aa3fccebfa6a7c8e59dfd9c85f8aed9ca89e7215cca","backend/api/tests_pr18_observation_ingest.py":"9066155e4d864846300ad93f8044ab80dccfb1beb950d6f705a22bf4bc1cad02","contracts/attention-event-v2.schema.json":"6b236e1c6970d5fbf6951c2be41a3f2f6c8b627a27c220ddfeecd446fb396e64","contracts/fixtures/browser-features-v1.raw.json":"1e1dc60169043ca18052cae56248e49367e06997bcf0ea9b63929f827cc8e78b","contracts/fixtures/browser-features-v1.normalized-90.json":"569e0d427ebdc7b82a14432577d44611043fad747a3224802eb7f36fbb3911eb","ml/feature_normalization.py":"cd102edec0045dc863fdc8ea57a2ddd38e7e1c6fbcf949de700a11d2f7e9c01e","ml/quality_gate.py":"1a1c09687226645ceea03222da17b6443832f85a8d4572864ced5c6b65aa332d","docs/WAVE5/REGISTRO_OLA5.md":"18f5d6ed65c4bd7883fc9d863c0fa16dd0781993fc8d6f3bc4d0f430294b7cf6","docs/WAVE5/VERIFICACION.json":"be36380cc0db498757e83c73275aed715a6de6dd80c9ed8d060d863cf517dc9a","docs/WAVE5/G3_DECISION_REQUIRED.md":"abf11fd468a0738b78db3dbf2e8ebcb3d0e2c74461f3030a965a47583b0d8419"}}
+{
+  "algorithm": "SHA-256",
+  "files": {
+    "frontend/app/lib/browser-feature-extractor.mjs": "a33fc18e9c919ee0df6a8056bfa8c9b976767220f59f216e6b717fa315246a54",
+    "frontend/app/lib/feature-normalization.mjs": "c6edb53c13065ec68cf18237fd99abaae93e356b476cb5e6fbc3f50efff09064",
+    "frontend/app/lib/quality-gate.mjs": "221c55776b38ae1c619aebbdc470c9f160a80308c9b491e2505e9b347ee9161d",
+    "frontend/app/lib/edge-profiles.mjs": "219299c7c5f7fd8d3a47a62881c0e1114354764a2f787fff9c235a79747fb4d8",
+    "frontend/app/student/course/[courseId]/page.tsx": "f4cf1b9e6aeb9ed645d7dcc663c7f23a5ff425af49b489b9e7b08f49debdf915",
+    "backend/api/views.py": "8fd4d76c69e55422470688d80e025998ec34311770baa5d17ea0fa62b880b3e3",
+    "backend/api/urls.py": "b1de4e350864b18f92a0927e7d269ab45996112647ba17b0a38a0b08cba619a3",
+    "backend/core/settings.py": "469a0b1c51572c34d5d62aa3fccebfa6a7c8e59dfd9c85f8aed9ca89e7215cca",
+    "backend/api/tests_pr18_observation_ingest.py": "9066155e4d864846300ad93f8044ab80dccfb1beb950d6f705a22bf4bc1cad02",
+    "contracts/attention-event-v2.schema.json": "6b236e1c6970d5fbf6951c2be41a3f2f6c8b627a27c220ddfeecd446fb396e64",
+    "contracts/fixtures/browser-features-v1.raw.json": "1e1dc60169043ca18052cae56248e49367e06997bcf0ea9b63929f827cc8e78b",
+    "contracts/fixtures/browser-features-v1.normalized-90.json": "569e0d427ebdc7b82a14432577d44611043fad747a3224802eb7f36fbb3911eb",
+    "ml/feature_normalization.py": "cd102edec0045dc863fdc8ea57a2ddd38e7e1c6fbcf949de700a11d2f7e9c01e",
+    "ml/quality_gate.py": "1a1c09687226645ceea03222da17b6443832f85a8d4572864ced5c6b65aa332d",
+    "docs/WAVE5/REGISTRO_OLA5.md": "18f5d6ed65c4bd7883fc9d863c0fa16dd0781993fc8d6f3bc4d0f430294b7cf6",
+    "docs/WAVE5/VERIFICACION.json": "be36380cc0db498757e83c73275aed715a6de6dd80c9ed8d060d863cf517dc9a",
+    "docs/WAVE5/G3_DECISION_REQUIRED.md": "970ebb118077d1e90e699c9b4621fe37589351a3bc4cc50e18e4488af7a3af07",
+    "docs/WAVE5/MATRIZ_COMPATIBILIDAD_EDGE_G3.md": "256cadf83b8105065da6aa4a4cc295b74bb57fec4287b0ddcb5c6eabba885449",
+    "docs/WAVE5/EJECUCION_MATRIZ_EDGE_G3.csv": "e489f7603214a306ef41b9a008b7d09691e84d37303cadaed73d5b0637ee8f52",
+    "docs/WAVE5/ATESTACION_MINIMA_G3.json": "acf19de0820c21e76525d4b2fc60613fdefbbbba8eaeaf8d2b7acf91b2946594"
+  }
+}

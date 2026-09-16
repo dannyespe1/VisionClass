@@ -653,9 +653,9 @@
       "repository_dependencies": [
         "PR19"
       ],
-      "objective": "Representar atención como estado latente con transiciones, emisiones e inferencia online.",
+      "objective": "Representar estados latentes de evidencia u orientación observable, con transiciones, emisiones, incertidumbre e inferencia online, sin atribuir atención interna.",
       "changes": [
-        "Definir estados interpretables y tratamiento de no observabilidad.",
+        "Definir estados de evidencia observable y tratamiento explícito de gaps y no_observable.",
         "Implementar entrenamiento, filtrado, suavizado y probabilidad posterior.",
         "Versionar parámetros de transición y emisiones."
       ],
@@ -754,11 +754,11 @@
         "PR21",
         "PR22"
       ],
-      "objective": "Cuantificar desempeño, calibración, detección de cambios y estabilidad sin fuga entre participantes.",
+      "objective": "Cuantificar cambio, volatilidad, persistencia, transiciones, recuperación, calibración, cobertura, demora y fallos sin fuga entre participantes.",
       "changes": [
         "Comparar HMM o estado espacial con baselines estáticos.",
-        "Medir demora de cambio, persistencia, cobertura y error por participante.",
-        "Generar intervalos de confianza y análisis de sensibilidad."
+        "Medir volatilidad, transiciones, episodios, recuperación, demora de cambio, calibración, cobertura y error por participante con P0.3 v0.2.",
+        "Separar dinámica, validez de constructo, clasificación y ruido por calidad, gaps, no_observable o cambio de perfil."
       ],
       "tests": [
         "Revisión independiente de splits, métricas y scripts.",
@@ -887,9 +887,9 @@
         "PR25",
         "PR26"
       ],
-      "objective": "Seleccionar perfil, frecuencia y ubicación de inferencia según presupuesto, calidad y estabilidad.",
+      "objective": "Seleccionar perfil, frecuencia y ubicación de inferencia según latencia, energía, cobertura e incertidumbre, bajo límites inviolables de privacidad y consentimiento.",
       "changes": [
-        "Definir función de decisión con límites y prioridades explícitas.",
+        "Definir función de decisión con objetivos, límites y prioridades explícitas de latencia, energía, cobertura e incertidumbre.",
         "Añadir histéresis, tiempo mínimo por perfil y fallback.",
         "Registrar decisión y métricas que la justifican."
       ],

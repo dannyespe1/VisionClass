@@ -1,0 +1,14 @@
+run_id,platform_id,required_cases,os_version,browser_version,device_class,camera_configuration,commit,flags,test_date,reviewer_role,result,evidence_reference,issue_reference,notes
+G3-P01,P01,C01-C04|C06-C08|C10-C15,,,,integrated_camera,3956476,all_edge_flags_off_then_controlled_on,,,NOT_EXECUTED,,,
+G3-P02,P02,C01-C04|C06-C08|C10-C15,,,,integrated_camera,3956476,all_edge_flags_off_then_controlled_on,,,NOT_EXECUTED,,,
+G3-P03,P03,C01-C04|C06-C08|C10-C15,,,,integrated_camera,3956476,all_edge_flags_off_then_controlled_on,,,NOT_EXECUTED,,,
+G3-P04,P04,C01-C04|C06-C08|C10-C15,,,,integrated_camera,3956476,all_edge_flags_off_then_controlled_on,,,NOT_EXECUTED,,,
+G3-P05,P05,C01-C04|C06-C08|C10-C15,,,,front_and_rear,3956476,all_edge_flags_off_then_controlled_on,,,NOT_EXECUTED,,,
+G3-P06,P06,C01-C04|C06-C08|C10-C15,,,,front_and_rear,3956476,all_edge_flags_off_then_controlled_on,,,NOT_EXECUTED,,,
+G3-P07,P07,C01-C04|C06-C08|C10-C15,,,,integrated_camera,3956476,all_edge_flags_off_then_controlled_on,,,NOT_EXECUTED,,,
+G3-C05-WIN,P01,C05,Windows_11,,,integrated_plus_usb,3956476,controlled_on,,,NOT_EXECUTED,,,
+G3-C05-ANDROID,P05,C05,Android,,,front_and_rear,3956476,controlled_on,,,NOT_EXECUTED,,,
+G3-C05-IOS,P06,C05,iOS,,,front_and_rear,3956476,controlled_on,,,NOT_EXECUTED,,,
+G3-C09-LAPTOP,P01,C09,Windows_11,,,battery_below_20_percent,3956476,controlled_on,,,NOT_EXECUTED,,,
+G3-C09-MOBILE,P05,C09,Android,,,battery_below_20_percent,3956476,controlled_on,,,NOT_EXECUTED,,,
+G3-SMOKE-IAB,SMOKE_ONLY,C02,Windows_11,version_not_exposed,desktop_local,in_app_browser_no_camera,52c4a3b,consent_v2_enabled|text_approved|edge_flags_controlled_on,2026-09-15,technical_execution,PASS,MATRIZ_COMPATIBILIDAD_EDGE_G3.md#6,,Synthetic isolated environment; zero observations persisted; does not satisfy P01-P07

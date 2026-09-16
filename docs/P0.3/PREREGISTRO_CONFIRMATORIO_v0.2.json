@@ -1,0 +1,160 @@
+{
+  "schema_version": "1.1",
+  "protocol_id": "VISIONCLASS-P0.3-2026-09-12",
+  "version": "0.2",
+  "amends_version": "0.1",
+  "prior_file": "PREREGISTRO_CONFIRMATORIO.json",
+  "prior_sha256": "a6236e53bb2fba4fd61833a571a0bc72d41511ac9adca2138a438edb4c9cd200",
+  "status": "PROSPECTIVE_CANDIDATE_PENDING_INDEPENDENT_RATIFICATION",
+  "amended_at_local": "2026-09-15 America/Guayaquil",
+  "outcomes_or_model_scores_reviewed_for_this_amendment": false,
+  "model_training_or_evaluation_permitted": false,
+  "reason": "Version 0.1 measured linear trend but did not define temporal stability estimands.",
+  "terminology": {
+    "permitted": [
+      "orientacion observable a la tarea",
+      "desempeno atencional en la tarea",
+      "evidencia multimetodo",
+      "estado latente de evidencia u orientacion observable"
+    ],
+    "prohibited_claim": "camera or model directly measures internal attention",
+    "visual_features_role": "predictors; never ground truth",
+    "separate_families": [
+      "task_performance",
+      "self_report",
+      "observable_annotation",
+      "visual_features",
+      "derived_states",
+      "quality_and_coverage"
+    ],
+    "no_observable_rule": "explicit state; never distraction, negative class, zero or imputation"
+  },
+  "retained_hypotheses": [
+    {
+      "id": "H1",
+      "family": "primary",
+      "status": "unchanged_from_v0.1"
+    },
+    {
+      "id": "H2",
+      "family": "secondary_confirmatory",
+      "status": "unchanged_from_v0.1"
+    },
+    {
+      "id": "H3_trend",
+      "family": "secondary_confirmatory",
+      "statement": "The linear slope of F1_tarea across 14 phases differs from zero.",
+      "interpretation": "mean trend; not temporal stability",
+      "analysis": "mixed model: F1_tarea ~ phase_index + (1 + phase_index|participant); frozen v0.1 simplification rule retained",
+      "multiplicity": "Holm jointly with H2"
+    }
+  ],
+  "temporal_estimands": [
+    {
+      "id": "T1_volatility",
+      "family": "secondary_descriptive",
+      "formula": "V_i = sum(abs(x_it - x_i,t-1)) / valid_adjacent_pairs_i",
+      "minimum_denominator": "report; no estimate when valid_adjacent_pairs_i = 0"
+    },
+    {
+      "id": "T2_persistence",
+      "family": "secondary_descriptive",
+      "formula": "P_aa = N(a_to_a) / sum_b N(a_to_b)"
+    },
+    {
+      "id": "T3_transition",
+      "family": "secondary_descriptive",
+      "formula": "P_ab = N(a_to_b) / sum_b N(a_to_b)",
+      "report": "full matrix, counts and denominators"
+    },
+    {
+      "id": "T4_episode_dwell",
+      "family": "secondary_descriptive",
+      "formula": "sum(window_duration) within each maximal contiguous run of the same observable state"
+    },
+    {
+      "id": "T5_recovery",
+      "family": "exploratory",
+      "formula": "elapsed time from onset of observable off-task episode to two consecutive observable on-task windows",
+      "unrecovered": "right censored"
+    },
+    {
+      "id": "T6_predictive_entropy",
+      "family": "technical_secondary",
+      "formula": "H_t = -sum_k(p_tk * ln(p_tk)) / ln(K)",
+      "interpretation": "model uncertainty, not cognitive uncertainty"
+    },
+    {
+      "id": "T7_coverage",
+      "family": "technical_secondary",
+      "formula": "observable_valid_windows / eligible_windows",
+      "also_report": ["label_coverage", "inference_coverage", "denominators"]
+    }
+  ],
+  "contiguity_rule": {
+    "required": [
+      "same participant and session",
+      "both windows observable",
+      "both windows pass quality gate",
+      "same edge profile generation",
+      "timestamp gap <= 1.5 * expected stride"
+    ],
+    "segment_breaks": [
+      "no_observable",
+      "quality failure",
+      "illumination failure",
+      "gap or suspended tab",
+      "edge profile change"
+    ],
+    "interpolation_for_confirmatory_analysis": false
+  },
+  "noise_separation": {
+    "never_use_score_variance_alone": true,
+    "required_counts": [
+      "eligible_pairs",
+      "included_pairs",
+      "quality_or_illumination_breaks",
+      "gap_or_suspension_breaks",
+      "no_observable_by_reason",
+      "edge_profile_breaks"
+    ],
+    "attribution_rule": "change adjacent to a break is not attributed to participant dynamics"
+  },
+  "M1": {
+    "status": "FROZEN_CANDIDATE_PENDING_D03_RATIFICATION_AND_G3",
+    "target": "orientado_a_tarea vs orientado_fuera_de_tarea",
+    "split": "participant-exclusive; split before windowing",
+    "no_observable": "excluded from binary classification and retained in coverage denominators",
+    "threshold_selection": "on development data only, choose the lowest threshold meeting sensitivity >= 0.70 and specificity >= 0.80; fail if none; never optimize on holdout",
+    "joint_minimum_effect": {
+      "auroc_lower_95ci": ">= 0.75",
+      "sensitivity_at_frozen_threshold": ">= 0.70",
+      "specificity_at_frozen_threshold": ">= 0.80",
+      "absolute_auprc_gain_over_holdout_prevalence": ">= 0.15",
+      "coverage_and_denominators_reported": true
+    },
+    "interpretation_limit": "classification of observable orientation; not internal attention"
+  },
+  "wave6_alignment": {
+    "order": ["PR19", "PR20", "PR21", "PR22", "PR23", "PR24"],
+    "PR19": "static and heuristic baselines with participant split",
+    "PR20": "latent states of observable evidence/orientation with uncertainty and no-observable handling",
+    "PR21": "idempotent and versioned temporal engine",
+    "PR22": "shadow mode and rollback; no decision or intervention",
+    "PR23": "separate dynamics, construct validity and classification; evaluate change, persistence, recovery, calibration, coverage, delay and failure conditions",
+    "PR24": "GRU or LSTM baseline under identical splits, signals and metrics"
+  },
+  "g3_blockers": [
+    "independent ratification of D01, D03, D05 and D08",
+    "ethics, privacy and protocol approvals",
+    "manual browser and device matrix",
+    "independent acceptance of M1 threshold and minimum effect",
+    "confirmation of PR17 calibration in shadow mode"
+  ],
+  "amendment_policy": {
+    "retain_prior_version": true,
+    "record_outcome_access_status": true,
+    "post_outcome_change_becomes_exploratory": true,
+    "new_data_required_to_restore_confirmatory_status": true
+  }
+}

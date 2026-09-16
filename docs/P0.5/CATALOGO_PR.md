@@ -628,11 +628,11 @@ Los prerrequisitos se conservan literalmente en `dependency_text`. `repository_d
 - **Componentes:** Entrenamiento e inferencia temporal
 - **Dependencias:** PR19 y protocolo de evaluación congelado
 - **Control:** Sí: state_model_v1
-- **Objetivo:** Representar atención como estado latente con transiciones, emisiones e inferencia online.
+- **Objetivo:** Representar estados latentes de evidencia u orientación observable, con transiciones, emisiones, incertidumbre e inferencia online, sin atribuir atención interna.
 
 **Cambios esperados**
 
-- Definir estados interpretables y tratamiento de no observabilidad.
+- Definir estados de evidencia observable y tratamiento explícito de gaps y `no_observable`.
 - Implementar entrenamiento, filtrado, suavizado y probabilidad posterior.
 - Versionar parámetros de transición y emisiones.
 
@@ -724,13 +724,13 @@ Los prerrequisitos se conservan literalmente en `dependency_text`. `repository_d
 - **Componentes:** Evaluación y documentación
 - **Dependencias:** PR19, PR20, PR21, PR22 y protocolo de evaluación congelado
 - **Control:** No
-- **Objetivo:** Cuantificar desempeño, calibración, detección de cambios y estabilidad sin fuga entre participantes.
+- **Objetivo:** Cuantificar cambio, volatilidad, persistencia, transiciones, recuperación, calibración, cobertura, demora y fallos sin fuga entre participantes.
 
 **Cambios esperados**
 
 - Comparar HMM o estado espacial con baselines estáticos.
-- Medir demora de cambio, persistencia, cobertura y error por participante.
-- Generar intervalos de confianza y análisis de sensibilidad.
+- Medir volatilidad, transiciones, episodios, recuperación, demora de cambio, calibración, cobertura y error por participante con P0.3 v0.2.
+- Separar dinámica, validez de constructo, clasificación y ruido por calidad, gaps, `no_observable` o cambio de perfil.
 
 **Pruebas mínimas**
 
@@ -852,11 +852,11 @@ Los prerrequisitos se conservan literalmente en `dependency_text`. `repository_d
 - **Componentes:** Edge, configuración y motor temporal
 - **Dependencias:** PR25 y PR26
 - **Control:** Sí: adaptive_scheduler
-- **Objetivo:** Seleccionar perfil, frecuencia y ubicación de inferencia según presupuesto, calidad y estabilidad.
+- **Objetivo:** Seleccionar perfil, frecuencia y ubicación de inferencia según latencia, energía, cobertura e incertidumbre, bajo límites inviolables de privacidad y consentimiento.
 
 **Cambios esperados**
 
-- Definir función de decisión con límites y prioridades explícitas.
+- Definir función de decisión con objetivos, límites y prioridades explícitas de latencia, energía, cobertura e incertidumbre.
 - Añadir histéresis, tiempo mínimo por perfil y fallback.
 - Registrar decisión y métricas que la justifican.
 

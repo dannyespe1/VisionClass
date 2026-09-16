@@ -1,42 +1,46 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-14",
+  "generated_at": "2026-09-15",
   "files": [
     {
       "path": "BRANCH_PROTECTION.json",
-      "sha256": "f9ca6e3426109cabcaf2d749a2ce25f9fada4aacc5d96e8351d73fe94e965280"
+      "sha256": "116c63c1f6bc53d6af5d7eb58ebd1ae45792e7154283156afdcb75d8e12d1079"
     },
     {
       "path": "CATALOGO_PR.md",
-      "sha256": "e7c145b99940431d98e6e2118747d19c035d65f9ba69d82ff214c7d07d0d8c47"
+      "sha256": "374ac1e931b080c626c8a26b7f849297b844d0506992a6487e9e1591b05c7651"
     },
     {
       "path": "COLISIONES_WORKTREES.csv",
-      "sha256": "fb0c87ba5433c01cb8229ce8ae6047a287a97ec3542f5e36d25dbcce3efdaf2c"
+      "sha256": "5aaf348c01465e880c03bf9cf6945344eb07ce47cd7b49e73526d836f8d52dc0"
     },
     {
       "path": "EPICAS.md",
-      "sha256": "4eb1f488d744aad7373002dbc8c3679de902b9eb69aac609458461469f85f1e4"
+      "sha256": "2f7d42cfa799c29feb13e45e5773f924a2d3578d7bafd0707d79694b88dd2c89"
     },
     {
       "path": "GRAFO_DEPENDENCIAS.md",
-      "sha256": "ef36999ab515118ab808362b949a6a393e32180f7f078b41ca90481289b20789"
+      "sha256": "e7e01c257701f0279ac03315bcd11af240e89f1ce7e2b0f086e535ae930d7e6c"
     },
     {
       "path": "INFORME_P0.5.md",
-      "sha256": "4eb5c12e8c7f7951c46474c2db014c4e6f9a9f14613136891ba8ec8f315ab61d"
+      "sha256": "970050a800b07be8c62b4c42ed695586db32a808da851da344eba8ed5c5afed3"
+    },
+    {
+      "path": "PLAN_OLA6_v0.2.md",
+      "sha256": "f92be58bd4d77e12803ce283414f361fd1c604b774845e2091651492734d103b"
     },
     {
       "path": "PLAN_PR_DETALLADO.json",
-      "sha256": "328689affe97026199fda3e65646963e380a8825ffe0e14e20bacfe39dbe6b71"
+      "sha256": "49c1ff2b8e26feee3e2edc043f3b9326b3a294893a1467eaedd288de52363d2e"
     },
     {
       "path": "PLAN_TRABAJO.csv",
-      "sha256": "09380e5e6c0e4dcd4daa49eabba45672f82331df47ed0cfbb49e2952bef7e761"
+      "sha256": "9b4275735c376a40e1034df338c9f92c3ac6090da1d0727ec9ed92a531ebb621"
     },
     {
       "path": "VERIFICACION.json",
-      "sha256": "de68179d5e9500f1c4d4cf812a5a8c5c8f8ca17dddaf090d990860ddd9070976"
+      "sha256": "4456c98888caa9b7d158f01b9fe30bf37751253156988e1154dddf7a044f69b3"
     }
   ]
 }

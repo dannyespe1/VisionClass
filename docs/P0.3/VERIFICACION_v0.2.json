@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-09-15T00:00:00-05:00",
+  "scope": "Prospective P0.3 v0.2 amendment and Wave 6 planning only",
+  "base_commit": "3956476",
+  "prior_version_preserved": {
+    "file": "docs/P0.3/PREREGISTRO_CONFIRMATORIO.json",
+    "version": "0.1",
+    "sha256": "a6236e53bb2fba4fd61833a571a0bc72d41511ac9adca2138a438edb4c9cd200",
+    "modified": false
+  },
+  "checks": [
+    {
+      "id": "V02-01",
+      "check": "Parse P0.3 v0.2 preregistration JSON",
+      "command": "Get-Content docs/P0.3/PREREGISTRO_CONFIRMATORIO_v0.2.json -Raw | ConvertFrom-Json",
+      "result": "PASS"
+    },
+    {
+      "id": "V02-02",
+      "check": "Parse detailed PR plan after terminology and scope alignment",
+      "command": "Get-Content docs/P0.5/PLAN_PR_DETALLADO.json -Raw | ConvertFrom-Json",
+      "result": "PASS"
+    },
+    {
+      "id": "V02-03",
+      "check": "Confirm prospective status before real outcomes or model scores",
+      "result": "PASS_DECLARED_NO_ACCESS",
+      "evidence": "PREREGISTRO_CONFIRMATORIO_v0.2.json"
+    },
+    {
+      "id": "V02-04",
+      "check": "Preserve no_observable and separate evidence families",
+      "result": "PASS_DOCUMENTED"
+    },
+    {
+      "id": "V02-05",
+      "check": "Align PR19 through PR24 and retain PR25 through PR28, PR32 and PR34 responsibilities",
+      "result": "PASS_DOCUMENTED",
+      "evidence": [
+        "docs/P0.5/PLAN_OLA6_v0.2.md",
+        "docs/P0.5/PLAN_PR_DETALLADO.json",
+        "docs/P0.5/CATALOGO_PR.md"
+      ]
+    },
+    {
+      "id": "V02-06",
+      "check": "Training, model evaluation, real participants and real data",
+      "result": "NOT_RUN_BY_DESIGN",
+      "note": "G3 remains blocked; this change is documentation and planning only."
+    },
+    {
+      "id": "V02-07",
+      "check": "G3 approval",
+      "result": "BLOCKED",
+      "evidence": "docs/WAVE5/G3_DECISION_REQUIRED.md"
+    },
+    {
+      "id": "V02-08",
+      "check": "Design and static review of browser and device matrix",
+      "result": "PASS_DESIGN_EXECUTION_PENDING",
+      "evidence": [
+        "docs/WAVE5/MATRIZ_COMPATIBILIDAD_EDGE_G3.md",
+        "docs/WAVE5/EJECUCION_MATRIZ_EDGE_G3.csv"
+      ],
+      "note": "Seven implementation blockers were corrected in pr18b-g3-compat; no manual device run is marked as executed yet."
+    }
+  ],
+  "novelty_sources_verified_at_cutoff": [
+    "https://doi.org/10.1038/s41598-026-61478-7",
+    "https://doi.org/10.1016/j.cogr.2026.08.001",
+    "https://doi.org/10.3389/fncom.2026.1828972",
+    "https://arxiv.org/abs/2502.06493"
+  ],
+  "approval_claim": false,
+  "pr19_permitted": false,
+  "real_data_used": false,
+  "model_training_or_evaluation_performed": false
+}

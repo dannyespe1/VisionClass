@@ -16,10 +16,27 @@ La implementación queda sometida a la retención y eliminación de PR14, acceso
 
 ## Pendientes científicos e institucionales
 
-- Ratificación independiente de P0.3 D01, D03, D05 y D08.
-- Cierre del umbral y efecto mínimo M1 antes de abrir un holdout.
-- Aprobaciones de privacidad/ética y protocolo aplicable.
-- Matriz manual de navegadores/dispositivos con permisos denegados, cámaras múltiples, suspensión de pestaña, batería limitada y liberación de recursos.
-- Confirmación de que los umbrales iniciales de PR17 se calibrarán en shadow mode y no se interpretarán como atención interna.
+P0.3 v0.2 fue preparada prospectivamente sin consultar outcomes o scores reales. Conserva v0.1, corrige H3 para distinguir tendencia de estabilidad y define volatilidad, persistencia, transiciones, episodios, recuperación, entropía y cobertura. El revisor ratificó SESOI, N, máximo, AUROC-LI, sensibilidad `>= 0.70`, especificidad `>= 0.80` y mejora AUPRC.
 
-Hasta resolverlo: cero participantes autorizados, cero datos reales, cero entrenamiento/evaluación, flags apagados y PR19 bloqueado.
+| Bloqueo | Evidencia verificable requerida | Responsable que debe aprobar | Estado |
+| --- | --- | --- | --- |
+| D01 — sede y marco | protocolo institucional con ESPE Latacunga, población adulta, periodo y canal de reclutamiento | autoridad institucional + ética | atestado por revisor; sin hash suministrado |
+| D03 — SESOI, muestra y M1 | ratificación independiente de SESOI/N y aceptación firmada del threshold y efectos mínimos de M1 v0.2 | metodólogo/estadístico independiente | atestado con sensibilidad 0.70 y demás valores; sin hash |
+| D05 — observación | segundo anotador identificado y procedimiento presencial sin grabación aceptado | ética + privacidad | atestado; segundo anotador asignado; sin hash |
+| D08 — congelamiento | aprobador independiente, hash firmado y sello temporal externo/Zenodo de v0.2 | director + aprobador independiente | atestado con aprobador y registro de sello; sin hash |
+| Privacidad, ética y protocolo | resoluciones o actas aplicables al flujo consentido y a la población adulta | instancias competentes | atestado bajo condiciones privadas; sin hash |
+| Compatibilidad Edge | matriz manual firmada de navegadores/dispositivos: permiso denegado, cámaras múltiples, suspensión, batería limitada y liberación de recursos | QA/revisor independiente | pendiente |
+| Shadow mode PR17 | acta que confirma calibración en shadow mode, sin decisión/intervención ni interpretación de atención interna | responsable científico + producto | atestado con roles establecidos; sin hash |
+
+Para preservar confidencialidad, el contenido de las aprobaciones no se incorpora al repositorio. El propietario indicó expresamente que no proporcionará SHA-256 y autorizó continuar considerando resueltas las aprobaciones comunicadas. `ATESTACION_MINIMA_G3.json` registra la respuesta como atestación sin hash, sin inventar fechas, roles, códigos ni huellas. Esta excepción documental satisface los bloques de aprobación, pero no sustituye la matriz ni la decisión final independiente de G3.
+
+La matriz requerida fue diseñada y revisada en `MATRIZ_COMPATIBILIDAD_EDGE_G3.md`; su registro de ejecución está en `EJECUCION_MATRIZ_EDGE_G3.csv`. B01 fue autorizado y B01–B08 tienen corrección técnica en la rama `pr18b-g3-compat`. El smoke test local de C02 pasó con cero observaciones persistidas, pero no sustituye P01–P07 ni la revisión independiente; la ejecución manual multiplataforma continúa pendiente.
+
+Documentos de la enmienda:
+
+- `docs/P0.3/ENMIENDA_v0.2.md`
+- `docs/P0.3/PREREGISTRO_CONFIRMATORIO_v0.2.json`
+- `docs/P0.3/REVISION_NOVEDAD_2026-09-15.md`
+- `docs/P0.5/PLAN_OLA6_v0.2.md`
+
+Hasta ejecutar y aprobar la matriz: cero participantes autorizados, cero datos reales, cero entrenamiento/evaluación, flags apagados y PR19 bloqueado.

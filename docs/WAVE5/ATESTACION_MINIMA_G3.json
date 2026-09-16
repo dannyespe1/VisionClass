@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.1",
+  "purpose": "Record non-sensitive reviewer attestations without storing private documents",
+  "status": "APPROVALS_ATTESTED_MATRIX_PENDING",
+  "attested_on": "2026-09-15",
+  "content_or_personal_names_required": false,
+  "required_fields_note": "The owner explicitly declined to provide SHA-256 values. Null hashes and withheld metadata must not be replaced or inferred.",
+  "attestations": {
+    "D01_institutional_frame": {
+      "approved": true,
+      "approval_date": null,
+      "approver_role_or_office": null,
+      "scope_code": null,
+      "private_document_sha256": null,
+      "expiry_or_conditions": "RETAINED_IN_PRIVATE_APPROVAL",
+      "evidence_status": "REVIEWER_ATTESTED_NO_HASH"
+    },
+    "D03_sesoi_sample_and_M1": {
+      "approved": true,
+      "approval_date": null,
+      "approver_role_or_office": null,
+      "scope_code": null,
+      "private_document_sha256": null,
+      "ratified_values": {
+        "sesoi_f1_task": 0.10,
+        "target_n": 80,
+        "maximum_n": 100,
+        "auroc_lower_95ci": 0.75,
+        "sensitivity": 0.70,
+        "specificity": 0.80,
+        "absolute_auprc_gain_over_prevalence": 0.15
+      },
+      "evidence_status": "REVIEWER_ATTESTED_NO_HASH"
+    },
+    "D05_live_observation": {
+      "approved": true,
+      "approval_date": null,
+      "approver_role_or_office": null,
+      "second_blinded_annotator_assigned": true,
+      "recording_prohibited": true,
+      "private_document_sha256": null,
+      "evidence_status": "REVIEWER_ATTESTED_NO_HASH"
+    },
+    "D08_preregistration_freeze": {
+      "approved": true,
+      "approval_date": null,
+      "independent_approver_role": null,
+      "external_timestamp_or_deposit_id": null,
+      "signed_preregistration_sha256": null,
+      "deposit_or_seal_record_confirmed": true,
+      "evidence_status": "REVIEWER_ATTESTED_NO_HASH"
+    },
+    "privacy_ethics_protocol": {
+      "approved": true,
+      "approval_date": null,
+      "approver_role_or_office": null,
+      "scope_code": null,
+      "private_document_sha256": null,
+      "expiry_or_conditions": "RETAINED_IN_PRIVATE_APPROVAL",
+      "evidence_status": "REVIEWER_ATTESTED_NO_HASH"
+    },
+    "PR17_shadow_mode": {
+      "approved": true,
+      "approval_date": null,
+      "scientific_approver_role": null,
+      "product_approver_role": null,
+      "no_decisions_or_interventions": true,
+      "not_internal_attention": true,
+      "private_document_sha256": null,
+      "approval_roles_confirmed": true,
+      "evidence_status": "REVIEWER_ATTESTED_NO_HASH"
+    }
+  },
+  "B01_local_fallback": {
+    "approved": true,
+    "implementation": "MediaPipe Tasks Vision with same-origin WASM/model assets and no image transmission at runtime",
+    "deployment_follow_up": "Evaluate ONNX with YOLO/OpenCV under the same privacy and output contract",
+    "evidence_status": "REVIEWER_ATTESTED"
+  },
+  "local_camera_matrix_execution": {
+    "browser_permission_approved": true,
+    "raw_media_persistence_approved": false,
+    "runtime_rule": "Frames remain in memory for local feature extraction and must not be transmitted or persisted.",
+    "evidence_status": "OWNER_AUTHORIZED"
+  },
+  "browser_device_matrix": {
+    "definition": "docs/WAVE5/MATRIZ_COMPATIBILIDAD_EDGE_G3.md",
+    "execution_log": "docs/WAVE5/EJECUCION_MATRIZ_EDGE_G3.csv",
+    "approved": false
+  },
+  "unresolved_items": [
+    "Browser/device matrix execution remains pending"
+  ],
+  "privacy_preserving_evidence_rule": "When private approval artifacts and hashes are intentionally withheld, REVIEWER_ATTESTED_NO_HASH is accepted as the recorded approval state; no missing value may be invented.",
+  "gate_rule": "G3 may be approved only when every approval is true or reviewer-attested under the privacy-preserving evidence rule, the browser/device matrix passes, and an independent reviewer records the final decision."
+}

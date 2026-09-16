@@ -4,6 +4,7 @@ from django.db import IntegrityError, models
 from django.db.models import Q
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 from rest_framework import viewsets, permissions, mixins, status
 from rest_framework.exceptions import APIException, PermissionDenied
 from rest_framework.response import Response
@@ -51,6 +52,8 @@ from .models import (
     ResearchAccessRequest,
     PrivacyPolicySetting,
     ConsentEvent,
+    TemporalSession,
+    Observation,
 )
 
 
@@ -107,6 +110,7 @@ from .serializers import (
 from .utils import send_mailgun_email
 from .permissions import D2RLegacyAccessPermission, IsAdminUserRole
 from .consent import consent_status, has_capture_consent
+from .event_contract import validate_attention_event_v2
 
 UserModel = get_user_model()
 BASELINE_TITLE = "baseline d2r"
@@ -186,6 +190,71 @@ def _event_idempotency_key(request, model, session_field, session, action):
         _audit_identity(request, action, "rejected", "event_replay", session_field, session.id)
         raise ReplayConflict()
     return key
+
+
+class ObservationIngestView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    feature_fields = {
+        "face_present", "face_count", "face_center_x", "face_center_y", "face_width", "face_height",
+        "eye_span", "head_roll", "gaze_horizontal_proxy", "pose_available", "gaze_available",
+        "window_offset_ms", "window_duration_ms", "profile_generation",
+    }
+
+    def post(self, request):
+        if not settings.NORMALIZED_FEATURES_V1 or not settings.QUALITY_GATE_V1:
+            return Response({"detail": "Ingesta de características desactivada."}, status=503)
+        event = validate_attention_event_v2(request.data.copy())
+        if event["session_type"] != "course":
+            return Response({"detail": "Tipo de sesión no soportado."}, status=400)
+        source = Session.objects.filter(pk=event["session_id"]).first()
+        if not source:
+            _audit_identity(request, "observation_ingest", "denied", "session_not_found", "session", event["session_id"])
+            return Response({"detail": "Sesión no autorizada."}, status=403)
+        _validate_course_session(request, source, "observation_ingest")
+        if not has_capture_consent(request.user):
+            _audit_identity(request, "observation_ingest", "denied", "consent_not_valid", "session", source.pk)
+            return Response({"detail": "Consentimiento ausente, vencido o revocado."}, status=403)
+        consent = event["consent"]
+        required_purposes = {ConsentEvent.PURPOSE_LOCAL_PROCESSING, ConsentEvent.PURPOSE_DERIVED_PERSISTENCE}
+        if consent["version"] != settings.CONSENT_CURRENT_VERSION or not required_purposes <= set(consent["purposes"]):
+            return Response({"detail": "Sobre de consentimiento inconsistente."}, status=400)
+        if set(event["features"]) != self.feature_fields:
+            return Response({"detail": "Conjunto de características no soportado."}, status=400)
+        device = event.get("device") or {}
+        if device.get("preprocessing_version") != "normalized-features-v1" or device.get("execution_profile") not in {"low", "balanced", "high"}:
+            return Response({"detail": "Versión o perfil de características no soportado."}, status=400)
+        captured_at = parse_datetime(event["captured_at"])
+        if not captured_at or captured_at > timezone.now() + timedelta(seconds=5):
+            return Response({"detail": "Fecha de captura inválida."}, status=400)
+        temporal, _ = TemporalSession.objects.get_or_create(
+            course_session=source,
+            defaults={
+                "participant": request.user,
+                "started_at": source.started_at or captured_at,
+                "provenance": {"source": "normalized_features_v1"},
+            },
+        )
+        existing = Observation.objects.filter(event_id=event["event_id"]).first()
+        if existing:
+            if existing.temporal_session_id != temporal.pk:
+                return Response({"detail": "Identificador de evento en conflicto."}, status=409)
+            return Response({"event_id": str(existing.event_id), "duplicate": True}, status=200)
+        observation = Observation.objects.create(
+            temporal_session=temporal,
+            event_id=event["event_id"],
+            kind="normalized_browser_features",
+            captured_at=captured_at,
+            received_at=max(timezone.now(), captured_at),
+            values=event["features"],
+            quality=event["quality"],
+            provenance={
+                "contract_version": event["contract_version"],
+                "extractor_version": device.get("extractor_version"),
+                "preprocessing_version": device["preprocessing_version"],
+                "execution_profile": device["execution_profile"],
+            },
+        )
+        return Response({"event_id": str(observation.event_id), "duplicate": False}, status=201)
 
 
 class EmailTokenObtainPairView(TokenObtainPairView):

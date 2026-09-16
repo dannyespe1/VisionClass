@@ -46,6 +46,8 @@ STREAM_MAX_RETRIES = int(os.environ.get('STREAM_MAX_RETRIES', '3'))
 DEMOGRAPHIC_VAULT = os.environ.get('DEMOGRAPHIC_VAULT', 'False').strip().lower() == 'true'
 DEMOGRAPHIC_VAULT_KEY = os.environ.get('DEMOGRAPHIC_VAULT_KEY', '').strip()
 RETENTION_JOBS = os.environ.get('RETENTION_JOBS', 'False').strip().lower() == 'true'
+NORMALIZED_FEATURES_V1 = os.environ.get('NORMALIZED_FEATURES_V1', 'False').strip().lower() == 'true'
+QUALITY_GATE_V1 = os.environ.get('QUALITY_GATE_V1', 'False').strip().lower() == 'true'
 RETENTION_AUDIT_SECRET = os.environ.get('RETENTION_AUDIT_SECRET', '').strip()
 OBSERVATION_RETENTION_DAYS = int(os.environ.get('OBSERVATION_RETENTION_DAYS', '30'))
 STATE_RETENTION_DAYS = int(os.environ.get('STATE_RETENTION_DAYS', '90'))

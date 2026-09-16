@@ -16,6 +16,8 @@ Cada cambio incrementa `profile_generation` y exige reiniciar la ventana para no
 
 Los eventos incluyen `device.execution_profile`. La telemetría de cambios contiene solo perfil anterior/nuevo, motivo, fuente, tiempo y generación; no contiene usuario, sesión ni características.
 
+Cuando extractor, normalización y calidad se habilitan conjuntamente, el navegador envía el sobre JSON v2 a `/api/observations/`. El backend vuelve a validar identidad, sesión activa, consentimiento, versión y perfil; persiste una `Observation` idempotente y rechaza campos desconocidos como imágenes. Con cualquiera de los controles apagado, la ingesta responde en modo cerrado.
+
 ## Activación
 
 `NEXT_PUBLIC_EDGE_PROFILES=false` por defecto. No hay ajuste automático basado en rendimiento de modelos; esa capacidad queda fuera hasta PR27 y sus gates. Antes de activar se requieren pruebas manuales por navegador/dispositivo y revisión de consumo energético.

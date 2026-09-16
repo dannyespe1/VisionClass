@@ -555,8 +555,8 @@ export default function CoursePage() {
           sample = { ...sample, quality: { observable: windowQuality.observable, confidence: windowQuality.confidence, reason: windowQuality.reason } };
           setQualityMessage(windowQuality.message);
         }
-        if (NORMALIZED_FEATURES_V1_ENABLED && sessionId && consentVersionRef.current) {
-          latestNormalizedEventRef.current = buildNormalizedEvent(sample, {
+        if (NORMALIZED_FEATURES_V1_ENABLED && QUALITY_GATE_V1_ENABLED && sessionId && consentVersionRef.current) {
+          const event = buildNormalizedEvent(sample, {
             sessionId,
             consentVersion: consentVersionRef.current,
             purposes: ["local_processing", ...(permissionSettings.saveAnalytics ? ["derived_persistence"] : [])],
@@ -564,6 +564,11 @@ export default function CoursePage() {
             executionProfile: edgeProfileControllerRef.current?.current || edgeProfile,
             profileGeneration: edgeProfileControllerRef.current?.generation || 0,
           });
+          latestNormalizedEventRef.current = event;
+          setCaptureTransportStatus("sending");
+          void apiFetch("/api/observations/", { method: "POST", body: JSON.stringify(event) }, token || undefined)
+            .then(() => setCaptureTransportStatus("idle"))
+            .catch(() => setCaptureTransportStatus("degraded"));
         }
         setAttentionStatus(sample.quality.observable ? "ok" : "no_face");
         setCaptureTransportStatus("idle");

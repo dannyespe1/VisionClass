@@ -1,0 +1,32 @@
+{
+  "pr": "PR20",
+  "base_commit": "fdaead9",
+  "verification_date": "2026-09-16",
+  "data_classification": "synthetic",
+  "real_participant_data_used": false,
+  "results": {
+    "full_ml_suite": {
+      "command": "python -m unittest discover -s ml -p test_*.py -v",
+      "passed": 29,
+      "failed": 0,
+      "status": "pass"
+    },
+    "static_compilation": {
+      "command": "python -m compileall -q ml",
+      "status": "pass"
+    }
+  },
+  "verified_controls": [
+    "deterministic_training",
+    "known_transition_persistence",
+    "posterior_distribution_and_uncertainty",
+    "explicit_no_observable_segment_break",
+    "long_gap_reset",
+    "short_window_inference",
+    "manual_reset",
+    "out_of_order_rejection",
+    "forward_backward_smoothing",
+    "versioned_artifact_matches_pipeline"
+  ],
+  "scope_note": "Synthetic evidence verifies pipeline behavior and reproducibility only; it does not establish validity or performance with participants."
+}

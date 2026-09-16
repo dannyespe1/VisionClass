@@ -1,0 +1,7 @@
+{
+  "schema_version": "state-model-v1",
+  "transition_smoothing": 1.0,
+  "initial_smoothing": 1.0,
+  "minimum_variance": 0.0025,
+  "maximum_gap_ms": 7500
+}

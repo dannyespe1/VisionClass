@@ -1,0 +1,11 @@
+{
+  "algorithm": "SHA-256",
+  "files": {
+    "docs/PR20/README.md": "11b67d61030412d426cd82646c13fc7ddbd82e4fa14d1d91df42c54a0d051537",
+    "docs/PR20/SYNTHETIC_STATE_MODEL.json": "754d1751d8b35c3767201525191a8052db39dabc5c942c6b75efad15c138623e",
+    "docs/PR20/VERIFICACION.json": "2f2fa44ff4b03a8c455c3239c8b635fa15c65c1f1e1f3758ab34d37a970e4e9f",
+    "ml/config/pr20_state_model_v1.json": "5ed9ad80e75d91cdc3d51c8a45f8bcb963db58d2b81e7fd320397e14472490cf",
+    "ml/state_model.py": "b3131abd94b928b9f2402be4fcc1274106b0ee68eeaecc54fc129b641ba1dfc0",
+    "ml/test_state_model.py": "b1a1cef2331997fb7852045a4c3b2743bf926ca7e800163d792002735df33839"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "pr": "PR24",
+  "base_commit": "8e03d04",
+  "verification_date": "2026-09-16",
+  "data_classification": "synthetic",
+  "real_participant_data_used": false,
+  "results": {
+    "specific_tests": {
+      "command": "docker run --rm -v <worktree>:/workspace -w /workspace vision_system-ml:latest python -m unittest ml.test_neural_temporal_baseline -v",
+      "passed": 9,
+      "failed": 0,
+      "status": "pass"
+    },
+    "ml_suite": {
+      "command": "docker run --rm -v <worktree>:/workspace -w /workspace vision_system-ml:latest python -m unittest discover -s ml -p test_*.py -v",
+      "passed": 62,
+      "failed": 0,
+      "status": "pass",
+      "note": "CPU execution; ONNX Runtime emitted a non-blocking GPU discovery warning. Existing MediaPipe FaceMesh initialization used the existing Haar fallback."
+    },
+    "static_compilation": {
+      "command": "docker run --rm -v <worktree>:/workspace -w /workspace vision_system-ml:latest python -m compileall -q ml",
+      "status": "pass"
+    },
+    "synthetic_training": {
+      "command": "python -m ml.run_neural_temporal_baseline --synthetic --config ml/config/pr24_masked_gru_v1.json --output docs/PR24/SYNTHETIC_GRU_COMPARISON.json --code-version 8e03d04",
+      "status": "pass",
+      "sha256": "56b8366e3e9951a99b9c7594c1fe8b6c9415ece9f75a43442615934eb5fa7051",
+      "selected_seed": 24023,
+      "model_state_sha256": "99a494ae7d91f97f9454a1ada57ed9f5a0fc659c6979e23ba6b820cb77ca54e8",
+      "candidate_mode": "shadow_only",
+      "test_operating_constraints_met": false
+    },
+    "real_approved_training_and_evaluation": {
+      "status": "not_executed",
+      "reason": "No approved minimized real dataset was supplied to this worktree."
+    }
+  },
+  "verified_controls": [
+    "participant_exclusive_split_before_sequences",
+    "same_pr19_features_splits_and_classification_metrics",
+    "masked_steps_gaps_and_profile_changes_reset_hidden_state",
+    "no_observable_excluded_from_loss_and_classification",
+    "two_deterministic_training_seeds",
+    "training_and_validation_curves_recorded",
+    "deliberate_overfit_probe",
+    "reproducible_comparison_with_pr19_and_pr20",
+    "calibration_and_participant_bootstrap",
+    "structural_compute_cost_comparison",
+    "candidate_registered_shadow_only_inactive",
+    "no_raw_media_or_intervention"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "pr": "PR23",
+  "protocol": "P0.3-v0.2-ratified-G3",
+  "status": "FROZEN_BEFORE_CONFIRMATORY_EVALUATION",
+  "approval_evidence": [
+    "docs/WAVE5/ATESTACION_MINIMA_G3.json",
+    "docs/P0.3/PREREGISTRO_CONFIRMATORIO_v0.2.json"
+  ],
+  "participant_split": "exclusive_before_windowing",
+  "test_threshold_selection": "prohibited",
+  "no_observable": "excluded_from_binary_classification_retained_in_coverage",
+  "contiguity": {
+    "expected_stride_ms": 5000,
+    "maximum_gap_multiplier": 1.5,
+    "breaks": [
+      "no_observable",
+      "quality_or_illumination_failure",
+      "gap_or_suspension",
+      "edge_profile_generation_change"
+    ],
+    "interpolation": false
+  },
+  "joint_minimum_effect": {
+    "sesoi": 0.1,
+    "target_participants": 80,
+    "maximum_participants": 100,
+    "minimum_auroc_lower_ci95": 0.75,
+    "minimum_sensitivity": 0.7,
+    "minimum_specificity": 0.8,
+    "minimum_absolute_auprc_gain_over_prevalence": 0.15,
+    "coverage_must_be_reported": true
+  },
+  "bootstrap_seeds": [23017, 23023],
+  "construct_claim": "observable_evidence_only_not_internal_attention",
+  "sha256_owner_documents": "NOT_PROVIDED_DO_NOT_INVENT"
+}

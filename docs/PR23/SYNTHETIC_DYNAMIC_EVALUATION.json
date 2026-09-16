@@ -1,0 +1,380 @@
+{
+  "provenance": {
+    "code_version": "86fbb00",
+    "config_sha256": "5d06d68628a754f2e655e1d61a4d22cdbf586760529cfff341e5c64dbf1916c3",
+    "input_sha256": "e3f2b404b1a9259201df9ee61fa617ade62ebe290344c9d916d60836a692b5b0",
+    "runtime": {
+      "numpy": "2.4.1",
+      "python": "3.11.9"
+    }
+  },
+  "result": {
+    "classification": {
+      "absolute_auprc_gain_over_prevalence": 0.41025641025641024,
+      "bootstrap_ci95_by_seed": {
+        "23017": {
+          "dynamic": {
+            "auprc": [
+              1.0,
+              1.0
+            ],
+            "auroc": [
+              1.0,
+              1.0
+            ],
+            "balanced_accuracy": [
+              1.0,
+              1.0
+            ],
+            "brier_score": [
+              0.032400000000000005,
+              0.032400000000000005
+            ],
+            "coverage": [
+              0.925,
+              1.0
+            ],
+            "ece": [
+              0.18,
+              0.18000000000000008
+            ],
+            "macro_f1": [
+              1.0,
+              1.0
+            ],
+            "prevalence": [
+              0.5675675675675675,
+              0.6
+            ],
+            "sensitivity": [
+              1.0,
+              1.0
+            ],
+            "specificity": [
+              1.0,
+              1.0
+            ]
+          },
+          "static_baseline": {
+            "auprc": [
+              0.8549629363498727,
+              0.971128936423054
+            ],
+            "auroc": [
+              0.875,
+              0.9166666666666666
+            ],
+            "balanced_accuracy": [
+              0.875,
+              0.9166666666666667
+            ],
+            "brier_score": [
+              0.1684,
+              0.17034594594594596
+            ],
+            "coverage": [
+              0.925,
+              1.0
+            ],
+            "ece": [
+              0.23473684210526316,
+              0.2897435897435897
+            ],
+            "macro_f1": [
+              0.8868594720496894,
+              0.898989898989899
+            ],
+            "prevalence": [
+              0.5675675675675675,
+              0.6
+            ],
+            "sensitivity": [
+              0.8333333333333334,
+              1.0
+            ],
+            "specificity": [
+              0.75,
+              1.0
+            ]
+          }
+        },
+        "23023": {
+          "dynamic": {
+            "auprc": [
+              1.0,
+              1.0
+            ],
+            "auroc": [
+              1.0,
+              1.0
+            ],
+            "balanced_accuracy": [
+              1.0,
+              1.0
+            ],
+            "brier_score": [
+              0.032400000000000005,
+              0.032400000000000005
+            ],
+            "coverage": [
+              0.95,
+              1.0
+            ],
+            "ece": [
+              0.18,
+              0.18000000000000005
+            ],
+            "macro_f1": [
+              1.0,
+              1.0
+            ],
+            "prevalence": [
+              0.5789473684210527,
+              0.6
+            ],
+            "sensitivity": [
+              1.0,
+              1.0
+            ],
+            "specificity": [
+              1.0,
+              1.0
+            ]
+          },
+          "static_baseline": {
+            "auprc": [
+              0.8550268007627985,
+              0.971128936423054
+            ],
+            "auroc": [
+              0.875,
+              0.9166666666666666
+            ],
+            "balanced_accuracy": [
+              0.875,
+              0.9166666666666667
+            ],
+            "brier_score": [
+              0.1684,
+              0.16966315789473685
+            ],
+            "coverage": [
+              0.95,
+              1.0
+            ],
+            "ece": [
+              0.23473684210526316,
+              0.2898
+            ],
+            "macro_f1": [
+              0.8878787878787879,
+              0.898989898989899
+            ],
+            "prevalence": [
+              0.5789473684210527,
+              0.6
+            ],
+            "sensitivity": [
+              0.8333333333333334,
+              1.0
+            ],
+            "specificity": [
+              0.75,
+              1.0
+            ]
+          }
+        }
+      },
+      "dynamic_model": {
+        "auprc": 1.0,
+        "auroc": 1.0,
+        "balanced_accuracy": 1.0,
+        "brier_score": 0.032400000000000005,
+        "confusion_matrix": {
+          "fn": 0,
+          "fp": 0,
+          "tn": 16,
+          "tp": 23
+        },
+        "coverage": 0.975,
+        "ece": 0.18000000000000005,
+        "eligible_windows": 39,
+        "macro_f1": 1.0,
+        "prevalence": 0.5897435897435898,
+        "sensitivity": 1.0,
+        "specificity": 1.0,
+        "total_windows": 40
+      },
+      "static_baseline": {
+        "auprc": 0.8698761590288334,
+        "auroc": 0.8940217391304348,
+        "balanced_accuracy": 0.8940217391304348,
+        "brier_score": 0.16901538461538462,
+        "confusion_matrix": {
+          "fn": 2,
+          "fp": 2,
+          "tn": 14,
+          "tp": 21
+        },
+        "coverage": 0.975,
+        "ece": 0.27743589743589747,
+        "eligible_windows": 39,
+        "macro_f1": 0.8940217391304348,
+        "prevalence": 0.5897435897435898,
+        "sensitivity": 0.9130434782608695,
+        "specificity": 0.875,
+        "total_windows": 40
+      },
+      "task_f1_gain_over_static_baseline": 0.08695652173913049
+    },
+    "config": {
+      "bootstrap_iterations": 200,
+      "bootstrap_seeds": [
+        23017,
+        23023
+      ],
+      "calibration_bins": 10,
+      "expected_stride_ms": 5000,
+      "frozen_threshold": 0.5,
+      "maximum_gap_multiplier": 1.5,
+      "maximum_participants": 100,
+      "minimum_absolute_auprc_gain": 0.15,
+      "minimum_auroc_lower_ci": 0.75,
+      "minimum_sensitivity": 0.7,
+      "minimum_specificity": 0.8,
+      "protocol_version": "P0.3-v0.2-ratified-G3",
+      "schema_version": "dynamic-evaluation-v1",
+      "sesoi": 0.1,
+      "target_participants": 80,
+      "threshold_source": "synthetic_development_fixture"
+    },
+    "confirmatory_gate": {
+      "criteria": {
+        "absolute_auprc_gain_over_prevalence": true,
+        "auroc_lower_ci": true,
+        "sample_within_approved_maximum": true,
+        "sensitivity": true,
+        "sesoi_task_f1_gain": false,
+        "specificity": true,
+        "target_sample_reached": false
+      },
+      "status": "NOT_EVALUABLE_SYNTHETIC"
+    },
+    "construct_validity": {
+      "note": "These results do not establish attention, cognition, diagnosis, or causal effect.",
+      "status": "NOT_ESTABLISHED_BY_CLASSIFICATION_OR_TEMPORAL_METRICS"
+    },
+    "data_classification": "synthetic",
+    "dynamics": {
+      "change_detection_delay_ms": {
+        "count": 15,
+        "maximum": 0,
+        "mean": 0,
+        "minimum": 0,
+        "right_censored": 0
+      },
+      "coverage": {
+        "eligible_windows": 40,
+        "inference": 0.975,
+        "label": 0.975,
+        "observable_valid_windows": 39
+      },
+      "episode_dwell_ms": {
+        "count": 20,
+        "maximum": 10000,
+        "mean": 9750,
+        "minimum": 5000
+      },
+      "noise_and_segment_breaks": {
+        "edge_profile_breaks": 0,
+        "eligible_pairs": 36,
+        "gap_or_suspension_breaks": 0,
+        "included_pairs": 34,
+        "no_observable_by_reason": {
+          "synthetic_low_confidence": 1
+        },
+        "quality_or_illumination_breaks": 1
+      },
+      "normalized_predictive_entropy": 0.6800770457282799,
+      "persistence": {
+        "off_task_evidence": 0.5333333333333333,
+        "task_oriented_evidence": 0.5789473684210527
+      },
+      "recovery_delay_ms": {
+        "count": 7,
+        "maximum": 15000,
+        "mean": 15000,
+        "minimum": 15000,
+        "right_censored": 1
+      },
+      "transition_counts": {
+        "0_to_0": 8,
+        "0_to_1": 7,
+        "1_to_0": 8,
+        "1_to_1": 11
+      },
+      "transition_denominator": 34,
+      "transition_probabilities": {
+        "off_task_evidence": {
+          "to_off_task_evidence": 0.5333333333333333,
+          "to_task_oriented_evidence": 0.4666666666666667
+        },
+        "task_oriented_evidence": {
+          "to_off_task_evidence": 0.42105263157894735,
+          "to_task_oriented_evidence": 0.5789473684210527
+        }
+      },
+      "volatility_mean_absolute_adjacent_change": 0.28235294117647053
+    },
+    "interpretation": "observable_task_orientation_evidence_not_internal_attention",
+    "non_use_conditions": [
+      "no_observable_or_failed_quality",
+      "consent_or_camera_permission_not_valid",
+      "profile_generation_changed_or_gap_exceeded",
+      "participant_exclusive_split_cannot_be_verified",
+      "confirmatory_sample_or_joint_minimum_effect_not_met",
+      "automated_intervention_or_diagnostic_use"
+    ],
+    "participant_error": [
+      {
+        "coverage": 1.0,
+        "eligible_windows": 10,
+        "error_rate": 0.0,
+        "participant_index": 1,
+        "total_windows": 10
+      },
+      {
+        "coverage": 0.9,
+        "eligible_windows": 9,
+        "error_rate": 0.0,
+        "participant_index": 2,
+        "total_windows": 10
+      },
+      {
+        "coverage": 1.0,
+        "eligible_windows": 10,
+        "error_rate": 0.0,
+        "participant_index": 3,
+        "total_windows": 10
+      },
+      {
+        "coverage": 1.0,
+        "eligible_windows": 10,
+        "error_rate": 0.0,
+        "participant_index": 4,
+        "total_windows": 10
+      }
+    ],
+    "protocol_version": "P0.3-v0.2-ratified-G3",
+    "sample": {
+      "maximum_participants": 100,
+      "target_participants": 80,
+      "test_participants": 4,
+      "test_windows": 40,
+      "total_participants": 15
+    },
+    "schema_version": "dynamic-evaluation-v1",
+    "split_policy": "participant_exclusive_before_windowing_test_only_evaluation",
+    "threshold_policy": "frozen_from_development_never_selected_on_test"
+  }
+}

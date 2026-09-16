@@ -1,0 +1,18 @@
+{
+  "schema_version": "dynamic-evaluation-v1",
+  "protocol_version": "P0.3-v0.2-ratified-G3",
+  "frozen_threshold": 0.5,
+  "threshold_source": "synthetic_development_fixture",
+  "expected_stride_ms": 5000,
+  "maximum_gap_multiplier": 1.5,
+  "calibration_bins": 10,
+  "bootstrap_iterations": 200,
+  "bootstrap_seeds": [23017, 23023],
+  "target_participants": 80,
+  "maximum_participants": 100,
+  "sesoi": 0.10,
+  "minimum_auroc_lower_ci": 0.75,
+  "minimum_sensitivity": 0.70,
+  "minimum_specificity": 0.80,
+  "minimum_absolute_auprc_gain": 0.15
+}

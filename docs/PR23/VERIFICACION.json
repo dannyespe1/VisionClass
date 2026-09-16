@@ -1,0 +1,58 @@
+{
+  "pr": "PR23",
+  "base_commit": "86fbb00",
+  "verification_date": "2026-09-16",
+  "data_classification": "synthetic",
+  "real_participant_data_used": false,
+  "results": {
+    "specific_tests": {
+      "command": "python -m unittest ml.test_dynamic_evaluation -v",
+      "passed": 10,
+      "failed": 0,
+      "status": "pass"
+    },
+    "ml_suite_container": {
+      "command": "docker run --rm -v <worktree>:/workspace -w /workspace vision_system-ml:latest python -m unittest discover -s ml -p test_*.py -v",
+      "passed": 53,
+      "failed": 0,
+      "status": "pass",
+      "note": "CPU execution; ONNX Runtime emitted a non-blocking GPU discovery warning. MediaPipe FaceMesh was unavailable and the existing Haar fallback initialized."
+    },
+    "static_compilation": {
+      "command": "python -m compileall -q ml",
+      "status": "pass"
+    },
+    "synthetic_report": {
+      "command": "python -m ml.run_dynamic_evaluation --synthetic --config ml/config/pr23_dynamic_evaluation_v1.json --output docs/PR23/SYNTHETIC_DYNAMIC_EVALUATION.json --code-version 86fbb00",
+      "status": "pass",
+      "sha256": "4a29e8906ddff18eaf3ec0ea670dc185e6d44ffb4cfc0934ec5a6a059a85d9d9",
+      "confirmatory_status": "NOT_EVALUABLE_SYNTHETIC"
+    },
+    "host_full_suite": {
+      "status": "environment_incompatible_not_used_as_acceptance_evidence",
+      "reason": "Installed TensorFlow/MediaPipe extensions target NumPy 1.x while the host has NumPy 2.4.1; the same suite passes in the versioned local ML image."
+    },
+    "real_confirmatory_evaluation": {
+      "status": "not_executed",
+      "reason": "No approved minimized real evaluation dataset or real development-threshold provenance was supplied to this worktree."
+    },
+    "independent_script_review": {
+      "status": "not_executed",
+      "procedure": "docs/PR23/REVISION_INDEPENDIENTE.md"
+    }
+  },
+  "verified_controls": [
+    "participant_exclusive_split_rejection",
+    "test_only_evaluation",
+    "frozen_threshold_with_provenance",
+    "same_windows_for_dynamic_and_static_models",
+    "no_observable_excluded_from_classification_and_retained_in_coverage",
+    "contiguity_breaks_without_interpolation",
+    "transition_counts_probabilities_and_denominators",
+    "episode_recovery_change_delay_entropy_and_coverage",
+    "participant_bootstrap_with_two_seeds",
+    "anonymous_participant_level_error",
+    "synthetic_results_cannot_pass_confirmatory_gate",
+    "classification_dynamics_and_construct_validity_separated"
+  ]
+}

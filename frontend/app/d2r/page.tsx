@@ -7,7 +7,7 @@ import { useAuth } from "../context/AuthContext";
 import D2RWidget from "./test-widget";
 import { D2R_ROWS } from "./d2r-rows";
 import { CameraPermissionModal, type PermissionSettings } from "../student/CameraPermissionModal";
-import { recordConsent, revokeCaptureConsent } from "../lib/consent";
+import { getConsentStatus, recordConsent, revokeCaptureConsent, type ConsentStatus } from "../lib/consent";
 import { BoundedCaptureQueue } from "../lib/bounded-capture-queue.mjs";
 import { BOUNDED_CAPTURE_QUEUE_ENABLED, CAPTURE_DEADLINE_MS } from "../lib/capture-features";
 
@@ -37,6 +37,7 @@ export default function D2RPage() {
   const [status, setStatus] = useState("");
   const [cameraStatus, setCameraStatus] = useState<"pending" | "granted" | "denied">("pending");
   const [permissionOpen, setPermissionOpen] = useState(true);
+  const [consentStatus, setConsentStatus] = useState<ConsentStatus | null>(null);
   const [started, setStarted] = useState(false);
   const [finished, setFinished] = useState(false);
   const [practiceOpen, setPracticeOpen] = useState(false);
@@ -88,6 +89,24 @@ export default function D2RPage() {
     };
     bootstrap();
   }, [token, router]);
+
+  useEffect(() => {
+    if (!token) {
+      setConsentStatus(null);
+      return;
+    }
+    let active = true;
+    getConsentStatus(token)
+      .then((consent) => {
+        if (active) setConsentStatus(consent);
+      })
+      .catch(() => {
+        if (active) setConsentStatus(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, [token]);
 
   const handlePhaseFinish = (phaseNumber: number, result: PhaseResult) => {
     if (finished) return;
@@ -575,6 +594,7 @@ export default function D2RPage() {
 
       {permissionOpen && (
         <CameraPermissionModal
+          consentStatus={consentStatus}
           onAllow={requestCamera}
           onDeny={async () => {
             stopCamera();

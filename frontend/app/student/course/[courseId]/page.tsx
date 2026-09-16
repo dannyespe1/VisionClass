@@ -26,7 +26,7 @@ import { apiFetch, BACKEND_URL } from "../../../lib/api";
 import { useAuth } from "../../../context/AuthContext";
 import { Button } from "../../../ui/button";
 import { CameraPermissionModal, PermissionSettings } from "../../CameraPermissionModal";
-import { recordConsent, revokeCaptureConsent } from "../../../lib/consent";
+import { getConsentStatus, recordConsent, revokeCaptureConsent, type ConsentStatus } from "../../../lib/consent";
 import { BoundedCaptureQueue } from "../../../lib/bounded-capture-queue.mjs";
 import {
   BROWSER_EXTRACTOR_ENABLED,
@@ -179,6 +179,7 @@ export default function CoursePage() {
   const [lessonInitialized, setLessonInitialized] = useState(false);
 
   const [permissionOpen, setPermissionOpen] = useState(true);
+  const [consentStatus, setConsentStatus] = useState<ConsentStatus | null>(null);
   const [permissionSettings, setPermissionSettings] = useState<PermissionSettings>({
     enableCamera: false,
     enableAttentionTracking: false,
@@ -215,6 +216,24 @@ export default function CoursePage() {
     // PR15 procesa en el navegador. No se consulta ni se usa el servicio de frames.
     setMlServiceStatus(BROWSER_EXTRACTOR_ENABLED ? "available" : null);
   }, [token, router]);
+
+  useEffect(() => {
+    if (!token) {
+      setConsentStatus(null);
+      return;
+    }
+    let active = true;
+    getConsentStatus(token)
+      .then((status) => {
+        if (active) setConsentStatus(status);
+      })
+      .catch(() => {
+        if (active) setConsentStatus(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, [token]);
 
   useEffect(() => {
     const init = async () => {
@@ -1460,6 +1479,7 @@ export default function CoursePage() {
 
       {permissionOpen && (
         <CameraPermissionModal
+          consentStatus={consentStatus}
           onAllow={(settings) => requestCamera(settings)}
           onDeny={async () => {
             stopCamera();

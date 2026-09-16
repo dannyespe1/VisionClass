@@ -2,10 +2,12 @@ import { useState, type ReactNode } from "react";
 import { Button } from "../ui/button";
 import { Switch } from "../ui/switch";
 import { AlertCircle, Camera, Database, FlaskConical, Shield } from "lucide-react";
+import type { ConsentStatus } from "../lib/consent";
 
 interface CameraPermissionModalProps {
   onAllow: (settings: PermissionSettings) => void | Promise<void>;
   onDeny: () => void | Promise<void>;
+  consentStatus: ConsentStatus | null;
 }
 
 export interface PermissionSettings {
@@ -16,10 +18,11 @@ export interface PermissionSettings {
   researchUse: boolean;
 }
 
-export function CameraPermissionModal({ onAllow, onDeny }: CameraPermissionModalProps) {
+export function CameraPermissionModal({ onAllow, onDeny, consentStatus }: CameraPermissionModalProps) {
   const [localProcessing, setLocalProcessing] = useState(false);
   const [derivedPersistence, setDerivedPersistence] = useState(false);
   const [researchUse, setResearchUse] = useState(false);
+  const consentTextApproved = Boolean(consentStatus?.enabled && consentStatus.text_approved);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
@@ -29,8 +32,12 @@ export function CameraPermissionModal({ onAllow, onDeny }: CameraPermissionModal
             <Camera className="h-8 w-8 text-blue-600" />
             <h2 className="text-2xl">Decisión sobre cámara y datos derivados</h2>
           </div>
-          <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
-            <p className="font-semibold">BORRADOR — PENDIENTE DE APROBACIÓN ÉTICA Y DE PRIVACIDAD</p>
+          <div className={`rounded-xl border p-4 text-sm ${consentTextApproved ? "border-emerald-300 bg-emerald-50 text-emerald-900" : "border-amber-300 bg-amber-50 text-amber-900"}`}>
+            <p className="font-semibold">
+              {consentTextApproved
+                ? `TEXTO DE CONSENTIMIENTO APROBADO — VERSIÓN ${consentStatus?.current_version}`
+                : "CONSENTIMIENTO NO DISPONIBLE — NO SE HABILITARÁ LA CÁMARA"}
+            </p>
             <p>La cámara es opcional. Puedes cursar y realizar las actividades sin activarla.</p>
           </div>
         </div>
@@ -46,7 +53,7 @@ export function CameraPermissionModal({ onAllow, onDeny }: CameraPermissionModal
         </div>
         <div className="flex gap-3 border-t bg-gray-50 p-8">
           <Button variant="outline" className="flex-1" onClick={onDeny}>Continuar sin cámara</Button>
-          <Button className="flex-1" disabled={!localProcessing || !derivedPersistence} onClick={() => onAllow({ enableCamera: true, enableAttentionTracking: true, saveAnalytics: true, shareWithInstructor: false, researchUse })}>
+          <Button className="flex-1" disabled={!consentTextApproved || !localProcessing || !derivedPersistence} onClick={() => onAllow({ enableCamera: true, enableAttentionTracking: true, saveAnalytics: true, shareWithInstructor: false, researchUse })}>
             Registrar decisiones y continuar
           </Button>
         </div>

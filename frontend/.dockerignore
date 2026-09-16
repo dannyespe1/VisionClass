@@ -1,0 +1,8 @@
+node_modules
+.next
+out
+build
+coverage
+public/vendor/mediapipe
+npm-debug.log*
+.env*

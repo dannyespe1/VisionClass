@@ -1,0 +1,54 @@
+{
+  "pr": "PR19",
+  "base_commit": "8a6c35a",
+  "verified_on": "2026-09-16",
+  "scope": "reproducible static and per-window baselines",
+  "data": {
+    "classification": "synthetic_only",
+    "real_participants_used": false,
+    "raw_media_used": false,
+    "model_performance_claim_allowed": false
+  },
+  "checks": [
+    {
+      "command": "python -m unittest discover -s ml -p test_*.py -v",
+      "environment": "vision_system-ml:latest mounted on isolated PR19 worktree",
+      "status": "PASS",
+      "result": "22 of 22 tests"
+    },
+    {
+      "command": "python -m compileall -q ml",
+      "environment": "vision_system-ml:latest mounted on isolated PR19 worktree",
+      "status": "PASS"
+    },
+    {
+      "check": "exact repeated baseline run",
+      "status": "PASS_BYTE_EQUIVALENT"
+    },
+    {
+      "check": "participant leakage negative test",
+      "status": "PASS_REJECTED"
+    },
+    {
+      "check": "versioned synthetic artifact matches executable pipeline",
+      "status": "PASS"
+    },
+    {
+      "check": "unclassified input rejection",
+      "status": "PASS_FAILS_CLOSED"
+    }
+  ],
+  "outputs": {
+    "feature_contract": "normalized-features-v1",
+    "split_policy": "participant-exclusive before windowing",
+    "no_observable_policy": "excluded from binary classification and retained in coverage denominator",
+    "threshold_policy": "validation only; minimum sensitivity 0.70 and specificity 0.80",
+    "interval_policy": "95% participant bootstrap",
+    "interpretation": "observable task orientation; not internal attention"
+  },
+  "limitations": [
+    "Synthetic scores demonstrate the pipeline only and are not evidence of model validity.",
+    "No approved real or pseudonymized dataset was available or required for this implementation PR.",
+    "Independent review of future real-data splits and results remains mandatory before promotion."
+  ]
+}

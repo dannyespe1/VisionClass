@@ -1,0 +1,102 @@
+{
+  "data_classification": "synthetic",
+  "evidence_use": "pipeline_reproducibility_only_not_model_performance",
+  "result": {
+    "feature_contract": "normalized-features-v1",
+    "heuristic_rule": {
+      "artifact_version": "centered-pose-rule-v1",
+      "ci95_participant_bootstrap": {
+        "auprc": [1.0, 1.0],
+        "auroc": [1.0, 1.0],
+        "balanced_accuracy": [1.0, 1.0],
+        "brier_score": [0.0625, 0.0625],
+        "coverage": [0.6666666666666666, 1.0],
+        "ece": [0.17857142857142855, 0.24999999999999997],
+        "macro_f1": [1.0, 1.0],
+        "prevalence": [0.5, 0.6666666666666666],
+        "sensitivity": [1.0, 1.0],
+        "specificity": [1.0, 1.0]
+      },
+      "metrics": {
+        "auprc": 1.0,
+        "auroc": 1.0,
+        "balanced_accuracy": 1.0,
+        "brier_score": 0.0625,
+        "confusion_matrix": {"fn": 0, "fp": 0, "tn": 3, "tp": 5},
+        "coverage": 0.8888888888888888,
+        "ece": 0.1875,
+        "eligible_windows": 8,
+        "macro_f1": 1.0,
+        "prevalence": 0.625,
+        "sensitivity": 1.0,
+        "specificity": 1.0,
+        "total_windows": 9
+      },
+      "threshold": 0.5
+    },
+    "interpretation": "observable_task_orientation_not_internal_attention",
+    "schema_version": "pr19-baselines-v1",
+    "split_policy": "participant_exclusive_assignment_before_windowing",
+    "splits": {
+      "test": ["syn-p02", "syn-p06", "syn-p12"],
+      "train": ["syn-p00", "syn-p03", "syn-p07", "syn-p08", "syn-p09", "syn-p10", "syn-p11", "syn-p13", "syn-p14"],
+      "validation": ["syn-p01", "syn-p04", "syn-p05"]
+    },
+    "threshold_selection": {
+      "selection_split": "validation",
+      "status": "PASS",
+      "threshold": 0.9872480317153989
+    },
+    "window_classifier": {
+      "artifact": {
+        "artifact_version": "window-logistic-v1",
+        "bias": 1.116610422807,
+        "config": {
+          "bootstrap_iterations": 200,
+          "calibration_bins": 5,
+          "iterations": 800,
+          "l2_penalty": 0.01,
+          "learning_rate": 0.1,
+          "minimum_sensitivity": 0.7,
+          "minimum_specificity": 0.8,
+          "schema_version": "pr19-baselines-v1",
+          "seed": 19017,
+          "test_fraction": 0.2,
+          "validation_fraction": 0.2
+        },
+        "feature_contract": "normalized-features-v1",
+        "feature_names": ["face_center_x", "face_center_y", "face_width", "face_height", "eye_span", "head_roll", "gaze_horizontal_proxy", "pose_available", "gaze_available"],
+        "mean": [0.6568, 0.5832, 0.35, 0.5, 0.2, 0.2492, 0.6432, 1.0, 1.0],
+        "scale": [0.1824, 0.1776, 1.0, 1.0, 1.0, 0.2256, 0.1776, 1.0, 1.0],
+        "weights": [-1.077541749567, -1.077541749567, 0.0, 0.0, -0.0, -1.077541749567, -1.077541749567, 0.0, 0.0]
+      },
+      "ci95_participant_bootstrap": {
+        "auprc": [1.0, 1.0],
+        "auroc": [1.0, 1.0],
+        "balanced_accuracy": [1.0, 1.0],
+        "brier_score": [0.00012794342938217035, 0.00013949985129860457],
+        "coverage": [0.6666666666666666, 1.0],
+        "ece": [0.008666532594394512, 0.011204911653479099],
+        "macro_f1": [1.0, 1.0],
+        "prevalence": [0.5, 0.6666666666666666],
+        "sensitivity": [1.0, 1.0],
+        "specificity": [1.0, 1.0]
+      },
+      "metrics": {
+        "auprc": 1.0,
+        "auroc": 1.0,
+        "balanced_accuracy": 1.0,
+        "brier_score": 0.00013661074581949601,
+        "confusion_matrix": {"fn": 0, "fp": 0, "tn": 3, "tp": 5},
+        "coverage": 0.8888888888888888,
+        "ece": 0.009177212055670339,
+        "eligible_windows": 8,
+        "macro_f1": 1.0,
+        "prevalence": 0.625,
+        "sensitivity": 1.0,
+        "specificity": 1.0,
+        "total_windows": 9
+      }
+    }
+  }
+}

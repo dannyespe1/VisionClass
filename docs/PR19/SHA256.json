@@ -1,0 +1,13 @@
+{
+  "algorithm": "SHA-256",
+  "generated_on": "2026-09-16",
+  "files": {
+    "ml/baselines.py": "074fdf3011c9dc69c076c331eefdc96deb34de9b303a2d293765f2c21a126629",
+    "ml/run_baselines.py": "84fdde7f60d4a7a7bc168ebf6f71cd0715a02a7c322791716f7bfd6efdf45f8e",
+    "ml/config/pr19_baselines_v1.json": "11ca6515eb8f198e5d6522ac35f8fe9274479ab0f299964aa44162703252ff1f",
+    "ml/test_baselines.py": "5110f91c8fbf551ba8d6c8eaf6808358c16350df4c7000c45eb7df7cef760e89",
+    "docs/PR19/README.md": "b7ef305cbe69b0cbc648abf3e7fea50deb676aa8116e789f2a384e3d66ccec2c",
+    "docs/PR19/SYNTHETIC_BASELINE_RESULT.json": "d1a8c226295306e15508c7617acbeb9680dcd5b195854178487893c8bb8d12fa",
+    "docs/PR19/VERIFICACION.json": "d5066316693d1291f5324500ed49492e3f0b0de27d561a26a03095d15d4da7b5"
+  }
+}

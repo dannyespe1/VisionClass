@@ -1,7 +1,9 @@
 # Aprobación de SLO y límites — PR39
 
-Fecha: 17 de septiembre de 2026  
-Fuente: confirmación explícita del propietario en la tarea de Codex  
+Fecha: 17 de septiembre de 2026
+
+Fuente: confirmación explícita del propietario en la tarea de Codex
+
 Estado: `APPROVED_BY_OWNER`
 
 ## Decisión

@@ -1,7 +1,9 @@
 {
   "gate": "G6",
   "date": "2026-09-17",
-  "status": "READY_FOR_OWNER_DECISION",
+  "status": "APPROVED_FOR_RELEASE_CANDIDATE_ENGINEERING",
+  "decision_owner": "pilot-owner",
+  "decision_source": "explicit_owner_confirmation",
   "pilot_activation": false,
   "checks": {
     "backend_full": {"status": "PASS", "tests": 133},
@@ -35,6 +37,6 @@
     "pr25_frontend_failures": 2,
     "human_and_independent_reviews": true,
     "candidate_soak_and_rollback": true,
-    "owner_gate_decision": true
+    "owner_gate_decision": false
   }
 }

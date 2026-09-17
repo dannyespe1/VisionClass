@@ -44,7 +44,7 @@
     "slo_independent_approval": "NOT_EXECUTED",
     "candidate_infrastructure_soak_test": "NOT_EXECUTED",
     "scheduled_backup_with_approved_retention": "NOT_EXECUTED",
-    "g6": "BLOCKED"
+    "g6": "APPROVED_FOR_RELEASE_CANDIDATE_ENGINEERING"
   },
   "safe_defaults": {
     "production_observability": false,

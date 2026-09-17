@@ -2,7 +2,7 @@
 
 Fecha: 17 de septiembre de 2026
 
-Estado: `READY_FOR_OWNER_DECISION`
+Estado: `APPROVED_FOR_RELEASE_CANDIDATE_ENGINEERING`
 
 ## Resultado técnico
 
@@ -24,6 +24,6 @@ Los SLO de PR39 están aprobados con disponibilidad de 99% y 432 minutos mensual
 - PR39: soak test en infraestructura candidata y revisión independiente del SLO;
 - triage formal de las vulnerabilidades npm y de los dos fallos PR25.
 
-## Decisión requerida
+## Decisión del propietario
 
-El `pilot-owner` debe decidir si autoriza PR40 exclusivamente para preparar un candidato con `pilot_release=false`, todos los módulos pendientes apagados y activación del piloto bloqueada. Esta revisión no aprueba G6 ni autoriza despliegue, producción, datos reales o piloto.
+El `pilot-owner` autorizó explícitamente preparar PR40 con `pilot_release=false`, todos los módulos pendientes apagados y sin activar el piloto. G6 queda aprobado únicamente para ingeniería del candidato; no autoriza despliegue, producción, datos reales o piloto.

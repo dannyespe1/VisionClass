@@ -1,0 +1,63 @@
+{
+  "pr": "PR36",
+  "scope": "privacy-protected teacher group dashboard",
+  "evidence_date": "2026-09-17",
+  "gate": "CONDITIONAL_PRODUCT_ENGINEERING_GO",
+  "feature_flags_default": "off",
+  "privacy_thresholds": {
+    "minimum_participants": 20,
+    "minimum_observable_participants": 20,
+    "minimum_observable_windows": 100,
+    "complementary_period_suppression": true
+  },
+  "checks": [
+    {
+      "name": "backend PR36 tests",
+      "command": "python manage.py test api.tests_pr36_teacher_group_dashboard --noinput",
+      "result": "PASS",
+      "summary": "9/9"
+    },
+    {
+      "name": "backend full suite",
+      "command": "python manage.py test api --noinput",
+      "result": "PASS",
+      "summary": "107/107"
+    },
+    {
+      "name": "django configuration and migration drift",
+      "command": "python manage.py check && python manage.py makemigrations --check --dry-run",
+      "result": "PASS",
+      "summary": "No issues; no changes detected"
+    },
+    {
+      "name": "frontend PR36 contracts",
+      "command": "node --test frontend/tests/pr36-teacher-group-dashboard.test.mjs",
+      "result": "PASS",
+      "summary": "5/5"
+    },
+    {
+      "name": "frontend typecheck and changed-file lint",
+      "result": "PASS"
+    },
+    {
+      "name": "frontend production build",
+      "command": "npm run build",
+      "result": "PASS"
+    },
+    {
+      "name": "frontend full contract suite",
+      "command": "node --test <all frontend *.test.mjs files>",
+      "result": "BASELINE_FAILURE",
+      "summary": "56/58; two inherited PR25 artifact/hash failures, outside PR36 diff"
+    },
+    {
+      "name": "independent reidentification review",
+      "result": "NOT_EXECUTED"
+    },
+    {
+      "name": "representative-teacher comprehension session",
+      "result": "NOT_EXECUTED"
+    }
+  ],
+  "promotion": "BLOCKED_PENDING_REIDENTIFICATION_REVIEW_COMPREHENSION_AND_REQUIRED_APPROVALS"
+}

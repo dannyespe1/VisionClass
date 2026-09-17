@@ -8,6 +8,8 @@ import { InicioProfesor } from "./components/InicioProfesor";
 import { MaterialesSection } from "./components/MaterialesSection";
 import { EstadisticasProfesor } from "./components/EstadisticasProfesor";
 import { EstadisticasProfesorAdvanced } from "./components/EstadisticasProfesorAdvanced";
+import { TeacherGroupDashboardSection } from "./components/TeacherGroupDashboardSection";
+import { TEACHER_GROUP_DASHBOARD_ENABLED } from "../lib/features";
 
 type TabId = "inicio" | "materiales" | "estadisticas";
 
@@ -68,8 +70,14 @@ export default function InstructorPage() {
 
         {activeTab === "estadisticas" && (
           <div className="space-y-8">
-            <EstadisticasProfesor />
-            <EstadisticasProfesorAdvanced />
+            {TEACHER_GROUP_DASHBOARD_ENABLED ? (
+              <TeacherGroupDashboardSection />
+            ) : (
+              <>
+                <EstadisticasProfesor />
+                <EstadisticasProfesorAdvanced />
+              </>
+            )}
           </div>
         )}
       </div>

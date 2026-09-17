@@ -1,3 +1,5 @@
 export const D2R_ENABLED = process.env.NEXT_PUBLIC_D2R_ENABLED?.trim().toLowerCase() === "true";
 export const STUDENT_ATTENTION_DASHBOARD_ENABLED =
   process.env.NEXT_PUBLIC_STUDENT_ATTENTION_DASHBOARD?.trim().toLowerCase() === "true";
+export const TEACHER_GROUP_DASHBOARD_ENABLED =
+  process.env.NEXT_PUBLIC_TEACHER_GROUP_DASHBOARD?.trim().toLowerCase() === "true";

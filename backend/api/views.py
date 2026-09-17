@@ -56,8 +56,10 @@ from .models import (
     Observation,
     ObservationWindow,
     InferredState,
+    LearningInteractionEvent,
     DeviceBudgetTelemetry,
 )
+from .group_dashboard import PERIOD_DAYS, build_teacher_group_dashboard
 
 
 class HealthLiveView(APIView):
@@ -1336,6 +1338,87 @@ class StudentEvidenceDashboardView(APIView):
                     "images_stored": False,
                     "teacher_access": False,
                 },
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class TeacherGroupDashboardView(APIView):
+    """Publish only privacy-protected activity aggregates for course owners."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        if not settings.TEACHER_GROUP_DASHBOARD:
+            return Response({"detail": "No disponible."}, status=status.HTTP_404_NOT_FOUND)
+        if request.user.role != User.ROLE_TEACHER:
+            return Response({"detail": "No autorizado."}, status=status.HTTP_403_FORBIDDEN)
+
+        period = request.query_params.get("period", "90d")
+        if period not in PERIOD_DAYS:
+            return Response({"detail": "Filtro no válido."}, status=status.HTTP_400_BAD_REQUEST)
+
+        owned_courses = Course.objects.filter(owner=request.user).exclude(title__iexact=BASELINE_TITLE)
+        course_id = request.query_params.get("course_id")
+        if course_id is not None:
+            try:
+                course_id = int(course_id)
+                if course_id <= 0:
+                    raise ValueError
+            except (TypeError, ValueError):
+                return Response({"detail": "Filtro no válido."}, status=status.HTTP_400_BAD_REQUEST)
+            if not owned_courses.filter(pk=course_id).exists():
+                return Response({"detail": "Curso no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+            selected_courses = owned_courses.filter(pk=course_id)
+        else:
+            selected_courses = owned_courses
+
+        inferred_states = InferredState.objects.order_by("inferred_at", "id")
+        events = list(
+            LearningInteractionEvent.objects.filter(
+                temporal_session__course_session__course__in=selected_courses,
+                window__isnull=False,
+            )
+            .select_related(
+                "temporal_session__participant",
+                "temporal_session__course_session__course",
+                "window",
+            )
+            .prefetch_related(models.Prefetch("window__inferred_states", queryset=inferred_states))
+            .order_by("occurred_at", "id")
+        )
+        activities = build_teacher_group_dashboard(
+            events,
+            period=period,
+            minimum_participants=settings.TEACHER_GROUP_DASHBOARD_MIN_PARTICIPANTS,
+            minimum_observable_windows=settings.TEACHER_GROUP_DASHBOARD_MIN_OBSERVABLE_WINDOWS,
+        )
+        return Response(
+            {
+                "schema_version": "teacher-group-dashboard-v1",
+                "state": "empty" if not activities else "ready",
+                "filters": {"period": period, "course_id": course_id},
+                "courses": list(owned_courses.order_by("title", "id").values("id", "title")),
+                "activities": activities,
+                "privacy": {
+                    "minimum_participants": settings.TEACHER_GROUP_DASHBOARD_MIN_PARTICIPANTS,
+                    "minimum_observable_windows": settings.TEACHER_GROUP_DASHBOARD_MIN_OBSERVABLE_WINDOWS,
+                    "individual_states_available": False,
+                    "exact_small_group_counts_available": False,
+                    "complementary_period_suppression": True,
+                },
+                "definitions": {
+                    "coverage": "Proporción de ventanas con evidencia observable suficiente.",
+                    "uncertainty": "Incertidumbre técnica media; no describe certeza sobre una persona.",
+                    "interval": "Intervalo descriptivo aproximado sobre promedios por participante.",
+                    "distribution": "Orientación se balancea por participante; no observable y desconocida usan ventanas.",
+                },
+                "limitations": [
+                    "Los agregados describen señales observables de una actividad, no estados mentales.",
+                    "No deben usarse para rankings, vigilancia individual ni decisiones automáticas.",
+                    "Una actividad suprimida no significa ausencia de dificultades ni de diferencias.",
+                    "Los intervalos son descriptivos y no establecen causalidad ni validez del constructo.",
+                ],
             },
             status=status.HTTP_200_OK,
         )

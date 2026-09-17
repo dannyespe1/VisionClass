@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { LogOut, Menu, User } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { apiFetch } from "../../lib/api";
+import { TEACHER_GROUP_DASHBOARD_ENABLED } from "../../lib/features";
 
 type TabId = "inicio" | "materiales" | "estadisticas";
 
@@ -36,7 +37,7 @@ export function InstructorNavbar({ activeTab, onTabChange }: Props) {
   const tabs: { id: TabId; label: string }[] = [
     { id: "inicio", label: "Inicio" },
     { id: "materiales", label: "Materiales" },
-    { id: "estadisticas", label: "Estadisticas" },
+    { id: "estadisticas", label: TEACHER_GROUP_DASHBOARD_ENABLED ? "Evidencia grupal" : "Estadisticas" },
   ];
 
   const handleLogout = () => {

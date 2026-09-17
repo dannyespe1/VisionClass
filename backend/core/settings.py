@@ -70,6 +70,13 @@ ML_EVENT_MAX_BYTES = int(os.environ.get('ML_EVENT_MAX_BYTES', '16384'))
 TEMPORAL_INFERENCE_API = os.environ.get('TEMPORAL_INFERENCE_API', 'False').strip().lower() == 'true'
 TEMPORAL_INFERENCE_MAX_BYTES = int(os.environ.get('TEMPORAL_INFERENCE_MAX_BYTES', '16384'))
 STUDENT_ATTENTION_DASHBOARD = os.environ.get('STUDENT_ATTENTION_DASHBOARD', 'False').strip().lower() == 'true'
+TEACHER_GROUP_DASHBOARD = os.environ.get('TEACHER_GROUP_DASHBOARD', 'False').strip().lower() == 'true'
+TEACHER_GROUP_DASHBOARD_MIN_PARTICIPANTS = max(
+    20, int(os.environ.get('TEACHER_GROUP_DASHBOARD_MIN_PARTICIPANTS', '20'))
+)
+TEACHER_GROUP_DASHBOARD_MIN_OBSERVABLE_WINDOWS = max(
+    100, int(os.environ.get('TEACHER_GROUP_DASHBOARD_MIN_OBSERVABLE_WINDOWS', '100'))
+)
 
 ALLOWED_HOSTS = [h.strip() for h in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if h.strip()]
 

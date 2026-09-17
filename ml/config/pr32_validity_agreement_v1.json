@@ -1,0 +1,13 @@
+{
+  "schema_version": "validity-agreement-v1",
+  "protocol_version": "P0.3-v0.2",
+  "manual_version": "observer-manual-v1",
+  "minimum_participants": 80,
+  "maximum_participants": 100,
+  "phase_count": 14,
+  "self_report_phases": [3, 6, 9, 12, 14],
+  "frozen_threshold": 0.5,
+  "calibration_bins": 10,
+  "bootstrap_iterations": 400,
+  "bootstrap_seed": 32017
+}

@@ -1,0 +1,533 @@
+{
+  "agreement": {
+    "all_categories": {
+      "ci95": {
+        "ci95_high": 0.32790197274005584,
+        "ci95_low": 0.22937101958320022,
+        "cluster": "participant",
+        "iterations_valid": 400
+      },
+      "expected_agreement": 0.5152726403061225,
+      "observed_agreement": 0.6526785714285714,
+      "pairs": 1120,
+      "participants": 80,
+      "value": 0.2834705497317619
+    },
+    "method": "cohen_kappa_with_participant_cluster_bootstrap",
+    "observable_binary_subset": {
+      "ci95": {
+        "ci95_high": 0.5017911735725257,
+        "ci95_low": 0.3798185161852,
+        "cluster": "participant",
+        "iterations_valid": 400
+      },
+      "expected_agreement": 0.6177881665449233,
+      "observed_agreement": 0.7859459459459459,
+      "pairs": 925,
+      "participants": 80,
+      "value": 0.4399596367305751
+    },
+    "prevalence": {
+      "observer_a": {
+        "attentive": {
+          "count": 756,
+          "proportion": 0.675
+        },
+        "distracted": {
+          "count": 258,
+          "proportion": 0.23035714285714284
+        },
+        "no_observable": {
+          "count": 52,
+          "proportion": 0.04642857142857143
+        },
+        "uncertain": {
+          "count": 54,
+          "proportion": 0.048214285714285716
+        }
+      },
+      "observer_b": {
+        "attentive": {
+          "count": 758,
+          "proportion": 0.6767857142857143
+        },
+        "distracted": {
+          "count": 264,
+          "proportion": 0.2357142857142857
+        },
+        "no_observable": {
+          "count": 47,
+          "proportion": 0.04196428571428571
+        },
+        "uncertain": {
+          "count": 51,
+          "proportion": 0.045535714285714284
+        }
+      }
+    },
+    "unit": "phase_nested_in_session_and_participant"
+  },
+  "analysis_unit": "participant_with_repeated_phases",
+  "convergent_validity": {
+    "interaction_count": {
+      "anchor_definition": "minimized event count; behavioral activity only",
+      "lags_in_phases": {
+        "-1": {
+          "association": "pearson_r",
+          "ci95": {
+            "ci95_high": 0.2109329179878383,
+            "ci95_low": 0.08602523807301997,
+            "cluster": "participant",
+            "iterations_valid": 400
+          },
+          "pairs": 974,
+          "participants": 80,
+          "temporal_interpretation": "exploratory_association_not_causality",
+          "value": 0.14813105133597587
+        },
+        "0": {
+          "association": "pearson_r",
+          "ci95": {
+            "ci95_high": 0.6108357867115272,
+            "ci95_low": 0.5420533835967011,
+            "cluster": "participant",
+            "iterations_valid": 400
+          },
+          "pairs": 1049,
+          "participants": 80,
+          "temporal_interpretation": "concurrent_association_not_construct_equivalence",
+          "value": 0.5758071359480836
+        },
+        "1": {
+          "association": "pearson_r",
+          "ci95": {
+            "ci95_high": 0.22989738705109167,
+            "ci95_low": 0.11149760838168579,
+            "cluster": "participant",
+            "iterations_valid": 400
+          },
+          "pairs": 974,
+          "participants": 80,
+          "temporal_interpretation": "exploratory_association_not_causality",
+          "value": 0.17757662258363224
+        }
+      }
+    },
+    "micro_assessment": {
+      "anchor_definition": "correct=1,incorrect=0; distal academic outcome",
+      "lags_in_phases": {
+        "-1": {
+          "association": "pearson_r",
+          "ci95": {
+            "ci95_high": 0.23358436908397945,
+            "ci95_low": -0.06557012844339344,
+            "cluster": "participant",
+            "iterations_valid": 400
+          },
+          "pairs": 150,
+          "participants": 80,
+          "temporal_interpretation": "exploratory_association_not_causality",
+          "value": 0.0840154725351264
+        },
+        "0": {
+          "association": "pearson_r",
+          "ci95": {
+            "ci95_high": 0.3833295314160183,
+            "ci95_low": 0.03963357946379292,
+            "cluster": "participant",
+            "iterations_valid": 400
+          },
+          "classification_and_calibration": {
+            "brier": 0.23690958488860667,
+            "calibration_bins": [
+              {
+                "lower": 0.3,
+                "n": 2,
+                "observed_rate": 0.0,
+                "predicted_mean": 0.384268,
+                "upper": 0.4
+              },
+              {
+                "lower": 0.4,
+                "n": 16,
+                "observed_rate": 0.625,
+                "predicted_mean": 0.4574223125,
+                "upper": 0.5
+              },
+              {
+                "lower": 0.5,
+                "n": 26,
+                "observed_rate": 0.5769230769230769,
+                "predicted_mean": 0.5462828076923076,
+                "upper": 0.6
+              },
+              {
+                "lower": 0.6,
+                "n": 30,
+                "observed_rate": 0.4666666666666667,
+                "predicted_mean": 0.6463378,
+                "upper": 0.7
+              },
+              {
+                "lower": 0.7,
+                "n": 33,
+                "observed_rate": 0.6666666666666666,
+                "predicted_mean": 0.7552285151515151,
+                "upper": 0.8
+              },
+              {
+                "lower": 0.8,
+                "n": 25,
+                "observed_rate": 0.64,
+                "predicted_mean": 0.84772476,
+                "upper": 0.9
+              },
+              {
+                "lower": 0.9,
+                "n": 18,
+                "observed_rate": 0.8888888888888888,
+                "predicted_mean": 0.9649871666666666,
+                "upper": 1.0
+              }
+            ],
+            "confusion": {
+              "fn": 10,
+              "fp": 49,
+              "tn": 8,
+              "tp": 83
+            },
+            "ece": 0.12747992666666666,
+            "sensitivity": 0.8924731182795699,
+            "specificity": 0.14035087719298245,
+            "threshold": 0.5,
+            "threshold_provenance": "frozen_configuration_not_selected_on_analysis_data"
+          },
+          "pairs": 150,
+          "participants": 80,
+          "temporal_interpretation": "concurrent_association_not_construct_equivalence",
+          "value": 0.1991584406094375
+        },
+        "1": {
+          "association": "pearson_r",
+          "ci95": {
+            "ci95_high": 0.28155880572006997,
+            "ci95_low": -0.19042155431832514,
+            "cluster": "participant",
+            "iterations_valid": 400
+          },
+          "pairs": 75,
+          "participants": 75,
+          "temporal_interpretation": "exploratory_association_not_causality",
+          "value": 0.027172050912894492
+        }
+      }
+    },
+    "observer_consensus": {
+      "anchor_definition": "both observers agree attentive=1 or distracted=0",
+      "lags_in_phases": {
+        "-1": {
+          "association": "pearson_r",
+          "ci95": {
+            "ci95_high": 0.24710402309918977,
+            "ci95_low": 0.09281372416716936,
+            "cluster": "participant",
+            "iterations_valid": 400
+          },
+          "pairs": 638,
+          "participants": 80,
+          "temporal_interpretation": "exploratory_association_not_causality",
+          "value": 0.17421291669056507
+        },
+        "0": {
+          "association": "pearson_r",
+          "ci95": {
+            "ci95_high": 0.6320821266251548,
+            "ci95_low": 0.5079324526414418,
+            "cluster": "participant",
+            "iterations_valid": 400
+          },
+          "classification_and_calibration": {
+            "brier": 0.12427341543780149,
+            "calibration_bins": [
+              {
+                "lower": 0.1,
+                "n": 3,
+                "observed_rate": 0.0,
+                "predicted_mean": 0.19010033333333334,
+                "upper": 0.2
+              },
+              {
+                "lower": 0.2,
+                "n": 17,
+                "observed_rate": 0.058823529411764705,
+                "predicted_mean": 0.26832464705882353,
+                "upper": 0.3
+              },
+              {
+                "lower": 0.3,
+                "n": 30,
+                "observed_rate": 0.13333333333333333,
+                "predicted_mean": 0.35458453333333334,
+                "upper": 0.4
+              },
+              {
+                "lower": 0.4,
+                "n": 79,
+                "observed_rate": 0.4810126582278481,
+                "predicted_mean": 0.45578682278481014,
+                "upper": 0.5
+              },
+              {
+                "lower": 0.5,
+                "n": 107,
+                "observed_rate": 0.7383177570093458,
+                "predicted_mean": 0.5509032990654206,
+                "upper": 0.6
+              },
+              {
+                "lower": 0.6,
+                "n": 123,
+                "observed_rate": 0.959349593495935,
+                "predicted_mean": 0.6474445772357723,
+                "upper": 0.7
+              },
+              {
+                "lower": 0.7,
+                "n": 141,
+                "observed_rate": 0.950354609929078,
+                "predicted_mean": 0.7474616099290781,
+                "upper": 0.8
+              },
+              {
+                "lower": 0.8,
+                "n": 94,
+                "observed_rate": 1.0,
+                "predicted_mean": 0.8456853936170213,
+                "upper": 0.9
+              },
+              {
+                "lower": 0.9,
+                "n": 81,
+                "observed_rate": 0.9753086419753086,
+                "predicted_mean": 0.9572209012345679,
+                "upper": 1.0
+              }
+            ],
+            "confusion": {
+              "fn": 43,
+              "fp": 42,
+              "tn": 86,
+              "tp": 504
+            },
+            "ece": 0.17149400592592592,
+            "sensitivity": 0.9213893967093236,
+            "specificity": 0.671875,
+            "threshold": 0.5,
+            "threshold_provenance": "frozen_configuration_not_selected_on_analysis_data"
+          },
+          "pairs": 675,
+          "participants": 80,
+          "temporal_interpretation": "concurrent_association_not_construct_equivalence",
+          "value": 0.5740792989551223
+        },
+        "1": {
+          "association": "pearson_r",
+          "ci95": {
+            "ci95_high": 0.2985152881969736,
+            "ci95_low": 0.14568170536335923,
+            "cluster": "participant",
+            "iterations_valid": 400
+          },
+          "pairs": 638,
+          "participants": 80,
+          "temporal_interpretation": "exploratory_association_not_causality",
+          "value": 0.21938082953072516
+        }
+      }
+    },
+    "self_report": {
+      "anchor_definition": "focused=1,distracted=0; unsure and omitted excluded",
+      "lags_in_phases": {
+        "-1": {
+          "association": "pearson_r",
+          "ci95": {
+            "ci95_high": 0.1862110178286364,
+            "ci95_low": 0.001465745370893065,
+            "cluster": "participant",
+            "iterations_valid": 400
+          },
+          "pairs": 328,
+          "participants": 80,
+          "temporal_interpretation": "exploratory_association_not_causality",
+          "value": 0.0865285856351067
+        },
+        "0": {
+          "association": "pearson_r",
+          "ci95": {
+            "ci95_high": 0.34007458612517844,
+            "ci95_low": 0.1499821451619165,
+            "cluster": "participant",
+            "iterations_valid": 400
+          },
+          "classification_and_calibration": {
+            "brier": 0.20690244012433023,
+            "calibration_bins": [
+              {
+                "lower": 0.1,
+                "n": 3,
+                "observed_rate": 0.6666666666666666,
+                "predicted_mean": 0.17077366666666666,
+                "upper": 0.2
+              },
+              {
+                "lower": 0.2,
+                "n": 14,
+                "observed_rate": 0.35714285714285715,
+                "predicted_mean": 0.2712512857142857,
+                "upper": 0.3
+              },
+              {
+                "lower": 0.3,
+                "n": 17,
+                "observed_rate": 0.6470588235294118,
+                "predicted_mean": 0.3621920588235294,
+                "upper": 0.4
+              },
+              {
+                "lower": 0.4,
+                "n": 37,
+                "observed_rate": 0.5945945945945946,
+                "predicted_mean": 0.4544302162162162,
+                "upper": 0.5
+              },
+              {
+                "lower": 0.5,
+                "n": 41,
+                "observed_rate": 0.6097560975609756,
+                "predicted_mean": 0.5462361463414634,
+                "upper": 0.6
+              },
+              {
+                "lower": 0.6,
+                "n": 54,
+                "observed_rate": 0.6666666666666666,
+                "predicted_mean": 0.6575831111111111,
+                "upper": 0.7
+              },
+              {
+                "lower": 0.7,
+                "n": 59,
+                "observed_rate": 0.7288135593220338,
+                "predicted_mean": 0.7470825762711865,
+                "upper": 0.8
+              },
+              {
+                "lower": 0.8,
+                "n": 57,
+                "observed_rate": 0.7719298245614035,
+                "predicted_mean": 0.8500528070175438,
+                "upper": 0.9
+              },
+              {
+                "lower": 0.9,
+                "n": 42,
+                "observed_rate": 0.9047619047619048,
+                "predicted_mean": 0.9625226428571428,
+                "upper": 1.0
+              }
+            ],
+            "confusion": {
+              "fn": 40,
+              "fp": 67,
+              "tn": 31,
+              "tp": 186
+            },
+            "ece": 0.07336617592592594,
+            "sensitivity": 0.8230088495575221,
+            "specificity": 0.3163265306122449,
+            "threshold": 0.5,
+            "threshold_provenance": "frozen_configuration_not_selected_on_analysis_data"
+          },
+          "pairs": 324,
+          "participants": 80,
+          "temporal_interpretation": "concurrent_association_not_construct_equivalence",
+          "value": 0.2433026734177201
+        },
+        "1": {
+          "association": "pearson_r",
+          "ci95": {
+            "ci95_high": 0.12754943521796983,
+            "ci95_low": -0.08863611779988433,
+            "cluster": "participant",
+            "iterations_valid": 400
+          },
+          "pairs": 255,
+          "participants": 80,
+          "temporal_interpretation": "exploratory_association_not_causality",
+          "value": 0.02997767456566781
+        }
+      }
+    }
+  },
+  "counts": {
+    "participants": 80,
+    "records": 1120,
+    "sessions": 80
+  },
+  "limitations": [
+    "synthetic_values_are_not_empirical_evidence",
+    "agreement_does_not_establish_construct_validity",
+    "window_counts_are_not_independent_sample_size",
+    "missingness_and_no_observable_must_not_be_imputed_as_negative",
+    "external_contexts_require_new_validation"
+  ],
+  "missingness_and_discrepancies": {
+    "interpretation": "describe_discrepancies_and_nonresponse_without_causal_attribution",
+    "model_vs_observer_consensus_disagreements": 85,
+    "no_observable": {
+      "count": 71,
+      "reasons": {
+        "synthetic_signal_insufficient": 71
+      }
+    },
+    "observer_disagreements": 389,
+    "self_report": {
+      "distracted": 104,
+      "focused": 245,
+      "omitted": 32,
+      "prompted": 400,
+      "unsure": 19
+    },
+    "self_report_vs_observer_comparable_rows": 235,
+    "self_report_vs_observer_consensus_disagreements": 84
+  },
+  "provenance": {
+    "code_version": "pr32-synthetic-v1",
+    "config_sha256": "3ae1df49c981938590bc81dc7f73063ff3cb630f32cba720b1246d944912d985",
+    "data_classification": "synthetic_development_fixture",
+    "input_sha256": "1369529b795eaee94a5465a5bd01f8efa1b93dda24167336d8e68e79a185b275",
+    "manual_version": "observer-manual-v1",
+    "protocol_version": "P0.3-v0.2",
+    "runtime": {
+      "python": "3.11.9"
+    },
+    "sample_sufficiency": {
+      "approved": false,
+      "reference": null,
+      "scope": "synthetic_numeric_check_only"
+    },
+    "schema_version": "validity-agreement-v1"
+  },
+  "required_ui_disclosure": [
+    "Associations do not prove causality or measure internal attention directly.",
+    "Self-report, visible orientation, interaction, micro-assessment and model inference are distinct constructs.",
+    "Show participant counts, paired-observation counts, uncertainty, missingness and no_observable with every estimate."
+  ],
+  "sample_size_gate": {
+    "maximum_participants": 100,
+    "minimum_participants": 80,
+    "note": "numeric sufficiency does not establish representativeness or approval",
+    "status": "PASS_NUMERIC_REQUIREMENT"
+  },
+  "status": "SYNTHETIC_ONLY_NOT_CONFIRMATORY"
+}

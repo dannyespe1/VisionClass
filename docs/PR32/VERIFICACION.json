@@ -1,0 +1,82 @@
+{
+  "pr": "PR32",
+  "base_commit": "501d1bd",
+  "verification_date": "2026-09-16",
+  "status": "TECHNICAL_PASS_SYNTHETIC_ONLY",
+  "data_classification": "synthetic_development_fixture",
+  "real_participant_data_used": false,
+  "sample_sufficiency": {
+    "numeric_fixture": "PASS_80_PARTICIPANTS",
+    "real_evidence": "NOT_SUPPLIED",
+    "confirmatory_analysis": "NOT_EXECUTED"
+  },
+  "results": {
+    "pr32_tests": {
+      "command": "python -m unittest ml.test_validity_agreement",
+      "passed": 10,
+      "failed": 0,
+      "status": "pass"
+    },
+    "pr23_pr32_related_tests": {
+      "command": "python -m unittest ml.test_validity_agreement ml.test_dynamic_evaluation",
+      "passed": 20,
+      "failed": 0,
+      "status": "pass"
+    },
+    "dependency_contract_tests": {
+      "command": "docker run --rm -e DEBUG=True -e DATABASE_URL=sqlite:////tmp/pr32-tests.sqlite3 -v <worktree>:/workspace -w /workspace/backend vision_system-backend:latest python manage.py test api.tests_pr29_self_report api.tests_pr30_learning_events api.tests_pr31_observer_annotation --noinput",
+      "passed": 10,
+      "failed": 0,
+      "status": "pass",
+      "note": "SQLite database existed only inside the disposable container."
+    },
+    "ml_suite_container": {
+      "command": "docker run --rm -v <worktree>:/workspace -w /workspace vision_system-ml:latest python -m unittest discover -s ml -p test_*.py",
+      "passed": 83,
+      "failed": 1,
+      "status": "pass_with_preexisting_failure",
+      "preexisting_failure": "ml.test_export_state_model_web.WebStateModelExportTests.test_cli_reproduces_versioned_files",
+      "baseline_evidence": "The same LF versus CRLF byte-comparison failure was reproduced on wave7-integracion before PR32.",
+      "non_blocking_warning": "ONNX Runtime could not discover a GPU in the CPU container."
+    },
+    "static_compilation": {
+      "command": "python -m compileall -q ml",
+      "status": "pass"
+    },
+    "artifact_validation": {
+      "records": 1120,
+      "participants": 80,
+      "sessions": 80,
+      "json": "valid",
+      "git_diff_check": "pass"
+    },
+    "independent_human_reproduction": {
+      "status": "not_executed",
+      "procedure": "docs/PR32/REPRODUCCION_INDEPENDIENTE.md",
+      "reason": "Requires a reviewer independent from the implementation."
+    }
+  },
+  "artifacts": {
+    "SYNTHETIC_VALIDITY_RECORDS.csv": {
+      "sha256": "e7c66d000f8a24f95d1439fd53c45a41da8868bf147b368a7cf7a80507a309c1"
+    },
+    "SYNTHETIC_VALIDITY_REPORT.json": {
+      "sha256": "ceff7ccc145de599f769095f8437159af8337ee108a1e27d0ac1f30bd1ee3e89"
+    }
+  },
+  "verified_controls": [
+    "participant_is_the_inferential_and_bootstrap_unit",
+    "complete_phase_matrix_and_sample_limits",
+    "opaque_identifier_format_and_monotonic_session_timestamps",
+    "cohen_kappa_with_prevalence_and_participant_cluster_interval",
+    "concurrent_and_lagged_associations_with_denominators",
+    "frozen_threshold_sensitivity_specificity_brier_and_ece",
+    "no_observable_probability_must_be_null",
+    "omitted_and_unsure_self_reports_remain_explicit",
+    "discrepancies_reported_without_causal_attribution",
+    "synthetic_results_cannot_be_confirmatory",
+    "real_execution_requires_sample_sufficiency_reference",
+    "future_ui_disclosure_is_machine_readable_and_documented"
+  ],
+  "rollback": "Withdraw affected conclusions, recalculate by participant or session, preserve prior hashes, and label the superseded output invalid or exploratory."
+}

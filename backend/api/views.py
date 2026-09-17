@@ -68,6 +68,7 @@ from .research_dashboard import (
     build_pseudonymized_export_rows,
     build_research_dashboard,
 )
+from .conservative_interventions import evaluate_intervention, public_policy
 
 
 class HealthLiveView(APIView):
@@ -1349,6 +1350,54 @@ class StudentEvidenceDashboardView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+
+class ConservativeInterventionView(APIView):
+    """Evaluate a self-only, server-side rule without changing ML eligibility."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        if not settings.CONSERVATIVE_INTERVENTIONS:
+            return Response({"detail": "No disponible."}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            session_id = int(request.data.get("session_id"))
+            if session_id <= 0:
+                raise ValueError
+        except (TypeError, ValueError):
+            _audit_identity(request, "intervention_evaluate", "denied", "invalid_session")
+            return Response({"detail": "Sesión no válida."}, status=status.HTTP_400_BAD_REQUEST)
+        source = Session.objects.filter(pk=session_id).first()
+        if source is None:
+            _audit_identity(request, "intervention_evaluate", "denied", "session_not_found")
+            return Response({"detail": "Sesión no encontrada."}, status=status.HTTP_404_NOT_FOUND)
+        _validate_course_session(request, source, "intervention_evaluate")
+        decision = evaluate_intervention(request.user, source)
+        _audit_identity(
+            request,
+            "intervention_evaluate",
+            "allowed" if decision.status == "presented" else "suppressed",
+            decision.reason_code,
+            "session",
+            source.id,
+        )
+        payload = {
+            "schema_version": "conservative-intervention-v1",
+            "state": decision.status,
+            "reason_code": decision.reason_code,
+            "policy": public_policy(),
+        }
+        if decision.status == "presented":
+            payload.update(
+                {
+                    "message": decision.message,
+                    "explanation": decision.explanation,
+                    "optional": True,
+                    "teacher_notified": False,
+                    "academic_decision": False,
+                }
+            )
+        return Response(payload, status=status.HTTP_200_OK)
 
 
 class TeacherGroupDashboardView(APIView):

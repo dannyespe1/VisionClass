@@ -5,3 +5,5 @@ export const TEACHER_GROUP_DASHBOARD_ENABLED =
   process.env.NEXT_PUBLIC_TEACHER_GROUP_DASHBOARD?.trim().toLowerCase() === "true";
 export const RESEARCH_DASHBOARD_ENABLED =
   process.env.NEXT_PUBLIC_RESEARCH_DASHBOARD?.trim().toLowerCase() === "true";
+export const CONSERVATIVE_INTERVENTIONS_ENABLED =
+  process.env.NEXT_PUBLIC_CONSERVATIVE_INTERVENTIONS?.trim().toLowerCase() === "true";

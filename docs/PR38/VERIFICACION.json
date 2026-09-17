@@ -1,0 +1,52 @@
+{
+  "pr": "PR38",
+  "scope": "conservative_rule_based_student_suggestions",
+  "approval": {
+    "status": "APPROVED_FOR_CONDITIONAL_ENGINEERING",
+    "date": "2026-09-17",
+    "source": "explicit_owner_confirmation",
+    "pilot_or_production": false
+  },
+  "automated": {
+    "django_check": "PASS",
+    "migration_drift": "PASS_NO_CHANGES",
+    "backend_pr38_tests": {
+      "status": "PASS",
+      "tests": 12
+    },
+    "backend_full_tests": {
+      "status": "PASS",
+      "tests": 129
+    },
+    "frontend_pr38_tests": {
+      "status": "PASS",
+      "tests": 4
+    },
+    "frontend_typecheck": "PASS",
+    "frontend_build": "PASS",
+    "frontend_new_files_lint": "PASS",
+    "frontend_modified_course_page_lint": {
+      "status": "BASELINE_FAILURE",
+      "errors": 11,
+      "warnings": 8,
+      "note": "Los 19 hallazgos existían en la página antes de PR38; no aparece un hallazgo nuevo en las líneas de PR38."
+    },
+    "frontend_full_tests": {
+      "status": "BASELINE_FAILURE",
+      "passed": 64,
+      "failed": 2,
+      "note": "Persisten exclusivamente los dos fallos heredados de PR25."
+    }
+  },
+  "manual": {
+    "representative_student_comprehension": "NOT_EXECUTED",
+    "independent_safety_review": "NOT_EXECUTED",
+    "pilot_enablement": "BLOCKED"
+  },
+  "safe_defaults": {
+    "backend_flag": false,
+    "frontend_flag": false,
+    "model_allowlist": "EMPTY",
+    "ml_allow_intervention_changed": false
+  }
+}

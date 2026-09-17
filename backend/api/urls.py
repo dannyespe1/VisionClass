@@ -49,6 +49,11 @@ urlpatterns = [
         name='student_evidence_dashboard',
     ),
     path(
+        'interventions/evaluate/',
+        views.ConservativeInterventionView.as_view(),
+        name='conservative_intervention',
+    ),
+    path(
         'teacher-group-dashboard/',
         views.TeacherGroupDashboardView.as_view(),
         name='teacher_group_dashboard',

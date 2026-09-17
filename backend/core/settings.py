@@ -88,6 +88,27 @@ RESEARCH_EXPORT_MAX_MINUTES = min(
     60, max(5, int(os.environ.get('RESEARCH_EXPORT_MAX_MINUTES', '30')))
 )
 RESEARCH_GRANT_MAX_DAYS = min(365, max(1, int(os.environ.get('RESEARCH_GRANT_MAX_DAYS', '90'))))
+CONSERVATIVE_INTERVENTIONS = os.environ.get('CONSERVATIVE_INTERVENTIONS', 'False').strip().lower() == 'true'
+INTERVENTION_POLICY_VERSION = 'conservative-interventions-v1'
+INTERVENTION_REQUIRED_WINDOWS = min(12, max(6, int(os.environ.get('INTERVENTION_REQUIRED_WINDOWS', '6'))))
+INTERVENTION_MAX_UNCERTAINTY = min(
+    0.30, max(0.0, float(os.environ.get('INTERVENTION_MAX_UNCERTAINTY', '0.30')))
+)
+INTERVENTION_COOLDOWN_SECONDS = max(600, int(os.environ.get('INTERVENTION_COOLDOWN_SECONDS', '600')))
+INTERVENTION_MAX_PER_SESSION = min(2, max(1, int(os.environ.get('INTERVENTION_MAX_PER_SESSION', '2'))))
+INTERVENTION_MAX_PER_DAY = min(4, max(1, int(os.environ.get('INTERVENTION_MAX_PER_DAY', '4'))))
+INTERVENTION_MIN_SESSION_SECONDS = max(300, int(os.environ.get('INTERVENTION_MIN_SESSION_SECONDS', '300')))
+INTERVENTION_MAX_WINDOW_GAP_SECONDS = min(
+    10, max(5, int(os.environ.get('INTERVENTION_MAX_WINDOW_GAP_SECONDS', '10')))
+)
+INTERVENTION_EVIDENCE_MAX_AGE_SECONDS = min(
+    30, max(10, int(os.environ.get('INTERVENTION_EVIDENCE_MAX_AGE_SECONDS', '30')))
+)
+INTERVENTION_ALLOWED_MODEL_REFERENCES = tuple(
+    value.strip()
+    for value in os.environ.get('INTERVENTION_ALLOWED_MODEL_REFERENCES', '').split(',')
+    if value.strip()
+)
 
 ALLOWED_HOSTS = [h.strip() for h in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if h.strip()]
 

@@ -47,6 +47,7 @@ import { constraintsForProfile, EDGE_PROFILES, EdgeProfileController } from "../
 import type { EdgeProfileName } from "../../../lib/edge-profiles.mjs";
 import { DeviceBudgetCollector } from "../../../lib/device-budget-telemetry.mjs";
 import { AdaptiveScheduler } from "../../../lib/adaptive-scheduler.mjs";
+import { CONSERVATIVE_INTERVENTIONS_ENABLED } from "../../../lib/features";
 import {
   Dialog,
   DialogContent,
@@ -118,6 +119,10 @@ const toYoutubeEmbed = (url: string) => {
 
 type CameraOption = { deviceId: string; label: string };
 type BatteryManagerLike = { level: number };
+type InterventionSuggestion = {
+  message: string;
+  explanation: string;
+};
 
 const browserFamilyFromUserAgent = (userAgent: string) => {
   if (/firefox/i.test(userAgent)) return "firefox";
@@ -215,6 +220,7 @@ export default function CoursePage() {
   const [edgeProfile, setEdgeProfile] = useState<EdgeProfileName>("low");
   const [availableCameras, setAvailableCameras] = useState<CameraOption[]>([]);
   const [selectedCameraId, setSelectedCameraId] = useState("");
+  const [interventionSuggestion, setInterventionSuggestion] = useState<InterventionSuggestion | null>(null);
 
   useEffect(() => {
     if (!token) {
@@ -564,6 +570,60 @@ export default function CoursePage() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (
+      !CONSERVATIVE_INTERVENTIONS_ENABLED ||
+      !token ||
+      !sessionId ||
+      !permissionSettings.enableCamera ||
+      !permissionSettings.enableAttentionTracking ||
+      !permissionSettings.saveAnalytics ||
+      currentMaterial?.materialType === "test"
+    ) {
+      setInterventionSuggestion(null);
+      return;
+    }
+    let cancelled = false;
+    let inFlight = false;
+    const evaluate = async () => {
+      if (inFlight) return;
+      inFlight = true;
+      try {
+        const decision = await apiFetch<{
+          state: "presented" | "suppressed";
+          message?: string;
+          explanation?: string;
+        }>(
+          "/api/interventions/evaluate/",
+          { method: "POST", body: JSON.stringify({ session_id: sessionId }) },
+          token,
+        );
+        if (!cancelled && decision.state === "presented" && decision.message && decision.explanation) {
+          setInterventionSuggestion({ message: decision.message, explanation: decision.explanation });
+        }
+      } catch {
+        // El panel sigue siendo utilizable; un fallo nunca genera una sugerencia local improvisada.
+        if (!cancelled) setInterventionSuggestion(null);
+      } finally {
+        inFlight = false;
+      }
+    };
+    void evaluate();
+    const interval = window.setInterval(evaluate, 30_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [
+    token,
+    sessionId,
+    currentMaterial?.id,
+    currentMaterial?.materialType,
+    permissionSettings.enableCamera,
+    permissionSettings.enableAttentionTracking,
+    permissionSettings.saveAnalytics,
+  ]);
 
   const stopCamera = () => {
     cameraGenerationRef.current += 1;
@@ -1267,6 +1327,30 @@ export default function CoursePage() {
           <div className="lg:col-span-2">
             {loading && <p className="text-sm text-slate-500">Cargando contenidos...</p>}
             {error && <p className="text-sm text-red-600">{error}</p>}
+
+            {interventionSuggestion && (
+              <section
+                className="mb-5 rounded-xl border border-cyan-200 bg-cyan-50 p-5 text-cyan-950"
+                role="status"
+                aria-live="polite"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h2 className="font-semibold">Sugerencia opcional</h2>
+                    <p className="mt-1">{interventionSuggestion.message}</p>
+                    <p className="mt-2 text-xs text-cyan-800">{interventionSuggestion.explanation}</p>
+                  </div>
+                  <button
+                    type="button"
+                    className="rounded border border-cyan-300 bg-white px-3 py-1 text-sm"
+                    onClick={() => setInterventionSuggestion(null)}
+                    aria-label="Ignorar sugerencia"
+                  >
+                    Ignorar
+                  </button>
+                </div>
+              </section>
+            )}
 
             {!currentMaterial && !loading && (
               <div className="bg-white rounded-xl shadow-sm p-8 text-slate-500">

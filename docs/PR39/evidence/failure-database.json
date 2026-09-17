@@ -1,0 +1,10 @@
+{
+  "environment": "isolated_compose",
+  "failure": "database",
+  "failure_detected_seconds": 0.036,
+  "probe_recovery_seconds": 0.3,
+  "real_data_used": false,
+  "recovery_seconds": 0.944,
+  "schema_version": "1.0",
+  "service": "db"
+}

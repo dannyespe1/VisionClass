@@ -1,0 +1,10 @@
+{
+  "environment": "isolated_compose",
+  "failure": "model",
+  "failure_detected_seconds": 1.004,
+  "probe_recovery_seconds": 0.54,
+  "real_data_used": false,
+  "recovery_seconds": 1.716,
+  "schema_version": "1.0",
+  "service": "ml"
+}

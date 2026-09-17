@@ -1,0 +1,10 @@
+{
+  "environment": "isolated_compose",
+  "failure": "redis_queue",
+  "failure_detected_seconds": 1.007,
+  "probe_recovery_seconds": 0.013,
+  "real_data_used": false,
+  "recovery_seconds": 0.692,
+  "schema_version": "1.0",
+  "service": "redis"
+}

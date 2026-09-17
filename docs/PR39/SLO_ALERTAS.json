@@ -1,0 +1,53 @@
+{
+  "schema_version": "1.0",
+  "status": "PROPOSED_NOT_APPROVED",
+  "measurement_window_days": 30,
+  "error_budget_policy": {
+    "availability_target": 0.995,
+    "budget_minutes_per_30_days": 216,
+    "freeze_condition": "burn_rate_6h >= 6 or remaining_budget <= 0",
+    "action": "freeze deployments and interventions; restore service before feature work",
+    "owner": "operations_owner"
+  },
+  "slos": [
+    {
+      "id": "api_availability",
+      "indicator": "successful non-5xx requests / valid requests",
+      "target": ">= 99.5% over 30 days",
+      "exclusions": ["synthetic probes", "client cancellations"],
+      "owner": "backend_owner"
+    },
+    {
+      "id": "api_latency",
+      "indicator": "server duration for non-streaming API routes",
+      "target": "p95 <= 750 ms and p99 <= 1500 ms over 30 days",
+      "owner": "backend_owner"
+    },
+    {
+      "id": "readiness_latency",
+      "indicator": "GET /api/health/ready/ duration",
+      "target": "p95 <= 500 ms over 30 days",
+      "owner": "operations_owner"
+    },
+    {
+      "id": "recovery",
+      "indicator": "time from controlled dependency recovery to healthy probe",
+      "target": "backend/Redis <= 120 s; database/model <= 300 s",
+      "owner": "incident_commander"
+    }
+  ],
+  "capacity_profiles": {
+    "target": {"requests": 200, "concurrency": 10, "required_error_rate": "<= 1%"},
+    "peak": {"requests": 400, "concurrency": 25, "required_error_rate": "<= 2%"}
+  },
+  "alerts": [
+    {"id": "availability_fast_burn", "condition": "error budget burn rate >= 14.4 for 1h", "owner": "on_call", "action": "page; stop rollout; follow instance/database/Redis runbook"},
+    {"id": "availability_slow_burn", "condition": "error budget burn rate >= 6 for 6h", "owner": "operations_owner", "action": "open incident; freeze releases; identify top failing route"},
+    {"id": "latency", "condition": "API p95 > 750 ms for 15m", "owner": "backend_owner", "action": "inspect route-level duration and dependency health; reduce load if needed"},
+    {"id": "database_readiness", "condition": "database readiness error for 2 probes", "owner": "database_owner", "action": "follow database runbook and block writes until consistency is verified"},
+    {"id": "redis_queue_readiness", "condition": "Redis readiness error for 2 probes", "owner": "queue_owner", "action": "follow Redis/queue runbook; preserve idempotency and inspect pending entries"},
+    {"id": "model_unavailable", "condition": "ML health fails for 2 probes", "owner": "ml_owner", "action": "disable online inference; keep unknown/no_observable fallback; follow model runbook"},
+    {"id": "privacy_signal", "condition": "raw media, direct identifier, or secret detected in telemetry", "owner": "privacy_officer", "action": "stop affected telemetry, restrict artifact, rotate exposed secret if applicable, follow privacy runbook"},
+    {"id": "backup_restore", "condition": "scheduled restoration or integrity verification fails", "owner": "database_owner", "action": "treat backup as unusable; preserve evidence and create a new validated backup"}
+  ]
+}

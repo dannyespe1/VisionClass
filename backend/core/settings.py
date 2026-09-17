@@ -89,6 +89,24 @@ RESEARCH_EXPORT_MAX_MINUTES = min(
 )
 RESEARCH_GRANT_MAX_DAYS = min(365, max(1, int(os.environ.get('RESEARCH_GRANT_MAX_DAYS', '90'))))
 CONSERVATIVE_INTERVENTIONS = os.environ.get('CONSERVATIVE_INTERVENTIONS', 'False').strip().lower() == 'true'
+PRODUCTION_OBSERVABILITY = os.environ.get('PRODUCTION_OBSERVABILITY', 'False').strip().lower() == 'true'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'operations_console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'visionclass.operations': {
+            'handlers': ['operations_console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
 INTERVENTION_POLICY_VERSION = 'conservative-interventions-v1'
 INTERVENTION_REQUIRED_WINDOWS = min(12, max(6, int(os.environ.get('INTERVENTION_REQUIRED_WINDOWS', '6'))))
 INTERVENTION_MAX_UNCERTAINTY = min(
@@ -137,6 +155,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'api.operational_observability.OperationalObservabilityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

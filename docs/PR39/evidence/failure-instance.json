@@ -1,0 +1,10 @@
+{
+  "environment": "isolated_compose",
+  "failure": "instance",
+  "failure_detected_seconds": 1.02,
+  "probe_recovery_seconds": 2.141,
+  "real_data_used": false,
+  "recovery_seconds": 3.39,
+  "schema_version": "1.0",
+  "service": "backend"
+}

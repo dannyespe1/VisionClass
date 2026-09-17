@@ -1,0 +1,20 @@
+{
+  "concurrency": 25,
+  "destination": "loopback",
+  "elapsed_seconds": 1.674,
+  "error_rate": 0.1,
+  "errors": 40,
+  "latency_percentiles_valid": false,
+  "latency_note": "Corrida de calibración previa a corregir el estimador; sólo errores y tasa de error se usan como evidencia.",
+  "latency_ms": {
+    "max": 1202.23,
+    "p50": 57.428,
+    "p95": 135.645,
+    "p99": 1114.648
+  },
+  "profile": "peak",
+  "requests": 400,
+  "schema_version": "1.0",
+  "successes": 360,
+  "throughput_rps": 238.979
+}

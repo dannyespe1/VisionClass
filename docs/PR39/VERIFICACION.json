@@ -1,0 +1,46 @@
+{
+  "pr": "PR39",
+  "scope": "production_observability_capacity_and_recovery",
+  "safe_environment": {
+    "compose_project": "visionclass-pr39-drill",
+    "destinations": "loopback_only",
+    "real_data_used": false,
+    "production_services_modified": false
+  },
+  "automated": {
+    "operations_unit_tests": {"status": "PASS", "tests": 7},
+    "backend_pr39_tests": {"status": "PASS", "tests": 4},
+    "backend_full_tests": {"status": "PASS", "tests": 133},
+    "django_check": "PASS",
+    "migration_drift": "PASS_NO_CHANGES",
+    "compose_config": "PASS",
+    "ml_compileall": "PASS",
+    "structured_correlation_log": "PASS",
+    "target_load": {"status": "PASS", "requests": 200, "errors": 0, "p95_ms": 21.395, "p99_ms": 576.649},
+    "peak_load": {"status": "PASS", "requests": 400, "errors": 0, "p95_ms": 37.422, "p99_ms": 39.605},
+    "backup_restore": {"status": "PASS", "rows": 100, "integrity_match": true},
+    "controlled_failures": {
+      "instance_recovery_seconds": 3.39,
+      "redis_queue_recovery_seconds": 0.692,
+      "database_recovery_seconds": 0.944,
+      "model_recovery_seconds": 1.716
+    }
+  },
+  "calibration": {
+    "status": "EXPECTED_FAILURE_RETAINED",
+    "server": "django_runserver",
+    "target_error_rate": 0.015,
+    "peak_error_rate": 0.1,
+    "resolution": "repeat with repository production server gunicorn"
+  },
+  "manual": {
+    "slo_independent_approval": "NOT_EXECUTED",
+    "candidate_infrastructure_soak_test": "NOT_EXECUTED",
+    "scheduled_backup_with_approved_retention": "NOT_EXECUTED",
+    "g6": "BLOCKED"
+  },
+  "safe_defaults": {
+    "production_observability": false,
+    "pilot_or_production_enablement": false
+  }
+}

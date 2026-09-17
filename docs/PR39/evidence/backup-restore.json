@@ -1,0 +1,8 @@
+{
+  "duration_seconds": 5.571,
+  "environment": "ephemeral_synthetic_postgres",
+  "integrity_match": true,
+  "real_data_used": false,
+  "rows": 100,
+  "schema_version": "1.0"
+}

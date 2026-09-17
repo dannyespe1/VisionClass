@@ -3,6 +3,13 @@
   "status": "TECHNICAL_PASS_WITH_BASELINE_FAILURES",
   "control": "adaptive_scheduler",
   "feature_flag": "NEXT_PUBLIC_ADAPTIVE_SCHEDULER=false",
+  "flag_owner": "frontend_edge_with_platform_and_privacy_review",
+  "flag_removal_condition": "PR28 reproducible, device-class limits accepted, and applicable G5 decision",
+  "recommended_split": {
+    "PR27A": "decision_policy_complete",
+    "PR27B": "hysteresis_and_local_fallback_complete",
+    "PR27C": "integration_telemetry_and_degradation_tests_complete"
+  },
   "real_data_used": false,
   "policy": {
     "latency_budget": "under_100_ms_bucket",
@@ -16,8 +23,9 @@
     "remote_inference_allowed": false
   },
   "checks": {
-    "wave7_targeted_tests": "PASS_13_OF_13",
+    "wave7_targeted_tests": "PASS_16_OF_16",
     "pr27_tests": "PASS_5_OF_5",
+    "pr27c_contract_tests": "PASS_3_OF_3",
     "frontend_suite": "PASS_43_OF_45_WITH_2_PREEXISTING_PR25_FAILURES",
     "frontend_typecheck": "PASS",
     "frontend_build": "PASS",
@@ -32,5 +40,6 @@
     "raw_media_transmission": false,
     "remote_inference": false,
     "bounded_local_decision_log": true
-  }
+  },
+  "rollback": "NEXT_PUBLIC_ADAPTIVE_SCHEDULER=false and NEXT_PUBLIC_EDGE_FIXED_PROFILE=balanced after target-device validation"
 }

@@ -23,3 +23,9 @@ export const DEVICE_BUDGET_TELEMETRY_ENABLED =
 
 export const ADAPTIVE_SCHEDULER_ENABLED =
   process.env.NEXT_PUBLIC_ADAPTIVE_SCHEDULER?.trim().toLowerCase() === "true";
+
+const configuredFixedProfile = process.env.NEXT_PUBLIC_EDGE_FIXED_PROFILE?.trim().toLowerCase();
+export const EDGE_FIXED_PROFILE: "low" | "balanced" | "high" | null =
+  configuredFixedProfile === "low" || configuredFixedProfile === "balanced" || configuredFixedProfile === "high"
+    ? configuredFixedProfile
+    : null;

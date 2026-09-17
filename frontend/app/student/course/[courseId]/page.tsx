@@ -33,6 +33,7 @@ import {
   BOUNDED_CAPTURE_QUEUE_ENABLED,
   CAPTURE_DEADLINE_MS,
   ADAPTIVE_SCHEDULER_ENABLED,
+  EDGE_FIXED_PROFILE,
   EDGE_PROFILES_ENABLED,
   DEVICE_BUDGET_TELEMETRY_ENABLED,
   NORMALIZED_FEATURES_V1_ENABLED,
@@ -736,7 +737,9 @@ export default function CoursePage() {
       const batteryLevel = await readBatteryLevel();
       batteryLevelRef.current = batteryLevel;
       if (generation !== cameraGenerationRef.current || pageIsHidden()) return;
-      const selection = EDGE_PROFILES_ENABLED
+      const selection = EDGE_FIXED_PROFILE
+        ? edgeProfileControllerRef.current.select(EDGE_FIXED_PROFILE, { source: "local", reason: "fixed_rollback_profile" })
+        : EDGE_PROFILES_ENABLED
         ? edgeProfileControllerRef.current.selectForEnvironment({
             hardwareConcurrency: navigator.hardwareConcurrency,
             deviceMemory: (navigator as Navigator & { deviceMemory?: number }).deviceMemory || 0,

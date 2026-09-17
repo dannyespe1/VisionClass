@@ -53,6 +53,18 @@ urlpatterns = [
         views.TeacherGroupDashboardView.as_view(),
         name='teacher_group_dashboard',
     ),
+    path('research-dashboard/', views.ResearchDashboardView.as_view(), name='research_dashboard'),
+    path('research-exports/', views.ResearchExportCreateView.as_view(), name='research_export_create'),
+    path(
+        'research-exports/download/',
+        views.ResearchExportDownloadView.as_view(),
+        name='research_export_download',
+    ),
+    path(
+        'research-exports/revoke/',
+        views.ResearchExportRevokeView.as_view(),
+        name='research_export_revoke',
+    ),
     path('exports/student-report/', views.StudentReportExportView.as_view(), name='student_report'),
     path('recommendations/difficulty/', views.RecommendDifficultyView.as_view(), name='recommend_difficulty'),
     path('ai/generate-test/', views.GenerateTestView.as_view(), name='generate_test'),

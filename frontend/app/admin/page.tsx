@@ -453,6 +453,7 @@ export default function AdminPage() {
                 <SelectContent>
                   <SelectItem value="estudiante">Estudiante</SelectItem>
                   <SelectItem value="profesor">Profesor</SelectItem>
+                  <SelectItem value="investigador">Investigador</SelectItem>
                   <SelectItem value="admin">Admin</SelectItem>
                 </SelectContent>
               </Select>
@@ -533,6 +534,7 @@ export default function AdminPage() {
                 <SelectContent>
                   <SelectItem value="estudiante">Estudiante</SelectItem>
                   <SelectItem value="profesor">Profesor</SelectItem>
+                  <SelectItem value="investigador">Investigador</SelectItem>
                   <SelectItem value="admin">Admin</SelectItem>
                 </SelectContent>
               </Select>

@@ -5,6 +5,9 @@ export function postLoginRoute(profile, options = {}) {
   if (profile.role === "teacher") {
     return "/instructor";
   }
+  if (profile.role === "researcher") {
+    return "/research";
+  }
   if (options.d2rEnabled && !options.hasD2RResult) {
     return "/d2r";
   }

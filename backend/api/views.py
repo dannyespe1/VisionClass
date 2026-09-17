@@ -25,6 +25,8 @@ from urllib.parse import urlparse, parse_qs
 import io
 import csv
 import uuid
+import hashlib
+import secrets
 from datetime import timedelta
 from google import genai
 from google.genai import types
@@ -50,6 +52,7 @@ from .models import (
     StudentReport,
     StudentNotification,
     ResearchAccessRequest,
+    ResearchExportLease,
     PrivacyPolicySetting,
     ConsentEvent,
     TemporalSession,
@@ -60,6 +63,11 @@ from .models import (
     DeviceBudgetTelemetry,
 )
 from .group_dashboard import PERIOD_DAYS, build_teacher_group_dashboard
+from .research_dashboard import (
+    PERIOD_DAYS as RESEARCH_PERIOD_DAYS,
+    build_pseudonymized_export_rows,
+    build_research_dashboard,
+)
 
 
 class HealthLiveView(APIView):
@@ -1387,6 +1395,7 @@ class TeacherGroupDashboardView(APIView):
             .prefetch_related(models.Prefetch("window__inferred_states", queryset=inferred_states))
             .order_by("occurred_at", "id")
         )
+
         activities = build_teacher_group_dashboard(
             events,
             period=period,
@@ -1422,6 +1431,274 @@ class TeacherGroupDashboardView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+
+def _active_research_grant(request):
+    if request.user.role != User.ROLE_RESEARCHER:
+        _audit_identity(request, "research_dashboard_access", "denied", "researcher_role_required")
+        raise PermissionDenied("No autorizado.")
+    grants = ResearchAccessRequest.objects.filter(
+        principal=request.user,
+        status=ResearchAccessRequest.STATUS_APPROVED,
+        ethics_approval=True,
+        expires_at__gt=timezone.now(),
+    ).exclude(purpose="")
+    grant_id = request.data.get("grant_id") if request.method == "POST" else request.query_params.get("grant_id")
+    if grant_id is not None:
+        try:
+            grant_id = int(grant_id)
+        except (TypeError, ValueError):
+            _audit_identity(request, "research_dashboard_access", "denied", "invalid_grant")
+            raise PermissionDenied("No autorizado.")
+        grants = grants.filter(pk=grant_id)
+    grant = grants.order_by("-requested_at", "-id").first()
+    if grant is None:
+        _audit_identity(request, "research_dashboard_access", "denied", "active_grant_required")
+        raise PermissionDenied("No autorizado.")
+    return grant
+
+
+def _research_filters(payload, grant, *, export=False):
+    period = payload.get("period", "90d")
+    cohort = payload.get("cohort") or None
+    model_value = payload.get("model") or None
+    profile = payload.get("profile") or None
+    if period not in RESEARCH_PERIOD_DAYS:
+        raise ValueError("invalid_period")
+    if cohort and cohort not in grant.cohort_scope:
+        raise ValueError("invalid_cohort")
+    if model_value and model_value not in grant.model_scope:
+        raise ValueError("invalid_model")
+    if model_value and model_value.count(":") != 1:
+        raise ValueError("invalid_model_format")
+    if profile and profile not in grant.profile_scope:
+        raise ValueError("invalid_profile")
+    if export and not all((cohort, model_value, profile)):
+        raise ValueError("export_requires_exact_scope")
+    return {"period": period, "cohort": cohort, "model": model_value, "profile": profile}
+
+
+class ResearchDashboardView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        if not settings.RESEARCH_DASHBOARD:
+            return Response({"detail": "No disponible."}, status=status.HTTP_404_NOT_FOUND)
+        grant = _active_research_grant(request)
+        try:
+            filters = _research_filters(request.query_params, grant)
+        except ValueError:
+            _audit_identity(
+                request, "research_dashboard_access", "denied", "filter_outside_grant", "research_grant", grant.id
+            )
+            return Response({"detail": "Filtro no autorizado."}, status=status.HTTP_400_BAD_REQUEST)
+
+        cells, _ = build_research_dashboard(
+            grant,
+            filters,
+            settings.RESEARCH_DASHBOARD_MIN_PARTICIPANTS,
+            settings.RESEARCH_DASHBOARD_MIN_OBSERVABLE_WINDOWS,
+        )
+        _audit_identity(
+            request, "research_dashboard_access", "allowed", "active_scoped_grant", "research_grant", grant.id
+        )
+        return Response(
+            {
+                "schema_version": "research-dashboard-v1",
+                "state": "empty" if not cells else "ready",
+                "grant": {
+                    "id": grant.id,
+                    "project": grant.project,
+                    "purpose": grant.purpose,
+                    "expires_at": grant.expires_at,
+                },
+                "filters": filters,
+                "filter_options": {
+                    "cohorts": grant.cohort_scope,
+                    "models": grant.model_scope,
+                    "profiles": grant.profile_scope,
+                    "periods": list(RESEARCH_PERIOD_DAYS),
+                },
+                "privacy": {
+                    "minimum_participants": settings.RESEARCH_DASHBOARD_MIN_PARTICIPANTS,
+                    "minimum_observable_windows": settings.RESEARCH_DASHBOARD_MIN_OBSERVABLE_WINDOWS,
+                    "demographic_vault_joined": False,
+                    "operational_identifiers_available": False,
+                },
+                "cells": cells,
+                "limitations": [
+                    "Las celdas describen evidencia observable y no miden estados mentales.",
+                    "Validez y equidad sólo se muestran si existe una referencia registrada; no se infieren del panel.",
+                    "Una celda suprimida representa evidencia insuficiente, no ausencia de diferencias.",
+                    "Los recursos son telemetría gruesa vigente y no identifican dispositivos.",
+                ],
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class ResearchExportCreateView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        if not settings.RESEARCH_DASHBOARD:
+            return Response({"detail": "No disponible."}, status=status.HTTP_404_NOT_FOUND)
+        grant = _active_research_grant(request)
+        purpose = str(request.data.get("purpose", "")).strip()
+        if purpose != grant.purpose:
+            _audit_identity(
+                request, "research_export_create", "denied", "purpose_outside_grant", "research_grant", grant.id
+            )
+            return Response({"detail": "Propósito no autorizado."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            filters = _research_filters(request.data, grant, export=True)
+            expires_in_minutes = int(request.data.get("expires_in_minutes", settings.RESEARCH_EXPORT_MAX_MINUTES))
+        except (TypeError, ValueError):
+            _audit_identity(
+                request, "research_export_create", "denied", "invalid_export_scope", "research_grant", grant.id
+            )
+            return Response({"detail": "Alcance de exportación no válido."}, status=status.HTTP_400_BAD_REQUEST)
+        if not 5 <= expires_in_minutes <= settings.RESEARCH_EXPORT_MAX_MINUTES:
+            _audit_identity(
+                request, "research_export_create", "denied", "invalid_export_expiry", "research_grant", grant.id
+            )
+            return Response({"detail": "Caducidad no válida."}, status=status.HTTP_400_BAD_REQUEST)
+
+        rows, reason = build_pseudonymized_export_rows(
+            grant,
+            filters,
+            settings.RESEARCH_DASHBOARD_MIN_PARTICIPANTS,
+            settings.RESEARCH_DASHBOARD_MIN_OBSERVABLE_WINDOWS,
+        )
+        if not rows:
+            _audit_identity(
+                request, "research_export_create", "denied", reason or "protected_sample_unavailable", "research_grant", grant.id
+            )
+            return Response({"detail": "La muestra protegida no es exportable."}, status=status.HTTP_409_CONFLICT)
+
+        token = secrets.token_urlsafe(32)
+        expires_at = min(
+            timezone.now() + timedelta(minutes=expires_in_minutes),
+            grant.expires_at,
+        )
+        lease = ResearchExportLease.objects.create(
+            grant=grant,
+            requested_by=request.user,
+            token_digest=hashlib.sha256(token.encode("utf-8")).hexdigest(),
+            purpose=purpose,
+            filters=filters,
+            row_count=len(rows),
+            expires_at=expires_at,
+        )
+        _audit_identity(
+            request, "research_export_create", "allowed", "protected_export_lease", "research_export", lease.export_id
+        )
+        return Response(
+            {
+                "export_id": lease.export_id,
+                "download_token": token,
+                "expires_at": lease.expires_at,
+                "one_time_download": True,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+def _csv_safe(value):
+    text_value = str(value)
+    return f"'{text_value}" if text_value.startswith(("=", "+", "-", "@")) else text_value
+
+
+class ResearchExportDownloadView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        if not settings.RESEARCH_DASHBOARD:
+            return Response({"detail": "No disponible."}, status=status.HTTP_404_NOT_FOUND)
+        if request.user.role != User.ROLE_RESEARCHER:
+            _audit_identity(request, "research_export_download", "denied", "researcher_role_required")
+            return Response({"detail": "No disponible."}, status=status.HTTP_404_NOT_FOUND)
+        token = str(request.data.get("download_token", ""))
+        if len(token) < 32:
+            _audit_identity(request, "research_export_download", "denied", "invalid_token")
+            return Response({"detail": "Enlace no válido."}, status=status.HTTP_404_NOT_FOUND)
+        digest = hashlib.sha256(token.encode("utf-8")).hexdigest()
+        lease = ResearchExportLease.objects.filter(
+            requested_by=request.user,
+            token_digest=digest,
+        ).select_related("grant").first()
+        if lease is None:
+            _audit_identity(request, "research_export_download", "denied", "invalid_token")
+            return Response({"detail": "Enlace no válido."}, status=status.HTTP_404_NOT_FOUND)
+        grant_inactive = (
+            lease.grant.status != ResearchAccessRequest.STATUS_APPROVED
+            or not lease.grant.ethics_approval
+            or lease.grant.principal_id != request.user.id
+        )
+        if grant_inactive or lease.revoked_at or lease.downloaded_at or lease.expires_at <= timezone.now() or lease.grant.expires_at <= timezone.now():
+            _audit_identity(
+                request, "research_export_download", "denied", "lease_inactive", "research_export", lease.export_id
+            )
+            return Response({"detail": "Enlace vencido o utilizado."}, status=status.HTTP_410_GONE)
+
+        rows, reason = build_pseudonymized_export_rows(
+            lease.grant,
+            lease.filters,
+            settings.RESEARCH_DASHBOARD_MIN_PARTICIPANTS,
+            settings.RESEARCH_DASHBOARD_MIN_OBSERVABLE_WINDOWS,
+        )
+        if not rows:
+            _audit_identity(
+                request, "research_export_download", "denied", reason or "protected_sample_unavailable", "research_export", lease.export_id
+            )
+            return Response({"detail": "La muestra ya no es exportable."}, status=status.HTTP_409_CONFLICT)
+
+        buffer = io.StringIO(newline="")
+        writer = csv.DictWriter(buffer, fieldnames=list(rows[0]))
+        writer.writeheader()
+        for row in rows:
+            writer.writerow({key: _csv_safe(value) for key, value in row.items()})
+        lease.downloaded_at = timezone.now()
+        lease.row_count = len(rows)
+        lease.save(update_fields=["downloaded_at", "row_count"])
+        _audit_identity(
+            request, "research_export_download", "allowed", "one_time_download", "research_export", lease.export_id
+        )
+        response = HttpResponse(buffer.getvalue(), content_type="text/csv; charset=utf-8")
+        response["Content-Disposition"] = f'attachment; filename="research-export-{lease.export_id}.csv"'
+        response["Cache-Control"] = "no-store"
+        return response
+
+
+class ResearchExportRevokeView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        if not settings.RESEARCH_DASHBOARD:
+            return Response({"detail": "No disponible."}, status=status.HTTP_404_NOT_FOUND)
+        if request.user.role != User.ROLE_RESEARCHER:
+            _audit_identity(request, "research_export_revoke", "denied", "researcher_role_required")
+            return Response({"detail": "No disponible."}, status=status.HTTP_404_NOT_FOUND)
+        export_id = request.data.get("export_id")
+        try:
+            export_id = uuid.UUID(str(export_id))
+        except (TypeError, ValueError, AttributeError):
+            _audit_identity(request, "research_export_revoke", "denied", "invalid_export_id")
+            return Response({"detail": "Exportación no encontrada."}, status=status.HTTP_404_NOT_FOUND)
+        lease = ResearchExportLease.objects.filter(
+            export_id=export_id,
+            requested_by=request.user,
+            revoked_at__isnull=True,
+        ).first()
+        if lease is None:
+            _audit_identity(request, "research_export_revoke", "denied", "export_not_found")
+            return Response({"detail": "Exportación no encontrada."}, status=status.HTTP_404_NOT_FOUND)
+        lease.revoked_at = timezone.now()
+        lease.save(update_fields=["revoked_at"])
+        _audit_identity(
+            request, "research_export_revoke", "allowed", "researcher_revoked", "research_export", lease.export_id
+        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class StudentReportExportView(APIView):

@@ -82,10 +82,18 @@ export function AdminUsersSection({
                         ? "bg-purple-100 text-purple-700"
                         : user.role === "profesor"
                           ? "bg-blue-100 text-blue-700"
+                          : user.role === "investigador"
+                            ? "bg-cyan-100 text-cyan-700"
                         : "bg-green-100 text-green-700"
                     }`}
                   >
-                    {user.role === "admin" ? "Admin" : user.role === "profesor" ? "Profesor" : "Estudiante"}
+                    {user.role === "admin"
+                      ? "Admin"
+                      : user.role === "profesor"
+                        ? "Profesor"
+                        : user.role === "investigador"
+                          ? "Investigador"
+                          : "Estudiante"}
                   </span>
                 </td>
                 <td className="py-4 px-6">{user.courses}</td>

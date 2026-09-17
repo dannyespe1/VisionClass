@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.conf import settings
 from rest_framework import serializers
 from django.http import HttpRequest, HttpResponseBadRequest
 from django.urls import NoReverseMatch, reverse
@@ -11,6 +12,7 @@ from dj_rest_auth.registration.serializers import SocialLoginSerializer
 from allauth.socialaccount.providers.oauth2.client import OAuth2Error
 import inspect
 import json
+from datetime import timedelta
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.utils import timezone
 from .event_contract import validate_attention_event_v2
@@ -548,6 +550,7 @@ class AdminUserSerializer(serializers.ModelSerializer):
             User.ROLE_STUDENT: "estudiante",
             User.ROLE_TEACHER: "profesor",
             User.ROLE_ADMIN: "admin",
+            User.ROLE_RESEARCHER: "investigador",
         }
         return mapping.get(role_value, role_value)
 
@@ -556,6 +559,7 @@ class AdminUserSerializer(serializers.ModelSerializer):
             "estudiante": User.ROLE_STUDENT,
             "profesor": User.ROLE_TEACHER,
             "admin": User.ROLE_ADMIN,
+            "investigador": User.ROLE_RESEARCHER,
         }
         return mapping.get(label, label)
 
@@ -688,9 +692,45 @@ class ResearchAccessRequestSerializer(serializers.ModelSerializer):
             'data_requested',
             'status',
             'ethics_approval',
+            'principal',
+            'purpose',
+            'expires_at',
+            'cohort_scope',
+            'model_scope',
+            'profile_scope',
             'requested_at',
         ]
         read_only_fields = ['id', 'requested_at']
+
+    def validate(self, attrs):
+        instance = self.instance
+        value = lambda name, default=None: attrs.get(name, getattr(instance, name, default) if instance else default)
+        if value('status') != ResearchAccessRequest.STATUS_APPROVED:
+            return attrs
+
+        errors = {}
+        principal = value('principal')
+        expires_at = value('expires_at')
+        if not value('ethics_approval', False):
+            errors['ethics_approval'] = 'Una concesión aprobada requiere aprobación ética.'
+        if principal is None or principal.role != User.ROLE_RESEARCHER:
+            errors['principal'] = 'La cuenta principal debe tener rol investigador.'
+        if len((value('purpose', '') or '').strip()) < 10:
+            errors['purpose'] = 'El propósito aprobado debe tener al menos 10 caracteres.'
+        if expires_at is None or expires_at <= timezone.now():
+            errors['expires_at'] = 'La concesión debe tener una caducidad futura.'
+        elif expires_at > timezone.now() + timedelta(days=settings.RESEARCH_GRANT_MAX_DAYS):
+            errors['expires_at'] = 'La caducidad supera el máximo permitido.'
+        for field in ('cohort_scope', 'model_scope', 'profile_scope'):
+            scope = value(field, [])
+            if not isinstance(scope, list) or not scope or any(not isinstance(item, str) or not item.strip() for item in scope):
+                errors[field] = 'Debe ser una lista no vacía de valores autorizados.'
+        model_scope = value('model_scope', [])
+        if isinstance(model_scope, list) and any(item.count(':') != 1 for item in model_scope if isinstance(item, str)):
+            errors['model_scope'] = 'Cada modelo debe usar el formato nombre:versión.'
+        if errors:
+            raise serializers.ValidationError(errors)
+        return attrs
 
 
 class PrivacyPolicySettingSerializer(serializers.ModelSerializer):

@@ -4,7 +4,7 @@ export interface AdminUser {
   id: number;
   name: string;
   email: string;
-  role: "estudiante" | "profesor" | "admin";
+  role: "estudiante" | "profesor" | "investigador" | "admin";
   status: "active" | "inactive";
   courses: number;
 }
@@ -57,6 +57,12 @@ export interface ResearchPermission {
   status: "pending" | "approved" | "rejected";
   date: string;
   ethics_approval: boolean;
+  principal: number | null;
+  purpose: string;
+  expires_at: string | null;
+  cohort_scope: string[];
+  model_scope: string[];
+  profile_scope: string[];
   requested_at: string;
 }
 

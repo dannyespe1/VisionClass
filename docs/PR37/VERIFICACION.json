@@ -1,0 +1,44 @@
+{
+  "pr": "PR37",
+  "scope": "research_dashboard_and_protected_export",
+  "automated": {
+    "django_check": "PASS",
+    "migration_drift": "PASS",
+    "backend_pr37_tests": {
+      "status": "PASS",
+      "tests": 10
+    },
+    "backend_full_tests": {
+      "status": "PASS",
+      "tests": 117,
+      "note": "El volumen /contracts fue montado para los fixtures compartidos de PR10."
+    },
+    "frontend_pr37_related_tests": {
+      "status": "PASS",
+      "tests": 14
+    },
+    "frontend_typecheck": "PASS",
+    "frontend_build": "PASS",
+    "frontend_changed_files_lint": "PASS",
+    "frontend_full_tests": {
+      "status": "BASELINE_FAILURE",
+      "passed": 60,
+      "failed": 2,
+      "note": "Persisten los dos fallos heredados de PR25 en pr25-local-temporal-model.test.mjs."
+    },
+    "frontend_full_lint": {
+      "status": "BASELINE_FAILURE",
+      "note": "La línea base contiene errores fuera de PR37; los archivos modificados por PR37 pasan ESLint."
+    }
+  },
+  "manual": {
+    "independent_access_export_review": "NOT_EXECUTED",
+    "comprehension_review": "NOT_EXECUTED",
+    "production_or_pilot_enablement": "BLOCKED"
+  },
+  "gate": {
+    "g5_product_engineering": "CONDITIONAL",
+    "feature_flags_default": "OFF",
+    "validity_or_fairness_claims": "NOT_AUTHORIZED"
+  }
+}

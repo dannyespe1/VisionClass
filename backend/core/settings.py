@@ -77,6 +77,17 @@ TEACHER_GROUP_DASHBOARD_MIN_PARTICIPANTS = max(
 TEACHER_GROUP_DASHBOARD_MIN_OBSERVABLE_WINDOWS = max(
     100, int(os.environ.get('TEACHER_GROUP_DASHBOARD_MIN_OBSERVABLE_WINDOWS', '100'))
 )
+RESEARCH_DASHBOARD = os.environ.get('RESEARCH_DASHBOARD', 'False').strip().lower() == 'true'
+RESEARCH_DASHBOARD_MIN_PARTICIPANTS = max(
+    20, int(os.environ.get('RESEARCH_DASHBOARD_MIN_PARTICIPANTS', '20'))
+)
+RESEARCH_DASHBOARD_MIN_OBSERVABLE_WINDOWS = max(
+    100, int(os.environ.get('RESEARCH_DASHBOARD_MIN_OBSERVABLE_WINDOWS', '100'))
+)
+RESEARCH_EXPORT_MAX_MINUTES = min(
+    60, max(5, int(os.environ.get('RESEARCH_EXPORT_MAX_MINUTES', '30')))
+)
+RESEARCH_GRANT_MAX_DAYS = min(365, max(1, int(os.environ.get('RESEARCH_GRANT_MAX_DAYS', '90'))))
 
 ALLOWED_HOSTS = [h.strip() for h in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if h.strip()]
 

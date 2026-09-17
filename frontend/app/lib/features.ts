@@ -3,3 +3,5 @@ export const STUDENT_ATTENTION_DASHBOARD_ENABLED =
   process.env.NEXT_PUBLIC_STUDENT_ATTENTION_DASHBOARD?.trim().toLowerCase() === "true";
 export const TEACHER_GROUP_DASHBOARD_ENABLED =
   process.env.NEXT_PUBLIC_TEACHER_GROUP_DASHBOARD?.trim().toLowerCase() === "true";
+export const RESEARCH_DASHBOARD_ENABLED =
+  process.env.NEXT_PUBLIC_RESEARCH_DASHBOARD?.trim().toLowerCase() === "true";

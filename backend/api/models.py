@@ -9,10 +9,12 @@ class User(AbstractUser):
     ROLE_STUDENT = 'student'
     ROLE_TEACHER = 'teacher'
     ROLE_ADMIN = 'admin'
+    ROLE_RESEARCHER = 'researcher'
     ROLE_CHOICES = [
         (ROLE_STUDENT, 'Estudiante'),
         (ROLE_TEACHER, 'Profesor'),
         (ROLE_ADMIN, 'Administrador'),
+        (ROLE_RESEARCHER, 'Investigador'),
     ]
 
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=ROLE_STUDENT)
@@ -352,6 +354,18 @@ class ResearchAccessRequest(models.Model):
     data_requested = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
     ethics_approval = models.BooleanField(default=False)
+    principal = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="research_access_grants",
+    )
+    purpose = models.TextField(blank=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    cohort_scope = models.JSONField(default=list, blank=True)
+    model_scope = models.JSONField(default=list, blank=True)
+    profile_scope = models.JSONField(default=list, blank=True)
     requested_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -359,6 +373,27 @@ class ResearchAccessRequest(models.Model):
 
     def __str__(self):
         return f"{self.project} ({self.status})"
+
+
+class ResearchExportLease(models.Model):
+    export_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    grant = models.ForeignKey(ResearchAccessRequest, on_delete=models.PROTECT, related_name="export_leases")
+    requested_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name="research_export_leases")
+    token_digest = models.CharField(max_length=64, unique=True)
+    purpose = models.TextField()
+    filters = models.JSONField(default=dict)
+    row_count = models.PositiveIntegerField(default=0)
+    expires_at = models.DateTimeField()
+    downloaded_at = models.DateTimeField(null=True, blank=True)
+    revoked_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+        indexes = [
+            models.Index(fields=["requested_by", "expires_at"], name="api_resexp_user_exp_idx"),
+            models.Index(fields=["expires_at"], name="api_resexp_exp_idx"),
+        ]
 
 
 class PrivacyPolicySetting(models.Model):

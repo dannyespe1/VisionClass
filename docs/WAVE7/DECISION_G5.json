@@ -1,0 +1,39 @@
+{
+  "schema_version": "g5-decision-v1",
+  "gate": "G5",
+  "evidence_cutoff": "2026-09-16",
+  "scope": "PR25-PR28_PR32_PR34",
+  "status": "CONDITIONAL_PRODUCT_ENGINEERING_GO",
+  "technical_evidence": {
+    "required_prs_integrated": true,
+    "final_ml_suite_passed_with_baseline_exception": true,
+    "final_ml_suite_passed": 93,
+    "preexisting_failures": 1,
+    "raw_media_transmitted": false
+  },
+  "scientific_and_privacy_evidence": {
+    "real_confirmatory_evaluation_executed": false,
+    "real_group_sufficiency_established": false,
+    "pr32_independent_review_executed": false,
+    "pr34_independent_review_executed": false,
+    "pr33_reidentification_review_executed": false,
+    "construct_validity_established": false,
+    "fairness_established": false,
+    "deployment_authorized": false
+  },
+  "decision": "CONDITIONAL_PRODUCT_ENGINEERING_GO",
+  "authorized_next_work": ["PR35", "PR36", "PR37"],
+  "conditions": [
+    "all dashboards disabled by default",
+    "synthetic empty or explicitly approved minimized data only",
+    "no demographic vault join or release",
+    "observation inference self-report and academic outcomes remain distinct",
+    "uncertainty coverage no_observable sources and limitations remain visible",
+    "no rankings diagnoses permanent labels or individual surveillance",
+    "pause revocation and data policy controls remain accessible",
+    "PR38 interventions remain blocked pending a separate safety approval",
+    "production pilot validity and fairness claims require a new evidence-based decision"
+  ],
+  "promotion_gate": "BLOCKED",
+  "pr34_gate": "BLOCK_PROMOTION_SYNTHETIC_ONLY"
+}

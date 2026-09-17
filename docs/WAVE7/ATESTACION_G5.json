@@ -1,0 +1,16 @@
+{
+  "schema_version": "g5-attestation-v1",
+  "gate": "G5",
+  "decision": "CONDITIONAL_PRODUCT_ENGINEERING_GO",
+  "decision_date": "2026-09-16",
+  "authorization_source": "project_owner_instruction_in_current_thread",
+  "evidence_status": "TECHNICAL_REVIEW_WITH_SYNTHETIC_EVIDENCE_ONLY",
+  "conditions_document": "docs/WAVE7/DECISION_G5.json",
+  "authorized_next_work": "PR35 engineering with feature flag off",
+  "production_authorized": false,
+  "pilot_authorized": false,
+  "intervention_authorized": false,
+  "construct_validity_claim_authorized": false,
+  "fairness_claim_authorized": false,
+  "external_reviewer_attestation_claimed": false
+}

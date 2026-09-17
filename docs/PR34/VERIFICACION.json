@@ -1,0 +1,81 @@
+{
+  "pr": "PR34",
+  "base_commit": "9de1df7",
+  "verification_date": "2026-09-16",
+  "status": "TECHNICAL_PASS_SYNTHETIC_ONLY_BLOCK_PROMOTION",
+  "data_classification": "synthetic_fairness_fixture",
+  "real_participant_or_demographic_data_used": false,
+  "results": {
+    "pr34_tests": {
+      "command": "python -m unittest ml.test_fairness_audit",
+      "passed": 10,
+      "failed": 0,
+      "status": "pass"
+    },
+    "pr23_pr32_pr34_related_tests": {
+      "command": "python -m unittest ml.test_fairness_audit ml.test_validity_agreement ml.test_dynamic_evaluation",
+      "passed": 30,
+      "failed": 0,
+      "status": "pass"
+    },
+    "ml_suite_container": {
+      "command": "docker run --rm -v <worktree>:/workspace -w /workspace vision_system-ml:latest python -m unittest discover -s ml -p test_*.py",
+      "passed": 93,
+      "failed": 1,
+      "status": "pass_with_preexisting_failure",
+      "preexisting_failure": "ml.test_export_state_model_web.WebStateModelExportTests.test_cli_reproduces_versioned_files",
+      "baseline_evidence": "The same LF versus CRLF byte-comparison failure was reproduced before PR32 and PR34.",
+      "non_blocking_warning": "ONNX Runtime could not discover a GPU in the CPU container."
+    },
+    "static_compilation": {
+      "command": "python -m compileall -q ml",
+      "status": "pass"
+    },
+    "artifact_validation": {
+      "records": 960,
+      "participants": 96,
+      "released_cells": 3,
+      "suppressed_cell_count_released": false,
+      "suppressed_scopes": ["group_b", "intersection"],
+      "released_scopes": ["overall", "group_a"],
+      "suppressed_fixture_value_present_in_report": false,
+      "gate": "BLOCK_PROMOTION_SYNTHETIC_ONLY",
+      "git_diff_check": "pass"
+    },
+    "real_group_sufficiency": {
+      "status": "not_supplied",
+      "effect": "real audit and deployment conclusions remain blocked"
+    },
+    "vault_release_and_reidentification_review": {
+      "status": "not_executed",
+      "effect": "real audit input is not authorized",
+      "dependency_context": "PR33 remains TECHNICAL_PASS_BLOCKED_PRIVACY with its feature flag off"
+    },
+    "independent_audit_review": {
+      "status": "not_executed",
+      "procedure": "docs/PR34/REVISION_INDEPENDIENTE.md"
+    }
+  },
+  "artifacts": {
+    "SYNTHETIC_FAIRNESS_RECORDS.csv": {
+      "sha256": "77971ff1f804defe3dfae8b54664da472f2ddd87e84cf2b26115db7e25fc8204"
+    },
+    "SYNTHETIC_FAIRNESS_REPORT.json": {
+      "sha256": "b55aa45ffc975ce2e158bec1477dc0fed12641ac5f7ef8e8db0adf709496c7ec"
+    }
+  },
+  "verified_controls": [
+    "participant_clustered_uncertainty",
+    "group_and_intersection_denominators",
+    "false_positive_false_negative_macro_f1_calibration_and_coverage",
+    "small_cell_primary_suppression",
+    "complementary_scope_suppression_prevents_subtraction",
+    "suppressed_selectors_and_denominators_absent",
+    "real_mode_does_not_copy_protected_records",
+    "common_and_group_specific_threshold_sensitivity_is_non_operational",
+    "gap_or_insufficient_evidence_blocks_promotion",
+    "synthetic_results_cannot_establish_fairness",
+    "real_mode_requires_separate_group_sufficiency_and_vault_release_approvals"
+  ],
+  "rollback": "Block promotion, withdraw risky releases, revoke access, preserve permitted audit hashes, expand the approved sample or restrict scope, and repeat an independently reviewed audit."
+}

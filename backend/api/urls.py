@@ -43,6 +43,11 @@ urlpatterns = [
     path('', include(router.urls)),
     path('me/', views.MeView.as_view(), name='me'),
     path('student-metrics/', views.StudentMetricsView.as_view(), name='student_metrics'),
+    path(
+        'student-evidence-dashboard/',
+        views.StudentEvidenceDashboardView.as_view(),
+        name='student_evidence_dashboard',
+    ),
     path('exports/student-report/', views.StudentReportExportView.as_view(), name='student_report'),
     path('recommendations/difficulty/', views.RecommendDifficultyView.as_view(), name='recommend_difficulty'),
     path('ai/generate-test/', views.GenerateTestView.as_view(), name='generate_test'),

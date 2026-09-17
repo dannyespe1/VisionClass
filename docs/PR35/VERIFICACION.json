@@ -1,0 +1,66 @@
+{
+  "pr": "PR35",
+  "scope": "student evidence dashboard",
+  "evidence_date": "2026-09-17",
+  "gate": "CONDITIONAL_PRODUCT_ENGINEERING_GO",
+  "feature_flags_default": "off",
+  "checks": [
+    {
+      "name": "backend targeted tests",
+      "command": "python manage.py test api.tests_pr35_student_dashboard --noinput",
+      "result": "PASS",
+      "summary": "7/7"
+    },
+    {
+      "name": "backend related regression",
+      "command": "python manage.py test api.tests_pr07_consent api.tests_pr08_temporal_schema api.tests_pr35_student_dashboard --noinput",
+      "result": "PASS",
+      "summary": "19/19"
+    },
+    {
+      "name": "backend full suite",
+      "command": "python manage.py test api --noinput",
+      "result": "PASS",
+      "summary": "98/98"
+    },
+    {
+      "name": "django configuration and migration drift",
+      "command": "python manage.py check && python manage.py makemigrations --check --dry-run",
+      "result": "PASS",
+      "summary": "No issues; no changes detected"
+    },
+    {
+      "name": "frontend PR35 contracts",
+      "command": "node --test frontend/tests/pr35-student-evidence-dashboard.test.mjs",
+      "result": "PASS",
+      "summary": "5/5"
+    },
+    {
+      "name": "frontend typecheck",
+      "command": "npm run typecheck",
+      "result": "PASS"
+    },
+    {
+      "name": "frontend changed-file lint",
+      "command": "npm run lint -- app/student/EvidenceDashboardSection.tsx app/student/page.tsx app/student/StudentNavbar.tsx app/lib/features.ts tests/pr35-student-evidence-dashboard.test.mjs",
+      "result": "PASS"
+    },
+    {
+      "name": "frontend production build",
+      "command": "npm run build",
+      "result": "PASS"
+    },
+    {
+      "name": "frontend full contract suite",
+      "command": "node --test <all frontend *.test.mjs files>",
+      "result": "BASELINE_FAILURE",
+      "summary": "51/53; two inherited PR25 artifact/hash failures, outside PR35 diff"
+    },
+    {
+      "name": "representative-user comprehension session",
+      "result": "NOT_EXECUTED",
+      "reason": "Requires recruited human participants and authorized facilitation"
+    }
+  ],
+  "promotion": "BLOCKED_PENDING_HUMAN_COMPREHENSION_AND_REQUIRED_REVIEWS"
+}

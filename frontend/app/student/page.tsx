@@ -7,8 +7,10 @@ import { useAuth } from "../context/AuthContext";
 import { InicioSection } from "./InicioSection";
 import { CursosSection } from "./CursosSection";
 import { EstadisticasSection } from "./EstadisticasSection";
+import { EvidenceDashboardSection } from "./EvidenceDashboardSection";
 import { AlertasSection } from "./AlertasSection";
 import { StudentNavbar } from "./StudentNavbar";
+import { STUDENT_ATTENTION_DASHBOARD_ENABLED } from "../lib/features";
 
 export default function StudentPage() {
   const router = useRouter();
@@ -66,7 +68,7 @@ export default function StudentPage() {
 
         {activeTab === "estadisticas" && (
           <section className="space-y-4">
-            <EstadisticasSection />
+            {STUDENT_ATTENTION_DASHBOARD_ENABLED ? <EvidenceDashboardSection /> : <EstadisticasSection />}
           </section>
         )}
 

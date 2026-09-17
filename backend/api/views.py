@@ -54,6 +54,8 @@ from .models import (
     ConsentEvent,
     TemporalSession,
     Observation,
+    ObservationWindow,
+    InferredState,
     DeviceBudgetTelemetry,
 )
 
@@ -1215,6 +1217,128 @@ class StudentMetricsView(APIView):
         if fmt in ["pdf", "xlsx", "csv"]:
             return _export_student_report(report.payload, fmt)
         return Response(metrics, status=status.HTTP_200_OK)
+
+
+class StudentEvidenceDashboardView(APIView):
+    """Return a minimized, self-only view of observable session evidence."""
+
+    permission_classes = [permissions.IsAuthenticated]
+    session_limit = 12
+
+    def get(self, request):
+        if not settings.STUDENT_ATTENTION_DASHBOARD:
+            return Response({"detail": "No disponible."}, status=status.HTTP_404_NOT_FOUND)
+        if request.user.role != User.ROLE_STUDENT:
+            return Response({"detail": "No autorizado."}, status=status.HTTP_403_FORBIDDEN)
+
+        inferred_states = InferredState.objects.order_by("inferred_at", "id")
+        temporal_sessions = list(
+            TemporalSession.objects.filter(participant=request.user)
+            .order_by("-started_at")
+            .prefetch_related(
+                models.Prefetch(
+                    "windows",
+                    queryset=ObservationWindow.objects.order_by("started_at", "id").prefetch_related(
+                        models.Prefetch("inferred_states", queryset=inferred_states)
+                    ),
+                )
+            )[: self.session_limit]
+        )
+        temporal_sessions.reverse()
+
+        sessions = []
+        has_partial_data = False
+        for position, temporal_session in enumerate(temporal_sessions, start=1):
+            windows = list(temporal_session.windows.all())
+            counts = {
+                InferredState.STATE_TASK_ORIENTED_EVIDENCE: 0,
+                InferredState.STATE_OFF_TASK_EVIDENCE: 0,
+                InferredState.STATE_NO_OBSERVABLE: 0,
+                InferredState.STATE_UNKNOWN: 0,
+            }
+            uncertainties = []
+
+            for window in windows:
+                states = list(window.inferred_states.all())
+                latest = states[-1] if states else None
+                state_value = latest.state if latest else InferredState.STATE_UNKNOWN
+                if state_value not in counts:
+                    # Legacy labels are intentionally not re-exposed as evidence.
+                    state_value = InferredState.STATE_UNKNOWN
+                counts[state_value] += 1
+                if (
+                    latest
+                    and state_value
+                    in {
+                        InferredState.STATE_TASK_ORIENTED_EVIDENCE,
+                        InferredState.STATE_OFF_TASK_EVIDENCE,
+                    }
+                    and latest.uncertainty is not None
+                ):
+                    uncertainties.append(latest.uncertainty)
+
+            total_windows = len(windows)
+            observable_windows = (
+                counts[InferredState.STATE_TASK_ORIENTED_EVIDENCE]
+                + counts[InferredState.STATE_OFF_TASK_EVIDENCE]
+            )
+            partial = total_windows == 0 or counts[InferredState.STATE_UNKNOWN] > 0
+            has_partial_data = has_partial_data or partial
+            sessions.append(
+                {
+                    "label": f"Sesión {position}",
+                    "started_at": temporal_session.started_at.isoformat(),
+                    "completed": temporal_session.ended_at is not None,
+                    "total_windows": total_windows,
+                    "observable_windows": observable_windows,
+                    "no_observable_windows": counts[InferredState.STATE_NO_OBSERVABLE],
+                    "unknown_windows": counts[InferredState.STATE_UNKNOWN],
+                    "task_oriented_evidence_windows": counts[
+                        InferredState.STATE_TASK_ORIENTED_EVIDENCE
+                    ],
+                    "off_task_evidence_windows": counts[InferredState.STATE_OFF_TASK_EVIDENCE],
+                    "coverage": round(observable_windows / total_windows, 4) if total_windows else None,
+                    "task_oriented_evidence_ratio": (
+                        round(counts[InferredState.STATE_TASK_ORIENTED_EVIDENCE] / observable_windows, 4)
+                        if observable_windows
+                        else None
+                    ),
+                    "mean_uncertainty": (
+                        round(sum(uncertainties) / len(uncertainties), 4) if uncertainties else None
+                    ),
+                    "partial": partial,
+                }
+            )
+
+        privacy = consent_status(request.user)
+        dashboard_state = "empty" if not sessions else ("partial" if has_partial_data else "ready")
+        return Response(
+            {
+                "schema_version": "student-evidence-dashboard-v1",
+                "state": dashboard_state,
+                "sessions": sessions,
+                "definitions": {
+                    "observation": "Señales técnicas derivadas y autorizadas; no incluyen imágenes ni video.",
+                    "inference": "Clasificación técnica con incertidumbre; no mide pensamientos ni diagnostica.",
+                    "no_observable": "La señal disponible no fue suficiente para interpretar esa ventana.",
+                    "self_report": "Lo que declaras sobre tu experiencia; se mantiene separado de la inferencia.",
+                },
+                "limitations": [
+                    "Los resultados describen evidencia de ventanas observables, no una capacidad personal.",
+                    "No deben usarse para rankings, diagnósticos ni decisiones automáticas.",
+                    "Una cobertura baja o datos parciales impiden interpretar una tendencia.",
+                ],
+                "privacy": {
+                    "capture_allowed": privacy["capture_allowed"],
+                    "consent_enabled": privacy["enabled"],
+                    "consent_text_approved": privacy["text_approved"],
+                    "current_version": privacy["current_version"],
+                    "images_stored": False,
+                    "teacher_access": False,
+                },
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 class StudentReportExportView(APIView):

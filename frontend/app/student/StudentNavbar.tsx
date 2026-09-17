@@ -5,6 +5,7 @@ import { LogOut, Menu, User } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 import { apiFetch } from "../lib/api";
+import { STUDENT_ATTENTION_DASHBOARD_ENABLED } from "../lib/features";
 
 type TabId = "inicio" | "cursos" | "estadisticas" | "alertas";
 
@@ -118,7 +119,7 @@ export function StudentNavbar({ activeTab, onTabChange }: Props) {
   const tabs: { id: TabId; label: string }[] = [
     { id: "inicio", label: "Inicio" },
     { id: "cursos", label: "Cursos" },
-    { id: "estadisticas", label: "Estadísticas" },
+    { id: "estadisticas", label: STUDENT_ATTENTION_DASHBOARD_ENABLED ? "Mi evidencia" : "Estadísticas" },
     { id: "alertas", label: "Alertas" },
   ];
 

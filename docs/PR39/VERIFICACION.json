@@ -34,6 +34,13 @@
     "resolution": "repeat with repository production server gunicorn"
   },
   "manual": {
+    "slo_owner_approval": {
+      "status": "APPROVED",
+      "date": "2026-09-17",
+      "availability_target": 0.99,
+      "maintenance_budget_minutes_per_30_days": 432,
+      "other_slo_and_limits": "APPROVED"
+    },
     "slo_independent_approval": "NOT_EXECUTED",
     "candidate_infrastructure_soak_test": "NOT_EXECUTED",
     "scheduled_backup_with_approved_retention": "NOT_EXECUTED",

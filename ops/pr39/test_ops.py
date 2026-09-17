@@ -27,10 +27,14 @@ class CommonTests(unittest.TestCase):
             common.write_json(path, {"ok": True})
             self.assertEqual(json.loads(path.read_text(encoding="utf-8")), {"ok": True})
 
-    def test_every_alert_has_owner_and_action_and_policy_is_not_self_approved(self):
+    def test_every_alert_has_owner_and_action_and_approval_is_traceable(self):
         policy_path = Path(__file__).resolve().parents[2] / "docs" / "PR39" / "SLO_ALERTAS.json"
         policy = json.loads(policy_path.read_text(encoding="utf-8"))
-        self.assertEqual(policy["status"], "PROPOSED_NOT_APPROVED")
+        self.assertEqual(policy["status"], "APPROVED_BY_OWNER")
+        self.assertEqual(policy["approval"]["source"], "explicit_owner_confirmation")
+        self.assertFalse(policy["approval"]["independent_review"])
+        self.assertEqual(policy["error_budget_policy"]["availability_target"], 0.99)
+        self.assertEqual(policy["error_budget_policy"]["budget_minutes_per_30_days"], 432)
         self.assertTrue(policy["alerts"])
         for alert in policy["alerts"]:
             self.assertTrue(alert["owner"])

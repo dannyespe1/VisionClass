@@ -1,10 +1,17 @@
 {
   "schema_version": "1.0",
-  "status": "PROPOSED_NOT_APPROVED",
+  "status": "APPROVED_BY_OWNER",
+  "approval": {
+    "date": "2026-09-17",
+    "source": "explicit_owner_confirmation",
+    "independent_review": false,
+    "scope": "SLO, capacity limits, alerts and recovery objectives"
+  },
   "measurement_window_days": 30,
   "error_budget_policy": {
-    "availability_target": 0.995,
-    "budget_minutes_per_30_days": 216,
+    "availability_target": 0.99,
+    "budget_minutes_per_30_days": 432,
+    "maintenance_window_policy": "planned maintenance consumes the monthly error budget",
     "freeze_condition": "burn_rate_6h >= 6 or remaining_budget <= 0",
     "action": "freeze deployments and interventions; restore service before feature work",
     "owner": "operations_owner"
@@ -13,7 +20,7 @@
     {
       "id": "api_availability",
       "indicator": "successful non-5xx requests / valid requests",
-      "target": ">= 99.5% over 30 days",
+      "target": ">= 99% over 30 days",
       "exclusions": ["synthetic probes", "client cancellations"],
       "owner": "backend_owner"
     },

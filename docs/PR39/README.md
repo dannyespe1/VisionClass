@@ -4,7 +4,7 @@
 
 PR39 prepara observabilidad, capacidad, recuperación y runbooks. `PRODUCTION_OBSERVABILITY` está apagado por defecto. Su activación sólo añade eventos JSON mínimos por solicitud y una cabecera de correlación; no registra cuerpo, query string, identidad, dirección IP ni parámetros concretos de ruta.
 
-Los SLO de `SLO_ALERTAS.json` son una propuesta técnica con estado `PROPOSED_NOT_APPROVED`. No habilitan producción ni piloto y requieren aprobación independiente antes de G6. Cada alerta declara propietario y acción.
+Los SLO de `SLO_ALERTAS.json` tienen aprobación explícita del propietario desde el 17 de septiembre de 2026. La disponibilidad aprobada es 99% en 30 días y la ventana de mantenimiento consume el presupuesto mensual de 432 minutos. Esta aprobación no habilita producción ni piloto ni sustituye la revisión independiente y el soak test exigidos antes de G6. Cada alerta declara propietario y acción.
 
 ## Ejecución aislada
 

@@ -1,0 +1,5432 @@
+{
+  "aggregates": [
+    {
+      "conditions": {
+        "cpu_load_percent_max": 90.784,
+        "cpu_load_percent_min": 87.372,
+        "temperature_c_max": 22.586,
+        "temperature_c_min": 21.849
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "capable",
+      "inference_location": "local_device",
+      "load": "busy",
+      "metrics": {
+        "balanced_accuracy": {
+          "ci95_high": 0.8147380964588731,
+          "ci95_low": 0.808064703541127,
+          "mean": 0.8114014,
+          "sd": 0.0038066735215933497,
+          "unit": "ratio"
+        },
+        "brier": {
+          "ci95_high": 0.21247328522572356,
+          "ci95_low": 0.21031351477427646,
+          "mean": 0.2113934,
+          "sd": 0.0012319881492936556,
+          "unit": "ratio"
+        },
+        "coverage": {
+          "ci95_high": 0.862699987851103,
+          "ci95_low": 0.8570500121488969,
+          "mean": 0.859875,
+          "sd": 0.0032228902401416053,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 90.61362597463466,
+          "ci95_low": 88.18117402536535,
+          "mean": 89.3974,
+          "sd": 1.3875326302469448,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": {
+          "ci95_high": 0.08754217921003812,
+          "ci95_low": 0.08219782078996188,
+          "mean": 0.08487,
+          "sd": 0.003048558347809664,
+          "unit": "ratio"
+        },
+        "energy_wh_approx": {
+          "ci95_high": 1.8035683301671204,
+          "ci95_low": 1.7203232698328794,
+          "mean": 1.7619458,
+          "sd": 0.047485105535314945,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 70.70810500127972,
+          "ci95_low": 69.37109499872027,
+          "mean": 70.0396,
+          "sd": 0.7626646051836953,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 89.95028513377434,
+          "ci95_low": 88.46211486622565,
+          "mean": 89.2062,
+          "sd": 0.8488902755951443,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 331.74028926129694,
+          "ci95_low": 322.2957107387031,
+          "mean": 327.01800000000003,
+          "sd": 5.387428468202617,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.418205728441926,
+          "ci95_low": 21.81179427155807,
+          "mean": 22.115,
+          "sd": 0.34591256120586306,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 0.22813369613233855,
+          "ci95_low": 0.22185670386766146,
+          "mean": 0.2249952,
+          "sd": 0.00358055647909651,
+          "unit": "ratio"
+        }
+      },
+      "profile": "balanced",
+      "repetitions": 5,
+      "scenario_id": "capable__balanced__busy__local_device"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 90.954,
+        "cpu_load_percent_min": 85.86,
+        "temperature_c_max": 22.692,
+        "temperature_c_min": 21.311
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "capable",
+      "inference_location": "local_fallback",
+      "load": "busy",
+      "metrics": {
+        "balanced_accuracy": null,
+        "brier": null,
+        "coverage": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 90.35668808908643,
+          "ci95_low": 86.85411191091357,
+          "mean": 88.6054,
+          "sd": 1.997958783358652,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": null,
+        "energy_wh_approx": {
+          "ci95_high": 0.222,
+          "ci95_low": 0.222,
+          "mean": 0.222,
+          "sd": 0.0,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 4.1444051851401635,
+          "ci95_low": 3.8367948148598363,
+          "mean": 3.9905999999999997,
+          "sd": 0.17546880064558484,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 5.180267908086607,
+          "ci95_low": 4.7957320919133934,
+          "mean": 4.988,
+          "sd": 0.21934903692517077,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 63.25,
+          "ci95_low": 63.25,
+          "mean": 63.25,
+          "sd": 0.0,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.345512702500148,
+          "ci95_low": 21.339687297499854,
+          "mean": 21.8426,
+          "sd": 0.5737484640502322,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 1.0,
+          "ci95_low": 1.0,
+          "mean": 1.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        }
+      },
+      "profile": "balanced",
+      "repetitions": 5,
+      "scenario_id": "capable__balanced__busy__local_fallback"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 25.903,
+        "cpu_load_percent_min": 24.563,
+        "temperature_c_max": 22.557,
+        "temperature_c_min": 21.417
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "capable",
+      "inference_location": "local_device",
+      "load": "idle",
+      "metrics": {
+        "balanced_accuracy": {
+          "ci95_high": 0.8150627440744113,
+          "ci95_low": 0.8097736559255887,
+          "mean": 0.8124182,
+          "sd": 0.003017030775447922,
+          "unit": "ratio"
+        },
+        "brier": {
+          "ci95_high": 0.21217859349083165,
+          "ci95_low": 0.21057980650916838,
+          "mean": 0.21137920000000002,
+          "sd": 0.0009119888705461323,
+          "unit": "ratio"
+        },
+        "coverage": {
+          "ci95_high": 0.8618524405170015,
+          "ci95_low": 0.8548803594829985,
+          "mean": 0.8583664,
+          "sd": 0.003977052840986635,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 25.638468449567192,
+          "ci95_low": 24.646331550432805,
+          "mean": 25.1424,
+          "sd": 0.5659401911863129,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": {
+          "ci95_high": 0.08748453101367087,
+          "ci95_low": 0.08344506898632911,
+          "mean": 0.0854648,
+          "sd": 0.002304212164710531,
+          "unit": "ratio"
+        },
+        "energy_wh_approx": {
+          "ci95_high": 0.946062949809646,
+          "ci95_low": 0.9112590501903539,
+          "mean": 0.928661,
+          "sd": 0.0198530319976572,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 37.067251443273804,
+          "ci95_low": 35.32434855672619,
+          "mean": 36.1958,
+          "sd": 0.9941962582910874,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 47.53298996224352,
+          "ci95_low": 44.37581003775648,
+          "mean": 45.9544,
+          "sd": 1.8009359511098668,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 335.2203099739785,
+          "ci95_low": 326.0572900260215,
+          "mean": 330.6388,
+          "sd": 5.226820276229145,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.330665366372262,
+          "ci95_low": 21.44933463362774,
+          "mean": 21.89,
+          "sd": 0.5027335278256257,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 0.23024413262656826,
+          "ci95_low": 0.22395266737343175,
+          "mean": 0.2270984,
+          "sd": 0.003588812240839576,
+          "unit": "ratio"
+        }
+      },
+      "profile": "balanced",
+      "repetitions": 5,
+      "scenario_id": "capable__balanced__idle__local_device"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 25.645,
+        "cpu_load_percent_min": 23.361,
+        "temperature_c_max": 22.248,
+        "temperature_c_min": 21.441
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "capable",
+      "inference_location": "local_fallback",
+      "load": "idle",
+      "metrics": {
+        "balanced_accuracy": null,
+        "brier": null,
+        "coverage": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 25.554050692894567,
+          "ci95_low": 23.829949307105434,
+          "mean": 24.692,
+          "sd": 0.9834714027362461,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": null,
+        "energy_wh_approx": {
+          "ci95_high": 0.117,
+          "ci95_low": 0.117,
+          "mean": 0.117,
+          "sd": 0.0,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 4.166805563785592,
+          "ci95_low": 3.828394436214408,
+          "mean": 3.9976,
+          "sd": 0.19303833816110202,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 5.20800087893857,
+          "ci95_low": 4.78519912106143,
+          "mean": 4.9966,
+          "sd": 0.24117690602543204,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 63.25,
+          "ci95_low": 63.25,
+          "mean": 63.25,
+          "sd": 0.0,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.147491555794975,
+          "ci95_low": 21.561708444205028,
+          "mean": 21.8546,
+          "sd": 0.3341456269353238,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 1.0,
+          "ci95_low": 1.0,
+          "mean": 1.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        }
+      },
+      "profile": "balanced",
+      "repetitions": 5,
+      "scenario_id": "capable__balanced__idle__local_fallback"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 57.386,
+        "cpu_load_percent_min": 53.618,
+        "temperature_c_max": 22.419,
+        "temperature_c_min": 21.431
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "capable",
+      "inference_location": "local_device",
+      "load": "nominal",
+      "metrics": {
+        "balanced_accuracy": {
+          "ci95_high": 0.8141675192021649,
+          "ci95_low": 0.8082848807978351,
+          "mean": 0.8112262,
+          "sd": 0.003355606979370506,
+          "unit": "ratio"
+        },
+        "brier": {
+          "ci95_high": 0.2124830718903708,
+          "ci95_low": 0.21162052810962922,
+          "mean": 0.2120518,
+          "sd": 0.0004920169712520007,
+          "unit": "ratio"
+        },
+        "coverage": {
+          "ci95_high": 0.8652443347895951,
+          "ci95_low": 0.8564612652104049,
+          "mean": 0.8608528,
+          "sd": 0.005010086895454006,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 57.680310724728116,
+          "ci95_low": 54.98048927527188,
+          "mean": 56.3304,
+          "sd": 1.5400470122694299,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": {
+          "ci95_high": 0.08862332578791676,
+          "ci95_low": 0.08616027421208325,
+          "mean": 0.0873918,
+          "sd": 0.001404987437666261,
+          "unit": "ratio"
+        },
+        "energy_wh_approx": {
+          "ci95_high": 1.216253032510721,
+          "ci95_low": 1.150236567489279,
+          "mean": 1.1832448,
+          "sd": 0.03765747536280148,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 48.08525942383138,
+          "ci95_low": 46.99394057616862,
+          "mean": 47.5396,
+          "sd": 0.6225161042093591,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 61.112428393016565,
+          "ci95_low": 59.74597160698344,
+          "mean": 60.4292,
+          "sd": 0.7794618015015226,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 329.73696679700413,
+          "ci95_low": 319.02943320299585,
+          "mean": 324.3832,
+          "sd": 6.107850251929891,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.162017606987774,
+          "ci95_low": 21.441582393012226,
+          "mean": 21.8018,
+          "sd": 0.41095462036580127,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 0.23068964864320746,
+          "ci95_low": 0.22238835135679252,
+          "mean": 0.226539,
+          "sd": 0.004735271692310803,
+          "unit": "ratio"
+        }
+      },
+      "profile": "balanced",
+      "repetitions": 5,
+      "scenario_id": "capable__balanced__nominal__local_device"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 57.222,
+        "cpu_load_percent_min": 53.408,
+        "temperature_c_max": 22.513,
+        "temperature_c_min": 21.344
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "capable",
+      "inference_location": "local_fallback",
+      "load": "nominal",
+      "metrics": {
+        "balanced_accuracy": null,
+        "brier": null,
+        "coverage": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 57.08832270020262,
+          "ci95_low": 53.80767729979738,
+          "mean": 55.448,
+          "sd": 1.8713638074944172,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": null,
+        "energy_wh_approx": {
+          "ci95_high": 0.15,
+          "ci95_low": 0.15,
+          "mean": 0.15,
+          "sd": 0.0,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 4.251990232293593,
+          "ci95_low": 3.9448097677064062,
+          "mean": 4.0984,
+          "sd": 0.1752235714737033,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 5.3148608750110355,
+          "ci95_low": 4.931139124988965,
+          "mean": 5.123,
+          "sd": 0.21888467283023744,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 63.25,
+          "ci95_low": 63.25,
+          "mean": 63.25,
+          "sd": 0.0,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.51415579713157,
+          "ci95_low": 21.637844202868433,
+          "mean": 22.076,
+          "sd": 0.4998704832254051,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 1.0,
+          "ci95_low": 1.0,
+          "mean": 1.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        }
+      },
+      "profile": "balanced",
+      "repetitions": 5,
+      "scenario_id": "capable__balanced__nominal__local_fallback"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 89.529,
+        "cpu_load_percent_min": 85.872,
+        "temperature_c_max": 22.7,
+        "temperature_c_min": 21.907
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "capable",
+      "inference_location": "local_device",
+      "load": "busy",
+      "metrics": {
+        "balanced_accuracy": {
+          "ci95_high": 0.8396564188086861,
+          "ci95_low": 0.8313895811913139,
+          "mean": 0.835523,
+          "sd": 0.004715615018213422,
+          "unit": "ratio"
+        },
+        "brier": {
+          "ci95_high": 0.20525614211793403,
+          "ci95_low": 0.20342545788206595,
+          "mean": 0.2043408,
+          "sd": 0.0010442689787597765,
+          "unit": "ratio"
+        },
+        "coverage": {
+          "ci95_high": 0.9149752382893874,
+          "ci95_low": 0.9058611617106125,
+          "mean": 0.9104182,
+          "sd": 0.00519890173017339,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 89.13213015938656,
+          "ci95_low": 86.55386984061344,
+          "mean": 87.843,
+          "sd": 1.4707054429762616,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": {
+          "ci95_high": 0.07435609075773125,
+          "ci95_low": 0.06983670924226876,
+          "mean": 0.0720964,
+          "sd": 0.0025779704808240127,
+          "unit": "ratio"
+        },
+        "energy_wh_approx": {
+          "ci95_high": 2.9339744154930667,
+          "ci95_low": 2.822141984506933,
+          "mean": 2.8780582,
+          "sd": 0.06379207086072691,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 114.78626148492842,
+          "ci95_low": 111.37173851507157,
+          "mean": 113.079,
+          "sd": 1.9477309875853004,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 147.56870115056552,
+          "ci95_low": 142.6444988494345,
+          "mean": 145.10660000000001,
+          "sd": 2.808890581706598,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 548.0227673504543,
+          "ci95_low": 530.8516326495459,
+          "mean": 539.4372000000001,
+          "sd": 9.794853173988894,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.471790288941527,
+          "ci95_low": 21.933009711058475,
+          "mean": 22.2024,
+          "sd": 0.30733418293447257,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 0.16777724009681635,
+          "ci95_low": 0.15557995990318366,
+          "mean": 0.1616786,
+          "sd": 0.006957639707544504,
+          "unit": "ratio"
+        }
+      },
+      "profile": "high",
+      "repetitions": 5,
+      "scenario_id": "capable__high__busy__local_device"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 89.877,
+        "cpu_load_percent_min": 86.105,
+        "temperature_c_max": 22.128,
+        "temperature_c_min": 21.698
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "capable",
+      "inference_location": "local_fallback",
+      "load": "busy",
+      "metrics": {
+        "balanced_accuracy": null,
+        "brier": null,
+        "coverage": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 90.01999243151009,
+          "ci95_low": 86.9376075684899,
+          "mean": 88.47879999999999,
+          "sd": 1.7582709404412022,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": null,
+        "energy_wh_approx": {
+          "ci95_high": 0.222,
+          "ci95_low": 0.222,
+          "mean": 0.222,
+          "sd": 0.0,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 4.112664792086204,
+          "ci95_low": 3.885335207913796,
+          "mean": 3.999,
+          "sd": 0.12967459273118992,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 5.14098229616939,
+          "ci95_low": 4.856617703830611,
+          "mean": 4.9988,
+          "sd": 0.16220881603661372,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 63.25,
+          "ci95_low": 63.25,
+          "mean": 63.25,
+          "sd": 0.0,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.10310860625379,
+          "ci95_low": 21.791291393746206,
+          "mean": 21.9472,
+          "sd": 0.17786849074526923,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 1.0,
+          "ci95_low": 1.0,
+          "mean": 1.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        }
+      },
+      "profile": "high",
+      "repetitions": 5,
+      "scenario_id": "capable__high__busy__local_fallback"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 24.042,
+        "cpu_load_percent_min": 21.258,
+        "temperature_c_max": 22.389,
+        "temperature_c_min": 21.719
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "capable",
+      "inference_location": "local_device",
+      "load": "idle",
+      "metrics": {
+        "balanced_accuracy": {
+          "ci95_high": 0.8406382765141985,
+          "ci95_low": 0.8330569234858015,
+          "mean": 0.8368476,
+          "sd": 0.004324597125744769,
+          "unit": "ratio"
+        },
+        "brier": {
+          "ci95_high": 0.20474573567756002,
+          "ci95_low": 0.20310266432243998,
+          "mean": 0.2039242,
+          "sd": 0.0009372498066150742,
+          "unit": "ratio"
+        },
+        "coverage": {
+          "ci95_high": 0.9087642522306355,
+          "ci95_low": 0.9051889477693645,
+          "mean": 0.9069766,
+          "sd": 0.002039444850933712,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 23.74030438831065,
+          "ci95_low": 21.554095611689352,
+          "mean": 22.6472,
+          "sd": 1.2470692442683378,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": {
+          "ci95_high": 0.072754803335556,
+          "ci95_low": 0.069803596664444,
+          "mean": 0.0712792,
+          "sd": 0.0016834435541472745,
+          "unit": "ratio"
+        },
+        "energy_wh_approx": {
+          "ci95_high": 1.565652753307674,
+          "ci95_low": 1.518834846692326,
+          "mean": 1.5422438,
+          "sd": 0.026706127999019235,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 61.07026239766407,
+          "ci95_low": 58.34853760233594,
+          "mean": 59.7094,
+          "sd": 1.5525412393878608,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 77.58874600917461,
+          "ci95_low": 73.8536539908254,
+          "mean": 75.72120000000001,
+          "sd": 2.130591748787178,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 550.2823886233199,
+          "ci95_low": 531.4892113766801,
+          "mean": 540.8858,
+          "sd": 10.72010761140019,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.2804837913742,
+          "ci95_low": 21.789116208625803,
+          "mean": 22.0348,
+          "sd": 0.28028860126662203,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 0.1663862554214919,
+          "ci95_low": 0.1622193445785081,
+          "mean": 0.1643028,
+          "sd": 0.002376912219666517,
+          "unit": "ratio"
+        }
+      },
+      "profile": "high",
+      "repetitions": 5,
+      "scenario_id": "capable__high__idle__local_device"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 25.409,
+        "cpu_load_percent_min": 22.726,
+        "temperature_c_max": 22.692,
+        "temperature_c_min": 21.909
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "capable",
+      "inference_location": "local_fallback",
+      "load": "idle",
+      "metrics": {
+        "balanced_accuracy": null,
+        "brier": null,
+        "coverage": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 24.550843883563477,
+          "ci95_low": 22.67555611643652,
+          "mean": 23.6132,
+          "sd": 1.0697119705789961,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": null,
+        "energy_wh_approx": {
+          "ci95_high": 0.117,
+          "ci95_low": 0.117,
+          "mean": 0.117,
+          "sd": 0.0,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 4.216512609317496,
+          "ci95_low": 3.892687390682504,
+          "mean": 4.0546,
+          "sd": 0.18471816369810515,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 5.270573583019128,
+          "ci95_low": 4.865826416980872,
+          "mean": 5.0682,
+          "sd": 0.23087810636784067,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 63.25,
+          "ci95_low": 63.25,
+          "mean": 63.25,
+          "sd": 0.0,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.62228015486169,
+          "ci95_low": 21.994519845138306,
+          "mean": 22.3084,
+          "sd": 0.358090491356584,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 1.0,
+          "ci95_low": 1.0,
+          "mean": 1.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        }
+      },
+      "profile": "high",
+      "repetitions": 5,
+      "scenario_id": "capable__high__idle__local_fallback"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 57.673,
+        "cpu_load_percent_min": 53.122,
+        "temperature_c_max": 22.335,
+        "temperature_c_min": 21.525
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "capable",
+      "inference_location": "local_device",
+      "load": "nominal",
+      "metrics": {
+        "balanced_accuracy": {
+          "ci95_high": 0.8396876481163661,
+          "ci95_low": 0.8323843518836339,
+          "mean": 0.836036,
+          "sd": 0.004165986437807967,
+          "unit": "ratio"
+        },
+        "brier": {
+          "ci95_high": 0.20465297468969657,
+          "ci95_low": 0.20314822531030347,
+          "mean": 0.20390060000000002,
+          "sd": 0.0008583474238325604,
+          "unit": "ratio"
+        },
+        "coverage": {
+          "ci95_high": 0.9122239560603493,
+          "ci95_low": 0.9035520439396507,
+          "mean": 0.907888,
+          "sd": 0.004946679846118997,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 56.71222108884638,
+          "ci95_low": 53.73657891115363,
+          "mean": 55.2244,
+          "sd": 1.6973821903154283,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": {
+          "ci95_high": 0.0717624226098271,
+          "ci95_low": 0.0695691773901729,
+          "mean": 0.0706658,
+          "sd": 0.0012510830108350141,
+          "unit": "ratio"
+        },
+        "energy_wh_approx": {
+          "ci95_high": 1.961900873116022,
+          "ci95_low": 1.876312726883978,
+          "mean": 1.9191068,
+          "sd": 0.04882166149057199,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 77.85441467824697,
+          "ci95_low": 75.46798532175305,
+          "mean": 76.66120000000001,
+          "sd": 1.3612801695463017,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 99.7908936646387,
+          "ci95_low": 95.8907063353613,
+          "mean": 97.8408,
+          "sd": 2.224766324808067,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 547.4949516234166,
+          "ci95_low": 533.4006483765833,
+          "mean": 540.4477999999999,
+          "sd": 8.039750039646753,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.160626589027572,
+          "ci95_low": 21.470573410972428,
+          "mean": 21.8156,
+          "sd": 0.3936239321992505,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 0.16706614878190476,
+          "ci95_low": 0.15848945121809524,
+          "mean": 0.1627778,
+          "sd": 0.004892367034473191,
+          "unit": "ratio"
+        }
+      },
+      "profile": "high",
+      "repetitions": 5,
+      "scenario_id": "capable__high__nominal__local_device"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 54.548,
+        "cpu_load_percent_min": 53.154,
+        "temperature_c_max": 22.693,
+        "temperature_c_min": 21.965
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "capable",
+      "inference_location": "local_fallback",
+      "load": "nominal",
+      "metrics": {
+        "balanced_accuracy": null,
+        "brier": null,
+        "coverage": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 54.449322597316275,
+          "ci95_low": 53.52867740268373,
+          "mean": 53.989000000000004,
+          "sd": 0.525159499580841,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": null,
+        "energy_wh_approx": {
+          "ci95_high": 0.15,
+          "ci95_low": 0.15,
+          "mean": 0.15,
+          "sd": 0.0,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 4.1861377741229395,
+          "ci95_low": 3.841862225877061,
+          "mean": 4.014,
+          "sd": 0.19638355328285517,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 5.232799939497666,
+          "ci95_low": 4.802800060502334,
+          "mean": 5.0178,
+          "sd": 0.24528289789547073,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 63.25,
+          "ci95_low": 63.25,
+          "mean": 63.25,
+          "sd": 0.0,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.615381190704433,
+          "ci95_low": 21.99901880929557,
+          "mean": 22.3072,
+          "sd": 0.3515888223479237,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 1.0,
+          "ci95_low": 1.0,
+          "mean": 1.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        }
+      },
+      "profile": "high",
+      "repetitions": 5,
+      "scenario_id": "capable__high__nominal__local_fallback"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 90.239,
+        "cpu_load_percent_min": 85.415,
+        "temperature_c_max": 22.521,
+        "temperature_c_min": 21.77
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "capable",
+      "inference_location": "local_device",
+      "load": "busy",
+      "metrics": {
+        "balanced_accuracy": {
+          "ci95_high": 0.7440533092783601,
+          "ci95_low": 0.73723949072164,
+          "mean": 0.7406464,
+          "sd": 0.0038867758875448764,
+          "unit": "ratio"
+        },
+        "brier": {
+          "ci95_high": 0.23227828273080273,
+          "ci95_low": 0.23047971726919728,
+          "mean": 0.231379,
+          "sd": 0.0010259476107482325,
+          "unit": "ratio"
+        },
+        "coverage": {
+          "ci95_high": 0.7330227638736263,
+          "ci95_low": 0.7269740361263738,
+          "mean": 0.7299984,
+          "sd": 0.0034503485765933653,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 90.19840892512735,
+          "ci95_low": 86.22279107487265,
+          "mean": 88.2106,
+          "sd": 2.2677938177885557,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": {
+          "ci95_high": 0.12183434724417379,
+          "ci95_low": 0.1172264527558262,
+          "mean": 0.1195304,
+          "sd": 0.0026284605380336224,
+          "unit": "ratio"
+        },
+        "energy_wh_approx": {
+          "ci95_high": 1.0451165050051576,
+          "ci95_low": 0.9951482949948426,
+          "mean": 1.0201324,
+          "sd": 0.028503141402308595,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 40.962932614388585,
+          "ci95_low": 38.99906738561142,
+          "mean": 39.981,
+          "sd": 1.1202388138249804,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 52.169774994418816,
+          "ci95_low": 49.34582500558119,
+          "mean": 50.7578,
+          "sd": 1.6108530969644623,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 195.76481748803093,
+          "ci95_low": 191.37598251196908,
+          "mean": 193.5704,
+          "sd": 2.5035034052303553,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.465114554783828,
+          "ci95_low": 21.906085445216174,
+          "mean": 22.1856,
+          "sd": 0.3188844618353172,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 0.3941437760374124,
+          "ci95_low": 0.38491902396258765,
+          "mean": 0.3895314,
+          "sd": 0.005262033855839382,
+          "unit": "ratio"
+        }
+      },
+      "profile": "low",
+      "repetitions": 5,
+      "scenario_id": "capable__low__busy__local_device"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 88.895,
+        "cpu_load_percent_min": 85.595,
+        "temperature_c_max": 22.526,
+        "temperature_c_min": 21.39
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "capable",
+      "inference_location": "local_fallback",
+      "load": "busy",
+      "metrics": {
+        "balanced_accuracy": null,
+        "brier": null,
+        "coverage": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 88.7966527374808,
+          "ci95_low": 86.3873472625192,
+          "mean": 87.592,
+          "sd": 1.3743292909634128,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": null,
+        "energy_wh_approx": {
+          "ci95_high": 0.222,
+          "ci95_low": 0.222,
+          "mean": 0.222,
+          "sd": 0.0,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 4.171674785497634,
+          "ci95_low": 3.803525214502366,
+          "mean": 3.9876,
+          "sd": 0.21000190475326647,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 5.214875498128879,
+          "ci95_low": 4.755124501871122,
+          "mean": 4.985,
+          "sd": 0.26225369396826426,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 63.25,
+          "ci95_low": 63.25,
+          "mean": 63.25,
+          "sd": 0.0,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.41557368266863,
+          "ci95_low": 21.50002631733137,
+          "mean": 21.9578,
+          "sd": 0.5222515677334052,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 1.0,
+          "ci95_low": 1.0,
+          "mean": 1.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        }
+      },
+      "profile": "low",
+      "repetitions": 5,
+      "scenario_id": "capable__low__busy__local_fallback"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 25.81,
+        "cpu_load_percent_min": 21.324,
+        "temperature_c_max": 22.042,
+        "temperature_c_min": 21.481
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "capable",
+      "inference_location": "local_device",
+      "load": "idle",
+      "metrics": {
+        "balanced_accuracy": {
+          "ci95_high": 0.742575558140649,
+          "ci95_low": 0.7368444418593509,
+          "mean": 0.73971,
+          "sd": 0.003269174895902628,
+          "unit": "ratio"
+        },
+        "brier": {
+          "ci95_high": 0.23192603988004848,
+          "ci95_low": 0.2313983601199515,
+          "mean": 0.23166219999999998,
+          "sd": 0.00030100199334887984,
+          "unit": "ratio"
+        },
+        "coverage": {
+          "ci95_high": 0.7327107210227117,
+          "ci95_low": 0.7249128789772883,
+          "mean": 0.7288118,
+          "sd": 0.00444808798249312,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 25.317738838074593,
+          "ci95_low": 21.413861161925407,
+          "mean": 23.3658,
+          "sd": 2.2268713927840547,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": {
+          "ci95_high": 0.12223723170195909,
+          "ci95_low": 0.11789076829804092,
+          "mean": 0.120064,
+          "sd": 0.00247933357981535,
+          "unit": "ratio"
+        },
+        "energy_wh_approx": {
+          "ci95_high": 0.5413314679238356,
+          "ci95_low": 0.5175305320761644,
+          "mean": 0.529431,
+          "sd": 0.013576660837628667,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 21.82201053008515,
+          "ci95_low": 20.822389469914853,
+          "mean": 21.322200000000002,
+          "sd": 0.5702093475207144,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 27.6334754957138,
+          "ci95_low": 26.111324504286205,
+          "mean": 26.872400000000003,
+          "sd": 0.8682737471558145,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 199.02996127991003,
+          "ci95_low": 193.03683872008997,
+          "mean": 196.0334,
+          "sd": 3.4186299595013176,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 21.97656057080248,
+          "ci95_low": 21.50143942919752,
+          "mean": 21.739,
+          "sd": 0.27102121688163106,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 0.3951495684335497,
+          "ci95_low": 0.3873552315664503,
+          "mean": 0.3912524,
+          "sd": 0.004446088539379314,
+          "unit": "ratio"
+        }
+      },
+      "profile": "low",
+      "repetitions": 5,
+      "scenario_id": "capable__low__idle__local_device"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 26.051,
+        "cpu_load_percent_min": 21.511,
+        "temperature_c_max": 22.553,
+        "temperature_c_min": 21.549
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "capable",
+      "inference_location": "local_fallback",
+      "load": "idle",
+      "metrics": {
+        "balanced_accuracy": null,
+        "brier": null,
+        "coverage": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 25.51346327292655,
+          "ci95_low": 22.508936727073447,
+          "mean": 24.0112,
+          "sd": 1.7138585705944345,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": null,
+        "energy_wh_approx": {
+          "ci95_high": 0.117,
+          "ci95_low": 0.117,
+          "mean": 0.117,
+          "sd": 0.0,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 4.223450904335454,
+          "ci95_low": 4.058949095664547,
+          "mean": 4.1412,
+          "sd": 0.09383602719638143,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 5.279354483775648,
+          "ci95_low": 5.073845516224352,
+          "mean": 5.1766,
+          "sd": 0.11722755648737185,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 63.25,
+          "ci95_low": 63.25,
+          "mean": 63.25,
+          "sd": 0.0,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.48123527858367,
+          "ci95_low": 21.828364721416325,
+          "mean": 22.154799999999998,
+          "sd": 0.3724140169220276,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 1.0,
+          "ci95_low": 1.0,
+          "mean": 1.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        }
+      },
+      "profile": "low",
+      "repetitions": 5,
+      "scenario_id": "capable__low__idle__local_fallback"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 57.218,
+        "cpu_load_percent_min": 53.017,
+        "temperature_c_max": 22.622,
+        "temperature_c_min": 21.737
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "capable",
+      "inference_location": "local_device",
+      "load": "nominal",
+      "metrics": {
+        "balanced_accuracy": {
+          "ci95_high": 0.7411549545456881,
+          "ci95_low": 0.7360894454543119,
+          "mean": 0.7386222,
+          "sd": 0.0028894955788164598,
+          "unit": "ratio"
+        },
+        "brier": {
+          "ci95_high": 0.23264965911898136,
+          "ci95_low": 0.23160594088101863,
+          "mean": 0.2321278,
+          "sd": 0.0005953635024083979,
+          "unit": "ratio"
+        },
+        "coverage": {
+          "ci95_high": 0.7347429958323378,
+          "ci95_low": 0.7273026041676621,
+          "mean": 0.7310228,
+          "sd": 0.004244189168734103,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 56.97290271072197,
+          "ci95_low": 53.78349728927803,
+          "mean": 55.3782,
+          "sd": 1.819318196468116,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": {
+          "ci95_high": 0.1234811094751957,
+          "ci95_low": 0.11897809052480429,
+          "mean": 0.12122959999999999,
+          "sd": 0.002568636856389011,
+          "unit": "ratio"
+        },
+        "energy_wh_approx": {
+          "ci95_high": 0.7089226498648389,
+          "ci95_low": 0.672691350135161,
+          "mean": 0.690807,
+          "sd": 0.02066725742569634,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 27.91748194097502,
+          "ci95_low": 26.623318059024978,
+          "mean": 27.2704,
+          "sd": 0.7382240852207411,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 35.66129507421375,
+          "ci95_low": 33.29150492578625,
+          "mean": 34.4764,
+          "sd": 1.35178874089112,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 198.03083299458612,
+          "ci95_low": 193.46756700541388,
+          "mean": 195.7492,
+          "sd": 2.6030033038780394,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.481213831250347,
+          "ci95_low": 21.914386168749655,
+          "mean": 22.1978,
+          "sd": 0.32333295532623996,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 0.3936466209149963,
+          "ci95_low": 0.38676737908500375,
+          "mean": 0.390207,
+          "sd": 0.003924094991204964,
+          "unit": "ratio"
+        }
+      },
+      "profile": "low",
+      "repetitions": 5,
+      "scenario_id": "capable__low__nominal__local_device"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 57.58,
+        "cpu_load_percent_min": 53.753,
+        "temperature_c_max": 22.668,
+        "temperature_c_min": 21.809
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "capable",
+      "inference_location": "local_fallback",
+      "load": "nominal",
+      "metrics": {
+        "balanced_accuracy": null,
+        "brier": null,
+        "coverage": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 57.85245127439883,
+          "ci95_low": 54.88634872560117,
+          "mean": 56.3694,
+          "sd": 1.6919405426905512,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": null,
+        "energy_wh_approx": {
+          "ci95_high": 0.15,
+          "ci95_low": 0.15,
+          "mean": 0.15,
+          "sd": 0.0,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 4.242834187432009,
+          "ci95_low": 3.804765812567992,
+          "mean": 4.0238000000000005,
+          "sd": 0.24988537372163275,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 5.303904652899508,
+          "ci95_low": 4.7560953471004925,
+          "mean": 5.03,
+          "sd": 0.31248439961060465,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 63.25,
+          "ci95_low": 63.25,
+          "mean": 63.25,
+          "sd": 0.0,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.484049827518188,
+          "ci95_low": 21.86715017248181,
+          "mean": 22.1756,
+          "sd": 0.3518952969279353,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 1.0,
+          "ci95_low": 1.0,
+          "mean": 1.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        }
+      },
+      "profile": "low",
+      "repetitions": 5,
+      "scenario_id": "capable__low__nominal__local_fallback"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 90.387,
+        "cpu_load_percent_min": 86.259,
+        "temperature_c_max": 22.19,
+        "temperature_c_min": 21.431
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "constrained",
+      "inference_location": "local_device",
+      "load": "busy",
+      "metrics": {
+        "balanced_accuracy": {
+          "ci95_high": 0.7739973356877061,
+          "ci95_low": 0.7675454643122939,
+          "mean": 0.7707714,
+          "sd": 0.0036803119840578403,
+          "unit": "ratio"
+        },
+        "brier": {
+          "ci95_high": 0.2257016158899499,
+          "ci95_low": 0.22369438411005005,
+          "mean": 0.22469799999999998,
+          "sd": 0.0011449762006260206,
+          "unit": "ratio"
+        },
+        "coverage": {
+          "ci95_high": 0.7855323333622806,
+          "ci95_low": 0.7755528666377194,
+          "mean": 0.7805426,
+          "sd": 0.005692542340641833,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 89.96386078151187,
+          "ci95_low": 86.64493921848813,
+          "mean": 88.3044,
+          "sd": 1.8931975068650368,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": {
+          "ci95_high": 0.1140496286191029,
+          "ci95_low": 0.11012237138089709,
+          "mean": 0.11208599999999999,
+          "sd": 0.0022402076912643614,
+          "unit": "ratio"
+        },
+        "energy_wh_approx": {
+          "ci95_high": 1.0820891168632498,
+          "ci95_low": 1.0365904831367503,
+          "mean": 1.0593398,
+          "sd": 0.0259535810958719,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 188.82124750910205,
+          "ci95_low": 181.09995249089795,
+          "mean": 184.9606,
+          "sd": 4.404423605876253,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 240.36078851106464,
+          "ci95_low": 226.61721148893537,
+          "mean": 233.489,
+          "sd": 7.8396868559911255,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 242.33184573188294,
+          "ci95_low": 237.28615426811706,
+          "mean": 239.809,
+          "sd": 2.878191098589527,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.118531152044806,
+          "ci95_low": 21.494668847955193,
+          "mean": 21.8066,
+          "sd": 0.3558669695265349,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 0.33649791247086286,
+          "ci95_low": 0.3265888875291371,
+          "mean": 0.3315434,
+          "sd": 0.005652360551132585,
+          "unit": "ratio"
+        }
+      },
+      "profile": "balanced",
+      "repetitions": 5,
+      "scenario_id": "constrained__balanced__busy__local_device"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 90.043,
+        "cpu_load_percent_min": 86.358,
+        "temperature_c_max": 22.641,
+        "temperature_c_min": 21.498
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "constrained",
+      "inference_location": "local_fallback",
+      "load": "busy",
+      "metrics": {
+        "balanced_accuracy": null,
+        "brier": null,
+        "coverage": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 89.59011495803429,
+          "ci95_low": 87.05068504196572,
+          "mean": 88.3204,
+          "sd": 1.448555590924974,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": null,
+        "energy_wh_approx": {
+          "ci95_high": 0.1332,
+          "ci95_low": 0.1332,
+          "mean": 0.1332,
+          "sd": 0.0,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 4.269321852548825,
+          "ci95_low": 4.044678147451175,
+          "mean": 4.157,
+          "sd": 0.12814249880504114,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 5.336519300682408,
+          "ci95_low": 5.055880699317592,
+          "mean": 5.1962,
+          "sd": 0.16008341575566173,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 46.75,
+          "ci95_low": 46.75,
+          "mean": 46.75,
+          "sd": 0.0,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.329983406995392,
+          "ci95_low": 21.520816593004607,
+          "mean": 21.9254,
+          "sd": 0.46156938806640896,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 1.0,
+          "ci95_low": 1.0,
+          "mean": 1.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        }
+      },
+      "profile": "balanced",
+      "repetitions": 5,
+      "scenario_id": "constrained__balanced__busy__local_fallback"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 26.408,
+        "cpu_load_percent_min": 21.148,
+        "temperature_c_max": 22.64,
+        "temperature_c_min": 21.483
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "constrained",
+      "inference_location": "local_device",
+      "load": "idle",
+      "metrics": {
+        "balanced_accuracy": {
+          "ci95_high": 0.8036105491676787,
+          "ci95_low": 0.7986170508323213,
+          "mean": 0.8011138,
+          "sd": 0.0028484188069875255,
+          "unit": "ratio"
+        },
+        "brier": {
+          "ci95_high": 0.21533478734590927,
+          "ci95_low": 0.21394041265409075,
+          "mean": 0.2146376,
+          "sd": 0.000795386886992738,
+          "unit": "ratio"
+        },
+        "coverage": {
+          "ci95_high": 0.8465109462258447,
+          "ci95_low": 0.8375694537741554,
+          "mean": 0.8420402,
+          "sd": 0.005100455342417949,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 26.08218058267486,
+          "ci95_low": 22.10781941732514,
+          "mean": 24.095,
+          "sd": 2.267076972667669,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": {
+          "ci95_high": 0.0933717199644473,
+          "ci95_low": 0.08915308003555268,
+          "mean": 0.0912624,
+          "sd": 0.002406419809592665,
+          "unit": "ratio"
+        },
+        "energy_wh_approx": {
+          "ci95_high": 0.5708142021403337,
+          "ci95_low": 0.5413625978596663,
+          "mean": 0.5560884,
+          "sd": 0.01679994622908063,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 101.12379916516802,
+          "ci95_low": 98.54500083483198,
+          "mean": 99.8344,
+          "sd": 1.4710123384934608,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 129.3635850466779,
+          "ci95_low": 125.30001495332209,
+          "mean": 127.3318,
+          "sd": 2.3179640204282674,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 245.44509669551059,
+          "ci95_low": 240.37210330448943,
+          "mean": 242.9086,
+          "sd": 2.8937648142169445,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.47106256704295,
+          "ci95_low": 21.563737432957048,
+          "mean": 22.0174,
+          "sd": 0.5175613973240283,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 0.25424848620545204,
+          "ci95_low": 0.24419551379454793,
+          "mean": 0.249222,
+          "sd": 0.005734471858854993,
+          "unit": "ratio"
+        }
+      },
+      "profile": "balanced",
+      "repetitions": 5,
+      "scenario_id": "constrained__balanced__idle__local_device"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 26.128,
+        "cpu_load_percent_min": 23.06,
+        "temperature_c_max": 22.182,
+        "temperature_c_min": 21.316
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "constrained",
+      "inference_location": "local_fallback",
+      "load": "idle",
+      "metrics": {
+        "balanced_accuracy": null,
+        "brier": null,
+        "coverage": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 25.9628461157517,
+          "ci95_low": 23.590353884248298,
+          "mean": 24.7766,
+          "sd": 1.3533300779928006,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": null,
+        "energy_wh_approx": {
+          "ci95_high": 0.0702,
+          "ci95_low": 0.0702,
+          "mean": 0.0702,
+          "sd": 0.0,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 4.2670496615327975,
+          "ci95_low": 3.866550338467202,
+          "mean": 4.0668,
+          "sd": 0.22845502839727577,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 5.334010814962164,
+          "ci95_low": 4.832789185037837,
+          "mean": 5.0834,
+          "sd": 0.28590960109796926,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 46.75,
+          "ci95_low": 46.75,
+          "mean": 46.75,
+          "sd": 0.0,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.04957443214187,
+          "ci95_low": 21.469625567858127,
+          "mean": 21.7596,
+          "sd": 0.330817623472511,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 1.0,
+          "ci95_low": 1.0,
+          "mean": 1.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        }
+      },
+      "profile": "balanced",
+      "repetitions": 5,
+      "scenario_id": "constrained__balanced__idle__local_fallback"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 57.873,
+        "cpu_load_percent_min": 53.92,
+        "temperature_c_max": 22.509,
+        "temperature_c_min": 21.936
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "constrained",
+      "inference_location": "local_device",
+      "load": "nominal",
+      "metrics": {
+        "balanced_accuracy": {
+          "ci95_high": 0.7971432301755995,
+          "ci95_low": 0.7908115698244006,
+          "mean": 0.7939774,
+          "sd": 0.003611740549928793,
+          "unit": "ratio"
+        },
+        "brier": {
+          "ci95_high": 0.21864723241535436,
+          "ci95_low": 0.21698996758464564,
+          "mean": 0.2178186,
+          "sd": 0.0009453461270878559,
+          "unit": "ratio"
+        },
+        "coverage": {
+          "ci95_high": 0.828204016064794,
+          "ci95_low": 0.8246683839352059,
+          "mean": 0.8264362,
+          "sd": 0.002016814741120266,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 57.21861850726238,
+          "ci95_low": 54.48098149273763,
+          "mean": 55.8498,
+          "sd": 1.5616179750502357,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": {
+          "ci95_high": 0.1009598984164253,
+          "ci95_low": 0.09788090158357471,
+          "mean": 0.0994204,
+          "sd": 0.0017563383216225746,
+          "unit": "ratio"
+        },
+        "energy_wh_approx": {
+          "ci95_high": 0.7215728521418457,
+          "ci95_low": 0.6853887478581543,
+          "mean": 0.7034808,
+          "sd": 0.02064033593961108,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 124.73792544775412,
+          "ci95_low": 121.72007455224588,
+          "mean": 123.229,
+          "sd": 1.72145911946813,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 159.494234731983,
+          "ci95_low": 154.702565268017,
+          "mean": 157.0984,
+          "sd": 2.7332904712086514,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 244.41784842184526,
+          "ci95_low": 241.62175157815474,
+          "mean": 243.0198,
+          "sd": 1.5949649525930112,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.493099262943158,
+          "ci95_low": 22.11410073705684,
+          "mean": 22.3036,
+          "sd": 0.21619042531990187,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 0.27423774538292367,
+          "ci95_low": 0.27173105461707636,
+          "mean": 0.2729844,
+          "sd": 0.0014298803446442664,
+          "unit": "ratio"
+        }
+      },
+      "profile": "balanced",
+      "repetitions": 5,
+      "scenario_id": "constrained__balanced__nominal__local_device"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 54.985,
+        "cpu_load_percent_min": 52.322,
+        "temperature_c_max": 22.612,
+        "temperature_c_min": 21.462
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "constrained",
+      "inference_location": "local_fallback",
+      "load": "nominal",
+      "metrics": {
+        "balanced_accuracy": null,
+        "brier": null,
+        "coverage": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 55.05582290401916,
+          "ci95_low": 53.040577095980844,
+          "mean": 54.0482,
+          "sd": 1.1495476066696826,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": null,
+        "energy_wh_approx": {
+          "ci95_high": 0.09,
+          "ci95_low": 0.09,
+          "mean": 0.09,
+          "sd": 0.0,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 4.103379241058758,
+          "ci95_low": 3.8606207589412427,
+          "mean": 3.982,
+          "sd": 0.13847562962485502,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 5.129472304571966,
+          "ci95_low": 4.825727695428034,
+          "mean": 4.9776,
+          "sd": 0.17326367189921835,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 46.75,
+          "ci95_low": 46.75,
+          "mean": 46.75,
+          "sd": 0.0,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.405880959379203,
+          "ci95_low": 21.435319040620797,
+          "mean": 21.9206,
+          "sd": 0.5536332721215365,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 1.0,
+          "ci95_low": 1.0,
+          "mean": 1.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        }
+      },
+      "profile": "balanced",
+      "repetitions": 5,
+      "scenario_id": "constrained__balanced__nominal__local_fallback"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 89.369,
+        "cpu_load_percent_min": 85.338,
+        "temperature_c_max": 22.628,
+        "temperature_c_min": 21.704
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "constrained",
+      "inference_location": "local_device",
+      "load": "busy",
+      "metrics": {
+        "balanced_accuracy": {
+          "ci95_high": 0.7172444788458996,
+          "ci95_low": 0.7110271211541004,
+          "mean": 0.7141358,
+          "sd": 0.0035465393977791707,
+          "unit": "ratio"
+        },
+        "brier": {
+          "ci95_high": 0.2461669251905534,
+          "ci95_low": 0.24524267480944661,
+          "mean": 0.2457048,
+          "sd": 0.0005272159898940837,
+          "unit": "ratio"
+        },
+        "coverage": {
+          "ci95_high": 0.7342889206442876,
+          "ci95_low": 0.7255182793557123,
+          "mean": 0.7299036,
+          "sd": 0.005002997481510434,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 87.90187633705614,
+          "ci95_low": 84.99012366294386,
+          "mean": 86.446,
+          "sd": 1.6609379880055737,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": {
+          "ci95_high": 0.1617068928865424,
+          "ci95_low": 0.1580267071134576,
+          "mean": 0.1598668,
+          "sd": 0.0020992718261340017,
+          "unit": "ratio"
+        },
+        "energy_wh_approx": {
+          "ci95_high": 1.7546933910408187,
+          "ci95_low": 1.6735842089591813,
+          "mean": 1.7141388,
+          "sd": 0.0462667461055994,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 312.55988117833186,
+          "ci95_low": 301.95771882166815,
+          "mean": 307.2588,
+          "sd": 6.047743810711568,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 391.4138544227957,
+          "ci95_low": 385.7629455772043,
+          "mean": 388.5884,
+          "sd": 3.2234225289279,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 409.3380524012506,
+          "ci95_low": 398.17634759874943,
+          "mean": 403.7572,
+          "sd": 6.3669210926475435,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.456779381208044,
+          "ci95_low": 21.82202061879196,
+          "mean": 22.139400000000002,
+          "sd": 0.36208258726428677,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 0.43472988807187246,
+          "ci95_low": 0.4251961119281275,
+          "mean": 0.429963,
+          "sd": 0.005438309066244752,
+          "unit": "ratio"
+        }
+      },
+      "profile": "high",
+      "repetitions": 5,
+      "scenario_id": "constrained__high__busy__local_device"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 88.881,
+        "cpu_load_percent_min": 85.057,
+        "temperature_c_max": 22.67,
+        "temperature_c_min": 21.451
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "constrained",
+      "inference_location": "local_fallback",
+      "load": "busy",
+      "metrics": {
+        "balanced_accuracy": null,
+        "brier": null,
+        "coverage": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 88.37372433180062,
+          "ci95_low": 85.89787566819939,
+          "mean": 87.1358,
+          "sd": 1.4122872229118262,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": null,
+        "energy_wh_approx": {
+          "ci95_high": 0.1332,
+          "ci95_low": 0.1332,
+          "mean": 0.1332,
+          "sd": 0.0,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 3.954893268025377,
+          "ci95_low": 3.754706731974623,
+          "mean": 3.8548,
+          "sd": 0.11419150581369891,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 4.9435404360548585,
+          "ci95_low": 4.693259563945142,
+          "mean": 4.8184000000000005,
+          "sd": 0.14276659273093276,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 46.75,
+          "ci95_low": 46.75,
+          "mean": 46.75,
+          "sd": 0.0,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.375683936922496,
+          "ci95_low": 21.541916063077505,
+          "mean": 21.9588,
+          "sd": 0.4756024600441006,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 1.0,
+          "ci95_low": 1.0,
+          "mean": 1.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        }
+      },
+      "profile": "high",
+      "repetitions": 5,
+      "scenario_id": "constrained__high__busy__local_fallback"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 26.408,
+        "cpu_load_percent_min": 21.594,
+        "temperature_c_max": 22.689,
+        "temperature_c_min": 21.776
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "constrained",
+      "inference_location": "local_device",
+      "load": "idle",
+      "metrics": {
+        "balanced_accuracy": {
+          "ci95_high": 0.7478026408345763,
+          "ci95_low": 0.7416157591654237,
+          "mean": 0.7447092,
+          "sd": 0.003529155097186839,
+          "unit": "ratio"
+        },
+        "brier": {
+          "ci95_high": 0.23622355735826694,
+          "ci95_low": 0.23460204264173307,
+          "mean": 0.2354128,
+          "sd": 0.0009249533501750268,
+          "unit": "ratio"
+        },
+        "coverage": {
+          "ci95_high": 0.7986627337689148,
+          "ci95_low": 0.7890360662310852,
+          "mean": 0.7938494,
+          "sd": 0.0054912966865759095,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 25.956712544674158,
+          "ci95_low": 22.027287455325844,
+          "mean": 23.992,
+          "sd": 2.2414442888459214,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": {
+          "ci95_high": 0.14076090765290272,
+          "ci95_low": 0.1357698923470973,
+          "mean": 0.1382654,
+          "sd": 0.0028470024236027544,
+          "unit": "ratio"
+        },
+        "energy_wh_approx": {
+          "ci95_high": 0.9265866043493226,
+          "ci95_low": 0.8833397956506773,
+          "mean": 0.9049632,
+          "sd": 0.02466908266839285,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 163.82773228831823,
+          "ci95_low": 158.3046677116818,
+          "mean": 161.0662,
+          "sd": 3.1504968973163616,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 208.85347020513342,
+          "ci95_low": 200.1793297948666,
+          "mean": 204.5164,
+          "sd": 4.947950919320033,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 403.97433871862506,
+          "ci95_low": 391.2816612813749,
+          "mean": 397.628,
+          "sd": 7.24022693014521,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.618474536494986,
+          "ci95_low": 21.882325463505012,
+          "mean": 22.2504,
+          "sd": 0.41991820632118315,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 0.3476857071651388,
+          "ci95_low": 0.3411462928348612,
+          "mean": 0.344416,
+          "sd": 0.00373024871824924,
+          "unit": "ratio"
+        }
+      },
+      "profile": "high",
+      "repetitions": 5,
+      "scenario_id": "constrained__high__idle__local_device"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 26.348,
+        "cpu_load_percent_min": 22.113,
+        "temperature_c_max": 22.238,
+        "temperature_c_min": 21.874
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "constrained",
+      "inference_location": "local_fallback",
+      "load": "idle",
+      "metrics": {
+        "balanced_accuracy": null,
+        "brier": null,
+        "coverage": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 25.649878237839822,
+          "ci95_low": 22.41612176216018,
+          "mean": 24.033,
+          "sd": 1.8446171689540354,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": null,
+        "energy_wh_approx": {
+          "ci95_high": 0.0702,
+          "ci95_low": 0.0702,
+          "mean": 0.0702,
+          "sd": 0.0,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 3.969347620965952,
+          "ci95_low": 3.853052379034048,
+          "mean": 3.9112,
+          "sd": 0.06633777204579613,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 4.961910946228945,
+          "ci95_low": 4.816089053771056,
+          "mean": 4.889,
+          "sd": 0.08318052656721991,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 46.75,
+          "ci95_low": 46.75,
+          "mean": 46.75,
+          "sd": 0.0,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.19669630164762,
+          "ci95_low": 21.91610369835238,
+          "mean": 22.0564,
+          "sd": 0.1600571772836194,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 1.0,
+          "ci95_low": 1.0,
+          "mean": 1.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        }
+      },
+      "profile": "high",
+      "repetitions": 5,
+      "scenario_id": "constrained__high__idle__local_fallback"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 57.778,
+        "cpu_load_percent_min": 52.105,
+        "temperature_c_max": 22.618,
+        "temperature_c_min": 21.335
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "constrained",
+      "inference_location": "local_device",
+      "load": "nominal",
+      "metrics": {
+        "balanced_accuracy": {
+          "ci95_high": 0.7421985323617568,
+          "ci95_low": 0.7333910676382431,
+          "mean": 0.7377948,
+          "sd": 0.0050240025079611745,
+          "unit": "ratio"
+        },
+        "brier": {
+          "ci95_high": 0.23985947304917354,
+          "ci95_low": 0.23799572695082644,
+          "mean": 0.2389276,
+          "sd": 0.0010631283083428777,
+          "unit": "ratio"
+        },
+        "coverage": {
+          "ci95_high": 0.7735840448371764,
+          "ci95_low": 0.7681403551628235,
+          "mean": 0.7708621999999999,
+          "sd": 0.0031052194286394787,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 56.85440768445669,
+          "ci95_low": 53.1123923155433,
+          "mean": 54.983399999999996,
+          "sd": 2.1345410045253295,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": {
+          "ci95_high": 0.14915320641978594,
+          "ci95_low": 0.1466435935802141,
+          "mean": 0.1478984,
+          "sd": 0.0014315471700226993,
+          "unit": "ratio"
+        },
+        "energy_wh_approx": {
+          "ci95_high": 1.1963691637289688,
+          "ci95_low": 1.1516820362710312,
+          "mean": 1.1740256,
+          "sd": 0.02549067722325163,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 211.76369065944903,
+          "ci95_low": 206.00790934055095,
+          "mean": 208.8858,
+          "sd": 3.283244462418227,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 268.21498832369525,
+          "ci95_low": 260.79581167630477,
+          "mean": 264.5054,
+          "sd": 4.232087581796945,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 407.19373918904205,
+          "ci95_low": 396.81946081095793,
+          "mean": 402.0066,
+          "sd": 5.917752977271028,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.225178434695508,
+          "ci95_low": 21.374421565304495,
+          "mean": 21.7998,
+          "sd": 0.4852934163987796,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 0.38075554308886717,
+          "ci95_low": 0.3733168569111328,
+          "mean": 0.3770362,
+          "sd": 0.004243216315485226,
+          "unit": "ratio"
+        }
+      },
+      "profile": "high",
+      "repetitions": 5,
+      "scenario_id": "constrained__high__nominal__local_device"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 57.643,
+        "cpu_load_percent_min": 52.311,
+        "temperature_c_max": 21.954,
+        "temperature_c_min": 21.434
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "constrained",
+      "inference_location": "local_fallback",
+      "load": "nominal",
+      "metrics": {
+        "balanced_accuracy": null,
+        "brier": null,
+        "coverage": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 56.256805663683565,
+          "ci95_low": 52.57559433631644,
+          "mean": 54.4162,
+          "sd": 2.0998568284528356,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": null,
+        "energy_wh_approx": {
+          "ci95_high": 0.09,
+          "ci95_low": 0.09,
+          "mean": 0.09,
+          "sd": 0.0,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 4.102113616170044,
+          "ci95_low": 3.8750863838299563,
+          "mean": 3.9886,
+          "sd": 0.12950212353471283,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 5.127548661480128,
+          "ci95_low": 4.843651338519872,
+          "mean": 4.9856,
+          "sd": 0.16194227366564912,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 46.75,
+          "ci95_low": 46.75,
+          "mean": 46.75,
+          "sd": 0.0,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 21.783818550030947,
+          "ci95_low": 21.399381449969052,
+          "mean": 21.5916,
+          "sd": 0.21929272673757325,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 1.0,
+          "ci95_low": 1.0,
+          "mean": 1.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        }
+      },
+      "profile": "high",
+      "repetitions": 5,
+      "scenario_id": "constrained__high__nominal__local_fallback"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 90.368,
+        "cpu_load_percent_min": 85.698,
+        "temperature_c_max": 22.544,
+        "temperature_c_min": 21.491
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "constrained",
+      "inference_location": "local_device",
+      "load": "busy",
+      "metrics": {
+        "balanced_accuracy": {
+          "ci95_high": 0.7022344608106731,
+          "ci95_low": 0.6944167391893269,
+          "mean": 0.6983256,
+          "sd": 0.0044594277996173525,
+          "unit": "ratio"
+        },
+        "brier": {
+          "ci95_high": 0.24638433513035318,
+          "ci95_low": 0.24444806486964682,
+          "mean": 0.2454162,
+          "sd": 0.001104497940242532,
+          "unit": "ratio"
+        },
+        "coverage": {
+          "ci95_high": 0.6553226249212518,
+          "ci95_low": 0.6477921750787481,
+          "mean": 0.6515574,
+          "sd": 0.004295560650252769,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 90.61525865160748,
+          "ci95_low": 87.28074134839251,
+          "mean": 88.948,
+          "sd": 1.902093714831108,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": {
+          "ci95_high": 0.15086944769215468,
+          "ci95_low": 0.14631495230784528,
+          "mean": 0.14859219999999998,
+          "sd": 0.002598000327174726,
+          "unit": "ratio"
+        },
+        "energy_wh_approx": {
+          "ci95_high": 0.6213714836812514,
+          "ci95_low": 0.6015745163187487,
+          "mean": 0.611473,
+          "sd": 0.011292695094617593,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 109.56207070646691,
+          "ci95_low": 107.54912929353308,
+          "mean": 108.5556,
+          "sd": 1.1482331209297163,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 140.53471315996154,
+          "ci95_low": 136.6564868400385,
+          "mean": 138.59560000000002,
+          "sd": 2.212239204968577,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 144.81916757329986,
+          "ci95_low": 141.44563242670012,
+          "mean": 143.1324,
+          "sd": 1.9243504878269913,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.54736921288753,
+          "ci95_low": 21.80903078711247,
+          "mean": 22.1782,
+          "sd": 0.42116706898806805,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 0.5013129305463647,
+          "ci95_low": 0.49275706945363534,
+          "mean": 0.497035,
+          "sd": 0.0048804813799460485,
+          "unit": "ratio"
+        }
+      },
+      "profile": "low",
+      "repetitions": 5,
+      "scenario_id": "constrained__low__busy__local_device"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 90.116,
+        "cpu_load_percent_min": 85.2,
+        "temperature_c_max": 21.975,
+        "temperature_c_min": 21.347
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "constrained",
+      "inference_location": "local_fallback",
+      "load": "busy",
+      "metrics": {
+        "balanced_accuracy": null,
+        "brier": null,
+        "coverage": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 89.95573129331191,
+          "ci95_low": 86.69026870668807,
+          "mean": 88.323,
+          "sd": 1.8627031432839731,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": null,
+        "energy_wh_approx": {
+          "ci95_high": 0.1332,
+          "ci95_low": 0.1332,
+          "mean": 0.1332,
+          "sd": 0.0,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 4.121718628137484,
+          "ci95_low": 3.811881371862516,
+          "mean": 3.9668,
+          "sd": 0.1767390732124621,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 5.152230622389756,
+          "ci95_low": 4.764569377610244,
+          "mean": 4.9584,
+          "sd": 0.22113186111458477,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 46.75,
+          "ci95_low": 46.75,
+          "mean": 46.75,
+          "sd": 0.0,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 21.83479324067264,
+          "ci95_low": 21.40320675932736,
+          "mean": 21.619,
+          "sd": 0.24618793634132466,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 1.0,
+          "ci95_low": 1.0,
+          "mean": 1.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        }
+      },
+      "profile": "low",
+      "repetitions": 5,
+      "scenario_id": "constrained__low__busy__local_fallback"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 25.698,
+        "cpu_load_percent_min": 22.116,
+        "temperature_c_max": 22.595,
+        "temperature_c_min": 21.483
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "constrained",
+      "inference_location": "local_device",
+      "load": "idle",
+      "metrics": {
+        "balanced_accuracy": {
+          "ci95_high": 0.7365337712615504,
+          "ci95_low": 0.7312718287384495,
+          "mean": 0.7339028,
+          "sd": 0.0030015462182015704,
+          "unit": "ratio"
+        },
+        "brier": {
+          "ci95_high": 0.2344005667479814,
+          "ci95_low": 0.23301863325201858,
+          "mean": 0.2337096,
+          "sd": 0.0007882901115706041,
+          "unit": "ratio"
+        },
+        "coverage": {
+          "ci95_high": 0.7166130474217656,
+          "ci95_low": 0.7070569525782344,
+          "mean": 0.711835,
+          "sd": 0.00545104022182926,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 25.07294710139885,
+          "ci95_low": 22.343852898601153,
+          "mean": 23.7084,
+          "sd": 1.5567449373612883,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": {
+          "ci95_high": 0.12685203589865465,
+          "ci95_low": 0.12221916410134534,
+          "mean": 0.1245356,
+          "sd": 0.0026427082320982756,
+          "unit": "ratio"
+        },
+        "energy_wh_approx": {
+          "ci95_high": 0.32893398344262187,
+          "ci95_low": 0.31805401655737814,
+          "mean": 0.323494,
+          "sd": 0.006206210599069299,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 58.7639079125128,
+          "ci95_low": 56.34929208748721,
+          "mean": 57.5566,
+          "sd": 1.3773584500775389,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 74.30295638248055,
+          "ci95_low": 71.19344361751945,
+          "mean": 72.7482,
+          "sd": 1.7737453875909033,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 146.6243464076542,
+          "ci95_low": 143.58405359234578,
+          "mean": 145.1042,
+          "sd": 1.7342605628912828,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.35521830060882,
+          "ci95_low": 21.433581699391183,
+          "mean": 21.8944,
+          "sd": 0.5257250231822715,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 0.4184836127581985,
+          "ci95_low": 0.40691798724180145,
+          "mean": 0.4127008,
+          "sd": 0.006597327769635217,
+          "unit": "ratio"
+        }
+      },
+      "profile": "low",
+      "repetitions": 5,
+      "scenario_id": "constrained__low__idle__local_device"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 26.943,
+        "cpu_load_percent_min": 22.804,
+        "temperature_c_max": 22.517,
+        "temperature_c_min": 22.125
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "constrained",
+      "inference_location": "local_fallback",
+      "load": "idle",
+      "metrics": {
+        "balanced_accuracy": null,
+        "brier": null,
+        "coverage": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 26.162711927623327,
+          "ci95_low": 23.08768807237667,
+          "mean": 24.6252,
+          "sd": 1.7540720338686218,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": null,
+        "energy_wh_approx": {
+          "ci95_high": 0.0702,
+          "ci95_low": 0.0702,
+          "mean": 0.0702,
+          "sd": 0.0,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 4.138493879149896,
+          "ci95_low": 3.802706120850104,
+          "mean": 3.9706,
+          "sd": 0.1915419014210728,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 5.1724459705031345,
+          "ci95_low": 4.753554029496866,
+          "mean": 4.963,
+          "sd": 0.23894664676450267,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 46.75,
+          "ci95_low": 46.75,
+          "mean": 46.75,
+          "sd": 0.0,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.500846056513435,
+          "ci95_low": 22.188353943486565,
+          "mean": 22.3446,
+          "sd": 0.1782534712144478,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 1.0,
+          "ci95_low": 1.0,
+          "mean": 1.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        }
+      },
+      "profile": "low",
+      "repetitions": 5,
+      "scenario_id": "constrained__low__idle__local_fallback"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 54.115,
+        "cpu_load_percent_min": 52.196,
+        "temperature_c_max": 22.65,
+        "temperature_c_min": 21.475
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "constrained",
+      "inference_location": "local_device",
+      "load": "nominal",
+      "metrics": {
+        "balanced_accuracy": {
+          "ci95_high": 0.7206808373307656,
+          "ci95_low": 0.7156931626692344,
+          "mean": 0.718187,
+          "sd": 0.0028450968349073564,
+          "unit": "ratio"
+        },
+        "brier": {
+          "ci95_high": 0.2390718920198116,
+          "ci95_low": 0.2372265079801884,
+          "mean": 0.2381492,
+          "sd": 0.0010526541217322995,
+          "unit": "ratio"
+        },
+        "coverage": {
+          "ci95_high": 0.6982373207533303,
+          "ci95_low": 0.6894202792466697,
+          "mean": 0.6938288,
+          "sd": 0.005029465349318931,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 53.77026209447969,
+          "ci95_low": 52.513737905520316,
+          "mean": 53.142,
+          "sd": 0.7167534443586598,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": {
+          "ci95_high": 0.1349234392994864,
+          "ci95_low": 0.1295489607005136,
+          "mean": 0.1322362,
+          "sd": 0.00306573966605125,
+          "unit": "ratio"
+        },
+        "energy_wh_approx": {
+          "ci95_high": 0.42349269677248097,
+          "ci95_low": 0.41100410322751907,
+          "mean": 0.4172484,
+          "sd": 0.007123812272933643,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 75.19773030734248,
+          "ci95_low": 72.28346969265752,
+          "mean": 73.7406,
+          "sd": 1.662368581271915,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 96.09709922877832,
+          "ci95_low": 91.81890077122168,
+          "mean": 93.958,
+          "sd": 2.4403935133498416,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 144.96129951393883,
+          "ci95_low": 141.56390048606116,
+          "mean": 143.2626,
+          "sd": 1.9379630543434023,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.322227154476643,
+          "ci95_low": 21.467372845523357,
+          "mean": 21.8948,
+          "sd": 0.48763070042809986,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 0.4426982383656083,
+          "ci95_low": 0.4341165616343917,
+          "mean": 0.4384074,
+          "sd": 0.004895207278553173,
+          "unit": "ratio"
+        }
+      },
+      "profile": "low",
+      "repetitions": 5,
+      "scenario_id": "constrained__low__nominal__local_device"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 57.722,
+        "cpu_load_percent_min": 53.303,
+        "temperature_c_max": 22.376,
+        "temperature_c_min": 21.719
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "constrained",
+      "inference_location": "local_fallback",
+      "load": "nominal",
+      "metrics": {
+        "balanced_accuracy": null,
+        "brier": null,
+        "coverage": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 56.59067327959339,
+          "ci95_low": 52.985326720406604,
+          "mean": 54.788,
+          "sd": 2.056581629792508,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": null,
+        "energy_wh_approx": {
+          "ci95_high": 0.09,
+          "ci95_low": 0.09,
+          "mean": 0.09,
+          "sd": 0.0,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 4.1342656567620395,
+          "ci95_low": 3.786134343237961,
+          "mean": 3.9602,
+          "sd": 0.19858298013676814,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 5.168075273965602,
+          "ci95_low": 4.732724726034398,
+          "mean": 4.9504,
+          "sd": 0.24833505592243724,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 46.75,
+          "ci95_low": 46.75,
+          "mean": 46.75,
+          "sd": 0.0,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.39474115703392,
+          "ci95_low": 21.83165884296608,
+          "mean": 22.1132,
+          "sd": 0.3211965130570375,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 1.0,
+          "ci95_low": 1.0,
+          "mean": 1.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        }
+      },
+      "profile": "low",
+      "repetitions": 5,
+      "scenario_id": "constrained__low__nominal__local_fallback"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 90.949,
+        "cpu_load_percent_min": 86.14,
+        "temperature_c_max": 22.544,
+        "temperature_c_min": 21.562
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "standard",
+      "inference_location": "local_device",
+      "load": "busy",
+      "metrics": {
+        "balanced_accuracy": {
+          "ci95_high": 0.7983188820631736,
+          "ci95_low": 0.7936319179368264,
+          "mean": 0.7959754,
+          "sd": 0.0026735638761772825,
+          "unit": "ratio"
+        },
+        "brier": {
+          "ci95_high": 0.21638267868331457,
+          "ci95_low": 0.21579332131668544,
+          "mean": 0.216088,
+          "sd": 0.00033618447316912194,
+          "unit": "ratio"
+        },
+        "coverage": {
+          "ci95_high": 0.832298145344704,
+          "ci95_low": 0.8289690546552959,
+          "mean": 0.8306336,
+          "sd": 0.001898998235912821,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 89.99300689521249,
+          "ci95_low": 86.82819310478752,
+          "mean": 88.4106,
+          "sd": 1.8052905029385151,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": {
+          "ci95_high": 0.0958651385041036,
+          "ci95_low": 0.0916888614958964,
+          "mean": 0.093777,
+          "sd": 0.0023822549191889605,
+          "unit": "ratio"
+        },
+        "energy_wh_approx": {
+          "ci95_high": 1.4175865584040757,
+          "ci95_low": 1.3586934415959242,
+          "mean": 1.38814,
+          "sd": 0.033594135864760684,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 107.5772268442554,
+          "ci95_low": 102.9751731557446,
+          "mean": 105.2762,
+          "sd": 2.6251287968402615,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 137.54181490844726,
+          "ci95_low": 132.88018509155276,
+          "mean": 135.211,
+          "sd": 2.6591125399275577,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 287.06785255672537,
+          "ci95_low": 282.2861474432747,
+          "mean": 284.677,
+          "sd": 2.7276065515392887,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.354378554285088,
+          "ci95_low": 21.574021445714916,
+          "mean": 21.9642,
+          "sd": 0.4451355973183901,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 0.26416104668437107,
+          "ci95_low": 0.2621265533156289,
+          "mean": 0.2631438,
+          "sd": 0.001160526906193915,
+          "unit": "ratio"
+        }
+      },
+      "profile": "balanced",
+      "repetitions": 5,
+      "scenario_id": "standard__balanced__busy__local_device"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 89.139,
+        "cpu_load_percent_min": 85.04,
+        "temperature_c_max": 22.628,
+        "temperature_c_min": 21.303
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "standard",
+      "inference_location": "local_fallback",
+      "load": "busy",
+      "metrics": {
+        "balanced_accuracy": null,
+        "brier": null,
+        "coverage": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 88.57224073775762,
+          "ci95_low": 85.96975926224238,
+          "mean": 87.271,
+          "sd": 1.4845218085295981,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": null,
+        "energy_wh_approx": {
+          "ci95_high": 0.1776,
+          "ci95_low": 0.1776,
+          "mean": 0.1776,
+          "sd": 0.0,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 4.101317541543817,
+          "ci95_low": 3.7590824584561826,
+          "mean": 3.9301999999999997,
+          "sd": 0.19521961991562217,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 5.126499317848374,
+          "ci95_low": 4.698700682151625,
+          "mean": 4.912599999999999,
+          "sd": 0.2440272525764285,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 55.0,
+          "ci95_low": 55.0,
+          "mean": 55.0,
+          "sd": 0.0,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.258528845555727,
+          "ci95_low": 21.34987115444427,
+          "mean": 21.804199999999998,
+          "sd": 0.5183215218375561,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 1.0,
+          "ci95_low": 1.0,
+          "mean": 1.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        }
+      },
+      "profile": "balanced",
+      "repetitions": 5,
+      "scenario_id": "standard__balanced__busy__local_fallback"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 26.871,
+        "cpu_load_percent_min": 23.147,
+        "temperature_c_max": 22.235,
+        "temperature_c_min": 21.409
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "standard",
+      "inference_location": "local_device",
+      "load": "idle",
+      "metrics": {
+        "balanced_accuracy": {
+          "ci95_high": 0.813226190886419,
+          "ci95_low": 0.8063646091135809,
+          "mean": 0.8097953999999999,
+          "sd": 0.00391402124419374,
+          "unit": "ratio"
+        },
+        "brier": {
+          "ci95_high": 0.21233222498359178,
+          "ci95_low": 0.21099137501640824,
+          "mean": 0.2116618,
+          "sd": 0.0007648550189415065,
+          "unit": "ratio"
+        },
+        "coverage": {
+          "ci95_high": 0.8636814025477376,
+          "ci95_low": 0.8582397974522623,
+          "mean": 0.8609606,
+          "sd": 0.003104030331681692,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 27.100599997448953,
+          "ci95_low": 23.927000002551047,
+          "mean": 25.5138,
+          "sd": 1.810302378057324,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": {
+          "ci95_high": 0.08733338174288653,
+          "ci95_low": 0.08249901825711346,
+          "mean": 0.0849162,
+          "sd": 0.002757644230135572,
+          "unit": "ratio"
+        },
+        "energy_wh_approx": {
+          "ci95_high": 0.7636927643617599,
+          "ci95_low": 0.7283308356382401,
+          "mean": 0.7460118,
+          "sd": 0.020171346030941985,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 56.610206189749945,
+          "ci95_low": 54.505393810250055,
+          "mean": 55.5578,
+          "sd": 1.200638663378787,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 72.71238904703979,
+          "ci95_low": 67.9884109529602,
+          "mean": 70.3504,
+          "sd": 2.694677587393342,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 289.5532128696872,
+          "ci95_low": 281.3267871303128,
+          "mean": 285.44,
+          "sd": 4.692563052320139,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.20233972397471,
+          "ci95_low": 21.522460276025292,
+          "mean": 21.8624,
+          "sd": 0.3878205770714082,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 0.22691577506783905,
+          "ci95_low": 0.22099542493216096,
+          "mean": 0.2239556,
+          "sd": 0.0033771187127490786,
+          "unit": "ratio"
+        }
+      },
+      "profile": "balanced",
+      "repetitions": 5,
+      "scenario_id": "standard__balanced__idle__local_device"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 24.484,
+        "cpu_load_percent_min": 21.311,
+        "temperature_c_max": 22.219,
+        "temperature_c_min": 21.543
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "standard",
+      "inference_location": "local_fallback",
+      "load": "idle",
+      "metrics": {
+        "balanced_accuracy": null,
+        "brier": null,
+        "coverage": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 23.873125627395446,
+          "ci95_low": 21.642074372604554,
+          "mean": 22.7576,
+          "sd": 1.272648537499652,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": null,
+        "energy_wh_approx": {
+          "ci95_high": 0.0936,
+          "ci95_low": 0.0936,
+          "mean": 0.0936,
+          "sd": 0.0,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 4.148839460549778,
+          "ci95_low": 3.7215605394502225,
+          "mean": 3.9352,
+          "sd": 0.24373079411514662,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 5.185883641550732,
+          "ci95_low": 4.651716358449268,
+          "mean": 4.9188,
+          "sd": 0.30470264193144136,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 55.0,
+          "ci95_low": 55.0,
+          "mean": 55.0,
+          "sd": 0.0,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.137357283965454,
+          "ci95_low": 21.516242716034544,
+          "mean": 21.8268,
+          "sd": 0.3542995907420733,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 1.0,
+          "ci95_low": 1.0,
+          "mean": 1.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        }
+      },
+      "profile": "balanced",
+      "repetitions": 5,
+      "scenario_id": "standard__balanced__idle__local_fallback"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 56.751,
+        "cpu_load_percent_min": 52.982,
+        "temperature_c_max": 21.963,
+        "temperature_c_min": 21.721
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "standard",
+      "inference_location": "local_device",
+      "load": "nominal",
+      "metrics": {
+        "balanced_accuracy": {
+          "ci95_high": 0.8147316067064567,
+          "ci95_low": 0.8075311932935432,
+          "mean": 0.8111314,
+          "sd": 0.0041072994534121915,
+          "unit": "ratio"
+        },
+        "brier": {
+          "ci95_high": 0.2119021805703587,
+          "ci95_low": 0.2103786194296413,
+          "mean": 0.2111404,
+          "sd": 0.0008690781322758042,
+          "unit": "ratio"
+        },
+        "coverage": {
+          "ci95_high": 0.860114479234903,
+          "ci95_low": 0.856110720765097,
+          "mean": 0.8581126,
+          "sd": 0.002283845944892086,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 55.99450999392291,
+          "ci95_low": 53.30309000607709,
+          "mean": 54.6488,
+          "sd": 1.5352546042920696,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": {
+          "ci95_high": 0.0862021528501178,
+          "ci95_low": 0.08116864714988221,
+          "mean": 0.08368540000000001,
+          "sd": 0.0028712400282804654,
+          "unit": "ratio"
+        },
+        "energy_wh_approx": {
+          "ci95_high": 0.9721510212779,
+          "ci95_low": 0.9248953787221,
+          "mean": 0.9485232,
+          "sd": 0.02695582374367364,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 73.8872851058544,
+          "ci95_low": 72.9543148941456,
+          "mean": 73.4208,
+          "sd": 0.5321900036641021,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 93.75275368109745,
+          "ci95_low": 91.01324631890255,
+          "mean": 92.383,
+          "sd": 1.5626848690634974,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 288.13660555531663,
+          "ci95_low": 280.0741944446833,
+          "mean": 284.1054,
+          "sd": 4.599004924981057,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 21.94357190277046,
+          "ci95_low": 21.77522809722954,
+          "mean": 21.8594,
+          "sd": 0.0960276001991098,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 0.2294468358007742,
+          "ci95_low": 0.22169916419922578,
+          "mean": 0.225573,
+          "sd": 0.004419469481736464,
+          "unit": "ratio"
+        }
+      },
+      "profile": "balanced",
+      "repetitions": 5,
+      "scenario_id": "standard__balanced__nominal__local_device"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 56.462,
+        "cpu_load_percent_min": 52.665,
+        "temperature_c_max": 22.596,
+        "temperature_c_min": 21.362
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "standard",
+      "inference_location": "local_fallback",
+      "load": "nominal",
+      "metrics": {
+        "balanced_accuracy": null,
+        "brier": null,
+        "coverage": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 55.820546119767435,
+          "ci95_low": 53.10705388023256,
+          "mean": 54.4638,
+          "sd": 1.5478451795964623,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": null,
+        "energy_wh_approx": {
+          "ci95_high": 0.12,
+          "ci95_low": 0.12,
+          "mean": 0.12,
+          "sd": 0.0,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 4.076077538089813,
+          "ci95_low": 3.8015224619101873,
+          "mean": 3.9388,
+          "sd": 0.15661321783297874,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 5.09543913668312,
+          "ci95_low": 4.751760863316879,
+          "mean": 4.9235999999999995,
+          "sd": 0.19604285245833364,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 55.0,
+          "ci95_low": 55.0,
+          "mean": 55.0,
+          "sd": 0.0,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.222232373159667,
+          "ci95_low": 21.28536762684033,
+          "mean": 21.7538,
+          "sd": 0.5344115455339643,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 1.0,
+          "ci95_low": 1.0,
+          "mean": 1.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        }
+      },
+      "profile": "balanced",
+      "repetitions": 5,
+      "scenario_id": "standard__balanced__nominal__local_fallback"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 89.951,
+        "cpu_load_percent_min": 86.529,
+        "temperature_c_max": 22.632,
+        "temperature_c_min": 21.522
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "standard",
+      "inference_location": "local_device",
+      "load": "busy",
+      "metrics": {
+        "balanced_accuracy": {
+          "ci95_high": 0.8237335994285029,
+          "ci95_low": 0.819455600571497,
+          "mean": 0.8215946,
+          "sd": 0.0024402796561050102,
+          "unit": "ratio"
+        },
+        "brier": {
+          "ci95_high": 0.20885158060248743,
+          "ci95_low": 0.20771641939751256,
+          "mean": 0.208284,
+          "sd": 0.0006475249029960125,
+          "unit": "ratio"
+        },
+        "coverage": {
+          "ci95_high": 0.8929121591424916,
+          "ci95_low": 0.8828934408575084,
+          "mean": 0.8879028,
+          "sd": 0.005714932431796556,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 89.86942829007353,
+          "ci95_low": 87.31697170992646,
+          "mean": 88.5932,
+          "sd": 1.455986332353433,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": {
+          "ci95_high": 0.08053593487577072,
+          "ci95_low": 0.0773768651242293,
+          "mean": 0.07895640000000001,
+          "sd": 0.0018020139566607132,
+          "unit": "ratio"
+        },
+        "energy_wh_approx": {
+          "ci95_high": 2.3161337041541334,
+          "ci95_low": 2.251389895845867,
+          "mean": 2.2837618,
+          "sd": 0.036931519515178354,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 172.68278111209864,
+          "ci95_low": 169.13041888790136,
+          "mean": 170.9066,
+          "sd": 2.026358013777425,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 222.2499721409974,
+          "ci95_low": 215.5608278590026,
+          "mean": 218.9054,
+          "sd": 3.8156585014909252,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 473.83901703314245,
+          "ci95_low": 465.6257829668575,
+          "mean": 469.7324,
+          "sd": 4.685038185543418,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.463648795428302,
+          "ci95_low": 21.746751204571698,
+          "mean": 22.1052,
+          "sd": 0.40893666991357075,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 0.19565693944269147,
+          "ci95_low": 0.18644986055730856,
+          "mean": 0.1910534,
+          "sd": 0.005251952617836531,
+          "unit": "ratio"
+        }
+      },
+      "profile": "high",
+      "repetitions": 5,
+      "scenario_id": "standard__high__busy__local_device"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 89.386,
+        "cpu_load_percent_min": 85.865,
+        "temperature_c_max": 22.541,
+        "temperature_c_min": 21.644
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "standard",
+      "inference_location": "local_fallback",
+      "load": "busy",
+      "metrics": {
+        "balanced_accuracy": null,
+        "brier": null,
+        "coverage": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 89.08025673472265,
+          "ci95_low": 86.32974326527734,
+          "mean": 87.705,
+          "sd": 1.568963033343999,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": null,
+        "energy_wh_approx": {
+          "ci95_high": 0.1776,
+          "ci95_low": 0.1776,
+          "mean": 0.1776,
+          "sd": 0.0,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 4.214703389616848,
+          "ci95_low": 3.918496610383152,
+          "mean": 4.0666,
+          "sd": 0.16896390147010687,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 5.267805239319669,
+          "ci95_low": 4.898194760680331,
+          "mean": 5.083,
+          "sd": 0.21083524373311024,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 55.0,
+          "ci95_low": 55.0,
+          "mean": 55.0,
+          "sd": 0.0,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.230733161488434,
+          "ci95_low": 21.60966683851157,
+          "mean": 21.9202,
+          "sd": 0.3542720705898227,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 1.0,
+          "ci95_low": 1.0,
+          "mean": 1.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        }
+      },
+      "profile": "high",
+      "repetitions": 5,
+      "scenario_id": "standard__high__busy__local_fallback"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 25.589,
+        "cpu_load_percent_min": 22.124,
+        "temperature_c_max": 22.51,
+        "temperature_c_min": 21.54
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "standard",
+      "inference_location": "local_device",
+      "load": "idle",
+      "metrics": {
+        "balanced_accuracy": {
+          "ci95_high": 0.8393942959471373,
+          "ci95_low": 0.8345909040528626,
+          "mean": 0.8369926,
+          "sd": 0.002739977244431079,
+          "unit": "ratio"
+        },
+        "brier": {
+          "ci95_high": 0.204376941009106,
+          "ci95_low": 0.20355385899089398,
+          "mean": 0.2039654,
+          "sd": 0.00046950697545403906,
+          "unit": "ratio"
+        },
+        "coverage": {
+          "ci95_high": 0.916044772680568,
+          "ci95_low": 0.905443627319432,
+          "mean": 0.9107442,
+          "sd": 0.006047163690524668,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 25.688738826791525,
+          "ci95_low": 23.111261173208472,
+          "mean": 24.4,
+          "sd": 1.4702589907903982,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": {
+          "ci95_high": 0.07342987712971032,
+          "ci95_low": 0.06964292287028968,
+          "mean": 0.0715364,
+          "sd": 0.0021601752938129794,
+          "unit": "ratio"
+        },
+        "energy_wh_approx": {
+          "ci95_high": 1.2573523452685262,
+          "ci95_low": 1.1921716547314736,
+          "mean": 1.224762,
+          "sd": 0.03718072828092536,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 93.34504765297162,
+          "ci95_low": 89.42615234702838,
+          "mean": 91.3856,
+          "sd": 2.235437831835189,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 119.95020185535722,
+          "ci95_low": 114.47859814464277,
+          "mean": 117.2144,
+          "sd": 3.1211423069126467,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 475.3917966699931,
+          "ci95_low": 465.18500333000696,
+          "mean": 470.2884,
+          "sd": 5.822215239923716,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.40096639135516,
+          "ci95_low": 21.726233608644844,
+          "mean": 22.0636,
+          "sd": 0.38488478795608516,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 0.16640055463425324,
+          "ci95_low": 0.15518424536574676,
+          "mean": 0.1607924,
+          "sd": 0.006398068872714646,
+          "unit": "ratio"
+        }
+      },
+      "profile": "high",
+      "repetitions": 5,
+      "scenario_id": "standard__high__idle__local_device"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 25.261,
+        "cpu_load_percent_min": 22.323,
+        "temperature_c_max": 22.589,
+        "temperature_c_min": 21.669
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "standard",
+      "inference_location": "local_fallback",
+      "load": "idle",
+      "metrics": {
+        "balanced_accuracy": null,
+        "brier": null,
+        "coverage": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 25.175946018663165,
+          "ci95_low": 23.086053981336836,
+          "mean": 24.131,
+          "sd": 1.1921277196676536,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": null,
+        "energy_wh_approx": {
+          "ci95_high": 0.0936,
+          "ci95_low": 0.0936,
+          "mean": 0.0936,
+          "sd": 0.0,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 4.125195072004336,
+          "ci95_low": 3.822004927995663,
+          "mean": 3.9736,
+          "sd": 0.17294739084473065,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 5.156092771305516,
+          "ci95_low": 4.7779072286944855,
+          "mean": 4.9670000000000005,
+          "sd": 0.2157266789249766,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 55.0,
+          "ci95_low": 55.0,
+          "mean": 55.0,
+          "sd": 0.0,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.485716503792293,
+          "ci95_low": 21.767483496207706,
+          "mean": 22.1266,
+          "sd": 0.4096984256742997,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 1.0,
+          "ci95_low": 1.0,
+          "mean": 1.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        }
+      },
+      "profile": "high",
+      "repetitions": 5,
+      "scenario_id": "standard__high__idle__local_fallback"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 55.5,
+        "cpu_load_percent_min": 53.334,
+        "temperature_c_max": 22.337,
+        "temperature_c_min": 21.331
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "standard",
+      "inference_location": "local_device",
+      "load": "nominal",
+      "metrics": {
+        "balanced_accuracy": {
+          "ci95_high": 0.8379874107259676,
+          "ci95_low": 0.8330357892740324,
+          "mean": 0.8355116,
+          "sd": 0.0028245311646359892,
+          "unit": "ratio"
+        },
+        "brier": {
+          "ci95_high": 0.20466406071575052,
+          "ci95_low": 0.20372113928424948,
+          "mean": 0.2041926,
+          "sd": 0.000537866433234128,
+          "unit": "ratio"
+        },
+        "coverage": {
+          "ci95_high": 0.913166772473117,
+          "ci95_low": 0.9051812275268831,
+          "mean": 0.909174,
+          "sd": 0.0045551585043772025,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 55.408832365241175,
+          "ci95_low": 53.76476763475883,
+          "mean": 54.586800000000004,
+          "sd": 0.9378164532572445,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": {
+          "ci95_high": 0.0732070616846528,
+          "ci95_low": 0.06978813831534719,
+          "mean": 0.0714976,
+          "sd": 0.001950241087660701,
+          "unit": "ratio"
+        },
+        "energy_wh_approx": {
+          "ci95_high": 1.5744277879617419,
+          "ci95_low": 1.534943012038258,
+          "mean": 1.5546853999999999,
+          "sd": 0.022523123224810503,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 121.09423849402073,
+          "ci95_low": 114.62216150597926,
+          "mean": 117.8582,
+          "sd": 3.6918377808349074,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 153.00970158442345,
+          "ci95_low": 144.56709841557654,
+          "mean": 148.7884,
+          "sd": 4.8158761715808325,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 474.2842734331556,
+          "ci95_low": 458.8109265668444,
+          "mean": 466.5476,
+          "sd": 8.826391691965643,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.055180892596127,
+          "ci95_low": 21.40081910740387,
+          "mean": 21.727999999999998,
+          "sd": 0.3732646514204098,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 0.16575310775827903,
+          "ci95_low": 0.158894092241721,
+          "mean": 0.1623236,
+          "sd": 0.003912557386160618,
+          "unit": "ratio"
+        }
+      },
+      "profile": "high",
+      "repetitions": 5,
+      "scenario_id": "standard__high__nominal__local_device"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 56.009,
+        "cpu_load_percent_min": 52.085,
+        "temperature_c_max": 22.679,
+        "temperature_c_min": 21.35
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "standard",
+      "inference_location": "local_fallback",
+      "load": "nominal",
+      "metrics": {
+        "balanced_accuracy": null,
+        "brier": null,
+        "coverage": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 56.041848782813204,
+          "ci95_low": 52.70455121718679,
+          "mean": 54.3732,
+          "sd": 1.903679647419702,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": null,
+        "energy_wh_approx": {
+          "ci95_high": 0.12,
+          "ci95_low": 0.12,
+          "mean": 0.12,
+          "sd": 0.0,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 4.258966123118724,
+          "ci95_low": 4.037033876881275,
+          "mean": 4.148,
+          "sd": 0.1265958135168774,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 5.323410113570403,
+          "ci95_low": 5.046189886429597,
+          "mean": 5.1848,
+          "sd": 0.15813348791448306,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 55.0,
+          "ci95_low": 55.0,
+          "mean": 55.0,
+          "sd": 0.0,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.531445287705505,
+          "ci95_low": 21.684554712294496,
+          "mean": 22.108,
+          "sd": 0.4830879837048309,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 1.0,
+          "ci95_low": 1.0,
+          "mean": 1.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        }
+      },
+      "profile": "high",
+      "repetitions": 5,
+      "scenario_id": "standard__high__nominal__local_fallback"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 89.79,
+        "cpu_load_percent_min": 86.32,
+        "temperature_c_max": 21.84,
+        "temperature_c_min": 21.468
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "standard",
+      "inference_location": "local_device",
+      "load": "busy",
+      "metrics": {
+        "balanced_accuracy": {
+          "ci95_high": 0.7284607389179938,
+          "ci95_low": 0.7238096610820062,
+          "mean": 0.7261352,
+          "sd": 0.0026530934208956964,
+          "unit": "ratio"
+        },
+        "brier": {
+          "ci95_high": 0.23637713135704663,
+          "ci95_low": 0.2354644686429534,
+          "mean": 0.2359208,
+          "sd": 0.0005206060890923262,
+          "unit": "ratio"
+        },
+        "coverage": {
+          "ci95_high": 0.708491836724439,
+          "ci95_low": 0.7032449632755609,
+          "mean": 0.7058684,
+          "sd": 0.0029929504339363936,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 89.31839659610849,
+          "ci95_low": 86.94720340389152,
+          "mean": 88.1328,
+          "sd": 1.3525890728525094,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": {
+          "ci95_high": 0.12956319089140053,
+          "ci95_low": 0.12725760910859948,
+          "mean": 0.1284104,
+          "sd": 0.0013151626515378236,
+          "unit": "ratio"
+        },
+        "energy_wh_approx": {
+          "ci95_high": 0.8246886271072366,
+          "ci95_low": 0.7909673728927634,
+          "mean": 0.807828,
+          "sd": 0.01923546344645743,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 62.25803885427906,
+          "ci95_low": 60.38036114572095,
+          "mean": 61.3192,
+          "sd": 1.0710752541254998,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 79.44518114716558,
+          "ci95_low": 76.63001885283441,
+          "mean": 78.0376,
+          "sd": 1.605840371892547,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 172.5618838405699,
+          "ci95_low": 167.88211615943013,
+          "mean": 170.222,
+          "sd": 2.6694588402895465,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 21.73221775702719,
+          "ci95_low": 21.486182242972813,
+          "mean": 21.6092,
+          "sd": 0.14034493222058286,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 0.42610502557014285,
+          "ci95_low": 0.4189793744298571,
+          "mean": 0.4225422,
+          "sd": 0.004064653146333649,
+          "unit": "ratio"
+        }
+      },
+      "profile": "low",
+      "repetitions": 5,
+      "scenario_id": "standard__low__busy__local_device"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 90.58,
+        "cpu_load_percent_min": 86.999,
+        "temperature_c_max": 22.604,
+        "temperature_c_min": 21.369
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "standard",
+      "inference_location": "local_fallback",
+      "load": "busy",
+      "metrics": {
+        "balanced_accuracy": null,
+        "brier": null,
+        "coverage": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 90.56334315250359,
+          "ci95_low": 87.6778568474964,
+          "mean": 89.1206,
+          "sd": 1.6459549811583567,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": null,
+        "energy_wh_approx": {
+          "ci95_high": 0.1776,
+          "ci95_low": 0.1776,
+          "mean": 0.1776,
+          "sd": 0.0,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 4.195071501569802,
+          "ci95_low": 3.7977284984301978,
+          "mean": 3.9964,
+          "sd": 0.22665458301124194,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 5.244295038502982,
+          "ci95_low": 4.746904961497017,
+          "mean": 4.9956,
+          "sd": 0.28372398559163103,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 55.0,
+          "ci95_low": 55.0,
+          "mean": 55.0,
+          "sd": 0.0,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.226792783991513,
+          "ci95_low": 21.37000721600849,
+          "mean": 21.7984,
+          "sd": 0.48873233983439224,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 1.0,
+          "ci95_low": 1.0,
+          "mean": 1.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        }
+      },
+      "profile": "low",
+      "repetitions": 5,
+      "scenario_id": "standard__low__busy__local_fallback"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 26.327,
+        "cpu_load_percent_min": 24.958,
+        "temperature_c_max": 22.641,
+        "temperature_c_min": 21.641
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "standard",
+      "inference_location": "local_device",
+      "load": "idle",
+      "metrics": {
+        "balanced_accuracy": {
+          "ci95_high": 0.7427035909334604,
+          "ci95_low": 0.7357120090665396,
+          "mean": 0.7392078,
+          "sd": 0.003988176613441266,
+          "unit": "ratio"
+        },
+        "brier": {
+          "ci95_high": 0.23225019710997308,
+          "ci95_low": 0.23104940289002696,
+          "mean": 0.23164980000000002,
+          "sd": 0.0006849636486704955,
+          "unit": "ratio"
+        },
+        "coverage": {
+          "ci95_high": 0.7369961062563661,
+          "ci95_low": 0.7268438937436339,
+          "mean": 0.73192,
+          "sd": 0.005791080944003439,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 26.213680114209147,
+          "ci95_low": 25.31791988579085,
+          "mean": 25.7658,
+          "sd": 0.5109644801745041,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": {
+          "ci95_high": 0.12193783177444696,
+          "ci95_low": 0.11744696822555305,
+          "mean": 0.1196924,
+          "sd": 0.0025617031053578395,
+          "unit": "ratio"
+        },
+        "energy_wh_approx": {
+          "ci95_high": 0.434565173452579,
+          "ci95_low": 0.425867626547421,
+          "mean": 0.4302164,
+          "sd": 0.004961302580976095,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 33.21663459775099,
+          "ci95_low": 31.802165402249013,
+          "mean": 32.5094,
+          "sd": 0.8068493043933297,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 41.84337694681995,
+          "ci95_low": 40.30022305318004,
+          "mean": 41.071799999999996,
+          "sd": 0.8802543382454869,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 171.96915760551582,
+          "ci95_low": 167.4972423944842,
+          "mean": 169.7332,
+          "sd": 2.55089449017399,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.422234098909513,
+          "ci95_low": 21.671365901090482,
+          "mean": 22.046799999999998,
+          "sd": 0.4283143705270695,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 0.392185721454444,
+          "ci95_low": 0.3833590785455559,
+          "mean": 0.38777239999999996,
+          "sd": 0.00503494223402812,
+          "unit": "ratio"
+        }
+      },
+      "profile": "low",
+      "repetitions": 5,
+      "scenario_id": "standard__low__idle__local_device"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 26.284,
+        "cpu_load_percent_min": 22.264,
+        "temperature_c_max": 22.63,
+        "temperature_c_min": 21.842
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "standard",
+      "inference_location": "local_fallback",
+      "load": "idle",
+      "metrics": {
+        "balanced_accuracy": null,
+        "brier": null,
+        "coverage": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 26.483700041702765,
+          "ci95_low": 23.556699958297234,
+          "mean": 25.0202,
+          "sd": 1.6696354991434506,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": null,
+        "energy_wh_approx": {
+          "ci95_high": 0.0936,
+          "ci95_low": 0.0936,
+          "mean": 0.0936,
+          "sd": 0.0,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 4.198488001098237,
+          "ci95_low": 3.907111998901763,
+          "mean": 4.0528,
+          "sd": 0.16620830304169512,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 5.248241060598976,
+          "ci95_low": 4.884158939401025,
+          "mean": 5.0662,
+          "sd": 0.2076817276507492,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 55.0,
+          "ci95_low": 55.0,
+          "mean": 55.0,
+          "sd": 0.0,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.50256921663846,
+          "ci95_low": 21.901830783361543,
+          "mean": 22.2022,
+          "sd": 0.34267652385303576,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 1.0,
+          "ci95_low": 1.0,
+          "mean": 1.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        }
+      },
+      "profile": "low",
+      "repetitions": 5,
+      "scenario_id": "standard__low__idle__local_fallback"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 57.686,
+        "cpu_load_percent_min": 52.038,
+        "temperature_c_max": 22.694,
+        "temperature_c_min": 21.663
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "standard",
+      "inference_location": "local_device",
+      "load": "nominal",
+      "metrics": {
+        "balanced_accuracy": {
+          "ci95_high": 0.7450688649779265,
+          "ci95_low": 0.7423303350220736,
+          "mean": 0.7436996,
+          "sd": 0.0015621273315578569,
+          "unit": "ratio"
+        },
+        "brier": {
+          "ci95_high": 0.23163383655195896,
+          "ci95_low": 0.23058016344804105,
+          "mean": 0.231107,
+          "sd": 0.000601042011842761,
+          "unit": "ratio"
+        },
+        "coverage": {
+          "ci95_high": 0.7321927286932682,
+          "ci95_low": 0.7265080713067317,
+          "mean": 0.7293504,
+          "sd": 0.003242673557421422,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 57.0394935691177,
+          "ci95_low": 53.059706430882294,
+          "mean": 55.0496,
+          "sd": 2.2701720859881966,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": {
+          "ci95_high": 0.12251888377854708,
+          "ci95_low": 0.1182715162214529,
+          "mean": 0.1203952,
+          "sd": 0.002422806781400452,
+          "unit": "ratio"
+        },
+        "energy_wh_approx": {
+          "ci95_high": 0.5649554566652673,
+          "ci95_low": 0.5331917433347326,
+          "mean": 0.5490735999999999,
+          "sd": 0.018118832200227492,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 42.274623046994265,
+          "ci95_low": 40.60737695300574,
+          "mean": 41.441,
+          "sd": 0.9510396942294256,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 53.85208394085911,
+          "ci95_low": 51.94071605914089,
+          "mean": 52.8964,
+          "sd": 1.0902929881458463,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 173.14629057655245,
+          "ci95_low": 168.4181094234476,
+          "mean": 170.78220000000002,
+          "sd": 2.69707511945811,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.562959144289124,
+          "ci95_low": 21.905840855710878,
+          "mean": 22.2344,
+          "sd": 0.3748370312549172,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 0.39416777726627394,
+          "ci95_low": 0.387921822733726,
+          "mean": 0.39104479999999997,
+          "sd": 0.0035628517650893076,
+          "unit": "ratio"
+        }
+      },
+      "profile": "low",
+      "repetitions": 5,
+      "scenario_id": "standard__low__nominal__local_device"
+    },
+    {
+      "conditions": {
+        "cpu_load_percent_max": 55.381,
+        "cpu_load_percent_min": 52.451,
+        "temperature_c_max": 22.665,
+        "temperature_c_min": 21.583
+      },
+      "data_classification": "synthetic_controlled_simulation",
+      "device_class": "standard",
+      "inference_location": "local_fallback",
+      "load": "nominal",
+      "metrics": {
+        "balanced_accuracy": null,
+        "brier": null,
+        "coverage": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        },
+        "cpu_load_percent": {
+          "ci95_high": 55.332883304034844,
+          "ci95_low": 53.368716695965155,
+          "mean": 54.3508,
+          "sd": 1.1204107282599534,
+          "unit": "percent"
+        },
+        "duration_seconds": {
+          "ci95_high": 120.0,
+          "ci95_low": 120.0,
+          "mean": 120.0,
+          "sd": 0.0,
+          "unit": "s"
+        },
+        "ece": null,
+        "energy_wh_approx": {
+          "ci95_high": 0.12,
+          "ci95_low": 0.12,
+          "mean": 0.12,
+          "sd": 0.0,
+          "unit": "Wh"
+        },
+        "latency_ms_p50": {
+          "ci95_high": 4.1530622283818435,
+          "ci95_low": 3.8857377716181567,
+          "mean": 4.0194,
+          "sd": 0.15248868810505267,
+          "unit": "ms"
+        },
+        "latency_ms_p95": {
+          "ci95_high": 5.191590655605383,
+          "ci95_low": 4.856809344394618,
+          "mean": 5.0242,
+          "sd": 0.19096779833259825,
+          "unit": "ms"
+        },
+        "memory_mb_peak": {
+          "ci95_high": 55.0,
+          "ci95_low": 55.0,
+          "mean": 55.0,
+          "sd": 0.0,
+          "unit": "MiB"
+        },
+        "network_kb": {
+          "ci95_high": 0.0,
+          "ci95_low": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "unit": "KiB"
+        },
+        "temperature_c": {
+          "ci95_high": 22.558463793255818,
+          "ci95_low": 21.660736206744183,
+          "mean": 22.1096,
+          "sd": 0.5120867114073556,
+          "unit": "degC"
+        },
+        "uncertainty_entropy": {
+          "ci95_high": 1.0,
+          "ci95_low": 1.0,
+          "mean": 1.0,
+          "sd": 0.0,
+          "unit": "ratio"
+        }
+      },
+      "profile": "low",
+      "repetitions": 5,
+      "scenario_id": "standard__low__nominal__local_fallback"
+    }
+  ],
+  "conditions": {
+    "cooldown_seconds": 30,
+    "duration_seconds": 120,
+    "matrix": {
+      "device_classes": 3,
+      "loads": 3,
+      "locations": 2,
+      "profiles": 3
+    },
+    "repetitions": 5,
+    "temperature_target_c": 22.0,
+    "temperature_tolerance_c": 2.0,
+    "warmup_seconds": 30
+  },
+  "limitations": [
+    "synthetic_results_are_not_empirical_device_measurements",
+    "energy_is_approximate",
+    "no_claim_about_internal_attention_or_diagnosis",
+    "pilot_sample_required_before_generalization"
+  ],
+  "pareto": {
+    "comparison_scope": "within_device_class",
+    "dominated_scenario_ids": [
+      "constrained__high__nominal__local_device"
+    ],
+    "frontier_scenario_ids": [
+      "capable__balanced__nominal__local_device",
+      "capable__high__nominal__local_device",
+      "capable__low__nominal__local_device",
+      "constrained__balanced__nominal__local_device",
+      "constrained__low__nominal__local_device",
+      "standard__balanced__nominal__local_device",
+      "standard__high__nominal__local_device",
+      "standard__low__nominal__local_device"
+    ],
+    "load": "nominal",
+    "maximize": [
+      "balanced_accuracy",
+      "coverage"
+    ],
+    "minimize": [
+      "ece",
+      "latency_ms_p95",
+      "memory_mb_peak",
+      "energy_wh_approx",
+      "network_kb"
+    ]
+  },
+  "provenance": {
+    "code_version": "pr28-synthetic-v1",
+    "config_sha256": "d7cc12973d46cbf4a27d64a63d56c72b03989cf4f5a7cee5d190dcb79025800a",
+    "data_classification": "synthetic_controlled_simulation",
+    "input_sha256": "ba6b551c7da0cce0c0680570256d9f31bf2b2012a2001ca54792bd46eb57647e",
+    "runtime": {
+      "python": "3.11.9"
+    },
+    "schema_version": "device-benchmark-v1"
+  },
+  "recommendations_by_device_class": {
+    "capable": {
+      "profile": "high",
+      "requires_empirical_confirmation": true,
+      "scenario_id": "capable__high__nominal__local_device",
+      "status": "SYNTHETIC_CONTROLLED_RECOMMENDATION",
+      "within_latency_budget": true
+    },
+    "constrained": {
+      "profile": "low",
+      "requires_empirical_confirmation": true,
+      "scenario_id": "constrained__low__nominal__local_device",
+      "status": "SYNTHETIC_CONTROLLED_RECOMMENDATION",
+      "within_latency_budget": true
+    },
+    "standard": {
+      "profile": "balanced",
+      "requires_empirical_confirmation": true,
+      "scenario_id": "standard__balanced__nominal__local_device",
+      "status": "SYNTHETIC_CONTROLLED_RECOMMENDATION",
+      "within_latency_budget": true
+    }
+  },
+  "status": "SYNTHETIC_ONLY_NOT_EMPIRICAL"
+}

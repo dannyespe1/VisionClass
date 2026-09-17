@@ -1,0 +1,12 @@
+{
+  "schema_version": "device-benchmark-v1",
+  "seed": 28017,
+  "repetitions": 5,
+  "duration_seconds": 120,
+  "warmup_seconds": 30,
+  "cooldown_seconds": 30,
+  "temperature_target_c": 22.0,
+  "temperature_tolerance_c": 2.0,
+  "latency_budget_ms_p95": 100.0,
+  "pareto_load": "nominal"
+}

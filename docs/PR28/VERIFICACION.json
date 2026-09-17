@@ -1,0 +1,82 @@
+{
+  "pr": "PR28",
+  "base_commit": "10b1dff",
+  "verification_date": "2026-09-16",
+  "status": "TECHNICAL_PASS_SYNTHETIC_ONLY",
+  "data_classification": "synthetic_controlled_simulation",
+  "real_device_or_participant_data_used": false,
+  "matrix": {
+    "scenarios": 54,
+    "repetitions_per_scenario": 5,
+    "runs": 270,
+    "device_classes": 3,
+    "profiles": 3,
+    "loads": 3,
+    "inference_locations": 2
+  },
+  "results": {
+    "pr28_tests": {
+      "command": "python -m unittest ml.test_benchmark_pareto",
+      "passed": 8,
+      "failed": 0,
+      "status": "pass"
+    },
+    "related_pr23_and_pr28_tests": {
+      "command": "python -m unittest ml.test_benchmark_pareto ml.test_dynamic_evaluation",
+      "passed": 18,
+      "failed": 0,
+      "status": "pass"
+    },
+    "ml_suite_container": {
+      "command": "docker run --rm -v <worktree>:/workspace -w /workspace vision_system-ml:latest python -m unittest discover -s ml -p test_*.py",
+      "passed": 73,
+      "failed": 1,
+      "status": "pass_with_preexisting_failure",
+      "preexisting_failure": "ml.test_export_state_model_web.WebStateModelExportTests.test_cli_reproduces_versioned_files",
+      "baseline_reproduction": "The same test fails on wave7-integracion at 10b1dff because generated LF bytes are compared against a CRLF checkout.",
+      "non_blocking_warning": "ONNX Runtime could not discover a GPU in the CPU container; the suite continued."
+    },
+    "static_compilation": {
+      "command": "python -m compileall -q ml",
+      "status": "pass"
+    },
+    "artifact_validation": {
+      "csv_rows": 270,
+      "unique_scenarios": 54,
+      "svg_xml": "valid",
+      "git_diff_check": "pass"
+    },
+    "real_controlled_device_benchmark": {
+      "status": "not_executed",
+      "reason": "No approved controlled target-device measurement dataset was supplied."
+    },
+    "pilot_replication": {
+      "status": "not_executed",
+      "reason": "Requires target devices and the approved pilot conditions."
+    }
+  },
+  "artifacts": {
+    "SYNTHETIC_BENCHMARK_RUNS.csv": {
+      "sha256": "149ae5fbf63e5c4e5fdf6b2f63956dd0df8adb86fa41affceb77cb6eb1f338d4"
+    },
+    "SYNTHETIC_BENCHMARK_RESULT.json": {
+      "sha256": "27016b169a9b7c48c42373701b7012a84f14e76e730da464e9f12235c97e93e2"
+    },
+    "PARETO_FRONTIER.svg": {
+      "sha256": "949a33ffe07e406806b1d45faa5079a0755cb0f1d0af89e579bc440d9fb87b2d"
+    }
+  },
+  "verified_controls": [
+    "complete_device_profile_load_location_matrix",
+    "fixed_repetitions_and_thermal_conditions",
+    "units_and_ranges_validated",
+    "aggregate_uncertainty_reported",
+    "pareto_compared_within_device_class",
+    "dominated_configuration_identified",
+    "fallback_cannot_claim_predictive_performance",
+    "raw_media_transmission_rejected",
+    "synthetic_and_controlled_artifact_names_separated",
+    "empirical_confirmation_required_before_deployment"
+  ],
+  "rollback": "Keep conclusions labeled controlled/non-generalizable and use NEXT_PUBLIC_ADAPTIVE_SCHEDULER=false with NEXT_PUBLIC_EDGE_FIXED_PROFILE=balanced until target-device pilot evidence is accepted."
+}

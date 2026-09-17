@@ -1,0 +1,40 @@
+{
+  "gate": "G6",
+  "date": "2026-09-17",
+  "status": "READY_FOR_OWNER_DECISION",
+  "pilot_activation": false,
+  "checks": {
+    "backend_full": {"status": "PASS", "tests": 133},
+    "operations": {"status": "PASS", "tests": 7},
+    "django_check": "PASS",
+    "migration_drift": "PASS_NO_CHANGES",
+    "frontend_typecheck": "PASS",
+    "frontend_build": "PASS",
+    "frontend_full_tests": {
+      "status": "BASELINE_FAILURE",
+      "passed": 64,
+      "failed": 2,
+      "source": "PR25 inherited artifact length/hash expectations"
+    },
+    "ml_compileall": "PASS",
+    "compose_config": "PASS",
+    "npm_audit": {
+      "status": "REQUIRES_TRIAGE",
+      "low": 1,
+      "moderate": 4,
+      "high": 11,
+      "critical": 1
+    }
+  },
+  "approved_slo": {
+    "availability": 0.99,
+    "budget_minutes_per_30_days": 432,
+    "planned_maintenance_consumes_budget": true
+  },
+  "pending": {
+    "pr25_frontend_failures": 2,
+    "human_and_independent_reviews": true,
+    "candidate_soak_and_rollback": true,
+    "owner_gate_decision": true
+  }
+}

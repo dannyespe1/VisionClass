@@ -69,15 +69,16 @@ ML_SERVICE_SCOPES = tuple(
 ML_EVENT_MAX_BYTES = int(os.environ.get('ML_EVENT_MAX_BYTES', '16384'))
 TEMPORAL_INFERENCE_API = os.environ.get('TEMPORAL_INFERENCE_API', 'False').strip().lower() == 'true'
 TEMPORAL_INFERENCE_MAX_BYTES = int(os.environ.get('TEMPORAL_INFERENCE_MAX_BYTES', '16384'))
-STUDENT_ATTENTION_DASHBOARD = os.environ.get('STUDENT_ATTENTION_DASHBOARD', 'False').strip().lower() == 'true'
-TEACHER_GROUP_DASHBOARD = os.environ.get('TEACHER_GROUP_DASHBOARD', 'False').strip().lower() == 'true'
+PILOT_RELEASE = os.environ.get('PILOT_RELEASE', 'False').strip().lower() == 'true'
+STUDENT_ATTENTION_DASHBOARD = PILOT_RELEASE and os.environ.get('STUDENT_ATTENTION_DASHBOARD', 'False').strip().lower() == 'true'
+TEACHER_GROUP_DASHBOARD = PILOT_RELEASE and os.environ.get('TEACHER_GROUP_DASHBOARD', 'False').strip().lower() == 'true'
 TEACHER_GROUP_DASHBOARD_MIN_PARTICIPANTS = max(
     20, int(os.environ.get('TEACHER_GROUP_DASHBOARD_MIN_PARTICIPANTS', '20'))
 )
 TEACHER_GROUP_DASHBOARD_MIN_OBSERVABLE_WINDOWS = max(
     100, int(os.environ.get('TEACHER_GROUP_DASHBOARD_MIN_OBSERVABLE_WINDOWS', '100'))
 )
-RESEARCH_DASHBOARD = os.environ.get('RESEARCH_DASHBOARD', 'False').strip().lower() == 'true'
+RESEARCH_DASHBOARD = PILOT_RELEASE and os.environ.get('RESEARCH_DASHBOARD', 'False').strip().lower() == 'true'
 RESEARCH_DASHBOARD_MIN_PARTICIPANTS = max(
     20, int(os.environ.get('RESEARCH_DASHBOARD_MIN_PARTICIPANTS', '20'))
 )
@@ -88,7 +89,7 @@ RESEARCH_EXPORT_MAX_MINUTES = min(
     60, max(5, int(os.environ.get('RESEARCH_EXPORT_MAX_MINUTES', '30')))
 )
 RESEARCH_GRANT_MAX_DAYS = min(365, max(1, int(os.environ.get('RESEARCH_GRANT_MAX_DAYS', '90'))))
-CONSERVATIVE_INTERVENTIONS = os.environ.get('CONSERVATIVE_INTERVENTIONS', 'False').strip().lower() == 'true'
+CONSERVATIVE_INTERVENTIONS = PILOT_RELEASE and os.environ.get('CONSERVATIVE_INTERVENTIONS', 'False').strip().lower() == 'true'
 PRODUCTION_OBSERVABILITY = os.environ.get('PRODUCTION_OBSERVABILITY', 'False').strip().lower() == 'true'
 
 LOGGING = {

@@ -1,0 +1,18 @@
+{
+  "concurrency": 10,
+  "destination": "loopback",
+  "elapsed_seconds": 0.909,
+  "error_rate": 0.0,
+  "errors": 0,
+  "latency_ms": {
+    "max": 651.389,
+    "p50": 13.173,
+    "p95": 26.043,
+    "p99": 647.566
+  },
+  "profile": "target",
+  "requests": 200,
+  "schema_version": "1.0",
+  "successes": 200,
+  "throughput_rps": 220.029
+}

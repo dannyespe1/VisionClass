@@ -34,6 +34,8 @@ services:
       - "8000:8000"
     env_file:
       - ./backend/.env
+    environment:
+      - PILOT_RELEASE=False
     depends_on:
       - db
       - redis
@@ -49,6 +51,7 @@ services:
       - "3000:3000"
     environment:
       - ML_BFF_SERVICE_TOKEN=${ML_BFF_SERVICE_TOKEN:-}
+      - NEXT_PUBLIC_PILOT_RELEASE=false
     depends_on:
       - backend
   ml:

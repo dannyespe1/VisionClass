@@ -1,0 +1,12 @@
+services:
+  backend:
+    environment:
+      PILOT_RELEASE: "False"
+      STUDENT_ATTENTION_DASHBOARD: "False"
+      TEACHER_GROUP_DASHBOARD: "False"
+      RESEARCH_DASHBOARD: "False"
+      CONSERVATIVE_INTERVENTIONS: "False"
+      PRODUCTION_OBSERVABILITY: "True"
+  ml:
+    environment:
+      TRAIN_ON_START: "0"

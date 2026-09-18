@@ -39,6 +39,16 @@ services:
         value: "https://visionclass-frontend.onrender.com/login"
       - key: SITE_ID
         value: "1"
+      - key: PILOT_RELEASE
+        value: "False"
+      - key: STUDENT_ATTENTION_DASHBOARD
+        value: "False"
+      - key: TEACHER_GROUP_DASHBOARD
+        value: "False"
+      - key: RESEARCH_DASHBOARD
+        value: "False"
+      - key: CONSERVATIVE_INTERVENTIONS
+        value: "False"
       - key: ML_SERVICE_IDENTITY
         value: "True"
       - key: ML_SERVICE_TOKEN
@@ -76,7 +86,7 @@ services:
   - type: web
     name: visionclass-frontend
     env: node
-    buildCommand: cd frontend && npm install && npm run build
+    buildCommand: cd frontend && npm ci && npm run build
     startCommand: cd frontend && npm run start
     envVars:
       - key: NEXT_PUBLIC_BACKEND_URL
@@ -93,3 +103,13 @@ services:
         sync: false
       - key: NEXT_PUBLIC_GOOGLE_REDIRECT_URI
         value: "https://visionclass-frontend.onrender.com/login"
+      - key: NEXT_PUBLIC_PILOT_RELEASE
+        value: "false"
+      - key: NEXT_PUBLIC_STUDENT_ATTENTION_DASHBOARD
+        value: "false"
+      - key: NEXT_PUBLIC_TEACHER_GROUP_DASHBOARD
+        value: "false"
+      - key: NEXT_PUBLIC_RESEARCH_DASHBOARD
+        value: "false"
+      - key: NEXT_PUBLIC_CONSERVATIVE_INTERVENTIONS
+        value: "false"

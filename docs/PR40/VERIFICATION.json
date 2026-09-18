@@ -1,0 +1,58 @@
+{
+  "pr": "PR40",
+  "release_id": "visionclass-pilot-0.40.0-rc.1",
+  "status": "PREPARED_NOT_DEPLOYED",
+  "authorization": "G6_APPROVED_FOR_RELEASE_CANDIDATE_ENGINEERING",
+  "automated": {
+    "candidate_manifest": "PASS",
+    "backend_targeted_journey": {"status": "PASS", "tests": 28},
+    "backend_full": {"status": "PASS", "tests": 135},
+    "django_check": "PASS",
+    "migration_drift": "PASS_NO_CHANGES",
+    "frontend_full": {"status": "PASS", "tests": 69},
+    "frontend_typecheck": "PASS",
+    "frontend_build": "PASS",
+    "frontend_changed_files_lint": "PASS",
+    "frontend_docker_build": "PASS",
+    "ml_compileall": "PASS",
+    "npm_audit_all": {"status": "PASS", "vulnerabilities": 0},
+    "npm_audit_production": {"status": "PASS", "vulnerabilities": 0},
+    "compose_config": "PASS"
+  },
+  "rehearsal": {
+    "environment": "isolated_synthetic_compose",
+    "real_data_used": false,
+    "backend_ready": true,
+    "ml_healthy": true,
+    "pilot_release": false,
+    "pending_modules_enabled": 0,
+    "load": {
+      "requests": 200,
+      "errors": 0,
+      "p95_ms": 26.043,
+      "p99_ms": 647.566
+    },
+    "rollback_seconds": 14.912,
+    "resources_remaining_after_rollback": 0
+  },
+  "resolved_baseline": {
+    "pr25_frontend_failures": "FIXED_BY_REFRESHED_ARTIFACT_LENGTH_AND_HASH",
+    "npm_critical_vulnerability": "FIXED_BY_NEXT_16_3_5",
+    "npm_total_vulnerabilities": 0
+  },
+  "manual": {
+    "pilot_activation": "BLOCKED",
+    "real_participant_roster": "NOT_CREATED",
+    "candidate_infrastructure_soak": "NOT_EXECUTED",
+    "human_and_independent_reviews_pr35_pr38": "PENDING",
+    "deployment": "NOT_EXECUTED"
+  },
+  "safe_defaults": {
+    "pilot_release": false,
+    "student_dashboard": false,
+    "teacher_dashboard": false,
+    "research_dashboard": false,
+    "conservative_interventions": false,
+    "train_on_start": false
+  }
+}

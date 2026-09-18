@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0",
+  "release_id": "visionclass-pilot-0.40.0-rc.1",
+  "status": "PREPARED_NOT_DEPLOYED",
+  "source_base_commit": "99f405c",
+  "g6_decision": "APPROVED_FOR_RELEASE_CANDIDATE_ENGINEERING",
+  "pilot_activation": false,
+  "runtime": {
+    "python": "3.11",
+    "node": "20",
+    "postgres": "15",
+    "redis": "7.4-alpine"
+  },
+  "dependencies": {
+    "frontend/package-lock.json": "dd88049cb83219d6a9821beac89e7d1471f3f761f87ec76046f5e30e82bfcc4f",
+    "backend/requirements.txt": "41844e4a7d30754a9bde9fd582b14e92db9620c308a7294b9c437888a2579dd3",
+    "ml/requirements.txt": "03babb22e38ed9b57a544a7b55958eadef9838d4a9d980efbeb590f9b55d4c2e"
+  },
+  "application_versions": {
+    "next": "16.3.5",
+    "axios": "1.18.0",
+    "temporal_web_artifact": "observable-evidence-hmm-v1"
+  },
+  "models": {
+    "frontend/public/models/temporal-reference.v1.json": {
+      "byte_length": 927,
+      "sha256": "61454bf05e3af371832e057ba5194c413d7e5470a07e9c50ac10355bade522a4",
+      "eligibility": "engineering_parity_only"
+    },
+    "ml/config/pr20_state_model_v1.json": {
+      "sha256": "fad1217d6c1c5d139f63fed630baf4b52cf1eab77ab2e62b69d1e457639b9532"
+    },
+    "ml/config/pr22_model_rollout_v1.json": {
+      "sha256": "c6fcc80e8203f14680ae29ce49a4c98f5f85b14295b7d06930892e76bba1fb75"
+    }
+  },
+  "migration_heads": ["0025_pr37_research_dashboard"],
+  "required_flags": {
+    "PILOT_RELEASE": false,
+    "STUDENT_ATTENTION_DASHBOARD": false,
+    "TEACHER_GROUP_DASHBOARD": false,
+    "RESEARCH_DASHBOARD": false,
+    "CONSERVATIVE_INTERVENTIONS": false,
+    "NEXT_PUBLIC_PILOT_RELEASE": false,
+    "NEXT_PUBLIC_STUDENT_ATTENTION_DASHBOARD": false,
+    "NEXT_PUBLIC_TEACHER_GROUP_DASHBOARD": false,
+    "NEXT_PUBLIC_RESEARCH_DASHBOARD": false,
+    "NEXT_PUBLIC_CONSERVATIVE_INTERVENTIONS": false,
+    "TRAIN_ON_START": false
+  },
+  "excluded_until_separate_approval": ["PR35", "PR36", "PR37", "PR38"],
+  "activation_blockers": [
+    "authorized participant roster and protocol values",
+    "required human and independent reviews",
+    "candidate environment soak test",
+    "pilot activation approval distinct from G6"
+  ]
+}

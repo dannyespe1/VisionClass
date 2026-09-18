@@ -140,7 +140,7 @@ def create_alias(*, environment, name, active_model, recorded_by, thresholds=Non
 
 @transaction.atomic
 def start_shadow(alias_id, candidate, *, recorded_by):
-    alias = ModelAlias.objects.select_for_update().select_related("active_model").get(pk=alias_id)
+    alias = ModelAlias.objects.select_for_update(of=("self",)).select_related("active_model").get(pk=alias_id)
     if candidate.status != ModelArtifact.STATUS_VALIDATED:
         raise ValidationError("El candidato debe estar validado.")
     alias.candidate_model = candidate
@@ -154,7 +154,7 @@ def start_shadow(alias_id, candidate, *, recorded_by):
 
 @transaction.atomic
 def start_canary(alias_id, percentage, *, recorded_by):
-    alias = ModelAlias.objects.select_for_update().select_related("active_model", "candidate_model").get(pk=alias_id)
+    alias = ModelAlias.objects.select_for_update(of=("self",)).select_related("active_model", "candidate_model").get(pk=alias_id)
     if not alias.candidate_model_id:
         raise ValidationError("No existe candidato para canary.")
     alias.mode = ModelAlias.MODE_CANARY
@@ -167,7 +167,7 @@ def start_canary(alias_id, percentage, *, recorded_by):
 
 @transaction.atomic
 def promote(alias_id, metrics, *, recorded_by):
-    alias = ModelAlias.objects.select_for_update().select_related("active_model", "candidate_model").get(pk=alias_id)
+    alias = ModelAlias.objects.select_for_update(of=("self",)).select_related("active_model", "candidate_model").get(pk=alias_id)
     if alias.mode != ModelAlias.MODE_CANARY or not alias.candidate_model_id:
         raise ValidationError("La promoción requiere canary activo.")
     violations = metric_violations(alias.thresholds, metrics)
@@ -190,7 +190,7 @@ def promote(alias_id, metrics, *, recorded_by):
 
 @transaction.atomic
 def rollback(alias_id, *, reason_code, recorded_by, metrics=None):
-    alias = ModelAlias.objects.select_for_update().select_related("active_model", "candidate_model", "previous_model").get(pk=alias_id)
+    alias = ModelAlias.objects.select_for_update(of=("self",)).select_related("active_model", "candidate_model", "previous_model").get(pk=alias_id)
     from_model = alias.candidate_model or alias.active_model
     if alias.mode in {ModelAlias.MODE_SHADOW, ModelAlias.MODE_CANARY}:
         to_model = alias.active_model

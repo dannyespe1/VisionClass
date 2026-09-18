@@ -1,10 +1,14 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-14",
+  "generated_at": "2026-09-18",
   "files": [
     {
       "path": "DICCIONARIO_EVIDENCIA.csv",
       "sha256": "0419069b554453d63a9a6d4c4b7243624b1967c2756296fbccf62e1e9cb9d1bf"
+    },
+    {
+      "path": "ENMIENDA_v0.2.md",
+      "sha256": "a755862f2f8c378eb41095c5666c097d9da950ad251850f9b75123af4551cc61"
     },
     {
       "path": "INFORME.md",
@@ -15,12 +19,28 @@
       "sha256": "a6236e53bb2fba4fd61833a571a0bc72d41511ac9adca2138a438edb4c9cd200"
     },
     {
+      "path": "PREREGISTRO_CONFIRMATORIO_v0.2.json",
+      "sha256": "2bc75363dfa03458fab223b2ba038abd2bed55945c9266ecdac9509b47f5be70"
+    },
+    {
       "path": "PROTOCOLO.md",
       "sha256": "757edbe7c041e187e972c4ec5571309fba7443781be466fd761f8bd785286409"
     },
     {
+      "path": "REVISION_NOVEDAD_2026-09-15.md",
+      "sha256": "aa8cfdc67fdf7541cbd553bac50b828cfff4a71833b0ae61eca7bb555c7ca6a7"
+    },
+    {
+      "path": "SHA256_v0.2.json",
+      "sha256": "f11a29f9e7933ffd7a83b3e2da97ca23f7bea8db86b647124e9f46b39084847f"
+    },
+    {
       "path": "VERIFICACION.json",
       "sha256": "3eb4ebdcbc7e7632c89beb4f017f9be1a677f646a8a38bbb0a2b035099a6c8da"
+    },
+    {
+      "path": "VERIFICACION_v0.2.json",
+      "sha256": "10936b4ed52b4cb18d2369028f15e3d55e172055e2c21362861048f6d529032b"
     }
   ]
 }

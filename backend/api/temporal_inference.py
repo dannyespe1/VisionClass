@@ -144,7 +144,7 @@ def persist_temporal_inference(validated: dict, *, service_name: str) -> Persist
     effective_artifact = None
     if rollout:
         try:
-            alias = ModelAlias.objects.select_for_update().select_related(
+            alias = ModelAlias.objects.select_for_update(of=("self",)).select_related(
                 "active_model", "candidate_model"
             ).get(environment=rollout["environment"], name=rollout["alias"])
         except ModelAlias.DoesNotExist as exc:

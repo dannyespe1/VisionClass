@@ -5,14 +5,13 @@ from django.test import override_settings
 from django.utils import timezone
 from rest_framework.test import APITestCase
 
-from .models import ConsentEvent, D2RAttentionEvent, D2RSession, User
+from .models import AttentionEvent, ConsentEvent, Course, Enrollment, Session, User
 
 
 @override_settings(
     CONSENT_V2_ENABLED=True,
     CONSENT_TEXT_APPROVED=True,
     CONSENT_CURRENT_VERSION="test-v1",
-    D2R_ENABLED=True,
 )
 class ConsentV2Tests(APITestCase):
     def setUp(self):
@@ -71,17 +70,24 @@ class ConsentV2Tests(APITestCase):
 
     def test_revocation_stops_new_events_immediately(self):
         self.grant_capture()
-        d2r_session = D2RSession.objects.create(user=self.student, started_at=timezone.now())
+        course = Course.objects.create(title="Consent test course", owner=self.teacher)
+        Enrollment.objects.create(user=self.student, course=course, status=Enrollment.STATUS_ACTIVE)
+        session = Session.objects.create(
+            course=course,
+            student=self.student,
+            created_by=self.student,
+            started_at=timezone.now(),
+        )
         self.client.force_authenticate(self.student)
         payload = {
-            "d2r_session_id": d2r_session.id,
+            "session_id": session.id,
             "user_id": self.student.id,
             "timestamp": timezone.now().isoformat(),
             "value": 0.8,
         }
         self.assertEqual(
             self.client.post(
-                "/api/d2r-attention-events/", payload, HTTP_IDEMPOTENCY_KEY="pr07-before-revoke"
+                "/api/attention-events/", payload, HTTP_IDEMPOTENCY_KEY="pr07-before-revoke"
             ).status_code,
             201,
         )
@@ -90,11 +96,11 @@ class ConsentV2Tests(APITestCase):
         )
         self.assertEqual(
             self.client.post(
-                "/api/d2r-attention-events/", payload, HTTP_IDEMPOTENCY_KEY="pr07-after-revoke"
+                "/api/attention-events/", payload, HTTP_IDEMPOTENCY_KEY="pr07-after-revoke"
             ).status_code,
             403,
         )
-        self.assertEqual(D2RAttentionEvent.objects.count(), 1)
+        self.assertEqual(AttentionEvent.objects.count(), 1)
 
     def test_expired_and_old_version_grants_are_invalid(self):
         self.grant_capture(expires_at=timezone.now() - timedelta(seconds=1))

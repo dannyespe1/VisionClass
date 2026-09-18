@@ -11,7 +11,6 @@ def read(path):
 
 queue = read("frontend/app/lib/bounded-capture-queue.mjs")
 course = read("frontend/app/student/course/[courseId]/page.tsx")
-d2r = read("frontend/app/d2r/page.tsx")
 proxy = read("frontend/app/api/attention-proxy/route.ts")
 ml = read("ml/ml_service.py")
 ml_env = read("ml/.env.example")
@@ -24,11 +23,10 @@ required = {
     "replacement counter": "this.stats.replaced",
     "deadline abort": 'controller.abort("deadline_exceeded")',
     "course integration": "captureQueueRef.current",
-    "D2R integration": "new BoundedCaptureQueue",
     "idempotency propagation": 'req.headers.get("idempotency-key")',
     "ML size limit": "MAX_FRAME_BYTES + 1",
 }
-haystacks = "\n".join((queue, course, d2r, proxy, ml))
+haystacks = "\n".join((queue, course, proxy, ml))
 for label, fragment in required.items():
     if fragment not in haystacks:
         raise SystemExit(f"Falta {label}: {fragment}")

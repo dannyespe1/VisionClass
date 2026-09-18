@@ -23,8 +23,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { apiFetch } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext";
 
-const BASELINE_TITLE = "baseline d2r";
-
 type MaterialType = "pdf" | "video" | "test";
 
 type MaterialForm = {
@@ -183,12 +181,10 @@ export function MaterialesSection() {
         apiFetch<any[]>("/api/course-materials/", {}, token),
       ]);
 
-      const filteredCourses = (coursesData || []).filter(
-        (c) => (c.title || "").toLowerCase() !== BASELINE_TITLE
-      );
+      const filteredCourses = coursesData || [];
 
       const mappedModules: CourseModule[] = (modulesData || [])
-        .filter((m) => m.course && (m.course.title || "").toLowerCase() !== BASELINE_TITLE)
+        .filter((m) => Boolean(m.course))
         .map((m) => ({
           id: m.id,
           title: m.title,
@@ -199,7 +195,7 @@ export function MaterialesSection() {
         }));
 
       const mappedLessons: CourseLesson[] = (lessonsData || [])
-        .filter((l) => l.module && l.module.course && (l.module.course.title || "").toLowerCase() !== BASELINE_TITLE)
+        .filter((l) => Boolean(l.module && l.module.course))
         .map((l) => ({
           id: l.id,
           title: l.title,
@@ -210,7 +206,7 @@ export function MaterialesSection() {
         }));
 
       const mappedMaterials: CourseMaterial[] = (materialsData || [])
-        .filter((mat) => mat.lesson && mat.lesson.module && mat.lesson.module.course && (mat.lesson.module.course.title || "").toLowerCase() !== BASELINE_TITLE)
+        .filter((mat) => Boolean(mat.lesson && mat.lesson.module && mat.lesson.module.course))
         .map((mat) => ({
           id: mat.id,
           title: mat.title,

@@ -1,30 +1,25 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { postLoginRoute } from "../app/lib/post-login-route.mjs";
+import { roleRoute } from "../app/lib/role-route.mjs";
 
 const student = { role: "student", is_staff: false, is_superuser: false };
 
-test("a student enters the main journey when D2R is disabled", () => {
-  assert.equal(postLoginRoute(student, { d2rEnabled: false, hasD2RResult: false }), "/student");
+test("a student enters the main journey directly", () => {
+  assert.equal(roleRoute(student), "/student");
 });
 
-test("the legacy student gate can be restored with the flag", () => {
-  assert.equal(postLoginRoute(student, { d2rEnabled: true, hasD2RResult: false }), "/d2r");
-  assert.equal(postLoginRoute(student, { d2rEnabled: true, hasD2RResult: true }), "/student");
-});
-
-test("teacher and administrator routes never depend on D2R", () => {
+test("teacher and administrator routes depend only on role", () => {
   assert.equal(
-    postLoginRoute({ role: "teacher", is_staff: false, is_superuser: false }, { d2rEnabled: true }),
+    roleRoute({ role: "teacher", is_staff: false, is_superuser: false }),
     "/instructor",
   );
   assert.equal(
-    postLoginRoute({ role: "student", is_staff: true, is_superuser: false }, { d2rEnabled: true }),
+    roleRoute({ role: "student", is_staff: true, is_superuser: false }),
     "/admin",
   );
   assert.equal(
-    postLoginRoute({ role: "admin", is_staff: false, is_superuser: false }, { d2rEnabled: false }),
+    roleRoute({ role: "admin", is_staff: false, is_superuser: false }),
     "/admin",
   );
 });

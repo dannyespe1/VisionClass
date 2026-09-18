@@ -17,6 +17,6 @@ require("backend/core/settings.py", "CONSENT_V2_ENABLED", "CONSENT_TEXT_APPROVED
 require("backend/api/views.py", "has_capture_consent", "class ConsentEventViewSet", "class ConsentStatusView")
 require("frontend/app/api/attention-proxy/route.ts", "/api/consents/status/", "capture_allowed")
 require("frontend/app/student/CameraPermissionModal.tsx", "PENDIENTE DE APROBACIÓN", "Continuar sin cámara")
-require("frontend/app/d2r/page.tsx", "Puedes comenzar y completar el test sin cámara")
+require("frontend/app/student/course/[courseId]/page.tsx", "enableCamera", "revokeCaptureConsent")
 require("docs/PR07/INFORME.md", "BLOCKED_HUMAN", "solo universitarios adultos")
 print("PASS PR07: contrato, cierre seguro, UI alternativa y evidencia presentes")

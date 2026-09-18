@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Grid, List, CheckCircle2, BookOpen, Eye, X } from "lucide-react";
+import { Grid, List, CheckCircle2, BookOpen } from "lucide-react";
 import { Button } from "../ui/button";
 import { Progress } from "../ui/progress";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
@@ -8,7 +7,6 @@ import { apiFetch } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import { parseCourseMeta } from "../lib/courseMeta";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
-import { D2R_ENABLED } from "../lib/features";
 
 interface InicioSectionProps {
   onCourseSelect: (courseId: number) => void;
@@ -43,14 +41,12 @@ type LessonItem = {
 };
 
 export function InicioSection({ onCourseSelect }: InicioSectionProps) {
-  const router = useRouter();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [courses, setCourses] = useState<EnrolledCourse[]>([]);
   const [moduleData, setModuleData] = useState<ModuleItem[]>([]);
   const [lessonData, setLessonData] = useState<LessonItem[]>([]);
   const [syllabusOpen, setSyllabusOpen] = useState(false);
   const [syllabusCourseId, setSyllabusCourseId] = useState<number | null>(null);
-  const [showD2RBanner, setShowD2RBanner] = useState(D2R_ENABLED);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { token } = useAuth();
@@ -66,20 +62,16 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
           apiFetch<any[]>("/api/course-modules/", {}, token),
           apiFetch<any[]>("/api/course-lessons/", {}, token),
         ]);
-        const filtered = (enrollments || []).filter((e) => {
-          if (!e.course) return false;
-          const title = (e.course.title || "").toLowerCase();
-          return title && title !== "baseline d2r";
-        });
+        const filtered = (enrollments || []).filter((e) => Boolean(e.course));
         const modules: ModuleItem[] = (modulesData || [])
-          .filter((m) => m.course && (m.course.title || "").toLowerCase() !== "baseline d2r")
+          .filter((m) => Boolean(m.course))
           .map((m) => ({
             id: m.id,
             order: m.order || 0,
             courseId: m.course.id,
           }));
         const lessons: LessonItem[] = (lessonsData || [])
-          .filter((l) => l.module && l.module.course && (l.module.course.title || "").toLowerCase() !== "baseline d2r")
+          .filter((l) => Boolean(l.module && l.module.course))
           .map((l) => {
             const moduleOrder = modules.find((m) => m.id === l.module.id)?.order || 0;
             return {
@@ -145,7 +137,6 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
   const totalCompleted = courses.reduce((sum, course) => sum + (course.completedLessons || 0), 0);
   const totalLessons = courses.reduce((sum, course) => sum + (course.totalLessons || 0), 0);
   const progressPercent = totalLessons ? Math.round((totalCompleted / totalLessons) * 100) : 0;
-  const goToD2R = () => router.push("/d2r");
   const syllabusModules = useMemo(() => {
     if (!syllabusCourseId) return [];
     const modules = moduleData
@@ -187,55 +178,6 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
             </button>
           </div>
         </div>
-
-        {D2R_ENABLED && showD2RBanner && (
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 text-white px-6 py-6 sm:px-8 sm:py-7 shadow-md">
-            <button
-              type="button"
-              className="absolute top-4 right-4 rounded-full bg-white/15 p-2 hover:bg-white/25"
-              onClick={() => setShowD2RBanner(false)}
-              aria-label="Cerrar recordatorio"
-            >
-              <X className="h-4 w-4 text-white" />
-            </button>
-            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 pr-12">
-              <div className="flex gap-4">
-                <div className="h-14 w-14 rounded-2xl bg-white/20 flex items-center justify-center">
-                  <Eye className="h-7 w-7 text-white" />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-lg font-semibold">Muestreo mensual de atención</h3>
-                    <span className="text-[11px] px-3 py-1 rounded-full bg-white/20">5-7 minutos</span>
-                  </div>
-                  <p className="text-sm text-blue-50 max-w-xl">
-                    Es momento de actualizar tu perfil atencional. Este breve test nos ayuda a personalizar
-                    tu experiencia de aprendizaje y ofrecerte mejores recomendaciones.
-                  </p>
-                  <p className="text-[11px] text-blue-100/80">
-                    Ultimo test realizado hace 28 dias - Proxima sugerencia en 2 dias
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-col lg:items-end gap-2 w-full lg:w-auto">
-                <Button
-                  type="button"
-                  onClick={goToD2R}
-                  className="rounded-xl bg-white text-blue-700 hover:bg-blue-50 w-full lg:w-auto"
-                >
-                  Realizar Test D2R ahora
-                </Button>
-                <button
-                  type="button"
-                  className="inline-flex items-center justify-center rounded-xl border border-white/40 text-white px-4 py-2 text-xs font-medium hover:bg-white/10"
-                  onClick={() => setShowD2RBanner(false)}
-                >
-                  Recordar más tarde
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
         <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm px-4 py-4 flex items-center justify-between transition transform hover:-translate-y-1 hover:shadow-lg">

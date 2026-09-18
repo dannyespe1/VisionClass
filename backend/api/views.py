@@ -41,13 +41,9 @@ from .models import (
     Enrollment,
     Session,
     AttentionEvent,
-    D2RSession,
-    D2RAttentionEvent,
     User,
     ContentView,
-    D2RResult,
     QuizAttempt,
-    D2RSchedule,
     SecurityAuditEvent,
     StudentReport,
     StudentNotification,
@@ -106,12 +102,8 @@ from .serializers import (
     EnrollmentSerializer,
     SessionSerializer,
     AttentionEventSerializer,
-    D2RSessionSerializer,
-    D2RAttentionEventSerializer,
     ContentViewSerializer,
-    D2RResultSerializer,
     QuizAttemptSerializer,
-    D2RScheduleSerializer,
     StudentReportSerializer,
     StudentNotificationSerializer,
     EmailTokenObtainPairSerializer,
@@ -122,12 +114,11 @@ from .serializers import (
     ConsentEventSerializer,
 )
 from .utils import send_mailgun_email
-from .permissions import D2RLegacyAccessPermission, IsAdminUserRole
+from .permissions import IsAdminUserRole
 from .consent import consent_status, has_capture_consent
 from .event_contract import validate_attention_event_v2
 
 UserModel = get_user_model()
-BASELINE_TITLE = "baseline d2r"
 logger = logging.getLogger(__name__)
 
 
@@ -182,18 +173,6 @@ def _validate_course_session(request, session, action):
 def _validate_claimed_user(request, claimed_user_id, action, resource_type, resource_id):
     if claimed_user_id is not None and claimed_user_id != request.user.id:
         _deny_identity(request, action, "claimed_user_mismatch", resource_type, resource_id)
-
-
-def _validate_d2r_session(request, session, action):
-    user = request.user
-    if not settings.STRICT_EVENT_IDENTITY:
-        _deny_identity(request, action, "strict_identity_disabled", "d2r_session", session.id)
-    now = timezone.now()
-    max_age = timedelta(minutes=settings.EVENT_SESSION_MAX_AGE_MINUTES)
-    if user.role != User.ROLE_STUDENT or session.user_id != user.id:
-        _deny_identity(request, action, "invalid_d2r_session", "d2r_session", session.id)
-    if not session.started_at or session.started_at > now or session.started_at < now - max_age or session.ended_at:
-        _deny_identity(request, action, "session_expired", "d2r_session", session.id)
 
 
 def _event_idempotency_key(request, model, session_field, session, action):
@@ -374,13 +353,8 @@ def _safe_avg(values):
 
 
 def _build_student_metrics(user):
-    enrollments = Enrollment.objects.filter(user=user).exclude(course__title__iexact=BASELINE_TITLE)
-    sessions = Session.objects.filter(student=user).exclude(course__title__iexact=BASELINE_TITLE)
-    d2r_results = (
-        D2RResult.objects.filter(user=user)
-        if settings.D2R_ENABLED
-        else D2RResult.objects.none()
-    )
+    enrollments = Enrollment.objects.filter(user=user)
+    sessions = Session.objects.filter(student=user)
     quiz_attempts = QuizAttempt.objects.filter(user=user)
     content_views = ContentView.objects.filter(user=user)
     attention_events = AttentionEvent.objects.filter(user=user)
@@ -403,32 +377,6 @@ def _build_student_metrics(user):
         "study_hours_total": round(study_total_seconds / 3600, 1),
         "average_grade": round(avg_grade, 1) if avg_grade else 0,
         "certificates_earned": courses_completed,
-    }
-
-    d2r_sorted = sorted(d2r_results, key=lambda r: r.created_at or timezone.now(), reverse=True)
-    current_d2r = d2r_sorted[0] if d2r_sorted else None
-    baseline_d2r = d2r_sorted[-1] if len(d2r_sorted) > 1 else current_d2r
-    d2r_avg = _safe_avg([r.attention_span or 0 for r in d2r_results]) if d2r_results.exists() else 0
-
-    schedules = (
-        D2RSchedule.objects.filter(user=user, status=D2RSchedule.STATUS_PENDING).order_by("scheduled_for")
-        if settings.D2R_ENABLED
-        else D2RSchedule.objects.none()
-    )
-    next_schedule = schedules.first()
-
-    trend_value = 0
-    if current_d2r and d2r_avg:
-        trend_value = round(((current_d2r.attention_span or 0) - d2r_avg) * 10, 1)
-
-    d2r_analysis = {
-        "baseline_score": round(baseline_d2r.attention_span, 1) if baseline_d2r else 0,
-        "current_score": round(current_d2r.attention_span, 1) if current_d2r else 0,
-        "trend": f"{trend_value:+.1f}%" if d2r_results.exists() else "0%",
-        "last_test_date": current_d2r.created_at.isoformat() if current_d2r else "",
-        "next_scheduled": next_schedule.scheduled_for.isoformat() if next_schedule else "",
-        "historical_average": round(d2r_avg, 1) if d2r_avg else 0,
-        "percentile": min(100, max(0, round(d2r_avg * 100))) if d2r_avg else 0,
     }
 
     attention_by_date = {}
@@ -641,7 +589,6 @@ def _build_student_metrics(user):
 
     return {
         "academic_metrics": academic_metrics,
-        "d2r_analysis": d2r_analysis,
         "attention_trend": attention_trend,
         "content_effectiveness": content_effectiveness,
         "productivity_by_hour": productivity_by_hour,
@@ -788,7 +735,10 @@ class CourseViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Course.objects.all()
+        queryset = Course.objects.all()
+        if self.request.user.role == User.ROLE_ADMIN:
+            return queryset
+        return queryset.filter(is_active=True)
 
     def perform_create(self, serializer):
         user = self.request.user
@@ -806,8 +756,8 @@ class CourseModuleViewSet(viewsets.ModelViewSet):
         if user.role == User.ROLE_ADMIN:
             return CourseModule.objects.all()
         if user.role == User.ROLE_TEACHER:
-            return CourseModule.objects.filter(course__owner=user)
-        return CourseModule.objects.filter(course__enrollments__user=user).distinct()
+            return CourseModule.objects.filter(course__owner=user, course__is_active=True)
+        return CourseModule.objects.filter(course__enrollments__user=user, course__is_active=True).distinct()
 
     def perform_create(self, serializer):
         if self.request.user.role not in [User.ROLE_TEACHER, User.ROLE_ADMIN]:
@@ -824,8 +774,8 @@ class CourseLessonViewSet(viewsets.ModelViewSet):
         if user.role == User.ROLE_ADMIN:
             return CourseLesson.objects.all()
         if user.role == User.ROLE_TEACHER:
-            return CourseLesson.objects.filter(module__course__owner=user)
-        return CourseLesson.objects.filter(module__course__enrollments__user=user).distinct()
+            return CourseLesson.objects.filter(module__course__owner=user, module__course__is_active=True)
+        return CourseLesson.objects.filter(module__course__enrollments__user=user, module__course__is_active=True).distinct()
 
     def perform_create(self, serializer):
         if self.request.user.role not in [User.ROLE_TEACHER, User.ROLE_ADMIN]:
@@ -842,8 +792,11 @@ class CourseMaterialViewSet(viewsets.ModelViewSet):
         if user.role == User.ROLE_ADMIN:
             return CourseMaterial.objects.all()
         if user.role == User.ROLE_TEACHER:
-            return CourseMaterial.objects.filter(lesson__module__course__owner=user)
-        return CourseMaterial.objects.filter(lesson__module__course__enrollments__user=user).distinct()
+            return CourseMaterial.objects.filter(lesson__module__course__owner=user, lesson__module__course__is_active=True)
+        return CourseMaterial.objects.filter(
+            lesson__module__course__enrollments__user=user,
+            lesson__module__course__is_active=True,
+        ).distinct()
 
     def perform_create(self, serializer):
         if self.request.user.role not in [User.ROLE_TEACHER, User.ROLE_ADMIN]:
@@ -1046,112 +999,6 @@ class ContentViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-class D2RSessionViewSet(viewsets.ModelViewSet):
-    serializer_class = D2RSessionSerializer
-    permission_classes = [permissions.IsAuthenticated, D2RLegacyAccessPermission]
-
-    def get_queryset(self):
-        user = self.request.user
-        if user.role == User.ROLE_ADMIN:
-            return D2RSession.objects.all()
-        if user.role == User.ROLE_TEACHER:
-            return D2RSession.objects.none()
-        return D2RSession.objects.filter(user=user)
-
-    def perform_create(self, serializer):
-        user = self.request.user
-        claimed_user_id = _pop_claimed_user(serializer)
-        if user.role != User.ROLE_STUDENT:
-            _deny_identity(self.request, "d2r_session_create", "role_not_student")
-        _validate_claimed_user(self.request, claimed_user_id, "d2r_session_create", "user", user.id)
-        serializer.save(user=user, started_at=timezone.now())
-
-
-class D2RAttentionEventViewSet(viewsets.ModelViewSet):
-    serializer_class = D2RAttentionEventSerializer
-    permission_classes = [permissions.IsAuthenticated, D2RLegacyAccessPermission]
-
-    def get_queryset(self):
-        user = self.request.user
-        if user.role == User.ROLE_ADMIN:
-            return D2RAttentionEvent.objects.all()
-        if user.role == User.ROLE_TEACHER:
-            return D2RAttentionEvent.objects.none()
-        return D2RAttentionEvent.objects.filter(user=user)
-
-    def perform_create(self, serializer):
-        user = self.request.user
-        d2r_session = serializer.validated_data.get('d2r_session')
-        claimed_user_id = _pop_claimed_user(serializer)
-        _validate_claimed_user(self.request, claimed_user_id, "d2r_event_create", "d2r_session", d2r_session.id)
-        _validate_d2r_session(self.request, d2r_session, "d2r_event_create")
-        if not has_capture_consent(user):
-            _deny_identity(self.request, "d2r_event_create", "consent_not_valid", "d2r_session", d2r_session.id)
-        idempotency_key = _event_idempotency_key(
-            self.request, D2RAttentionEvent, "d2r_session", d2r_session, "d2r_event_create"
-        )
-        try:
-            event = serializer.save(user=user, idempotency_key=idempotency_key)
-        except IntegrityError:
-            _audit_identity(self.request, "d2r_event_create", "rejected", "event_replay", "d2r_session", d2r_session.id)
-            raise ReplayConflict()
-
-        frames = d2r_session.frame_count or 0
-        new_count = frames + 1
-        new_mean = ((d2r_session.mean_attention or 0) * frames + event.value) / new_count
-        low_prev = (d2r_session.low_attention_ratio or 0) * frames
-        is_low = 1 if event.value < 0.4 else 0
-        new_low_ratio = (low_prev + is_low) / new_count
-
-        d2r_session.frame_count = new_count
-        d2r_session.mean_attention = new_mean
-        d2r_session.low_attention_ratio = new_low_ratio
-        d2r_session.last_score = event.value
-        d2r_session.attention_score = event.value
-        d2r_session.save(update_fields=[
-            'frame_count', 'mean_attention', 'low_attention_ratio', 'last_score', 'attention_score'
-        ])
-
-
-class D2RResultViewSet(viewsets.ModelViewSet):
-    serializer_class = D2RResultSerializer
-    permission_classes = [permissions.IsAuthenticated, D2RLegacyAccessPermission]
-
-    def get_queryset(self):
-        user = self.request.user
-        if user.role == User.ROLE_ADMIN:
-            return D2RResult.objects.all()
-        if user.role == User.ROLE_TEACHER:
-            return D2RResult.objects.none()
-        return D2RResult.objects.filter(user=user)
-
-    def perform_create(self, serializer):
-        user = self.request.user
-        claimed_user_id = _pop_claimed_user(serializer)
-        if not user or not user.is_authenticated:
-            raise PermissionDenied("Debes estar autenticado para registrar resultados.")
-        if user.role != User.ROLE_STUDENT:
-            raise PermissionDenied("Solo estudiantes pueden registrar resultados D2R.")
-        _validate_claimed_user(self.request, claimed_user_id, "d2r_result_create", "user", user.id)
-        d2r_session = serializer.validated_data.get("d2r_session")
-        _validate_d2r_session(self.request, d2r_session, "d2r_result_create")
-        result = serializer.save(user=user)
-        if user.email:
-            subject = "Resultado D2R registrado"
-            message = (
-                "Tu resultado del test D2R ha sido registrado.\n\n"
-                f"Fecha: {result.created_at.isoformat() if result.created_at else ''}\n"
-                f"Puntaje (TA): {result.raw_score}\n"
-                f"Concentracion (CON): {result.attention_span}\n"
-                f"Velocidad: {result.processing_speed}\n"
-                f"Errores (C): {result.errors}\n"
-            )
-            try:
-                send_mailgun_email(user.email, subject, message)
-            except Exception as exc:
-                logger.warning("No se pudo enviar mailgun D2R a %s: %s", user.email, exc)
-
-
 class QuizAttemptViewSet(viewsets.ModelViewSet):
     serializer_class = QuizAttemptSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -1169,26 +1016,6 @@ class QuizAttemptViewSet(viewsets.ModelViewSet):
         session = serializer.validated_data.get('session')
         _validate_claimed_user(self.request, claimed_user_id, "quiz_attempt_create", "session", session.id)
         _validate_course_session(self.request, session, "quiz_attempt_create")
-        serializer.save(user=self.request.user)
-
-
-class D2RScheduleViewSet(viewsets.ModelViewSet):
-    serializer_class = D2RScheduleSerializer
-    permission_classes = [permissions.IsAuthenticated, D2RLegacyAccessPermission]
-
-    def get_queryset(self):
-        user = self.request.user
-        if user.role == User.ROLE_ADMIN:
-            return D2RSchedule.objects.all()
-        if user.role == User.ROLE_TEACHER:
-            return D2RSchedule.objects.filter(user=user)
-        return D2RSchedule.objects.filter(user=user)
-
-    def perform_create(self, serializer):
-        claimed_user_id = _pop_claimed_user(serializer)
-        _validate_claimed_user(
-            self.request, claimed_user_id, "d2r_schedule_create", "user", self.request.user.id
-        )
         serializer.save(user=self.request.user)
 
 
@@ -1415,7 +1242,7 @@ class TeacherGroupDashboardView(APIView):
         if period not in PERIOD_DAYS:
             return Response({"detail": "Filtro no válido."}, status=status.HTTP_400_BAD_REQUEST)
 
-        owned_courses = Course.objects.filter(owner=request.user).exclude(title__iexact=BASELINE_TITLE)
+        owned_courses = Course.objects.filter(owner=request.user, is_active=True)
         course_id = request.query_params.get("course_id")
         if course_id is not None:
             try:
@@ -2232,8 +2059,8 @@ class AdminOverviewView(APIView):
     permission_classes = [IsAdminUserRole]
 
     def get(self, request):
-        courses = Course.objects.exclude(title__iexact=BASELINE_TITLE)
-        enrollments = Enrollment.objects.exclude(course__title__iexact=BASELINE_TITLE)
+        courses = Course.objects.filter(is_active=True)
+        enrollments = Enrollment.objects.filter(course__is_active=True)
         users = User.objects.all()
         students = users.filter(role=User.ROLE_STUDENT)
         teachers = users.filter(role=User.ROLE_TEACHER)
@@ -2257,7 +2084,7 @@ class AdminAnalyticsView(APIView):
         return labels[dt.month - 1]
 
     def _faculty_metrics(self):
-        courses = Course.objects.exclude(title__iexact=BASELINE_TITLE)
+        courses = Course.objects.filter(is_active=True)
         categories = courses.values_list("category", flat=True).distinct()
         output = []
         for idx, category in enumerate(categories, start=1):
@@ -2306,8 +2133,8 @@ class AdminAnalyticsView(APIView):
         return output
 
     def _institutional_trend(self):
-        sessions = Session.objects.exclude(course__title__iexact=BASELINE_TITLE)
-        enrollments = Enrollment.objects.exclude(course__title__iexact=BASELINE_TITLE)
+        sessions = Session.objects.filter(course__is_active=True)
+        enrollments = Enrollment.objects.filter(course__is_active=True)
         session_by_month = (
             sessions.annotate(month=TruncMonth("created_at"))
             .values("month")
@@ -2361,7 +2188,7 @@ class AdminAnalyticsView(APIView):
         students = User.objects.filter(role=User.ROLE_STUDENT)
         results = []
         for user in students:
-            sessions = Session.objects.filter(student=user).exclude(course__title__iexact=BASELINE_TITLE)
+            sessions = Session.objects.filter(student=user, course__is_active=True)
             if not sessions.exists():
                 continue
             avg_attention = sessions.aggregate(avg=models.Avg("mean_attention"))["avg"] or 0

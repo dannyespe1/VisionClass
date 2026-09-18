@@ -8,11 +8,12 @@ from django.db import transaction
 from django.utils import timezone
 
 from .models import (
-    AttentionEvent, DemographicVaultRecord, D2RAttentionEvent, InferredState,
+    AttentionEvent, DemographicVaultRecord, InferredState,
     InterventionRecord, LearningInteractionEvent, MomentarySelfReport, Observation,
     ObservationWindow, ObserverAnnotation, ObserverAssignment, ResearchPseudonymMap,
     RetentionRun, StateTransition, TemporalSession, DeviceBudgetTelemetry,
 )
+from .legacy_archive import count_participant_rows, delete_participant_rows
 
 
 def _subject_digest(participant_id):
@@ -39,7 +40,7 @@ def _counts_for(participant):
         "windows": windows.count(),
         "temporal_sessions": temporal.count(),
         "legacy_attention_events": AttentionEvent.objects.filter(user=participant).count(),
-        "legacy_d2r_events": D2RAttentionEvent.objects.filter(user=participant).count(),
+        "legacy_assessment_archive": count_participant_rows(participant.pk),
         "device_budget_samples": DeviceBudgetTelemetry.objects.filter(course_session__student=participant).count(),
         "vault_records": int(bool(mapping and DemographicVaultRecord.objects.filter(research_pseudonym=mapping.research_pseudonym).exists())),
         "pseudonym_maps": int(mapping is not None),
@@ -67,7 +68,7 @@ def delete_participant_derived(participant, redis_client=None, execute=False):
     windows.delete()
     temporal.delete()
     AttentionEvent.objects.filter(user=participant).delete()
-    D2RAttentionEvent.objects.filter(user=participant).delete()
+    delete_participant_rows(participant.pk)
     DeviceBudgetTelemetry.objects.filter(course_session__student=participant).delete()
     mapping = ResearchPseudonymMap.objects.filter(participant=participant).first()
     if mapping:

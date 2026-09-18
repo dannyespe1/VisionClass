@@ -1,4 +1,3 @@
-export const D2R_ENABLED = process.env.NEXT_PUBLIC_D2R_ENABLED?.trim().toLowerCase() === "true";
 export const PILOT_RELEASE_ENABLED =
   process.env.NEXT_PUBLIC_PILOT_RELEASE?.trim().toLowerCase() === "true";
 export const STUDENT_ATTENTION_DASHBOARD_ENABLED =

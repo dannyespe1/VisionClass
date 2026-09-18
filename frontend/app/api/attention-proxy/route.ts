@@ -41,12 +41,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, detail: "Identidad discordante" }, { status: 403 });
     }
     const sessionId = formData.get("session_id");
-    const d2rSessionId = formData.get("d2r_session_id");
-    const sessionPath = sessionId
-      ? `/api/sessions/${sessionId}/`
-      : d2rSessionId
-        ? `/api/d2r-sessions/${d2rSessionId}/`
-        : "";
+    const sessionPath = sessionId ? `/api/sessions/${sessionId}/` : "";
     if (!sessionPath) {
       return NextResponse.json({ ok: false, detail: "Sesión requerida" }, { status: 400 });
     }

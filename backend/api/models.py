@@ -179,49 +179,6 @@ class AttentionEvent(models.Model):
         return f"Evento {self.id} sesion {self.session_id}"
 
 
-class D2RSession(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='d2r_sessions')
-    started_at = models.DateTimeField(null=True, blank=True)
-    ended_at = models.DateTimeField(null=True, blank=True)
-    attention_score = models.FloatField(null=True, blank=True)
-    mean_attention = models.FloatField(default=0)
-    low_attention_ratio = models.FloatField(default=0)
-    frame_count = models.PositiveIntegerField(default=0)
-    last_score = models.FloatField(null=True, blank=True)
-    raw_metrics = models.JSONField(default=dict, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        indexes = [
-            models.Index(fields=['user']),
-        ]
-
-    def __str__(self):
-        return f"D2R sesion {self.id} - {self.user}"
-
-
-class D2RAttentionEvent(models.Model):
-    d2r_session = models.ForeignKey(D2RSession, on_delete=models.CASCADE, related_name='events')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='d2r_attention_events')
-    timestamp = models.DateTimeField()
-    value = models.FloatField()
-    label = models.CharField(max_length=100, blank=True)
-    data = models.JSONField(default=dict, blank=True)
-    idempotency_key = models.CharField(max_length=64, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        indexes = [
-            models.Index(fields=['d2r_session', 'timestamp']),
-        ]
-        constraints = [
-            models.UniqueConstraint(fields=['d2r_session', 'idempotency_key'], name='uniq_d2r_event_idempotency'),
-        ]
-
-    def __str__(self):
-        return f"D2R evento {self.id} sesion {self.d2r_session_id}"
-
-
 class ContentView(models.Model):
     TYPE_PDF = 'pdf'
     TYPE_VIDEO = 'video'
@@ -244,20 +201,6 @@ class ContentView(models.Model):
         return f"{self.user} {self.content_type} {self.content_id}"
 
 
-class D2RResult(models.Model):
-    d2r_session = models.ForeignKey(D2RSession, on_delete=models.CASCADE, related_name='results')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='d2r_results')
-    raw_score = models.IntegerField()
-    processing_speed = models.FloatField(help_text="Índice de velocidad/procesamiento")
-    attention_span = models.FloatField(help_text="Indicador de atención")
-    errors = models.IntegerField(default=0)
-    phase_data = models.JSONField(default=dict, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"D2R {self.user} sesion {self.d2r_session_id}"
-
-
 class QuizAttempt(models.Model):
     DIFF_NORMAL = 'normal'
     DIFF_HARD = 'hard'
@@ -275,28 +218,6 @@ class QuizAttempt(models.Model):
 
     def __str__(self):
         return f"Quiz {self.difficulty} - {self.user}"
-
-
-class D2RSchedule(models.Model):
-    STATUS_PENDING = 'pending'
-    STATUS_COMPLETED = 'completed'
-    STATUS_CANCELLED = 'cancelled'
-    STATUS_CHOICES = [
-        (STATUS_PENDING, 'Pendiente'),
-        (STATUS_COMPLETED, 'Completado'),
-        (STATUS_CANCELLED, 'Cancelado'),
-    ]
-
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='d2r_schedules')
-    scheduled_for = models.DateTimeField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['scheduled_for', 'id']
-
-    def __str__(self):
-        return f"D2R {self.user} {self.scheduled_for} ({self.status})"
 
 
 class StudentReport(models.Model):
@@ -456,9 +377,7 @@ class TemporalSession(models.Model):
     course_session = models.OneToOneField(
         Session, on_delete=models.PROTECT, null=True, blank=True, related_name="temporal_session"
     )
-    d2r_session = models.OneToOneField(
-        D2RSession, on_delete=models.PROTECT, null=True, blank=True, related_name="temporal_session"
-    )
+    legacy_assessment_source_id = models.PositiveBigIntegerField(null=True, blank=True)
     started_at = models.DateTimeField()
     ended_at = models.DateTimeField(null=True, blank=True)
     provenance = models.JSONField(default=dict, blank=True)
@@ -469,8 +388,8 @@ class TemporalSession(models.Model):
         constraints = [
             models.CheckConstraint(
                 condition=(
-                    (models.Q(course_session__isnull=False) & models.Q(d2r_session__isnull=True))
-                    | (models.Q(course_session__isnull=True) & models.Q(d2r_session__isnull=False))
+                    (models.Q(course_session__isnull=False) & models.Q(legacy_assessment_source_id__isnull=True))
+                    | (models.Q(course_session__isnull=True) & models.Q(legacy_assessment_source_id__isnull=False))
                 ),
                 name="temporal_session_exactly_one_source",
             ),

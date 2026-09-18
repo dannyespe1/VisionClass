@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { postLoginRoute } from "../app/lib/post-login-route.mjs";
+import { roleRoute } from "../app/lib/role-route.mjs";
 
 const page = readFileSync(new URL("../app/research/page.tsx", import.meta.url), "utf8");
 const features = readFileSync(new URL("../app/lib/features.ts", import.meta.url), "utf8");
@@ -9,7 +9,7 @@ const features = readFileSync(new URL("../app/lib/features.ts", import.meta.url)
 test("research panel is fail-closed and receives its own least-privilege route", () => {
   assert.match(features, /NEXT_PUBLIC_RESEARCH_DASHBOARD/);
   assert.match(features, /=== "true"/);
-  assert.equal(postLoginRoute({ role: "researcher" }), "/research");
+  assert.equal(roleRoute({ role: "researcher" }), "/research");
 });
 
 test("panel exposes scoped filters, provenance, sample and explicit evidence status", () => {

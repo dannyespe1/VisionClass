@@ -13,10 +13,10 @@ Este repositorio implementa VisionClass mediante PR pequeños, verificables y or
 
 ## Arquitectura estable
 
-- `frontend/`: aplicación Next.js 16, React 19 y TypeScript. Consume la API por `frontend/app/lib/api.ts` y por la ruta proxy `frontend/app/api/proxy/[...path]/route.ts`. La captura D2R vive en `frontend/app/d2r/`.
+- `frontend/`: aplicación Next.js 16, React 19 y TypeScript. Consume la API por `frontend/app/lib/api.ts` y por la ruta proxy `frontend/app/api/proxy/[...path]/route.ts`. La captura autorizada ocurre únicamente dentro de sesiones de curso.
 - `backend/`: API Django 5 y Django REST Framework. `backend/core/` contiene configuración y rutas raíz; `backend/api/` concentra modelos, permisos, serializadores, vistas, rutas, migraciones y comandos operativos.
 - `ml/`: servicio FastAPI con MediaPipe/OpenCV y soporte ONNX opcional. `ml/ml_service.py` es el punto de integración actual. No se considera una frontera confiable para identidad o autorización.
-- Persistencia: PostgreSQL es la base relacional prevista. Los archivos locales, exportaciones D2R, checkpoints y volúmenes Docker son artefactos operativos; no son fuentes de verdad compartidas entre instancias.
+- Persistencia: PostgreSQL es la base relacional prevista. Los archivos locales, exportaciones aprobadas, checkpoints y volúmenes Docker son artefactos operativos; no son fuentes de verdad compartidas entre instancias.
 - Despliegue: `docker-compose.yml` cubre desarrollo local; `render.yaml`, `cloudbuild*.yaml`, `backend/Dockerfile*`, `frontend/Dockerfile` y `ml/Dockerfile` cubren empaquetado y despliegue.
 - Flujo de identidad: el frontend conserva credenciales JWT y llama al backend; solo el backend puede autenticar y autorizar. El servicio ML usa una identidad de servicio separada. Consulta `docs/P0.1/` y `docs/P0.2/` antes de cambiar autenticación, captura, persistencia o exportación.
 - Contratos compartidos: los cambios coordinados suelen cruzar `frontend/app/lib/api.ts`, `backend/api/{models,serializers,urls,views}.py` y `ml/ml_service.py`. No existe todavía un esquema de contrato generado; trátalos como una sola superficie de compatibilidad.

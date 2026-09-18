@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.conf import settings
 
 from .models import (
     User,
@@ -11,26 +10,10 @@ from .models import (
     Enrollment,
     Session,
     AttentionEvent,
-    D2RSession,
-    D2RAttentionEvent,
     ContentView,
-    D2RResult,
     QuizAttempt,
     SecurityAuditEvent,
 )
-
-
-class D2RLegacyAdmin(admin.ModelAdmin):
-    """Expose legacy records for audit while respecting the transition flag."""
-
-    def has_add_permission(self, request):
-        return settings.D2R_ENABLED and super().has_add_permission(request)
-
-    def has_change_permission(self, request, obj=None):
-        return settings.D2R_ENABLED and super().has_change_permission(request, obj)
-
-    def has_delete_permission(self, request, obj=None):
-        return settings.D2R_ENABLED and super().has_delete_permission(request, obj)
 
 
 @admin.register(User)
@@ -104,29 +87,11 @@ class SecurityAuditEventAdmin(admin.ModelAdmin):
         return False
 
 
-@admin.register(D2RSession)
-class D2RSessionAdmin(D2RLegacyAdmin):
-    list_display = ('id', 'user', 'started_at', 'ended_at', 'attention_score', 'frame_count')
-    search_fields = ('user__username',)
-
-
-@admin.register(D2RAttentionEvent)
-class D2RAttentionEventAdmin(D2RLegacyAdmin):
-    list_display = ('id', 'd2r_session', 'user', 'timestamp', 'value', 'label')
-    search_fields = ('d2r_session__id', 'user__username', 'label')
-
-
 @admin.register(ContentView)
 class ContentViewAdmin(admin.ModelAdmin):
     list_display = ('user', 'session', 'content_type', 'content_id', 'duration_seconds', 'started_at')
     list_filter = ('content_type',)
     search_fields = ('content_id', 'user__username', 'session__id')
-
-
-@admin.register(D2RResult)
-class D2RResultAdmin(D2RLegacyAdmin):
-    list_display = ('user', 'd2r_session', 'raw_score', 'processing_speed', 'attention_span', 'errors', 'created_at')
-    search_fields = ('user__username', 'd2r_session__id')
 
 
 @admin.register(QuizAttempt)

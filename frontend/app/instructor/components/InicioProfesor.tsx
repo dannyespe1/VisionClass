@@ -8,8 +8,6 @@ import { apiFetch } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext";
 import { Button } from "../../ui/button";
 
-const BASELINE_TITLE = "baseline d2r";
-
 type ModuleMeta = { name: string; lessons: number; tests: number };
 
 type CourseItem = {
@@ -96,9 +94,7 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
           apiFetch<any[]>("/api/course-lessons/", {}, token),
           apiFetch<any[]>("/api/course-materials/", {}, token),
         ]);
-        const mapped = data
-          .filter((c) => (c.title || "").toLowerCase() !== BASELINE_TITLE)
-          .map((c, idx) => {
+        const mapped = data.map((c, idx) => {
             const meta = extractMeta(c.description);
             return {
               id: c.id,
@@ -119,9 +115,7 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
           });
         setCourses(mapped);
         setModules(
-          (moduleData || [])
-            .filter((m) => (m.course.title || "").toLowerCase() !== BASELINE_TITLE)
-            .map((m) => ({
+          (moduleData || []).map((m) => ({
               id: m.id,
               title: m.title,
               order: m.order || 0,
@@ -130,9 +124,7 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
             }))
         );
         setLessons(
-          (lessonData || [])
-            .filter((l) => (l.module.course.title || "").toLowerCase() !== BASELINE_TITLE)
-            .map((l) => ({
+          (lessonData || []).map((l) => ({
               id: l.id,
               title: l.title,
               order: l.order || 0,
@@ -141,9 +133,7 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
             }))
         );
         setMaterials(
-          (materialData || [])
-            .filter((mat) => (mat.lesson.module.course.title || "").toLowerCase() !== BASELINE_TITLE)
-            .map((mat) => ({
+          (materialData || []).map((mat) => ({
               id: mat.id,
               title: mat.title,
               materialType: mat.material_type,

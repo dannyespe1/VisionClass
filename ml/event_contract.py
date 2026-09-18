@@ -23,7 +23,7 @@ def validate_attention_event_v2(value):
         datetime.fromisoformat(str(value.get("captured_at")).replace("Z", "+00:00"))
     except (TypeError, ValueError, AttributeError) as exc:
         raise ValueError("event_v2.identity_or_time") from exc
-    if value.get("session_type") not in {"course", "d2r"}:
+    if value.get("session_type") != "course":
         raise ValueError("event_v2.session_type")
     session_id = value.get("session_id")
     if isinstance(session_id, bool) or not isinstance(session_id, int) or session_id < 1:

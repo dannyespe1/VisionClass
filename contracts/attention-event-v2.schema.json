@@ -8,7 +8,7 @@
   "properties": {
     "contract_version": {"const": "2.0"},
     "event_id": {"type": "string", "format": "uuid"},
-    "session_type": {"enum": ["course", "d2r"]},
+    "session_type": {"enum": ["course"]},
     "session_id": {"type": "integer", "minimum": 1},
     "captured_at": {"type": "string", "format": "date-time"},
     "features": {

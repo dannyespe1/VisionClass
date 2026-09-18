@@ -1,7 +1,7 @@
 export type AttentionEventV2 = {
   contract_version: "2.0";
   event_id: string;
-  session_type: "course" | "d2r";
+  session_type: "course";
   session_id: number;
   captured_at: string;
   features: Record<string, number | null>;

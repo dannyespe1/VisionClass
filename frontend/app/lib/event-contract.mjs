@@ -9,7 +9,7 @@ export function validateAttentionEventV2(value) {
   for (const key of fields) if (key !== "device" && !(key in value)) errors.push(`missing.${key}`);
   if (value.contract_version !== "2.0") errors.push("contract_version");
   if (!uuid.test(value.event_id || "")) errors.push("event_id");
-  if (!["course", "d2r"].includes(value.session_type)) errors.push("session_type");
+  if (value.session_type !== "course") errors.push("session_type");
   if (!Number.isInteger(value.session_id) || value.session_id < 1) errors.push("session_id");
   if (typeof value.captured_at !== "string" || Number.isNaN(Date.parse(value.captured_at))) errors.push("captured_at");
   if (!value.features || typeof value.features !== "object" || Object.values(value.features).some((item) => item !== null && typeof item !== "number")) errors.push("features");

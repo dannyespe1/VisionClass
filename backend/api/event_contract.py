@@ -27,7 +27,7 @@ def validate_attention_event_v2(value):
         UUID(str(value.get("event_id")))
     except (TypeError, ValueError, AttributeError):
         raise serializers.ValidationError({"event_id": "UUID inválido."})
-    if value.get("session_type") not in {"course", "d2r"}:
+    if value.get("session_type") != "course":
         raise serializers.ValidationError({"session_type": "Valor no soportado."})
     session_id = value.get("session_id")
     if isinstance(session_id, bool) or not isinstance(session_id, int) or session_id < 1:

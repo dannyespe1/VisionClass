@@ -9,8 +9,6 @@ from .models import (
     AttentionEvent,
     ConsentEvent,
     Course,
-    D2RResult,
-    D2RSession,
     Enrollment,
     SecurityAuditEvent,
     Session,
@@ -158,49 +156,3 @@ class StrictEventIdentityTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(SecurityAuditEvent.objects.latest("id").reason_code, "strict_identity_disabled")
-class D2RTransitionTests(APITestCase):
-    def setUp(self):
-        self.student = User.objects.create_user(
-            username="student-pr02",
-            role=User.ROLE_STUDENT,
-        )
-        self.session = D2RSession.objects.create(user=self.student)
-        self.result = D2RResult.objects.create(
-            d2r_session=self.session,
-            user=self.student,
-            raw_score=10,
-            processing_speed=1.0,
-            attention_span=8.0,
-            errors=2,
-        )
-        self.client.force_authenticate(self.student)
-
-    @override_settings(D2R_ENABLED=False)
-    def test_historical_results_remain_readable_when_disabled(self):
-        response = self.client.get("/api/d2r-results/")
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]["id"], self.result.id)
-
-    @override_settings(D2R_ENABLED=False)
-    def test_new_d2r_writes_are_blocked_when_disabled(self):
-        response = self.client.post("/api/d2r-sessions/", {}, format="json")
-
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(D2RSession.objects.filter(user=self.student).count(), 1)
-
-    @override_settings(D2R_ENABLED=True)
-    def test_flag_restores_legacy_session_creation(self):
-        response = self.client.post("/api/d2r-sessions/", {}, format="json")
-
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(D2RSession.objects.filter(user=self.student).count(), 2)
-
-    @override_settings(D2R_ENABLED=False)
-    def test_student_metrics_do_not_expose_d2r_analysis_when_disabled(self):
-        response = self.client.get("/api/student-metrics/")
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["d2r_analysis"]["current_score"], 0)
-        self.assertEqual(response.data["d2r_analysis"]["last_test_date"], "")

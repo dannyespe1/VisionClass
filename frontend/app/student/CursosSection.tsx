@@ -89,7 +89,7 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
           apiFetch<any[]>("/api/course-materials/", {}, token),
         ]);
         setMe(meData || null);
-        const filtered = data.filter((c) => (c.title || "").toLowerCase() !== "baseline d2r");
+        const filtered = data;
         const modulesByCourse = new Map<number, number>();
         const lessonsByCourse = new Map<number, number>();
         const materialsByCourse = new Map<number, number>();

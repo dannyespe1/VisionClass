@@ -12,8 +12,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .consent import has_capture_consent
-from .models import AttentionEvent, D2RAttentionEvent, D2RSession, Enrollment, Session
-from .serializers import AttentionEventSerializer, D2RAttentionEventSerializer
+from .models import AttentionEvent, Enrollment, Session
+from .serializers import AttentionEventSerializer
 from .service_identity import authenticate_ml_service
 from .temporal_inference import (
     TemporalInferenceConflict,
@@ -102,26 +102,6 @@ def _validate_course_session(session: Session):
     return session.student
 
 
-def _validate_d2r_session(session: D2RSession):
-    if not getattr(settings, "STRICT_EVENT_IDENTITY", True):
-        _audit("denied", "strict_identity_disabled")
-        raise PermissionDenied("La validación estricta no está disponible.")
-    if not getattr(settings, "D2R_ENABLED", True):
-        _audit("denied", "d2r_disabled")
-        raise PermissionDenied("D2R está deshabilitado.")
-    now = timezone.now()
-    max_age = timedelta(minutes=settings.EVENT_SESSION_MAX_AGE_MINUTES)
-    if (
-        not session.started_at
-        or session.started_at > now
-        or session.started_at < now - max_age
-        or session.ended_at
-    ):
-        _audit("denied", "invalid_d2r_session")
-        raise PermissionDenied("Sesión no válida.")
-    return session.user
-
-
 def _update_aggregate(session, event):
     frames = session.frame_count or 0
     new_count = frames + 1
@@ -152,36 +132,20 @@ class MLServiceEventView(APIView):
         principal = authenticate_ml_service(request, "events:write")
         idempotency_key = _validate_common_payload(request)
         course_session_id = request.data.get("session_id")
-        d2r_session_id = request.data.get("d2r_session_id")
-        if bool(course_session_id) == bool(d2r_session_id):
-            raise ValidationError("Indique exactamente una sesión.")
-
-        if course_session_id:
-            try:
-                session = Session.objects.select_for_update().select_related("student", "course").get(
-                    pk=course_session_id
-                )
-            except (Session.DoesNotExist, TypeError, ValueError):
-                _audit("denied", "session_not_found")
-                raise PermissionDenied("Sesión no válida.")
-            participant = _validate_course_session(session)
-            serializer_class = AttentionEventSerializer
-            model = AttentionEvent
-            relation_name = "session"
-            serializer_data = {**request.data, "session_id": session.id}
-        else:
-            try:
-                session = D2RSession.objects.select_for_update().select_related("user").get(
-                    pk=d2r_session_id
-                )
-            except (D2RSession.DoesNotExist, TypeError, ValueError):
-                _audit("denied", "session_not_found")
-                raise PermissionDenied("Sesión no válida.")
-            participant = _validate_d2r_session(session)
-            serializer_class = D2RAttentionEventSerializer
-            model = D2RAttentionEvent
-            relation_name = "d2r_session"
-            serializer_data = {**request.data, "d2r_session_id": session.id}
+        if not course_session_id:
+            raise ValidationError("session_id es obligatorio.")
+        try:
+            session = Session.objects.select_for_update().select_related("student", "course").get(
+                pk=course_session_id
+            )
+        except (Session.DoesNotExist, TypeError, ValueError):
+            _audit("denied", "session_not_found")
+            raise PermissionDenied("Sesión no válida.")
+        participant = _validate_course_session(session)
+        serializer_class = AttentionEventSerializer
+        model = AttentionEvent
+        relation_name = "session"
+        serializer_data = {**request.data, "session_id": session.id}
 
         if not has_capture_consent(participant):
             _audit("denied", "consent_not_valid")

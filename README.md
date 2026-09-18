@@ -1,6 +1,6 @@
 # VisionClass - Documentacion del Proyecto
 
-VisionClass es una plataforma web de atencion inteligente con frontend en Next.js, backend en Django/DRF y servicio ML en FastAPI (MediaPipe + heuristicas). La plataforma incluye paneles de estudiante, profesor y administrador, y un test D2R para calibracion atencional.
+VisionClass es una plataforma web de atención inteligente con frontend en Next.js, backend en Django/DRF y servicio ML en FastAPI (MediaPipe + heurísticas). La plataforma incluye paneles de estudiante, profesor, investigación y administración.
 
 ## Arquitectura
 
@@ -75,7 +75,6 @@ Backend (Django):
 - `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_CALLBACK_URL`
 - `GOOGLE_API_KEY` (generacion de tests IA)
 - `MAILGUN_API_KEY`, `MAILGUN_DOMAIN`, `MAILGUN_BASE_URL`, `MAILGUN_FROM_EMAIL`
-- `D2R_ENABLED` (`False` por defecto; conserva lecturas históricas y bloquea escrituras D2R)
 
 Frontend (Next.js):
 
@@ -83,7 +82,6 @@ Frontend (Next.js):
 - `NEXT_PUBLIC_ML_URL` (default: http://localhost:9000)
 - `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
 - `NEXT_PUBLIC_GOOGLE_REDIRECT_URI`
-- `NEXT_PUBLIC_D2R_ENABLED` (`false` por defecto; oculta y desacopla el recorrido D2R)
 
 ML (FastAPI):
 
@@ -123,18 +121,7 @@ Endpoints de autenticacion:
 - `/student`
 - `/instructor`
 - `/admin`
-- `/d2r` (ruta histórica, disponible únicamente con el flag D2R habilitado)
 - `/privacidad`, `/terminos`, `/seguridad`, `/documentacion`
-
-## Test D2R
-
-El flujo D2R está deshabilitado por defecto durante la transición. El login, acceso a cursos y paneles no requieren resultados D2R. Los endpoints conservan lectura histórica, pero rechazan escrituras mientras `D2R_ENABLED=False`. Para rollback temporal deben establecerse conjuntamente `D2R_ENABLED=True` en Django y `NEXT_PUBLIC_D2R_ENABLED=true` en el build de Next.js.
-
-- 14 fases, 15s por fase (configurable en `frontend/app/d2r/page.tsx`).
-- 47 celdas fijas por fase (definido en `frontend/app/d2r/test-widget.tsx`).
-- Se marcan solo las "d" con exactamente dos rayitas (arriba, abajo o divididas).
-- Usa camara para estimar atencion (sin guardar video). Los frames se envian a `/api/attention-proxy`.
-- Los resultados se guardan en `D2RResult` y alimentan metricas del estudiante.
 
 ## Backend: endpoints core
 
@@ -149,9 +136,7 @@ Recursos principales (DRF):
 - `GET/POST /api/sessions/`
 - `GET/POST /api/attention-events/`
 - `GET/POST /api/content-views/`
-- `GET /api/d2r-results/` y escritura solo con `D2R_ENABLED=True`
 - `GET/POST /api/quiz-attempts/`
-- `GET /api/d2r-schedules/` y escritura solo con `D2R_ENABLED=True`
 - `GET/POST /api/student-reports/`
 - `GET /api/student-metrics/`
 - `GET /api/exports/student-report/?export=pdf|csv|xlsx`
@@ -193,15 +178,14 @@ docker compose exec backend python manage.py migrate
 ## Troubleshooting
 
 - Si el admin no abre panel: verificar rol y permisos en `/api/me/`.
-- Si el test D2R no inicia: revisar permisos de camara y disponibilidad de `/api/attention-proxy`.
+- Si la captura de una sesión de curso no inicia: revisar consentimiento, permiso de cámara y disponibilidad del procesamiento local.
 - Si faltan politicas de privacidad: el endpoint de analytics crea defaults si no existen.
 
 ## Entrenamiento de modelo (opcional)
 
 1. Activar captura de frames:
    - `SAVE_FRAMES=1` y `FRAMES_DIR=/app/data/frames`
-2. Exportar dataset en backend:
-   - `python manage.py export_d2r_frames_dataset --out data/frames_dataset.parquet`
+2. Preparar un dataset aprobado y pseudonimizado de acuerdo con el protocolo vigente.
 3. Entrenar en ML:
    - `python train_model.py` (genera ONNX en `MODEL_PATH`)
 

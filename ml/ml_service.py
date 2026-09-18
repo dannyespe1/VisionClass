@@ -221,8 +221,7 @@ async def _persist_temporal_result(result: dict[str, Any]) -> bool:
 
 
 class AttentionEventPayload(BaseModel):
-    session_id: Optional[int] = None
-    d2r_session_id: Optional[int] = None
+    session_id: int
     user_id: int
     timestamp: Optional[datetime] = Field(default_factory=datetime.utcnow)
     value: float = Field(..., description="Attention score between 0 and 1")
@@ -231,8 +230,8 @@ class AttentionEventPayload(BaseModel):
 
     @model_validator(mode="after")
     def ensure_session_present(self):
-        if not self.session_id and not self.d2r_session_id:
-            raise ValueError("session_id o d2r_session_id requerido")
+        if self.session_id < 1:
+            raise ValueError("session_id debe ser positivo")
         return self
 
 
@@ -443,21 +442,15 @@ def aggregate_temporal_score(session_id: int, frame_result: Dict[str, Any]) -> D
 
 async def post_event_to_backend(
     payload: AttentionEventPayload,
-    test_name: str = "D2R",
     authorization: Optional[str] = None,
     idempotency_key: Optional[str] = None,
 ) -> None:
     bearer = authorization if authorization and authorization.lower().startswith("bearer ") else ""
     if not bearer and not BACKEND_TOKEN:
         return
-    normalized_test = (test_name or "").upper()
-    is_d2r = normalized_test == "D2R" or (normalized_test == "" and payload.d2r_session_id is not None)
-    if is_d2r and not payload.d2r_session_id:
-        raise HTTPException(status_code=400, detail="d2r_session_id requerido")
-    if not is_d2r and not payload.session_id:
+    if not payload.session_id:
         raise HTTPException(status_code=400, detail="session_id requerido")
-    endpoint = "/api/d2r-attention-events/" if is_d2r else "/api/attention-events/"
-    url = f"{BACKEND_URL}{endpoint}"
+    url = f"{BACKEND_URL}/api/attention-events/"
     headers = {
         "Authorization": bearer or f"Bearer {BACKEND_TOKEN}",
         "Idempotency-Key": idempotency_key or f"ml:{uuid.uuid4()}",
@@ -521,21 +514,18 @@ async def receive_event(payload: AttentionEventPayload, authorization: Optional[
     Endpoint para recibir eventos de atención ya calculados
     (por ejemplo, desde otro proceso ML).
     """
-    test_name = "D2R" if payload.d2r_session_id is not None else "COURSE"
-    await post_event_to_backend(payload, test_name=test_name, authorization=authorization)
+    await post_event_to_backend(payload, authorization=authorization)
     return {"ok": True, "forwarded": bool(BACKEND_TOKEN)}
 
 
 @app.post("/analyze/frame")
 async def analyze_frame(
     file: UploadFile = File(...),
-    d2r_session_id: Optional[int] = Form(None),
-    session_id: Optional[int] = Form(None),
+    session_id: int = Form(...),
     user_id: int = Form(...),
     phase: int = Form(0),
     time_left: float = Form(0),
     spinning: int = Form(0),
-    test_name: str = Form("D2R"),
     idempotency_key: Optional[str] = Form(None),
     authorization: Optional[str] = Header(None),
 ):
@@ -543,9 +533,9 @@ async def analyze_frame(
     Recibe un frame (image/jpeg o png), calcula score y reenvía al backend.
     Pensado para ser llamado desde el frontend (captura de cámara).
     """
-    if not d2r_session_id and not session_id:
-        raise HTTPException(status_code=422, detail="session_id o d2r_session_id requerido")
-    session_key = d2r_session_id if d2r_session_id is not None else session_id
+    if session_id < 1:
+        raise HTTPException(status_code=422, detail="session_id debe ser positivo")
+    session_key = session_id
 
     if file.content_type not in {"image/jpeg", "image/png"}:
         raise HTTPException(status_code=415, detail="Formato de imagen no permitido")
@@ -607,17 +597,14 @@ async def analyze_frame(
     )
     value = model_score if model_score is not None else float(temporal.get("value", 0.0))
 
-    normalized_test = (test_name or "").upper()
-    is_d2r = normalized_test == "D2R" or (normalized_test == "" and d2r_session_id is not None)
     payload = AttentionEventPayload(
-        d2r_session_id=session_key if is_d2r else None,
-        session_id=None if is_d2r else session_key,
+        session_id=session_key,
         user_id=user_id,
         value=value,
         label=label,
         data={
             "context": {
-                "test": test_name or ("D2R" if is_d2r else "COURSE"),
+                "test": "COURSE",
                 "phase": phase,
                 "spinning": int(spinning),
                 "time_left": time_left,
@@ -631,7 +618,6 @@ async def analyze_frame(
     )
     await post_event_to_backend(
         payload,
-        test_name=(test_name or ("D2R" if is_d2r else "COURSE")),
         authorization=authorization,
         idempotency_key=idempotency_key,
     )

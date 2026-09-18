@@ -7,7 +7,6 @@ import { InstructorNavbar } from "./components/InstructorNavbar";
 import { InicioProfesor } from "./components/InicioProfesor";
 import { MaterialesSection } from "./components/MaterialesSection";
 import { EstadisticasProfesor } from "./components/EstadisticasProfesor";
-import { EstadisticasProfesorAdvanced } from "./components/EstadisticasProfesorAdvanced";
 import { TeacherGroupDashboardSection } from "./components/TeacherGroupDashboardSection";
 import { TEACHER_GROUP_DASHBOARD_ENABLED } from "../lib/features";
 
@@ -75,7 +74,6 @@ export default function InstructorPage() {
             ) : (
               <>
                 <EstadisticasProfesor />
-                <EstadisticasProfesorAdvanced />
               </>
             )}
           </div>

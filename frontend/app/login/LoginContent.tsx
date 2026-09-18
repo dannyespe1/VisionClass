@@ -8,8 +8,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/app/ui/button";
 import { apiFetch } from "@/app/lib/api";
 import { useAuth } from "@/app/context/AuthContext";
-import { D2R_ENABLED } from "@/app/lib/features";
-import { postLoginRoute } from "@/app/lib/post-login-route.mjs";
+import { roleRoute } from "@/app/lib/role-route.mjs";
 
 type LoginProfile = {
   role: string;
@@ -37,17 +36,7 @@ export function LoginContent() {
       {},
       accessToken
     );
-    let hasD2RResult = false;
-    if (D2R_ENABLED && profile.role === "student") {
-      try {
-        const d2rResults = await apiFetch<any[]>("/api/d2r-results/", {}, accessToken);
-        hasD2RResult = Array.isArray(d2rResults) && d2rResults.length > 0;
-      } catch (_) {
-        router.push("/student");
-        return;
-      }
-    }
-    router.push(postLoginRoute(profile, { d2rEnabled: D2R_ENABLED, hasD2RResult }));
+    router.push(roleRoute(profile));
   }, [router]);
 
   const handleLogin = async (accessToken: string) => {

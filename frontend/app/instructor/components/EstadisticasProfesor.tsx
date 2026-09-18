@@ -19,8 +19,6 @@ import {
 import { apiFetch } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext";
 
-const BASELINE_TITLE = "baseline d2r";
-
 type Course = {
   id: number;
   title: string;
@@ -93,11 +91,7 @@ export function EstadisticasProfesor() {
           apiFetch<any[]>("/api/sessions/", {}, token),
           apiFetch<any[]>("/api/quiz-attempts/", {}, token),
         ]);
-        setCourses(
-          (courseData || []).filter(
-            (course) => (course.title || "").toLowerCase() !== BASELINE_TITLE
-          )
-        );
+        setCourses(courseData || []);
         setEnrollments(enrollmentData || []);
         setSessions(sessionData || []);
         setQuizAttempts(quizData || []);

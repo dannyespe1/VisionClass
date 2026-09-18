@@ -17,7 +17,6 @@ test("teacher dashboard remains disabled unless explicitly enabled", () => {
 test("new panel replaces individual legacy analytics when enabled", () => {
   assert.match(page, /<TeacherGroupDashboardSection \/>/);
   assert.match(page, /<EstadisticasProfesor \/>/);
-  assert.match(page, /<EstadisticasProfesorAdvanced \/>/);
   assert.doesNotMatch(component, /student_id|username|email|Ver perfil|Enviar mensaje/);
 });
 

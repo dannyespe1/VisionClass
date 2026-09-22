@@ -14,6 +14,7 @@ type Cell = {
   quality?: { coverage: number; mean_uncertainty: number; no_observable_ratio: number; unknown_ratio: number };
   observable_distribution?: { task_oriented_evidence_ratio: number; off_task_evidence_ratio: number; task_oriented_interval_95: { lower: number; upper: number; method: string } };
   resources?: Record<string, Record<string, number>>; registry_metrics?: Record<string, number>;
+  edge_validation?: { local_execution_ratio: number; registry_integrity_ratio: number; mean_task_oriented_probability: number | null; profiles: Record<string, number> };
   validity_evidence?: Evidence; fairness_evidence?: Evidence;
   provenance?: Record<string, string | string[]>;
 };
@@ -97,8 +98,13 @@ export default function ResearchPage() {
     {dashboard?.cells.map((cell) => <article key={`${cell.cohort}-${cell.model}`} className="rounded-xl border bg-white p-5"><h2 className="text-xl font-semibold">{cell.cohort} · {cell.model}</h2>{cell.status === "suppressed" ? <p className="mt-3 rounded bg-amber-50 p-3">Celda suprimida por protección de muestra ({cell.reason_code}). No se muestran conteos parciales.</p> : <div className="mt-4 space-y-4">
       <div className="grid gap-3 sm:grid-cols-3"><p>Muestra: {cell.participant_band} participantes</p><p>Ventanas observables: {cell.sample?.observable_windows}</p><p>Cobertura: {Math.round((cell.quality?.coverage || 0) * 100)}%</p></div>
       <p>Incertidumbre técnica media: {cell.quality?.mean_uncertainty}. Distribución agregada orientada a tarea: {Math.round((cell.observable_distribution?.task_oriented_evidence_ratio || 0) * 100)}%. Intervalo descriptivo: {cell.observable_distribution?.task_oriented_interval_95.lower}–{cell.observable_distribution?.task_oriented_interval_95.upper}.</p>
+      {cell.edge_validation && <section className="rounded border border-cyan-200 bg-cyan-50 p-3" aria-label="Validación Edge">
+        <h3 className="font-medium">Validación Edge</h3>
+        <p className="text-sm text-slate-700">Ejecución local: {Math.round(cell.edge_validation.local_execution_ratio * 100)}% · Integridad canónica confirmada: {Math.round(cell.edge_validation.registry_integrity_ratio * 100)}%{cell.edge_validation.mean_task_oriented_probability === null ? "" : ` · Probabilidad media orientada a tarea: ${Math.round(cell.edge_validation.mean_task_oriented_probability * 100)}%`}.</p>
+        <p className="mt-1 text-xs text-slate-600">Sólo resume resultados derivados por ventana; no contiene imágenes, video ni rasgos faciales individuales.</p>
+      </section>}
       <div className="grid gap-3 md:grid-cols-2"><EvidenceCard title="Validez" value={cell.validity_evidence} /><EvidenceCard title="Equidad" value={cell.fairness_evidence} /></div>
-      <details><summary className="cursor-pointer font-medium">Proveniencia, versiones y recursos</summary><pre className="mt-2 overflow-auto rounded bg-slate-950 p-3 text-xs text-white">{JSON.stringify({ provenance: cell.provenance, registry_metrics: cell.registry_metrics, resources: cell.resources }, null, 2)}</pre></details>
+      <details><summary className="cursor-pointer font-medium">Proveniencia, versiones y recursos</summary><pre className="mt-2 overflow-auto rounded bg-slate-950 p-3 text-xs text-white">{JSON.stringify({ provenance: cell.provenance, registry_metrics: cell.registry_metrics, resources: cell.resources, edge_profiles: cell.edge_validation?.profiles }, null, 2)}</pre></details>
     </div>}</article>)}
     {dashboard && <section className="rounded-xl border bg-white p-4"><h2 className="font-semibold">Exportación protegida</h2><p className="text-sm text-slate-600">CSV seudonimizado, de un solo uso, con propósito y caducidad. Exige al menos {dashboard.privacy.minimum_participants} participantes y {dashboard.privacy.minimum_observable_windows} ventanas observables.</p><button className="mt-3 rounded bg-cyan-700 px-4 py-2 text-white disabled:opacity-50" disabled={busy} onClick={() => void exportCsv()}>Exportar selección exacta</button></section>}
     {dashboard && <ul className="list-disc space-y-1 pl-6 text-sm text-slate-600">{dashboard.limitations.map((item) => <li key={item}>{item}</li>)}</ul>}

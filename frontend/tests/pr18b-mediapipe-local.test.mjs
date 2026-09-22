@@ -19,6 +19,37 @@ test("adapts only numeric derived features and converts normalized keypoints", (
   assert.equal(JSON.stringify(result).includes("image"), false);
 });
 
+test("recovers BlazeFace eyes and nose when MediaPipe omits optional labels", () => {
+  const result = adaptMediaPipeDetection({
+    boundingBox: { originX: 120, originY: 80, width: 300, height: 300 },
+    keypoints: [
+      { x: 0.62, y: 0.40 },
+      { x: 0.38, y: 0.39 },
+      { x: 0.50, y: 0.52 },
+      { x: 0.50, y: 0.64 },
+      { x: 0.30, y: 0.50 },
+      { x: 0.70, y: 0.50 },
+    ],
+    categories: [{ score: 0.95 }],
+  }, 640, 480);
+
+  assert.deepEqual(result.landmarks, [
+    { type: "leftEye", locations: [{ x: 243.2, y: 187.20000000000002 }] },
+    { type: "rightEye", locations: [{ x: 396.8, y: 192 }] },
+    { type: "nose", locations: [{ x: 320, y: 249.60000000000002 }] },
+  ]);
+});
+
+test("keeps unlabeled incomplete keypoints unavailable instead of inventing geometry", () => {
+  const result = adaptMediaPipeDetection({
+    boundingBox: { originX: 10, originY: 20, width: 100, height: 80 },
+    keypoints: [{ x: 0.25, y: 0.5 }],
+    categories: [{ score: 0.9 }],
+  }, 640, 480);
+
+  assert.deepEqual(result.landmarks, []);
+});
+
 test("runtime assets are same-origin paths while build input is checksum pinned", () => {
   assert.equal(MEDIAPIPE_WASM_BASE.startsWith("/"), true);
   assert.equal(MEDIAPIPE_FACE_MODEL.startsWith("/"), true);

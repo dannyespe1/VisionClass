@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
-from rest_framework import viewsets, permissions, mixins, status
+from rest_framework import viewsets, permissions, mixins, serializers, status
 from rest_framework.exceptions import APIException, PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -116,6 +116,12 @@ from .serializers import (
 from .utils import send_mailgun_email
 from .permissions import IsAdminUserRole
 from .consent import consent_status, has_capture_consent
+from .edge_inference import (
+    EdgeInferenceConflict,
+    EdgeShadowInferenceSerializer,
+    edge_inference_response,
+    persist_edge_shadow_inference,
+)
 from .event_contract import validate_attention_event_v2
 
 UserModel = get_user_model()
@@ -248,6 +254,69 @@ class ObservationIngestView(APIView):
             },
         )
         return Response({"event_id": str(observation.event_id), "duplicate": False}, status=201)
+
+
+class EdgeShadowInferenceView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        if not (
+            settings.TEMPORAL_SCHEMA_V2
+            and settings.MODEL_REGISTRY
+            and settings.NORMALIZED_FEATURES_V1
+            and settings.QUALITY_GATE_V1
+            and settings.EDGE_SHADOW_REPORTING
+        ):
+            return Response({"detail": "Reporte Edge shadow desactivado."}, status=503)
+        try:
+            encoded = json.dumps(request.data, separators=(",", ":")).encode("utf-8")
+        except (TypeError, ValueError):
+            encoded = b""
+        if not encoded or len(encoded) > settings.EDGE_SHADOW_REPORT_MAX_BYTES:
+            return Response({"detail": "Tamaño de reporte Edge inválido."}, status=413)
+        serializer = EdgeShadowInferenceSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=400)
+        source = Session.objects.filter(pk=serializer.validated_data["session_id"]).first()
+        if not source:
+            _deny_identity(request, "edge_shadow_inference", "session_not_found")
+        _validate_course_session(request, source, "edge_shadow_inference")
+        status_data = consent_status(request.user)
+        if not (
+            status_data["capture_allowed"]
+            and status_data["purposes"][ConsentEvent.PURPOSE_RESEARCH]["granted"]
+        ):
+            _audit_identity(
+                request,
+                "edge_shadow_inference",
+                "denied",
+                "research_consent_not_valid",
+                "session",
+                source.pk,
+            )
+            return Response(
+                {"detail": "Se requiere consentimiento vigente de persistencia e investigación."},
+                status=403,
+            )
+        try:
+            result = persist_edge_shadow_inference(
+                serializer.validated_data,
+                participant=request.user,
+                source=source,
+            )
+        except EdgeInferenceConflict as exc:
+            return Response({"detail": str(exc)}, status=409)
+        except serializers.ValidationError as exc:
+            return Response(exc.detail, status=400)
+        _audit_identity(
+            request,
+            "edge_shadow_inference",
+            "allowed",
+            "research_consented_shadow_result",
+            "session",
+            source.pk,
+        )
+        return Response(edge_inference_response(result), status=200 if result.duplicate else 201)
 
 
 class DeviceBudgetTelemetryView(APIView):
@@ -1407,6 +1476,7 @@ class ResearchDashboardView(APIView):
                     "Validez y equidad sólo se muestran si existe una referencia registrada; no se infieren del panel.",
                     "Una celda suprimida representa evidencia insuficiente, no ausencia de diferencias.",
                     "Los recursos son telemetría gruesa vigente y no identifican dispositivos.",
+                    "Los resultados Edge son reportes del cliente enlazados a un artefacto canónico; no constituyen atestación de hardware.",
                 ],
             },
             status=status.HTTP_200_OK,

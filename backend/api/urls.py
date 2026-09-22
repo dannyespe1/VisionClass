@@ -35,6 +35,7 @@ urlpatterns = [
     path('internal/ml/events/', MLServiceEventView.as_view(), name='ml-service-event'),
     path('internal/ml/temporal-inferences/', MLTemporalInferenceView.as_view(), name='ml-temporal-inference'),
     path('observations/', views.ObservationIngestView.as_view(), name='observation-ingest'),
+    path('edge-shadow-inferences/', views.EdgeShadowInferenceView.as_view(), name='edge-shadow-inference'),
     path('device-budget-telemetry/', views.DeviceBudgetTelemetryView.as_view(), name='device-budget-telemetry'),
     path('', include(router.urls)),
     path('me/', views.MeView.as_view(), name='me'),

@@ -197,6 +197,28 @@ class ResearchDashboardTests(APITestCase):
             SecurityAuditEvent.objects.filter(action="research_dashboard_access", outcome="allowed").exists()
         )
 
+    def test_dashboard_adds_only_aggregate_edge_validation_fields(self):
+        self.add_participants(20)
+        inference = InferredState.objects.order_by("id").first()
+        inference.probabilities = {
+            InferredState.STATE_OFF_TASK_EVIDENCE: 0.1,
+            InferredState.STATE_TASK_ORIENTED_EVIDENCE: 0.9,
+        }
+        inference.provenance = {
+            "source": "edge_shadow_inference",
+            "artifact_integrity": "sha256_verified_by_client_and_registry_matched",
+        }
+        inference.save(update_fields=["probabilities", "provenance"])
+        inference.window.provenance = {"execution_profile": "balanced"}
+        inference.window.save(update_fields=["provenance"])
+        response = self.client.get(reverse("research_dashboard"), self.filters())
+        edge = response.data["cells"][0]["edge_validation"]
+        self.assertEqual(edge["local_execution_ratio"], 0.01)
+        self.assertEqual(edge["registry_integrity_ratio"], 1.0)
+        self.assertEqual(edge["mean_task_oriented_probability"], 0.9)
+        self.assertEqual(edge["profiles"], {"balanced": 1.0})
+        self.assertNotIn("participant", str(edge))
+
     def test_small_cells_are_suppressed_without_exact_counts(self):
         self.add_participants(19, windows=6)
         response = self.client.get(reverse("research_dashboard"), self.filters())

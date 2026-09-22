@@ -47,6 +47,13 @@ DEMOGRAPHIC_VAULT_KEY = os.environ.get('DEMOGRAPHIC_VAULT_KEY', '').strip()
 RETENTION_JOBS = os.environ.get('RETENTION_JOBS', 'False').strip().lower() == 'true'
 NORMALIZED_FEATURES_V1 = os.environ.get('NORMALIZED_FEATURES_V1', 'False').strip().lower() == 'true'
 QUALITY_GATE_V1 = os.environ.get('QUALITY_GATE_V1', 'False').strip().lower() == 'true'
+EDGE_SHADOW_REPORTING = os.environ.get('EDGE_SHADOW_REPORTING', 'False').strip().lower() == 'true'
+EDGE_SHADOW_REPORT_MIN_INTERVAL_SECONDS = max(
+    5, int(os.environ.get('EDGE_SHADOW_REPORT_MIN_INTERVAL_SECONDS', '5'))
+)
+EDGE_SHADOW_REPORT_MAX_BYTES = min(
+    8192, max(1024, int(os.environ.get('EDGE_SHADOW_REPORT_MAX_BYTES', '4096')))
+)
 RETENTION_AUDIT_SECRET = os.environ.get('RETENTION_AUDIT_SECRET', '').strip()
 OBSERVATION_RETENTION_DAYS = int(os.environ.get('OBSERVATION_RETENTION_DAYS', '30'))
 STATE_RETENTION_DAYS = int(os.environ.get('STATE_RETENTION_DAYS', '90'))

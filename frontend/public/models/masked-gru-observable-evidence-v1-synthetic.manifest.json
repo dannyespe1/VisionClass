@@ -1,0 +1,9 @@
+{
+  "artifact_filename": "masked-gru-observable-evidence-v1-synthetic.json",
+  "artifact_version": "masked-gru-observable-evidence-v1-synthetic",
+  "byte_length": 17629,
+  "deployment_eligibility": "shadow_only",
+  "manifest_version": "masked-gru-shadow-manifest-v1",
+  "sha256": "ee636d2e89298bebfe6e47aa0eb25bf25948ea6d4bce007bda3286ec1366b475",
+  "signature_status": "not_signed_synthetic_engineering_only"
+}

@@ -3,11 +3,19 @@ export const MEDIAPIPE_FACE_MODEL = "/vendor/mediapipe/models/blaze_face_short_r
 
 const normalizedLabel = (value) => String(value || "").toLowerCase().replace(/[^a-z]/g, "");
 
+const isFiniteKeypoint = (point) => Number.isFinite(point?.x) && Number.isFinite(point?.y);
+
+const toLandmark = (type, point, frameWidth, frameHeight) => ({
+  type,
+  locations: [{ x: point.x * frameWidth, y: point.y * frameHeight }],
+});
+
 export function adaptMediaPipeDetection(detection, frameWidth = 1, frameHeight = 1) {
   const box = detection?.boundingBox;
   if (!box) return null;
-  const landmarks = [];
-  for (const point of detection.keypoints || []) {
+  const keypoints = Array.isArray(detection.keypoints) ? detection.keypoints : [];
+  const landmarksByType = new Map();
+  for (const point of keypoints) {
     const label = normalizedLabel(point.label || point.categoryName);
     const type = label.includes("lefteye")
       ? "leftEye"
@@ -16,10 +24,29 @@ export function adaptMediaPipeDetection(detection, frameWidth = 1, frameHeight =
         : label.includes("nose")
           ? "nose"
           : null;
-    if (type && Number.isFinite(point.x) && Number.isFinite(point.y)) {
-      landmarks.push({ type, locations: [{ x: point.x * frameWidth, y: point.y * frameHeight }] });
+    if (type && isFiniteKeypoint(point)) {
+      landmarksByType.set(type, toLandmark(type, point, frameWidth, frameHeight));
     }
   }
+
+  // BlazeFace returns six ordered keypoints, but the Web Tasks API declares
+  // their labels optional and commonly omits them. The first two points are
+  // the eyes and the third is the nose tip. Sorting the eyes by image x keeps
+  // roll orientation stable for mirrored and non-mirrored camera previews.
+  if (!landmarksByType.has("leftEye") && !landmarksByType.has("rightEye")) {
+    const eyes = keypoints.slice(0, 2).filter(isFiniteKeypoint).sort((a, b) => a.x - b.x);
+    if (eyes.length === 2) {
+      landmarksByType.set("leftEye", toLandmark("leftEye", eyes[0], frameWidth, frameHeight));
+      landmarksByType.set("rightEye", toLandmark("rightEye", eyes[1], frameWidth, frameHeight));
+    }
+  }
+  if (!landmarksByType.has("nose") && isFiniteKeypoint(keypoints[2])) {
+    landmarksByType.set("nose", toLandmark("nose", keypoints[2], frameWidth, frameHeight));
+  }
+
+  const landmarks = ["leftEye", "rightEye", "nose"]
+    .map((type) => landmarksByType.get(type))
+    .filter(Boolean);
   return {
     boundingBox: {
       x: box.originX,

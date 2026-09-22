@@ -35,6 +35,7 @@ import {
   ADAPTIVE_SCHEDULER_ENABLED,
   EDGE_FIXED_PROFILE,
   EDGE_PROFILES_ENABLED,
+  EDGE_SHADOW_REPORTING_ENABLED,
   DEVICE_BUDGET_TELEMETRY_ENABLED,
   NORMALIZED_FEATURES_V1_ENABLED,
   QUALITY_GATE_V1_ENABLED,
@@ -47,6 +48,18 @@ import { constraintsForProfile, EDGE_PROFILES, EdgeProfileController } from "../
 import type { EdgeProfileName } from "../../../lib/edge-profiles.mjs";
 import { DeviceBudgetCollector } from "../../../lib/device-budget-telemetry.mjs";
 import { AdaptiveScheduler } from "../../../lib/adaptive-scheduler.mjs";
+import {
+  MASKED_GRU_SHADOW_ENABLED,
+  loadMaskedGRUShadow,
+  type MaskedGRUShadowEngine,
+  type MaskedGRUShadowResult,
+  type SafeMaskedGRUShadowFallback,
+} from "../../../lib/masked-gru-shadow.mjs";
+import {
+  buildEdgeShadowReport,
+  shouldPersistNormalizedObservation,
+  shouldReportEdgeShadow,
+} from "../../../lib/edge-shadow-report.mjs";
 import { CONSERVATIVE_INTERVENTIONS_ENABLED } from "../../../lib/features";
 import {
   Dialog,
@@ -163,6 +176,10 @@ export default function CoursePage() {
   const edgeProfileControllerRef = useRef<EdgeProfileController | null>(null);
   const deviceBudgetCollectorRef = useRef<DeviceBudgetCollector | null>(null);
   const adaptiveSchedulerRef = useRef<AdaptiveScheduler | null>(null);
+  const maskedGRUShadowRef = useRef<MaskedGRUShadowEngine | SafeMaskedGRUShadowFallback | null>(null);
+  const maskedGRUShadowLoadRef = useRef<ReturnType<typeof loadMaskedGRUShadow> | null>(null);
+  const maskedGRUShadowQueueRef = useRef<Promise<void>>(Promise.resolve());
+  const lastEdgeShadowReportAtRef = useRef<number | null>(null);
   const batteryLevelRef = useRef<number | null>(null);
   const sessionRef = useRef<number | null>(null);
   const progressSyncRef = useRef<{ lessonId: number | null; completed: number }>({
@@ -217,6 +234,11 @@ export default function CoursePage() {
     "idle" | "queued" | "sending" | "degraded" | "stopped"
   >("stopped");
   const [qualityMessage, setQualityMessage] = useState<string | null>(null);
+  const [maskedGRUShadowStatus, setMaskedGRUShadowStatus] = useState<"disabled" | "loading" | "ready" | "fallback">(
+    MASKED_GRU_SHADOW_ENABLED ? "loading" : "disabled",
+  );
+  const [maskedGRUShadowResult, setMaskedGRUShadowResult] = useState<MaskedGRUShadowResult | null>(null);
+  const [edgeShadowReportStatus, setEdgeShadowReportStatus] = useState<"idle" | "sending" | "sent" | "degraded">("idle");
   const [edgeProfile, setEdgeProfile] = useState<EdgeProfileName>("low");
   const [availableCameras, setAvailableCameras] = useState<CameraOption[]>([]);
   const [selectedCameraId, setSelectedCameraId] = useState("");
@@ -644,6 +666,14 @@ export default function CoursePage() {
     latestNormalizedEventRef.current = null;
     deviceBudgetCollectorRef.current = null;
     adaptiveSchedulerRef.current = null;
+    maskedGRUShadowRef.current?.reset();
+    maskedGRUShadowRef.current = null;
+    maskedGRUShadowLoadRef.current = null;
+    maskedGRUShadowQueueRef.current = Promise.resolve();
+    lastEdgeShadowReportAtRef.current = null;
+    setEdgeShadowReportStatus("idle");
+    setMaskedGRUShadowStatus(MASKED_GRU_SHADOW_ENABLED ? "loading" : "disabled");
+    setMaskedGRUShadowResult(null);
     batteryLevelRef.current = null;
     qualityWindowRef.current = [];
     setQualityMessage(null);
@@ -759,10 +789,66 @@ export default function CoursePage() {
             profileGeneration: edgeProfileControllerRef.current?.generation || 0,
           });
           latestNormalizedEventRef.current = event;
-          setCaptureTransportStatus("sending");
-          void apiFetch("/api/observations/", { method: "POST", body: JSON.stringify(event) }, token || undefined)
-            .then(() => setCaptureTransportStatus("idle"))
-            .catch(() => setCaptureTransportStatus("degraded"));
+          const eventGeneration = cameraGenerationRef.current;
+          const persistNormalizedObservation = shouldPersistNormalizedObservation({
+            edgeReportingEnabled: EDGE_SHADOW_REPORTING_ENABLED,
+            shadowEnabled: MASKED_GRU_SHADOW_ENABLED,
+          });
+          if (persistNormalizedObservation) {
+            setCaptureTransportStatus("sending");
+            void apiFetch(
+              "/api/observations/",
+              { method: "POST", body: JSON.stringify(event) },
+              token || undefined,
+            )
+              .then(() => setCaptureTransportStatus("idle"))
+              .catch(() => setCaptureTransportStatus("degraded"));
+          } else {
+            setCaptureTransportStatus("idle");
+          }
+          if (MASKED_GRU_SHADOW_ENABLED) {
+            maskedGRUShadowQueueRef.current = maskedGRUShadowQueueRef.current.then(async () => {
+              if (!maskedGRUShadowRef.current) {
+                maskedGRUShadowLoadRef.current ||= loadMaskedGRUShadow();
+                const loaded = await maskedGRUShadowLoadRef.current;
+                maskedGRUShadowRef.current = loaded.engine;
+                setMaskedGRUShadowStatus(loaded.status === "ready" ? "ready" : "fallback");
+              }
+              const result = maskedGRUShadowRef.current.update(event);
+              setMaskedGRUShadowResult(result);
+              if (
+                eventGeneration === cameraGenerationRef.current
+                && cameraActiveRef.current
+                && EDGE_SHADOW_REPORTING_ENABLED
+                && permissionSettings.saveAnalytics
+                && permissionSettings.researchUse
+                && shouldReportEdgeShadow(lastEdgeShadowReportAtRef.current, event.captured_at)
+              ) {
+                const report = buildEdgeShadowReport(event, result, {
+                  sampleCount: qualityWindowRef.current.length,
+                });
+                lastEdgeShadowReportAtRef.current = Date.parse(event.captured_at);
+                setEdgeShadowReportStatus("sending");
+                setCaptureTransportStatus("sending");
+                void apiFetch(
+                  "/api/edge-shadow-inferences/",
+                  { method: "POST", body: JSON.stringify(report) },
+                  token || undefined,
+                )
+                  .then(() => setEdgeShadowReportStatus("sent"))
+                  .then(() => setCaptureTransportStatus("idle"))
+                  .catch(() => {
+                    setEdgeShadowReportStatus("degraded");
+                    setCaptureTransportStatus("degraded");
+                  });
+              }
+            }).catch(() => {
+              maskedGRUShadowRef.current = null;
+              maskedGRUShadowLoadRef.current = null;
+              setMaskedGRUShadowStatus("fallback");
+              setMaskedGRUShadowResult(null);
+            });
+          }
         }
         setAttentionStatus(sample.quality.observable ? "ok" : "no_face");
         if (!(NORMALIZED_FEATURES_V1_ENABLED && QUALITY_GATE_V1_ENABLED && sessionId && consentVersionRef.current)) {
@@ -1312,6 +1398,38 @@ export default function CoursePage() {
                             ? "listo"
                             : "detenido"}
                   </p>
+                  {MASKED_GRU_SHADOW_ENABLED && (
+                    <div
+                      className="rounded-lg border border-violet-200 bg-violet-50 px-3 py-2 text-xs text-violet-900"
+                      data-testid="masked-gru-shadow-status"
+                      role="status"
+                    >
+                      <strong>Modelo GRU en prueba (shadow): </strong>
+                      {!permissionSettings.enableCamera
+                        ? "en espera; cámara inactiva"
+                        : maskedGRUShadowStatus === "loading"
+                        ? "cargando"
+                        : maskedGRUShadowStatus === "fallback"
+                          ? "no disponible; salida oficial sin cambios"
+                          : maskedGRUShadowResult?.evidence_state === "no_observable"
+                            ? "señal no observable"
+                            : maskedGRUShadowResult
+                              ? `${maskedGRUShadowResult.evidence_state === "task_oriented_evidence" ? "orientación observable" : "fuera de orientación observable"} (${Math.round((maskedGRUShadowResult.probability || 0) * 100)}%)`
+                              : "esperando una ventana válida"}
+                      <span className="mt-1 block text-violet-700">No afecta la medición oficial ni activa intervenciones.</span>
+                      {EDGE_SHADOW_REPORTING_ENABLED && permissionSettings.researchUse && (
+                        <span className="mt-1 block text-violet-700">
+                          Resumen Edge para investigación: {edgeShadowReportStatus === "sending"
+                            ? "enviando"
+                            : edgeShadowReportStatus === "sent"
+                              ? "confirmado"
+                              : edgeShadowReportStatus === "degraded"
+                                ? "sin confirmación; el modelo local continúa"
+                                : "esperando intervalo"}.
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </>
               )}
               <div className="text-sm text-slate-600">

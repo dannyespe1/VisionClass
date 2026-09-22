@@ -16,6 +16,14 @@ test("panel exposes scoped filters, provenance, sample and explicit evidence sta
   for (const term of ["period", "cohort", "model", "profile", "Proveniencia", "Ventanas observables", "Validez", "Equidad", "not_linked"]) assert.match(page, new RegExp(term, "i"));
 });
 
+test("panel adds only aggregate Edge validation indicators", () => {
+  for (const term of ["Validación Edge", "local_execution_ratio", "registry_integrity_ratio", "mean_task_oriented_probability"]) {
+    assert.match(page, new RegExp(term, "i"));
+  }
+  assert.match(page, /no contiene imágenes, video ni rasgos faciales individuales/i);
+  assert.doesNotMatch(page, /face_center_x|observation_event_id|research_pseudonym/);
+});
+
 test("export is purpose-bound, short-lived, one-time and never persists its token", () => {
   assert.match(page, /purpose: dashboard\.grant\.purpose/);
   assert.match(page, /expires_in_minutes: 10/);

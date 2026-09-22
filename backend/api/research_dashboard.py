@@ -110,7 +110,15 @@ def prepare_research_inferences(grant, filters, now=None):
     if profile:
         telemetry = telemetry.filter(profile=profile)
         inferences = inferences.filter(
-            window__temporal_session__course_session_id__in=telemetry.values("course_session_id")
+            Q(
+                provenance__source__in=["edge_shadow_inference", "strict_edge_shadow_inference"],
+                window__provenance__execution_profile=profile,
+            )
+            | Q(
+                window__temporal_session__course_session_id__in=telemetry.values(
+                    "course_session_id"
+                )
+            )
         )
 
     candidate_ids = set(
@@ -150,6 +158,49 @@ def _bucket_distribution(samples, field):
         counts[getattr(sample, field)] += 1
     total = sum(counts.values())
     return {key: round(value / total, 4) for key, value in sorted(counts.items())} if total else {}
+
+
+def _edge_validation_summary(inferences):
+    edge = [
+        item for item in inferences
+        if item.provenance.get("source") in {"edge_shadow_inference", "strict_edge_shadow_inference"}
+    ]
+    if not edge:
+        return {
+            "local_execution_ratio": 0.0,
+            "registry_integrity_ratio": 0.0,
+            "mean_task_oriented_probability": None,
+            "profiles": {},
+        }
+    verified = [
+        item for item in edge
+        if item.provenance.get("artifact_integrity")
+        == "sha256_verified_by_client_and_registry_matched"
+    ]
+    probabilities = [
+        item.probabilities.get(InferredState.STATE_TASK_ORIENTED_EVIDENCE)
+        for item in edge
+        if item.state in OBSERVABLE_STATES
+        and isinstance(
+            item.probabilities.get(InferredState.STATE_TASK_ORIENTED_EVIDENCE),
+            (int, float),
+        )
+    ]
+    profiles = defaultdict(int)
+    for item in edge:
+        profile = item.window.provenance.get("execution_profile")
+        if profile in {"low", "balanced", "high"}:
+            profiles[profile] += 1
+    return {
+        "local_execution_ratio": round(len(edge) / len(inferences), 4),
+        "registry_integrity_ratio": round(len(verified) / len(edge), 4),
+        "mean_task_oriented_probability": (
+            round(sum(probabilities) / len(probabilities), 4) if probabilities else None
+        ),
+        "profiles": {
+            key: round(value / len(edge), 4) for key, value in sorted(profiles.items())
+        },
+    }
 
 
 def _summarize_cell(inferences, telemetry, minimum_participants, minimum_observable_windows):
@@ -228,6 +279,7 @@ def _summarize_cell(inferences, telemetry, minimum_participants, minimum_observa
                 "network": _bucket_distribution(samples, "network_bucket"),
                 "energy": _bucket_distribution(samples, "energy_bucket"),
             },
+            "edge_validation": _edge_validation_summary(inferences),
             "registry_metrics": _metric_subset(artifact.metrics),
             "validity_evidence": _evidence_reference(artifact.evaluation, "validity"),
             "fairness_evidence": _evidence_reference(artifact.evaluation, "fairness"),

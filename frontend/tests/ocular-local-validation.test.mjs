@@ -42,3 +42,39 @@ test("reset clears values only when a new camera run begins", () => {
   assert.equal(session.snapshot().total_samples, 0);
   assert.equal(session.snapshot().active_phase, "frontal");
 });
+
+test("computes a robust local calibration without retaining individual samples", () => {
+  const session = new OcularLocalValidationSession();
+  const recordPhase = (phase, value) => {
+    session.selectPhase(phase);
+    for (let index = 0; index < 40; index += 1) session.record(sample(value));
+  };
+  recordPhase("frontal", 0.44);
+  recordPhase("eyes_left", 0.55);
+  recordPhase("eyes_right", 0.39);
+  recordPhase("front_return", 0.49);
+  const result = session.snapshot();
+  assert.equal(result.calibration.status, "ready");
+  assert.ok(Math.abs(result.calibration.center - 0.465) < 0.001);
+  assert.ok(Math.abs(result.calibration.left_threshold - 0.516) < 0.001);
+  assert.ok(Math.abs(result.calibration.right_threshold - 0.42) < 0.001);
+  assert.equal(result.calibration.polarity, "increasing_x_is_left");
+  assert.equal(Object.hasOwn(result, "samples"), false);
+});
+
+test("uses a histogram-trimmed mean to reduce isolated ocular outliers", () => {
+  const session = new OcularLocalValidationSession();
+  for (let index = 0; index < 9; index += 1) session.record(sample(0.5));
+  const result = session.record(sample(1));
+  assert.equal(result.phases.frontal.binocular_gaze_x.mean, 0.55);
+  assert.ok(Math.abs(result.phases.frontal.binocular_gaze_x.robust_mean - 0.5) < 0.001);
+});
+
+test("freezes each phase after the required valid sample count", () => {
+  const session = new OcularLocalValidationSession();
+  for (let index = 0; index < 40; index += 1) session.record(sample(0.5));
+  for (let index = 0; index < 20; index += 1) session.record(sample(1));
+  const result = session.snapshot();
+  assert.equal(result.phases.frontal.sample_count, 40);
+  assert.ok(Math.abs(result.phases.frontal.binocular_gaze_x.robust_mean - 0.5) < 0.001);
+});

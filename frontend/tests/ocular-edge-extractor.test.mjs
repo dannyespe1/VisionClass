@@ -91,7 +91,7 @@ test("selects worker only when it protects the main thread without losing covera
 });
 
 test("benchmarks both lanes before freezing the local decision", () => {
-  const benchmark = new EdgeExecutionBenchmark({ samplesPerLane: 2 });
+  const benchmark = new EdgeExecutionBenchmark({ samplesPerLane: 2, warmupSamplesPerLane: 0 });
   for (let index = 0; index < 4; index += 1) {
     const lane = benchmark.nextLane();
     benchmark.record(lane, lane === "main"
@@ -100,6 +100,34 @@ test("benchmarks both lanes before freezing the local decision", () => {
   }
   assert.equal(benchmark.summary().selected_lane, "worker");
   assert.equal(benchmark.nextLane(), "worker");
+});
+
+test("discards warmup measurements before comparing execution lanes", () => {
+  const benchmark = new EdgeExecutionBenchmark({ samplesPerLane: 1, warmupSamplesPerLane: 2 });
+  for (let index = 0; index < 4; index += 1) {
+    const lane = benchmark.nextLane();
+    benchmark.record(lane, { totalMs: 500, mainThreadMs: 500, observable: true });
+  }
+  assert.equal(benchmark.summary().lanes.main.samples, 0);
+  assert.equal(benchmark.summary().lanes.worker.samples, 0);
+  assert.deepEqual(benchmark.summary().warmup_discarded, { main: 2, worker: 2 });
+  for (let index = 0; index < 2; index += 1) {
+    const lane = benchmark.nextLane();
+    benchmark.record(lane, lane === "main"
+      ? { totalMs: 40, mainThreadMs: 40, observable: true }
+      : { totalMs: 45, mainThreadMs: 4, observable: true });
+  }
+  assert.equal(benchmark.summary().selected_lane, "worker");
+});
+
+test("freezes benchmark evidence after selecting a lane", () => {
+  const benchmark = new EdgeExecutionBenchmark({ samplesPerLane: 1, warmupSamplesPerLane: 0 });
+  benchmark.record(benchmark.nextLane(), { totalMs: 40, mainThreadMs: 40, observable: true });
+  benchmark.record(benchmark.nextLane(), { totalMs: 45, mainThreadMs: 4, observable: true });
+  const selected = benchmark.summary();
+  assert.equal(selected.selected_lane, "worker");
+  assert.equal(benchmark.record("worker", { totalMs: 999, mainThreadMs: 999, observable: false }), false);
+  assert.deepEqual(benchmark.summary(), selected);
 });
 
 test("worker path transfers frames locally and never performs network or serialization", async () => {

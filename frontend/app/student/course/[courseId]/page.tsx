@@ -50,6 +50,7 @@ import type { EdgeProfileName } from "../../../lib/edge-profiles.mjs";
 import { DeviceBudgetCollector } from "../../../lib/device-budget-telemetry.mjs";
 import { AdaptiveScheduler } from "../../../lib/adaptive-scheduler.mjs";
 import {
+  OCULAR_MIN_VALID_SAMPLES,
   OCULAR_VALIDATION_PHASES,
   OcularLocalValidationSession,
   type OcularValidationPhase,
@@ -1269,6 +1270,7 @@ export default function CoursePage() {
     syncProgress();
   }, [selectedLessonId, currentLessonIndex, token, enrollmentId, sortedLessons.length, courseId]);
   const activeOcularSummary = ocularValidationSummary?.phases[ocularValidationPhase] || null;
+  const ocularCalibration = ocularValidationSummary?.calibration || null;
   const selectOcularValidationPhase = (phase: OcularValidationPhase) => {
     ocularValidationRef.current ||= new OcularLocalValidationSession();
     setOcularValidationPhase(phase);
@@ -1397,7 +1399,7 @@ export default function CoursePage() {
                       <>
                         <div>Muestras: {activeOcularSummary.sample_count}</div>
                         <div>
-                          Mirada X media {Math.round((activeOcularSummary.binocular_gaze_x.mean || 0) * 100)}%
+                          Mirada X robusta {Math.round((activeOcularSummary.binocular_gaze_x.robust_mean ?? activeOcularSummary.binocular_gaze_x.mean ?? 0) * 100)}%
                           {` · rango ${Math.round((activeOcularSummary.binocular_gaze_x.min || 0) * 100)}–${Math.round((activeOcularSummary.binocular_gaze_x.max || 0) * 100)}%`}
                         </div>
                         <div>
@@ -1409,6 +1411,46 @@ export default function CoursePage() {
                     )
                     : "Aún no hay muestras válidas para esta fase."}
                 </div>
+                {ocularCalibration && (
+                  <div className="mt-2 rounded-md border border-violet-200 bg-white/70 p-2 text-xs text-violet-900" data-testid="ocular-session-calibration">
+                    {ocularCalibration.status === "collecting" && (
+                      <>
+                        <div className="font-medium">Calibración: recopilando</div>
+                        <div className="mt-1 grid grid-cols-2 gap-x-2">
+                          {OCULAR_VALIDATION_PHASES.map((phase) => (
+                            <span key={phase.id}>
+                              {phase.label}: {Math.min(ocularCalibration.counts[phase.id] || 0, OCULAR_MIN_VALID_SAMPLES)}/{OCULAR_MIN_VALID_SAMPLES}
+                            </span>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                    {ocularCalibration.status === "ready" && (
+                      <>
+                        <div className="font-medium text-emerald-700">Calibración local lista</div>
+                        <div>
+                          Centro {Math.round((ocularCalibration.center || 0) * 100)}%
+                          {` · límite izquierda ${Math.round((ocularCalibration.left_threshold || 0) * 100)}%`}
+                          {` · límite derecha ${Math.round((ocularCalibration.right_threshold || 0) * 100)}%`}
+                        </div>
+                        <div>
+                          Separación {Math.round((ocularCalibration.directional_separation || 0) * 100)} puntos
+                          {` · deriva ${Math.round((ocularCalibration.center_drift || 0) * 100)} puntos`}
+                        </div>
+                      </>
+                    )}
+                    {ocularCalibration.status === "insufficient" && (
+                      <>
+                        <div className="font-medium text-amber-700">Calibración insuficiente</div>
+                        <div>
+                          {ocularCalibration.reason === "directional_separation_too_small" && "La separación entre izquierda y derecha es menor a 10 puntos."}
+                          {ocularCalibration.reason === "center_drift_too_large" && "La deriva entre frontal y regreso supera 8 puntos."}
+                          {ocularCalibration.reason === "center_not_between_directions" && "El centro no quedó entre ambas direcciones."}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
                 {ocularEdgeStatus && (
                   <div className="mt-2 border-t border-violet-200 pt-2 text-xs text-violet-700">
                     Carril: {ocularEdgeStatus.selectedLane

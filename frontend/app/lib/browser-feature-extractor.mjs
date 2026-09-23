@@ -1,6 +1,9 @@
 import { createLocalFaceDetector } from "./mediapipe-face-detector.mjs";
+import { createMeasuredFaceLandmarker } from "./measured-face-landmarker.mjs";
 
 const clamp01 = (value) => Math.min(1, Math.max(0, value));
+export const OCULAR_FEATURES_V2_ENABLED =
+  process.env.NEXT_PUBLIC_OCULAR_FEATURES_V2?.trim().toLowerCase() !== "false";
 
 const pointFor = (landmarks, type) => {
   const landmark = landmarks?.find((item) => item?.type === type);
@@ -24,6 +27,10 @@ export function summarizeDetectedFace(face, frameWidth, frameHeight) {
     ? clamp01((nose.x - Math.min(leftEye.x, rightEye.x)) / Math.max(1, Math.abs(rightEye.x - leftEye.x)))
     : null;
   const edgeMargin = Math.min(box.x, box.y, frameWidth - box.x - box.width, frameHeight - box.y - box.height);
+  const ocular = face?.ocular || {};
+  const irisAvailable = ocular.iris_available === 1
+    && [ocular.left_iris_x, ocular.left_iris_y, ocular.right_iris_x, ocular.right_iris_y]
+      .every((value) => Number.isFinite(value));
 
   return {
     face_present: 1,
@@ -34,12 +41,33 @@ export function summarizeDetectedFace(face, frameWidth, frameHeight) {
     face_height: clamp01(box.height / frameHeight),
     eye_span: eyeSpan === null ? null : clamp01(eyeSpan),
     head_roll: roll,
+    head_yaw_proxy: Number.isFinite(ocular.head_yaw_proxy) ? clamp01(ocular.head_yaw_proxy) : gazeX,
+    head_pitch_proxy: Number.isFinite(ocular.head_pitch_proxy) ? clamp01(ocular.head_pitch_proxy) : null,
+    left_iris_x: irisAvailable ? clamp01(ocular.left_iris_x) : null,
+    left_iris_y: irisAvailable ? clamp01(ocular.left_iris_y) : null,
+    right_iris_x: irisAvailable ? clamp01(ocular.right_iris_x) : null,
+    right_iris_y: irisAvailable ? clamp01(ocular.right_iris_y) : null,
+    binocular_gaze_x: irisAvailable && Number.isFinite(ocular.binocular_gaze_x) ? clamp01(ocular.binocular_gaze_x) : null,
+    binocular_gaze_y: irisAvailable && Number.isFinite(ocular.binocular_gaze_y) ? clamp01(ocular.binocular_gaze_y) : null,
+    eye_openness: irisAvailable && Number.isFinite(ocular.eye_openness) ? clamp01(ocular.eye_openness) : null,
+    iris_agreement: irisAvailable && Number.isFinite(ocular.iris_agreement) ? clamp01(ocular.iris_agreement) : null,
+    iris_available: irisAvailable ? 1 : 0,
+    // Compatibility only: v1 used this name for nose-versus-eyes head yaw.
     gaze_horizontal_proxy: gazeX,
     face_edge_margin: clamp01(edgeMargin / Math.min(frameWidth, frameHeight)),
     detection_confidence: Number.isFinite(face.confidence) ? clamp01(face.confidence) : null,
     pose_available: roll === null ? 0 : 1,
     gaze_available: gazeX === null ? 0 : 1,
   };
+}
+
+async function createPreferredLocalAnalyzer() {
+  if (!OCULAR_FEATURES_V2_ENABLED) return createLocalFaceDetector();
+  try {
+    return await createMeasuredFaceLandmarker();
+  } catch {
+    return createLocalFaceDetector();
+  }
 }
 
 export function summarizeLuminance(imageData) {
@@ -63,7 +91,7 @@ export function summarizeLuminance(imageData) {
 
 export class BrowserFeatureExtractor {
   constructor({ detectorFactory, canvasFactory } = {}) {
-    this.detectorFactory = detectorFactory || createLocalFaceDetector;
+    this.detectorFactory = detectorFactory || createPreferredLocalAnalyzer;
     this.canvasFactory = canvasFactory || (() => document.createElement("canvas"));
     this.detector = null;
     this.canvas = null;
@@ -104,7 +132,14 @@ export class BrowserFeatureExtractor {
         captured_at: new Date().toISOString(),
         frame: { width, height },
         features: { ...features, ...luminance },
-        quality: { observable: true, confidence: features.detection_confidence, reason: null },
+        quality: {
+          observable: true,
+          ocular_observable: features.iris_available === 1,
+          confidence: features.detection_confidence,
+          reason: null,
+          ocular_reason: features.iris_available === 1 ? null : "iris_unavailable",
+        },
+        ...(this.detector.performanceSummary ? { performance: this.detector.performanceSummary() } : {}),
       };
     } catch {
       return this.unobservable("detector_error", width, height);
@@ -121,6 +156,7 @@ export class BrowserFeatureExtractor {
         face_count: reason === "face_absent" ? 0 : null,
       },
       quality: { observable: false, reason },
+      ...(this.detector?.performanceSummary ? { performance: this.detector.performanceSummary() } : {}),
     };
   }
 

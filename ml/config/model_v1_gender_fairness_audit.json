@@ -1,0 +1,19 @@
+{
+  "schema_version": "fairness-audit-v1",
+  "protocol_version": "P0.3-v0.2-model-v1-gender",
+  "group_dimensions": ["gender_self_description"],
+  "minimum_total_participants": 80,
+  "maximum_total_participants": 100,
+  "minimum_cell_participants": 20,
+  "minimum_observable_records": 100,
+  "minimum_positive_labels": 20,
+  "minimum_negative_labels": 20,
+  "common_threshold": 0.013582718558609486,
+  "sensitivity_thresholds": [0.01, 0.013582718558609486, 0.025, 0.05, 0.1],
+  "calibration_bins": 10,
+  "bootstrap_iterations": 300,
+  "bootstrap_seed": 34017,
+  "maximum_error_or_calibration_gap": 0.1,
+  "maximum_coverage_gap": 0.1,
+  "minimum_coverage": 0.7
+}

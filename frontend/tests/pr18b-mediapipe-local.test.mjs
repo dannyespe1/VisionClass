@@ -6,7 +6,13 @@ import {
   MEDIAPIPE_FACE_MODEL,
   MEDIAPIPE_WASM_BASE,
 } from "../app/lib/mediapipe-face-detector.mjs";
-import { MODEL_SHA256, MODEL_URL, sha256 } from "../scripts/prepare-mediapipe-assets.mjs";
+import {
+  FACE_LANDMARKER_MODEL_SHA256,
+  FACE_LANDMARKER_MODEL_URL,
+  MODEL_SHA256,
+  MODEL_URL,
+  sha256,
+} from "../scripts/prepare-mediapipe-assets.mjs";
 
 test("adapts only numeric derived features and converts normalized keypoints", () => {
   const result = adaptMediaPipeDetection({
@@ -57,6 +63,8 @@ test("runtime assets are same-origin paths while build input is checksum pinned"
   assert.equal(MEDIAPIPE_FACE_MODEL.includes("http"), false);
   assert.match(MODEL_URL, /^https:\/\/storage\.googleapis\.com\/mediapipe-models\//);
   assert.match(MODEL_SHA256, /^[a-f0-9]{64}$/);
+  assert.match(FACE_LANDMARKER_MODEL_URL, /^https:\/\/storage\.googleapis\.com\/mediapipe-models\//);
+  assert.match(FACE_LANDMARKER_MODEL_SHA256, /^[a-f0-9]{64}$/);
   assert.equal(sha256(Buffer.from("visionclass")), "a501b4b1bc1bbf5c9806717b78db4c4f6d2d133e9880872a90a981ea7d22eb1c");
 });
 

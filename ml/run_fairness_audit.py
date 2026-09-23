@@ -67,6 +67,11 @@ def synthetic_records(config: dict[str, Any]) -> list[dict[str, Any]]:
             group_b = "b3_small"
         else:
             group_b = "b1" if participant_index % 4 in {0, 1} else "b2"
+        if config["group_dimensions"] == ["gender_self_description"]:
+            gender = ("g01", "g02", "g03")[(participant_index - 1) % 3]
+            groups = {"gender_self_description": gender}
+        else:
+            groups = {"group_a": group_a, "group_b": group_b}
         participant_effect = ((participant_index * 13) % 17 - 8) / 100
         for window_index in range(1, 11):
             generator = _rng(seed, participant_index, window_index)
@@ -74,7 +79,10 @@ def synthetic_records(config: dict[str, Any]) -> list[dict[str, Any]]:
             observable = (participant_index * 5 + window_index * 3) % 19 not in {0, 1}
             if observable:
                 base = 0.73 if label else 0.27
-                disparity = -0.20 if group_a == "a2" and label else 0.0
+                disparity = -0.20 if (
+                    (config["group_dimensions"] == ["gender_self_description"] and gender == "g03" and label)
+                    or (config["group_dimensions"] != ["gender_self_description"] and group_a == "a2" and label)
+                ) else 0.0
                 probability = max(0.01, min(0.99, base + disparity + generator.uniform(-0.24, 0.24)))
                 output_label = label
                 reason = None
@@ -85,7 +93,7 @@ def synthetic_records(config: dict[str, Any]) -> list[dict[str, Any]]:
             rows.append({
                 "participant_pseudo": f"syn-p{participant_index:03d}",
                 "window_id": f"syn-w{participant_index:03d}-{window_index:02d}",
-                "groups": {"group_a": group_a, "group_b": group_b},
+                "groups": groups,
                 "label": output_label,
                 "probability": None if probability is None else round(probability, 6),
                 "observable": observable,

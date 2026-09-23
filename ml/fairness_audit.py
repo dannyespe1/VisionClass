@@ -160,13 +160,14 @@ def _candidate_cells(records: list[dict[str, Any]], dimensions: tuple[str, ...])
         for value in values:
             selected = [row for row in records if (row["groups"][dimension] if row["groups"][dimension] is not None else "missing") == value]
             candidates.append((dimension, {dimension: value}, selected))
-    combinations: dict[tuple[str, ...], list[dict[str, Any]]] = defaultdict(list)
-    for row in records:
-        key = tuple(row["groups"][dimension] if row["groups"][dimension] is not None else "missing" for dimension in dimensions)
-        combinations[key].append(row)
-    for values in sorted(combinations):
-        selector = dict(zip(dimensions, values))
-        candidates.append(("intersection", selector, combinations[values]))
+    if len(dimensions) > 1:
+        combinations: dict[tuple[str, ...], list[dict[str, Any]]] = defaultdict(list)
+        for row in records:
+            key = tuple(row["groups"][dimension] if row["groups"][dimension] is not None else "missing" for dimension in dimensions)
+            combinations[key].append(row)
+        for values in sorted(combinations):
+            selector = dict(zip(dimensions, values))
+            candidates.append(("intersection", selector, combinations[values]))
     return candidates
 
 

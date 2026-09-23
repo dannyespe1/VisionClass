@@ -1,14 +1,26 @@
 import hashlib
 import json
+import uuid
 
 from cryptography.fernet import Fernet
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
+from django.utils import timezone
 
-from .models import DemographicVaultAudit, DemographicVaultRecord
+from .consent import consent_status
+from .models import (
+    ConsentEvent,
+    DemographicVaultAudit,
+    DemographicVaultRecord,
+    ResearchPseudonymMap,
+)
 
 
 ALLOWED_FIELDS = {"age_band", "gender_self_description", "accessibility_accommodation", "voluntary_group"}
+APPROVED_AGE_BAND = "18-20"
+APPROVED_GENDER_VALUES = {"masculino", "femenino", "otro"}
+AGE_STORAGE_CODE = "a01"
+GENDER_STORAGE_CODES = {"masculino": "g01", "femenino": "g02", "otro": "g03"}
 
 
 def _digest(pseudonym):
@@ -48,3 +60,82 @@ def read_demographics(actor, pseudonym):
     value = json.loads(Fernet(settings.DEMOGRAPHIC_VAULT_KEY.encode("ascii")).decrypt(bytes(record.encrypted_payload)))
     _audit(actor, "read", "allowed", "approved_role", pseudonym)
     return value
+
+
+def store_own_demographics(actor, payload, retention_until):
+    """Store the authenticated participant's voluntary demographic response."""
+
+    if not settings.DEMOGRAPHIC_VAULT or not settings.DEMOGRAPHIC_VAULT_KEY:
+        raise PermissionDenied("Bóveda no disponible.")
+    if not actor.is_authenticated or actor.role != actor.ROLE_STUDENT:
+        raise PermissionDenied("Acceso no autorizado.")
+    status = consent_status(actor)
+    research = status["purposes"][ConsentEvent.PURPOSE_RESEARCH]
+    if not research["granted"]:
+        raise PermissionDenied("Se requiere consentimiento vigente para investigación.")
+    if payload != {
+        "age_band": APPROVED_AGE_BAND,
+        "gender_self_description": payload.get("gender_self_description"),
+    } or payload["gender_self_description"] not in APPROVED_GENDER_VALUES:
+        raise ValueError("Categorías demográficas no autorizadas.")
+    consent_expiry = research["expires_at"]
+    if consent_expiry is not None:
+        retention_until = min(retention_until, consent_expiry)
+    if retention_until <= timezone.now():
+        raise ValueError("La retención demográfica debe expirar en el futuro.")
+    mapping, _ = ResearchPseudonymMap.objects.get_or_create(
+        participant=actor,
+        defaults={"research_pseudonym": uuid.uuid4()},
+    )
+    protected_payload = {
+        "age_band": AGE_STORAGE_CODE,
+        "gender_self_description": GENDER_STORAGE_CODES[payload["gender_self_description"]],
+    }
+    encrypted = Fernet(settings.DEMOGRAPHIC_VAULT_KEY.encode("ascii")).encrypt(
+        json.dumps(protected_payload, sort_keys=True).encode("utf-8")
+    )
+    record, _ = DemographicVaultRecord.objects.update_or_create(
+        research_pseudonym=mapping.research_pseudonym,
+        defaults={
+            "encrypted_payload": encrypted,
+            "consent_version": status["current_version"],
+            "retention_until": retention_until,
+        },
+    )
+    _audit(actor, "self_write", "allowed", "voluntary_research_response", mapping.research_pseudonym)
+    return record
+
+
+def own_demographic_status(actor):
+    if not actor.is_authenticated or actor.role != actor.ROLE_STUDENT:
+        raise PermissionDenied("Acceso no autorizado.")
+    mapping = ResearchPseudonymMap.objects.filter(participant=actor).first()
+    record = None
+    if mapping:
+        record = DemographicVaultRecord.objects.filter(
+            research_pseudonym=mapping.research_pseudonym,
+            retention_until__gt=timezone.now(),
+        ).first()
+    return {
+        "registered": record is not None,
+        "retention_until": record.retention_until if record else None,
+    }
+
+
+def delete_own_demographics(actor):
+    if not actor.is_authenticated or actor.role != actor.ROLE_STUDENT:
+        raise PermissionDenied("Acceso no autorizado.")
+    mapping = ResearchPseudonymMap.objects.filter(participant=actor).first()
+    if not mapping:
+        return False
+    deleted, _ = DemographicVaultRecord.objects.filter(
+        research_pseudonym=mapping.research_pseudonym
+    ).delete()
+    _audit(
+        actor,
+        "self_delete",
+        "allowed",
+        "voluntary_response_withdrawn",
+        mapping.research_pseudonym,
+    )
+    return bool(deleted)

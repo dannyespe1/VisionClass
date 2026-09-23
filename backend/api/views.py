@@ -112,10 +112,18 @@ from .serializers import (
     ResearchAccessRequestSerializer,
     PrivacyPolicySettingSerializer,
     ConsentEventSerializer,
+    DemographicProfileSerializer,
 )
 from .utils import send_mailgun_email
 from .permissions import IsAdminUserRole
 from .consent import consent_status, has_capture_consent
+from .demographic_vault import (
+    APPROVED_AGE_BAND,
+    APPROVED_GENDER_VALUES,
+    delete_own_demographics,
+    own_demographic_status,
+    store_own_demographics,
+)
 from .edge_inference import (
     EdgeInferenceConflict,
     EdgeShadowInferenceSerializer,
@@ -2371,7 +2379,12 @@ class ConsentEventViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewse
                 raise PermissionDenied("El texto de consentimiento está pendiente de aprobación.")
             if version != settings.CONSENT_CURRENT_VERSION:
                 raise PermissionDenied("La versión de consentimiento no está vigente.")
-        serializer.save(participant=user, source="web")
+        event = serializer.save(participant=user, source="web")
+        if (
+            event.purpose == ConsentEvent.PURPOSE_RESEARCH
+            and event.action in {ConsentEvent.ACTION_DECLINE, ConsentEvent.ACTION_REVOKE}
+        ):
+            delete_own_demographics(user)
 
 
 class ConsentStatusView(APIView):
@@ -2381,3 +2394,44 @@ class ConsentStatusView(APIView):
         if request.user.role != User.ROLE_STUDENT:
             raise PermissionDenied("Estado disponible solo para participantes.")
         return Response(consent_status(request.user), status=status.HTTP_200_OK)
+
+
+class DemographicProfileView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def _response(self, request):
+        if request.user.role != User.ROLE_STUDENT:
+            raise PermissionDenied("Datos demográficos disponibles solo para participantes.")
+        research = consent_status(request.user)["purposes"][ConsentEvent.PURPOSE_RESEARCH]
+        current = own_demographic_status(request.user)
+        return {
+            "schema_version": "demographic-profile-v1",
+            "available": bool(settings.DEMOGRAPHIC_VAULT and settings.DEMOGRAPHIC_VAULT_KEY),
+            "research_consent_granted": research["granted"],
+            "age_band": APPROVED_AGE_BAND,
+            "gender_options": sorted(APPROVED_GENDER_VALUES),
+            "comparative_dimension": "gender_self_description",
+            "age_is_eligibility_only": True,
+            **current,
+        }
+
+    def get(self, request):
+        return Response(self._response(request), status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = DemographicProfileSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        payload = {
+            "age_band": serializer.validated_data["age_band"],
+            "gender_self_description": serializer.validated_data["gender_self_description"],
+        }
+        retention_until = timezone.now() + timedelta(days=settings.DEMOGRAPHIC_RETENTION_DAYS)
+        try:
+            store_own_demographics(request.user, payload, retention_until)
+        except ValueError as exc:
+            raise serializers.ValidationError({"demographics": str(exc)}) from exc
+        return Response(self._response(request), status=status.HTTP_200_OK)
+
+    def delete(self, request):
+        delete_own_demographics(request.user)
+        return Response(self._response(request), status=status.HTTP_200_OK)

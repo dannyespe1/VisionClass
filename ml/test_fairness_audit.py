@@ -98,6 +98,19 @@ class FairnessAuditTests(unittest.TestCase):
             self.assertEqual(first["status"], "SYNTHETIC_ONLY_NOT_FAIRNESS_EVIDENCE")
             self.assertEqual(first["deployment_gate"]["status"], "BLOCK_PROMOTION_SYNTHETIC_ONLY")
 
+    def test_model_v1_gender_protocol_has_one_comparative_dimension(self):
+        config_path = self.root / "ml" / "config" / "model_v1_gender_fairness_audit.json"
+        config = load_config(config_path)
+        records = synthetic_records(config)
+        result = audit(records, config)
+        self.assertEqual(config["group_dimensions"], ["gender_self_description"])
+        self.assertEqual(config["common_threshold"], 0.013582718558609486)
+        self.assertEqual(
+            {row["groups"]["gender_self_description"] for row in records},
+            {"g01", "g02", "g03"},
+        )
+        self.assertNotIn("intersection", {cell["scope"] for cell in result["released_cells"]})
+
     def test_real_mode_requires_both_approvals_and_does_not_copy_protected_records(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

@@ -44,6 +44,7 @@ STREAM_PIPELINE = os.environ.get('STREAM_PIPELINE', 'False').strip().lower() == 
 STREAM_MAX_RETRIES = int(os.environ.get('STREAM_MAX_RETRIES', '3'))
 DEMOGRAPHIC_VAULT = os.environ.get('DEMOGRAPHIC_VAULT', 'False').strip().lower() == 'true'
 DEMOGRAPHIC_VAULT_KEY = os.environ.get('DEMOGRAPHIC_VAULT_KEY', '').strip()
+DEMOGRAPHIC_RETENTION_DAYS = max(1, int(os.environ.get('DEMOGRAPHIC_RETENTION_DAYS', '30')))
 RETENTION_JOBS = os.environ.get('RETENTION_JOBS', 'False').strip().lower() == 'true'
 NORMALIZED_FEATURES_V1 = os.environ.get('NORMALIZED_FEATURES_V1', 'False').strip().lower() == 'true'
 QUALITY_GATE_V1 = os.environ.get('QUALITY_GATE_V1', 'False').strip().lower() == 'true'

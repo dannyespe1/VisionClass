@@ -32,6 +32,7 @@ urlpatterns = [
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('auth/google/', views.GoogleLogin.as_view(), name='google_login'),
     path('consents/status/', views.ConsentStatusView.as_view(), name='consent-status'),
+    path('demographics/profile/', views.DemographicProfileView.as_view(), name='demographic-profile'),
     path('internal/ml/events/', MLServiceEventView.as_view(), name='ml-service-event'),
     path('internal/ml/temporal-inferences/', MLTemporalInferenceView.as_view(), name='ml-temporal-inference'),
     path('observations/', views.ObservationIngestView.as_view(), name='observation-ingest'),

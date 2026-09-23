@@ -666,3 +666,16 @@ class ConsentEventSerializer(serializers.ModelSerializer):
         if attrs.get('action') == ConsentEvent.ACTION_GRANT and attrs.get('expires_at') is None:
             raise serializers.ValidationError({'expires_at': 'Todo otorgamiento debe expirar.'})
         return attrs
+
+
+class DemographicProfileSerializer(serializers.Serializer):
+    age_band = serializers.ChoiceField(choices=["18-20"])
+    gender_self_description = serializers.ChoiceField(
+        choices=["masculino", "femenino", "otro"]
+    )
+    voluntary_confirmation = serializers.BooleanField(write_only=True)
+
+    def validate_voluntary_confirmation(self, value):
+        if value is not True:
+            raise serializers.ValidationError("La participación debe confirmarse voluntariamente.")
+        return value

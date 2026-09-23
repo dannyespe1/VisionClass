@@ -14,7 +14,7 @@ Una medición ocular incompleta, ojos cerrados o discordancia excesiva produce `
 
 ## Decisión entre hilo principal y Web Worker
 
-Cuando `NEXT_PUBLIC_OCULAR_WORKER_BENCHMARK=true` y el navegador soporta `Worker` y `createImageBitmap`, el dispositivo alterna seis muestras por carril. Registra exclusivamente en memoria:
+Cuando `NEXT_PUBLIC_OCULAR_WORKER_BENCHMARK=true` y el navegador soporta `Worker` y `createImageBitmap`, el dispositivo descarta tres muestras de calentamiento y luego alterna seis muestras válidas por carril. Registra exclusivamente en memoria:
 
 - latencia total p50 y p95;
 - retraso p95 del bucle de eventos como aproximación al bloqueo del hilo principal;
@@ -22,11 +22,13 @@ Cuando `NEXT_PUBLIC_OCULAR_WORKER_BENCHMARK=true` y el navegador soporta `Worker
 
 El worker se selecciona solamente cuando conserva la cobertura dentro de 5 puntos porcentuales, reduce el retraso del hilo principal al menos 25% —o hasta un máximo de 8 ms— y su latencia total p95 no supera 1.5 veces la principal ni añade más de 25 ms. En caso de duda se conserva el hilo principal.
 
-La selección se reinicia al comenzar una nueva ejecución de cámara. Al detenerla, el último resumen p95 permanece visible en memoria para poder revisarlo; se pierde al recargar o abandonar la página. Ninguna métrica de alta granularidad se transmite.
+La selección y la evidencia comparativa quedan congeladas al completar el benchmark y se reinician al comenzar una nueva ejecución de cámara. Al detenerla, el último resumen p95 permanece visible en memoria para poder revisarlo; se pierde al recargar o abandonar la página. Ninguna métrica de alta granularidad se transmite.
 
 ## Protocolo local por fases
 
-El panel de configuración permite marcar `frontal`, `ojos izquierda`, `ojos derecha` y `regreso frontal`. Para cada fase conserva únicamente conteo, media, mínimo y máximo de orientación binocular, apertura ocular y concordancia entre iris. No conserva muestras individuales ni landmarks y el resumen completo desaparece al recargar la página.
+El panel de configuración permite marcar `frontal`, `ojos izquierda`, `ojos derecha` y `regreso frontal`. Para cada fase conserva únicamente histogramas agregados, conteo, media, media recortada al 10%, mínimo y máximo de orientación binocular, apertura ocular y concordancia entre iris. No conserva muestras individuales ni landmarks y el resumen completo desaparece al recargar la página.
+
+La calibración experimental requiere 40 muestras válidas por fase y congela cada fase al alcanzar ese límite para evitar contaminación durante la transición. El centro se calcula con frontal y regreso frontal; los límites direccionales se ubican al 60% del desplazamiento observado hacia cada lado. Solo se declara `ready` si el centro queda entre ambas direcciones, la separación es al menos 0,10 y la deriva entre centros no supera 0,08. Estos límites son locales, efímeros y no modifican el umbral canónico.
 
 ## Activación y rollback
 

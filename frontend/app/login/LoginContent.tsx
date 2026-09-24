@@ -9,6 +9,7 @@ import { Button } from "@/app/ui/button";
 import { apiFetch } from "@/app/lib/api";
 import { useAuth } from "@/app/context/AuthContext";
 import { roleRoute } from "@/app/lib/role-route.mjs";
+import Image from "next/image";
 
 type LoginProfile = {
   role: string;
@@ -73,7 +74,6 @@ export function LoginContent() {
       
       const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
       setGoogleAuthUrl(authUrl);
-      console.log("✅ Google OAuth URL generada correctamente");
     } catch (error) {
       console.error("❌ Error configurando Google OAuth:", error);
       setOauthError("Error al configurar Google OAuth.");
@@ -89,12 +89,10 @@ export function LoginContent() {
       setOauthLoading(true);
       setOauthError(null);
       try {
-        console.log("🔄 Iniciando OAuth con código:", code.substring(0, 20) + "...");
         const data = await apiFetch<{ access: string; refresh: string }>("/api/auth/google/", {
           method: "POST",
           body: JSON.stringify({ code, redirect_uri: redirectUri }),
         });
-        console.log("✅ Token OAuth obtenido exitosamente");
         setTokenValue(data.access);
         await routeByRole(data.access);
       } catch (err) {
@@ -164,7 +162,7 @@ export function LoginContent() {
             >
               <div className="flex items-center justify-center gap-3">
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white">
-                  <img src="/google-new.svg" alt="Google" className="h-5 w-5" />
+                  <Image src="/google-new.svg" alt="Google" width={20} height={20} className="h-5 w-5" />
                 </span>
                 <span>{oauthLoading ? "Conectando con Google..." : "Continuar con Google"}</span>
               </div>

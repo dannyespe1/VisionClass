@@ -56,6 +56,18 @@ type DashboardResponse = {
   state: "empty" | "ready";
   filters: { period: "30d" | "90d" | "all"; course_id: number | null };
   courses: Array<{ id: number; title: string }>;
+  academic_results: Array<{
+    course_id: number;
+    course_title: string;
+    enrollment_count: number;
+    completed_enrollment_count: number;
+    attempt_count: number;
+    average_score: number | null;
+    latest_score: number | null;
+    latest_attempt_at: string | null;
+    passing_score: number;
+    pass_rate: number | null;
+  }>;
   activities: Array<SuppressedActivity | PublishedActivity>;
   privacy: {
     minimum_participants: number;
@@ -72,6 +84,18 @@ const resourceLabels = { text: "Texto", video: "Video", activity: "Actividad" };
 
 function percent(value: number | null) {
   return value === null ? "No disponible" : `${Math.round(value * 100)} %`;
+}
+
+function score(value: number | null) {
+  return value === null ? "Sin datos" : `${value.toLocaleString("es-EC", { maximumFractionDigits: 1 })} %`;
+}
+
+function dateTime(value: string | null) {
+  if (!value) return "Sin intentos";
+  return new Intl.DateTimeFormat("es-EC", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
 }
 
 function suppressionMessage(reason: string, minimum: number) {
@@ -199,8 +223,6 @@ export function TeacherGroupDashboardSection() {
     let cancelled = false;
     const params = new URLSearchParams({ period });
     if (courseId) params.set("course_id", courseId);
-    setLoading(true);
-    setError(null);
     apiFetch<DashboardResponse>(`/api/teacher-group-dashboard/?${params.toString()}`, {}, token)
       .then((response) => {
         if (!cancelled) setDashboard(response);
@@ -229,14 +251,30 @@ export function TeacherGroupDashboardSection() {
       <div className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 sm:grid-cols-2">
         <label className="text-sm font-medium text-slate-700">
           Curso
-          <select className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" value={courseId} onChange={(event) => setCourseId(event.target.value)}>
+          <select
+            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+            value={courseId}
+            onChange={(event) => {
+              setLoading(true);
+              setError(null);
+              setCourseId(event.target.value);
+            }}
+          >
             <option value="">Todos mis cursos</option>
             {(dashboard?.courses ?? []).map((course) => <option key={course.id} value={course.id}>{course.title}</option>)}
           </select>
         </label>
         <label className="text-sm font-medium text-slate-700">
           Periodo
-          <select className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" value={period} onChange={(event) => setPeriod(event.target.value as "30d" | "90d" | "all")}>
+          <select
+            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+            value={period}
+            onChange={(event) => {
+              setLoading(true);
+              setError(null);
+              setPeriod(event.target.value as "30d" | "90d" | "all");
+            }}
+          >
             <option value="30d">Últimos 30 días</option>
             <option value="90d">Últimos 90 días</option>
             <option value="all">Todo el historial autorizado</option>
@@ -246,10 +284,58 @@ export function TeacherGroupDashboardSection() {
 
       {loading && <p role="status" className="rounded-xl bg-white p-6 text-slate-600">Cargando agregados protegidos…</p>}
       {error && <p role="alert" className="rounded-xl bg-red-50 p-6 text-red-800">{error}</p>}
+      {!loading && !error && dashboard && (
+        <section aria-labelledby="academic-results-title" className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">Seguimiento académico</p>
+            <h2 id="academic-results-title" className="mt-1 text-xl font-semibold text-slate-950">Resultados de cursos y evaluaciones</h2>
+            <p className="mt-2 max-w-3xl text-sm text-slate-600">
+              Resume matrículas e intentos calificados de todo el historial del curso. Estas notas se presentan separadas de la evidencia de atención y no se usan para inferir estados mentales.
+            </p>
+          </div>
+          <div className="mt-5 grid gap-4 lg:grid-cols-2">
+            {dashboard.academic_results.map((result) => (
+              <article key={result.course_id} className="rounded-xl border border-slate-200 p-5">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <h3 className="font-semibold text-slate-950">{result.course_title}</h3>
+                  <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800">
+                    Aprobación desde {score(result.passing_score)}
+                  </span>
+                </div>
+                <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  <div className="rounded-lg bg-slate-50 p-3">
+                    <dt className="text-xs text-slate-600">Matrículas</dt>
+                    <dd className="mt-1 text-xl font-semibold text-slate-950">
+                      {result.enrollment_count}
+                      <span className="block text-xs font-normal text-slate-500">{result.completed_enrollment_count} completadas</span>
+                    </dd>
+                  </div>
+                  <div className="rounded-lg bg-slate-50 p-3">
+                    <dt className="text-xs text-slate-600">Intentos calificados</dt>
+                    <dd className="mt-1 text-xl font-semibold text-slate-950">{result.attempt_count}</dd>
+                  </div>
+                  <div className="rounded-lg bg-slate-50 p-3">
+                    <dt className="text-xs text-slate-600">Promedio</dt>
+                    <dd className="mt-1 text-xl font-semibold text-slate-950">{score(result.average_score)}</dd>
+                  </div>
+                  <div className="rounded-lg bg-slate-50 p-3">
+                    <dt className="text-xs text-slate-600">Tasa de aprobación</dt>
+                    <dd className="mt-1 text-xl font-semibold text-slate-950">{score(result.pass_rate)}</dd>
+                  </div>
+                </dl>
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-4 text-sm">
+                  <span className="text-slate-600">Última calificación: <strong className="text-slate-950">{score(result.latest_score)}</strong></span>
+                  <time className="text-slate-500" dateTime={result.latest_attempt_at ?? undefined}>{dateTime(result.latest_attempt_at)}</time>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
       {!loading && !error && dashboard?.state === "empty" && (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
-          <h2 className="font-semibold text-slate-900">No hay actividades agregables</h2>
-          <p className="mt-2 text-sm text-slate-600">Los datos aparecerán sólo cuando existan eventos autorizados y suficientes.</p>
+          <h2 className="font-semibold text-slate-900">No hay evidencia de atención agregable</h2>
+          <p className="mt-2 text-sm text-slate-600">Esta sección aparecerá cuando existan eventos autorizados y suficientes; los resultados académicos se muestran arriba.</p>
         </div>
       )}
       {!loading && !error && dashboard?.activities.map((activity) => (

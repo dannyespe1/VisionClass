@@ -1305,7 +1305,7 @@ class ConservativeInterventionView(APIView):
 
 
 class TeacherGroupDashboardView(APIView):
-    """Publish only privacy-protected activity aggregates for course owners."""
+    """Publish course results and privacy-protected activity aggregates for owners."""
 
     permission_classes = [permissions.IsAuthenticated]
 
@@ -1355,12 +1355,85 @@ class TeacherGroupDashboardView(APIView):
             minimum_participants=settings.TEACHER_GROUP_DASHBOARD_MIN_PARTICIPANTS,
             minimum_observable_windows=settings.TEACHER_GROUP_DASHBOARD_MIN_OBSERVABLE_WINDOWS,
         )
+
+        scored_attempts_by_course = {}
+        for attempt in (
+            QuizAttempt.objects.filter(
+                session__course__in=selected_courses,
+                score__isnull=False,
+            )
+            .select_related("session__course")
+            .order_by("created_at", "id")
+        ):
+            scored_attempts_by_course.setdefault(attempt.session.course_id, []).append(attempt)
+
+        passing_scores = {}
+        for material in (
+            CourseMaterial.objects.filter(
+                lesson__module__course__in=selected_courses,
+                material_type=CourseMaterial.TYPE_TEST,
+            )
+            .order_by("lesson__module__course_id", "created_at", "id")
+            .values("lesson__module__course_id", "metadata")
+        ):
+            raw_score = (material["metadata"] or {}).get("passing_score", 70)
+            try:
+                passing_score = float(raw_score)
+            except (TypeError, ValueError):
+                passing_score = 70.0
+            passing_scores[material["lesson__module__course_id"]] = min(
+                100.0, max(0.0, passing_score)
+            )
+
+        enrollment_counts = {
+            row["course_id"]: row
+            for row in Enrollment.objects.filter(course__in=selected_courses)
+            .exclude(status=Enrollment.STATUS_CANCELLED)
+            .values("course_id")
+            .annotate(
+                enrollment_count=models.Count("id"),
+                completed_enrollment_count=models.Count(
+                    "id", filter=Q(status=Enrollment.STATUS_COMPLETED)
+                ),
+            )
+        }
+
+        academic_results = []
+        for course in selected_courses.order_by("title", "id"):
+            attempts = scored_attempts_by_course.get(course.id, [])
+            scores = [float(attempt.score) for attempt in attempts]
+            passing_score = passing_scores.get(course.id, 70.0)
+            enrollment_summary = enrollment_counts.get(course.id, {})
+            academic_results.append(
+                {
+                    "course_id": course.id,
+                    "course_title": course.title,
+                    "enrollment_count": enrollment_summary.get("enrollment_count", 0),
+                    "completed_enrollment_count": enrollment_summary.get(
+                        "completed_enrollment_count", 0
+                    ),
+                    "attempt_count": len(scores),
+                    "average_score": round(sum(scores) / len(scores), 1) if scores else None,
+                    "latest_score": round(scores[-1], 1) if scores else None,
+                    "latest_attempt_at": attempts[-1].created_at.isoformat() if attempts else None,
+                    "passing_score": passing_score,
+                    "pass_rate": (
+                        round(
+                            sum(score >= passing_score for score in scores) / len(scores) * 100,
+                            1,
+                        )
+                        if scores
+                        else None
+                    ),
+                }
+            )
         return Response(
             {
                 "schema_version": "teacher-group-dashboard-v1",
                 "state": "empty" if not activities else "ready",
                 "filters": {"period": period, "course_id": course_id},
                 "courses": list(owned_courses.order_by("title", "id").values("id", "title")),
+                "academic_results": academic_results,
                 "activities": activities,
                 "privacy": {
                     "minimum_participants": settings.TEACHER_GROUP_DASHBOARD_MIN_PARTICIPANTS,

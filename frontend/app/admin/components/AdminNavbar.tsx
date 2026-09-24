@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { LogOut, Menu } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import type { AdminView } from "../types";
+import Image from "next/image";
 
 type Props = {
   currentView: AdminView;
@@ -41,7 +42,7 @@ export function AdminNavbar({ currentView, onViewChange }: Props) {
           </button>
           <div className="flex items-center gap-3">
             <div className="h-12 w-12 rounded-lg bg-white p-1 flex items-center justify-center">
-              <img src="/LOGO1.png" alt="VisionClass" className="h-full w-full object-contain" />
+              <Image src="/LOGO1.png" alt="VisionClass" width={48} height={48} className="h-full w-full object-contain" priority />
             </div>
             <span className="text-sm font-semibold text-slate-900">VisionClass</span>
             <div className="h-8 w-px bg-slate-300" aria-hidden="true" />

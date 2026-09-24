@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { LogOut, Menu, User } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { apiFetch } from "../../lib/api";
+import type { UserProfileApi } from "../../lib/api-types";
 import { TEACHER_GROUP_DASHBOARD_ENABLED } from "../../lib/features";
+import Image from "next/image";
 
 type TabId = "inicio" | "materiales" | "estadisticas";
 
@@ -49,7 +51,7 @@ export function InstructorNavbar({ activeTab, onTabChange }: Props) {
     const loadProfile = async () => {
       if (!token) return;
       try {
-        const data = await apiFetch<any>("/api/me/", {}, token);
+        const data = await apiFetch<UserProfileApi>("/api/me/", {}, token);
         setProfileForm({
           username: data.username || "",
           first_name: data.first_name || "",
@@ -58,8 +60,8 @@ export function InstructorNavbar({ activeTab, onTabChange }: Props) {
           profile_image: data.profile_image || "",
         });
         setOriginalEmail(data.email || "");
-      } catch (err) {
-        console.error(err);
+      } catch {
+        setProfileError("No se pudo cargar el perfil.");
       }
     };
     loadProfile();
@@ -92,7 +94,7 @@ export function InstructorNavbar({ activeTab, onTabChange }: Props) {
       if (wantsPasswordChange) {
         payload.new_password = newPassword;
       }
-      const updated = await apiFetch<any>(
+      const updated = await apiFetch<UserProfileApi>(
         "/api/me/",
         {
           method: "PATCH",
@@ -112,8 +114,7 @@ export function InstructorNavbar({ activeTab, onTabChange }: Props) {
       setNewPassword("");
       setConfirmPassword("");
       setProfileOpen(false);
-    } catch (err) {
-      console.error(err);
+    } catch {
       setProfileError("No se pudo actualizar el perfil. Verifica la contraseña actual.");
     }
   };
@@ -136,7 +137,7 @@ export function InstructorNavbar({ activeTab, onTabChange }: Props) {
           </button>
           <div className="flex items-center gap-3">
             <div className="h-12 w-12 rounded-lg bg-white p-1 flex items-center justify-center">
-              <img src="/LOGO1.png" alt="VisionClass" className="h-full w-full object-contain" />
+              <Image src="/LOGO1.png" alt="VisionClass" width={48} height={48} className="h-full w-full object-contain" priority />
             </div>
             <span className="text-sm font-semibold text-slate-900">VisionClass</span>
             <div className="h-8 w-px bg-slate-300" aria-hidden="true" />
@@ -177,7 +178,7 @@ export function InstructorNavbar({ activeTab, onTabChange }: Props) {
           >
             <span className="h-8 w-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-semibold overflow-hidden">
               {avatarUrl ? (
-                <img src={avatarUrl} alt="Perfil" className="h-full w-full object-cover" />
+                <Image src={avatarUrl} alt="Perfil" width={32} height={32} className="h-full w-full object-cover" unoptimized />
               ) : (
                 initials
               )}
@@ -223,7 +224,7 @@ export function InstructorNavbar({ activeTab, onTabChange }: Props) {
                 <div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-3">
                   <div className="h-16 w-16 rounded-full bg-slate-200 overflow-hidden flex items-center justify-center text-slate-600 text-sm">
                       {avatarUrl ? (
-                        <img src={avatarUrl} alt="Perfil" className="h-full w-full object-cover" />
+                        <Image src={avatarUrl} alt="Perfil" width={64} height={64} className="h-full w-full object-cover" unoptimized />
                       ) : (
                         initials
                       )}

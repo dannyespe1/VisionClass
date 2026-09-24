@@ -8,9 +8,14 @@ from rest_framework.test import APITestCase
 
 from .models import (
     Course,
+    CourseLesson,
+    CourseMaterial,
+    CourseModule,
+    Enrollment,
     InferredState,
     LearningInteractionEvent,
     ObservationWindow,
+    QuizAttempt,
     Session,
     TemporalSession,
     User,
@@ -120,6 +125,55 @@ class TeacherGroupDashboardTests(APITestCase):
         self.assertEqual(response.data["courses"], [{"id": self.course.id, "title": self.course.title}])
         self.assertFalse(response.data["privacy"]["individual_states_available"])
 
+    def test_academic_results_include_owned_course_quiz_summary(self):
+        Enrollment.objects.create(
+            user=self.student,
+            course=self.course,
+            status=Enrollment.STATUS_COMPLETED,
+        )
+        module = CourseModule.objects.create(course=self.course, title="Módulo", order=1)
+        lesson = CourseLesson.objects.create(module=module, title="Lección", order=1)
+        CourseMaterial.objects.create(
+            lesson=lesson,
+            material_type=CourseMaterial.TYPE_TEST,
+            title="Evaluación",
+            metadata={"passing_score": 70},
+        )
+        first_session = Session.objects.create(
+            course=self.course,
+            student=self.student,
+            created_by=self.teacher,
+        )
+        second_session = Session.objects.create(
+            course=self.course,
+            student=self.student,
+            created_by=self.teacher,
+        )
+        QuizAttempt.objects.create(session=first_session, user=self.student, score=17)
+        latest_attempt = QuizAttempt.objects.create(
+            session=second_session,
+            user=self.student,
+            score=67,
+        )
+
+        response = self.client.get(
+            reverse("teacher_group_dashboard"),
+            {"course_id": self.course.id, "period": "90d"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["state"], "empty")
+        result = response.data["academic_results"][0]
+        self.assertEqual(result["course_id"], self.course.id)
+        self.assertEqual(result["enrollment_count"], 1)
+        self.assertEqual(result["completed_enrollment_count"], 1)
+        self.assertEqual(result["attempt_count"], 2)
+        self.assertEqual(result["average_score"], 42.0)
+        self.assertEqual(result["latest_score"], 67.0)
+        self.assertEqual(result["passing_score"], 70.0)
+        self.assertEqual(result["pass_rate"], 0.0)
+        self.assertEqual(result["latest_attempt_at"], latest_attempt.created_at.isoformat())
+
     def test_small_group_is_suppressed_without_exact_count_or_reference(self):
         for index in range(19):
             self.add_participant(self.course, index, windows=1)
@@ -130,9 +184,9 @@ class TeacherGroupDashboardTests(APITestCase):
         self.assertEqual(activity["status"], "suppressed")
         self.assertEqual(activity["reason_code"], "minimum_participants")
         self.assertNotIn("participant_band", activity)
+        self.assertNotIn("participant_count", activity)
         self.assertNotIn("total_windows", activity)
         self.assertNotIn("resource_reference", str(response.data))
-        self.assertNotIn("19", str(activity))
 
     def test_publishes_distribution_coverage_uncertainty_and_interval(self):
         for index in range(20):

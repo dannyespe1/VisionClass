@@ -7,8 +7,16 @@ import { ImageWithFallback } from "../../figma/ImageWithFallback";
 import { apiFetch } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext";
 import { Button } from "../../ui/button";
+import type {
+  CourseApi,
+  CourseLessonApi,
+  CourseMaterialApi,
+  CourseModuleApi,
+  EnrollmentApi,
+} from "../../lib/api-types";
 
 type ModuleMeta = { name: string; lessons: number; tests: number };
+type CourseDescriptionMeta = { thumbnail?: string; modules?: ModuleMeta[] };
 
 type CourseItem = {
   id: number;
@@ -17,7 +25,7 @@ type CourseItem = {
   is_active: boolean;
   image: string;
   students: number;
-  avgAttention: number;
+  avgAttention: number | null;
   lessonsCompleted: string;
   category: string;
   lastUpdated: string;
@@ -49,16 +57,36 @@ type CourseMaterial = {
   courseId: number;
 };
 
-function extractMeta(description: string) {
+function extractMeta(description: string): CourseDescriptionMeta {
   if (!description) return {};
   const match = description.match(/\[meta\]:\s*(\{.*\})/);
   if (!match || !match[1]) return {};
   try {
-    const meta = JSON.parse(match[1]);
-    return meta || {};
-  } catch (_) {
+    return JSON.parse(match[1]) as CourseDescriptionMeta;
+  } catch {
     return {};
   }
+}
+
+function average(values: number[]) {
+  return values.length ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length) : null;
+}
+
+function latestActivityLabel(enrollments: EnrollmentApi[]) {
+  const timestamps = enrollments
+    .flatMap((enrollment) => [
+      enrollment.enrollment_data.attention_updated_at,
+      enrollment.enrollment_data.last_attention_at,
+      enrollment.enrollment_data.last_update_at,
+      enrollment.enrollment_data.last_quiz_at,
+    ])
+    .filter((value): value is string => Boolean(value))
+    .map((value) => new Date(value))
+    .filter((value) => !Number.isNaN(value.getTime()))
+    .sort((left, right) => right.getTime() - left.getTime());
+  return timestamps.length === 0
+    ? "Sin actividad"
+    : new Intl.DateTimeFormat("es-EC", { dateStyle: "medium" }).format(timestamps[0]);
 }
 
 function stripMeta(description: string) {
@@ -88,14 +116,22 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
       setLoading(true);
       setError(null);
       try {
-        const [data, moduleData, lessonData, materialData] = await Promise.all([
-          apiFetch<any[]>("/api/courses/", {}, token),
-          apiFetch<any[]>("/api/course-modules/", {}, token),
-          apiFetch<any[]>("/api/course-lessons/", {}, token),
-          apiFetch<any[]>("/api/course-materials/", {}, token),
+        const [data, enrollmentData, moduleData, lessonData, materialData] = await Promise.all([
+          apiFetch<CourseApi[]>("/api/courses/", {}, token),
+          apiFetch<EnrollmentApi[]>("/api/enrollments/", {}, token),
+          apiFetch<CourseModuleApi[]>("/api/course-modules/", {}, token),
+          apiFetch<CourseLessonApi[]>("/api/course-lessons/", {}, token),
+          apiFetch<CourseMaterialApi[]>("/api/course-materials/", {}, token),
         ]);
         const mapped = data.map((c, idx) => {
             const meta = extractMeta(c.description);
+            const courseEnrollments = enrollmentData.filter((enrollment) => enrollment.course.id === c.id);
+            const attentionValues = courseEnrollments
+              .map((enrollment) => enrollment.enrollment_data.attention_avg ?? enrollment.enrollment_data.attention_last)
+              .filter((value): value is number => typeof value === "number" && Number.isFinite(value));
+            const progressValues = courseEnrollments
+              .map((enrollment) => enrollment.enrollment_data.progress_percent ?? enrollment.enrollment_data.progress)
+              .filter((value): value is number => typeof value === "number" && Number.isFinite(value));
             return {
               id: c.id,
               title: c.title || `Curso ${idx + 1}`,
@@ -105,11 +141,11 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
                 meta.thumbnail ||
                 c.thumbnail ||
                 "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
-              students: Math.floor(Math.random() * 40) + 10,
-              avgAttention: Math.floor(Math.random() * 20) + 70,
-              lessonsCompleted: "--",
+              students: courseEnrollments.length,
+              avgAttention: average(attentionValues),
+              lessonsCompleted: progressValues.length ? `${average(progressValues)}%` : "Sin progreso",
               category: "Curso",
-              lastUpdated: "Reciente",
+              lastUpdated: latestActivityLabel(courseEnrollments),
               modules: meta.modules || [],
             };
           });
@@ -152,12 +188,24 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
     load();
   }, [token]);
 
-  const toggleCourseActive = (courseId: number) => {
-    setCourses((prev) =>
-      prev.map((course) =>
-        course.id === courseId ? { ...course, is_active: !course.is_active } : course
-      )
-    );
+  const toggleCourseActive = async (courseId: number) => {
+    if (!token) return;
+    const current = courses.find((course) => course.id === courseId);
+    if (!current) return;
+    try {
+      await apiFetch<CourseApi>(
+        `/api/courses/${courseId}/`,
+        { method: "PATCH", body: JSON.stringify({ is_active: !current.is_active }) },
+        token,
+      );
+      setCourses((previous) =>
+        previous.map((course) =>
+          course.id === courseId ? { ...course, is_active: !course.is_active } : course,
+        ),
+      );
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "No se pudo cambiar el estado del curso.");
+    }
   };
 
   const goToTab = (tab: TabId) => {
@@ -173,9 +221,10 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
     [courses]
   );
   const avgAttention = useMemo(() => {
-    if (!courses.length) return 0;
-    const sum = courses.reduce((acc, c) => acc + (c.avgAttention || 0), 0);
-    return Math.round(sum / courses.length);
+    const values = courses
+      .map((course) => course.avgAttention)
+      .filter((value): value is number => value !== null);
+    return average(values);
   }, [courses]);
 
   const buildStructure = (courseId: number) => {
@@ -237,13 +286,14 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
             </div>
             <span className="text-sm text-gray-600">Promedio</span>
           </div>
-          <div className="text-2xl mb-1">{avgAttention}%</div>
+          <div className="text-2xl mb-1">{avgAttention === null ? "—" : `${avgAttention}%`}</div>
           <div className="text-sm text-gray-600">Atención General</div>
         </div>
       </div>
 
       <div>
         <h2 className="text-2xl mb-4">Mis Cursos</h2>
+        {error && <p role="alert" className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
         {courses.length === 0 && !loading && (
           <div className="bg-white rounded-xl p-6 shadow-sm border text-sm text-slate-600">
             Aún no tienes cursos. Crea uno desde la sección Materiales.
@@ -305,7 +355,7 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
                       <Eye className="w-5 h-5 text-gray-400" />
                       <div>
                         <div className="text-sm text-gray-600">Atención Prom.</div>
-                        <div>{course.avgAttention ?? "--"}%</div>
+                        <div>{course.avgAttention === null ? "—" : `${course.avgAttention}%`}</div>
                       </div>
                     </div>
 
@@ -382,7 +432,9 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
                 {selectedDetails.description || "Sin descripción"}
               </p>
               <div className="flex gap-4 text-sm text-slate-600">
-                <span>Atención prom.: {selectedDetails.avgAttention ?? "--"}%</span>
+                <span>
+                  Atención prom.: {selectedDetails.avgAttention === null ? "—" : `${selectedDetails.avgAttention}%`}
+                </span>
                 <span>Última actualización: {selectedDetails.lastUpdated || "Reciente"}</span>
               </div>
 

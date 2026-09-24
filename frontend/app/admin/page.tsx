@@ -75,6 +75,13 @@ export default function AdminPage() {
 
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [courses, setCourses] = useState<AdminCourse[]>([]);
+  const [analyticsData, setAnalyticsData] = useState<AdminAnalyticsData>({
+    faculty_metrics: [],
+    institutional_trend: [],
+    dropout_prediction: [],
+    research_permissions: [],
+    privacy_policies: [],
+  });
 
   useEffect(() => {
     if (!token) {
@@ -200,14 +207,6 @@ export default function AdminPage() {
       .then(() => loadOverview(token))
       .catch((err) => console.warn("No se pudo actualizar curso", err));
   };
-
-  const [analyticsData, setAnalyticsData] = useState<AdminAnalyticsData>({
-    faculty_metrics: [],
-    institutional_trend: [],
-    dropout_prediction: [],
-    research_permissions: [],
-    privacy_policies: [],
-  });
 
   const openCreateModal = () => {
     setFormError(null);

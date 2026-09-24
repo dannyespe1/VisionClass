@@ -1,5 +1,5 @@
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Upload,
   FileText,
@@ -22,6 +22,15 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
 import { apiFetch } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext";
+import type {
+  AiSourceApi,
+  CourseApi,
+  CourseLessonApi,
+  CourseMaterialApi,
+  CourseModuleApi,
+  MaterialMetadata,
+  QuizQuestion,
+} from "../../lib/api-types";
 
 type MaterialType = "pdf" | "video" | "test";
 
@@ -48,7 +57,6 @@ type CourseItem = {
   id: number;
   title: string;
   description: string;
-  meta: CourseMeta;
 };
 
 type ModuleBlock = {
@@ -83,7 +91,7 @@ type CourseMaterial = {
   description: string;
   materialType: MaterialType;
   url: string;
-  metadata: Record<string, any>;
+  metadata: MaterialMetadata;
   lessonId: number;
   lessonTitle: string;
   moduleId: number;
@@ -92,6 +100,13 @@ type CourseMaterial = {
   courseTitle: string;
   createdAt: string;
 };
+
+const isModuleTestLesson = (title: string) => {
+  const normalized = (title || "").toLowerCase();
+  return normalized.startsWith("prueba ") || normalized.startsWith("test ");
+};
+
+const isFinalExamLesson = (title: string) => (title || "").toLowerCase().includes("examen final");
 
 export function MaterialesSection() {
   const { token } = useAuth();
@@ -102,17 +117,9 @@ export function MaterialesSection() {
   const [youtubePreview, setYoutubePreview] = useState("");
   const [status, setStatus] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
-  const [aiQuestions, setAiQuestions] = useState<any[]>([]);
+  const [aiQuestions, setAiQuestions] = useState<QuizQuestion[]>([]);
   const [aiSourcesOpen, setAiSourcesOpen] = useState(false);
-  const [aiSources, setAiSources] = useState<
-    Array<{
-      type: "pdf" | "video" | "lesson" | "course" | "module";
-      title: string;
-      detail: string;
-      status: string;
-      reason: string;
-    }>
-  >([]);
+  const [aiSources, setAiSources] = useState<AiSourceApi[]>([]);
   const sourceTypeLabels: Record<string, string> = {
     pdf: "PDF",
     video: "Video",
@@ -171,14 +178,14 @@ export function MaterialesSection() {
     () => modulesDraft.reduce((acc, m) => acc + (m.durationMinutes || 0), 0),
     [modulesDraft]
   );
-  const refreshData = async () => {
+  const refreshData = useCallback(async () => {
     if (!token) return;
     try {
       const [coursesData, modulesData, lessonsData, materialsData] = await Promise.all([
-        apiFetch<CourseItem[]>("/api/courses/", {}, token),
-        apiFetch<any[]>("/api/course-modules/", {}, token),
-        apiFetch<any[]>("/api/course-lessons/", {}, token),
-        apiFetch<any[]>("/api/course-materials/", {}, token),
+        apiFetch<CourseApi[]>("/api/courses/", {}, token),
+        apiFetch<CourseModuleApi[]>("/api/course-modules/", {}, token),
+        apiFetch<CourseLessonApi[]>("/api/course-lessons/", {}, token),
+        apiFetch<CourseMaterialApi[]>("/api/course-materials/", {}, token),
       ]);
 
       const filteredCourses = coursesData || [];
@@ -228,23 +235,20 @@ export function MaterialesSection() {
       setCourseLessons(mappedLessons);
       setMaterials(mappedMaterials);
 
-      if (!formData.courseId && filteredCourses.length) {
-        setFormData((prev) => ({ ...prev, courseId: String(filteredCourses[0].id) }));
-      }
-      if (!aiTargetCourseId && filteredCourses.length) {
-        setAiTargetCourseId(String(filteredCourses[0].id));
-      }
-      if (!manageCourseId && filteredCourses.length) {
-        setManageCourseId(String(filteredCourses[0].id));
+      if (filteredCourses.length) {
+        const firstCourseId = String(filteredCourses[0].id);
+        setFormData((previous) => previous.courseId ? previous : { ...previous, courseId: firstCourseId });
+        setAiTargetCourseId((previous) => previous || firstCourseId);
+        setManageCourseId((previous) => previous || firstCourseId);
       }
     } catch (err) {
       console.error(err);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
-    refreshData();
-  }, [token]);
+    void refreshData();
+  }, [refreshData]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -277,22 +281,15 @@ export function MaterialesSection() {
       .map((m) => ({ id: String(m.id), label: m.title }));
   }, [courseModules, aiTargetCourseId]);
 
-  const isModuleTestLesson = (title: string) => {
-    const normalized = (title || "").toLowerCase();
-    return normalized.startsWith("prueba ") || normalized.startsWith("test ");
-  };
-
-  const isFinalExamLesson = (title: string) => (title || "").toLowerCase().includes("examen final");
-
-  const getModuleTestLessons = (moduleId: number) => {
+  const getModuleTestLessons = useCallback((moduleId: number) => {
     return courseLessons
       .filter((l) => l.moduleId === moduleId && isModuleTestLesson(l.title))
       .sort((a, b) => a.order - b.order);
-  };
+  }, [courseLessons]);
 
-  const getCourseFinalExamLesson = (courseId: number) => {
+  const getCourseFinalExamLesson = useCallback((courseId: number) => {
     return courseLessons.find((l) => l.courseId === courseId && isFinalExamLesson(l.title));
-  };
+  }, [courseLessons]);
 
   const aiTestOptions = useMemo(() => {
     if (!aiTargetModuleId) return [];
@@ -313,7 +310,7 @@ export function MaterialesSection() {
       });
     }
     return options;
-  }, [aiTargetModuleId, aiTargetCourseId, courseLessons]);
+  }, [aiTargetModuleId, aiTargetCourseId, getCourseFinalExamLesson, getModuleTestLessons]);
 
   useEffect(() => {
     if (moduleOptions.length && !formData.moduleId) {
@@ -349,7 +346,7 @@ export function MaterialesSection() {
     });
     setModuleTestDrafts(draft);
     setFinalExamEnabled(Boolean(getCourseFinalExamLesson(courseId)));
-  }, [manageCourseId, courseModules, courseLessons]);
+  }, [manageCourseId, courseModules, getCourseFinalExamLesson, getModuleTestLessons]);
 
   const addModuleDraft = () => {
     setModulesDraft((prev) => [
@@ -398,7 +395,7 @@ export function MaterialesSection() {
         totalLessons,
         totalDurationHours: totalDuration,
       };
-      const created = await apiFetch<CourseItem>(
+      const created = await apiFetch<CourseApi>(
         "/api/courses/",
         {
           method: "POST",
@@ -413,7 +410,7 @@ export function MaterialesSection() {
 
       for (let i = 0; i < modulesDraft.length; i += 1) {
         const moduleDraft = modulesDraft[i];
-        const moduleRes = await apiFetch<any>(
+        const moduleRes = await apiFetch<CourseModuleApi>(
           "/api/course-modules/",
           {
             method: "POST",
@@ -535,7 +532,7 @@ export function MaterialesSection() {
       return;
     }
     let finalUrl = formData.url;
-    const metadata: Record<string, any> = {};
+    const metadata: MaterialMetadata = {};
     if (formData.type === "pdf" && filePdf) {
       metadata.file_name = filePdf.name;
       metadata.file_size = filePdf.size;
@@ -678,7 +675,7 @@ export function MaterialesSection() {
     const courseId = Number(manageCourseId);
     const count = courseModules.filter((m) => m.courseId === courseId).length;
     try {
-      const moduleRes = await apiFetch<any>(
+      const moduleRes = await apiFetch<CourseModuleApi>(
         "/api/course-modules/",
         {
           method: "POST",
@@ -1165,7 +1162,7 @@ export function MaterialesSection() {
 
         <div className="space-y-2">
           <Label>Tipo</Label>
-          <Select value={selectedType} onValueChange={(value) => setSelectedType(value as any)}>
+          <Select value={selectedType} onValueChange={(value) => setSelectedType(value as MaterialType | "all")}>
             <SelectTrigger>
               <SelectValue placeholder="Tipo" />
             </SelectTrigger>
@@ -1267,7 +1264,7 @@ export function MaterialesSection() {
                 }
                 try {
                   setAiLoading(true);
-                  const res = await apiFetch<{ questions: any[]; sources: any[] }>(
+                  const res = await apiFetch<{ questions: QuizQuestion[]; sources: AiSourceApi[] }>(
                     "/api/ai/generate-test/",
                     {
                       method: "POST",
@@ -1284,8 +1281,8 @@ export function MaterialesSection() {
                   );
                   setAiQuestions(res.questions || []);
                   setAiSources(res.sources || []);
-                } catch (err: any) {
-                  alert(err.message || "Error generando prueba");
+                } catch (err: unknown) {
+                  alert(err instanceof Error ? err.message : "Error generando prueba");
                 } finally {
                   setAiLoading(false);
                 }
@@ -1327,12 +1324,12 @@ export function MaterialesSection() {
                       const testIndex = Number(parts[3]);
                       const existing = getModuleTestLessons(moduleId);
                       const target = existing[testIndex - 1];
-                      if (target.id) {
+                      if (target?.id) {
                         lessonId = target.id;
                       } else {
                         const lessonsForModule = courseLessons.filter((l) => l.moduleId === moduleId);
                         const nextOrder = lessonsForModule.length + 1;
-                        const created = await apiFetch<any>(
+                        const created = await apiFetch<CourseLessonApi>(
                           "/api/course-lessons/",
                           {
                             method: "POST",

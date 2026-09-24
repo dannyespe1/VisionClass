@@ -38,7 +38,7 @@ export function AdminAnalyticsSection({ data, onUpdatePolicy, onUpdateResearchSt
   const [selectedFaculty, setSelectedFaculty] = useState("all");
   const [policyValues, setPolicyValues] = useState<Record<number, string>>({});
 
-  const facultyMetrics = data.faculty_metrics || [];
+  const facultyMetrics = useMemo(() => data.faculty_metrics || [], [data.faculty_metrics]);
   const dropoutPrediction = data.dropout_prediction || [];
   const institutionalTrend = data.institutional_trend || [];
   const researchPermissions = data.research_permissions || [];

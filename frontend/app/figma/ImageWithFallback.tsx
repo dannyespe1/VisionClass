@@ -19,10 +19,14 @@ export function ImageWithFallback(props: React.ImgHTMLAttributes<HTMLImageElemen
       style={style}
     >
       <div className="flex items-center justify-center w-full h-full">
+        {/* Native img is intentional: this compatibility wrapper accepts arbitrary data/blob URLs. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={ERROR_IMG_SRC} alt="Error loading image" {...rest} data-original-url={src} />
       </div>
     </div>
   ) : (
+    // Native img is intentional because the source may be a user-selected data/blob URL.
+    // eslint-disable-next-line @next/next/no-img-element
     <img src={src} alt={alt} className={className} style={style} {...rest} onError={handleError} />
   )
 }

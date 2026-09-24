@@ -1,6 +1,5 @@
 export const BACKEND_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
-export const ML_URL = process.env.NEXT_PUBLIC_ML_URL || "http://localhost:9000";
 
 export async function apiFetch<T>(
   path: string,
@@ -37,49 +36,4 @@ export async function apiFetch<T>(
     return undefined as T;
   }
   return JSON.parse(text) as T;
-}
-
-export async function postFrameToML(
-  form: FormData,
-  token?: string,
-  options: { signal?: AbortSignal; idempotencyKey?: string } = {},
-) {
-  try {
-    const headers: Record<string, string> = {};
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-    if (options.idempotencyKey) {
-      headers["Idempotency-Key"] = options.idempotencyKey;
-    }
-    const res = await fetch(`/api/attention-proxy`, {
-      method: "POST",
-      body: form,
-      headers,
-      signal: options.signal,
-    });
-    if (!res.ok) {
-      const text = await res.text();
-      return { ok: false, error: text || res.statusText };
-    }
-    const data = await res.json().catch(() => ({}));
-    return { ok: true, ...data };
-  } catch (err) {
-    if (options.signal?.aborted) throw err;
-    const message = err instanceof Error ? err.message : "Failed to fetch";
-    return { ok: false, error: message };
-  }
-}
-
-export async function checkMLServiceHealth() {
-  try {
-    const res = await fetch(`/api/attention-proxy`, {
-      method: "GET",
-    });
-    const data = await res.json().catch(() => ({ ok: false }));
-    return { ok: data.ok === true, url: data.service_url, message: data.message };
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Healthcheck failed";
-    return { ok: false, message };
-  }
 }

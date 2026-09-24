@@ -7,6 +7,7 @@ import { apiFetch } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import { parseCourseMeta } from "../lib/courseMeta";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
+import type { CourseLessonApi, CourseModuleApi, EnrollmentApi } from "../lib/api-types";
 
 interface InicioSectionProps {
   onCourseSelect: (courseId: number) => void;
@@ -22,7 +23,6 @@ type EnrolledCourse = {
   nextLesson: string;
   image: string;
   category: string;
-  attentionLevel: number;
 };
 
 type ModuleItem = {
@@ -58,9 +58,9 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
       setError(null);
       try {
         const [enrollments, modulesData, lessonsData] = await Promise.all([
-          apiFetch<any[]>("/api/enrollments/", {}, token),
-          apiFetch<any[]>("/api/course-modules/", {}, token),
-          apiFetch<any[]>("/api/course-lessons/", {}, token),
+          apiFetch<EnrollmentApi[]>("/api/enrollments/", {}, token),
+          apiFetch<CourseModuleApi[]>("/api/course-modules/", {}, token),
+          apiFetch<CourseLessonApi[]>("/api/course-lessons/", {}, token),
         ]);
         const filtered = (enrollments || []).filter((e) => Boolean(e.course));
         const modules: ModuleItem[] = (modulesData || [])
@@ -116,7 +116,6 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
             nextLesson,
             image: meta.thumbnail || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
             category: "Programación",
-            attentionLevel: 85,
           } as EnrolledCourse;
         });
         setCourses(mapped);
@@ -260,7 +259,7 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
                   </div>
                   <div className="flex items-center gap-1">
                     <div className="w-2 h-2 bg-green-500 rounded-full" />
-                    <span className="text-sm text-gray-600">{course.attentionLevel}% atención</span>
+                    <span className="text-sm text-gray-600">Progreso: {course.progress}%</span>
                   </div>
                 </div>
 
@@ -318,7 +317,7 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
                       </div>
                       <div className="flex items-center gap-1">
                         <div className="w-2 h-2 bg-green-500 rounded-full" />
-                        <span className="text-sm text-gray-600">{course.attentionLevel}%</span>
+                        <span className="text-sm text-gray-600">Progreso: {course.progress}%</span>
                       </div>
                     </div>
                   </div>

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/app/ui/button";
+import Image from "next/image";
 
 interface NavbarProps {
   onNavigateToLogin: () => void;
@@ -52,7 +53,7 @@ export function Navbar({ onNavigateToLogin }: NavbarProps) {
           {/* Logo */}
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => scrollToSection("inicio")}>
             <div className="w-12 h-12 rounded-lg bg-white p-1 flex items-center justify-center">
-              <img src="/LOGO1.png" alt="VisionClass" className="h-full w-full object-contain" />
+              <Image src="/LOGO1.png" alt="VisionClass" width={48} height={48} className="h-full w-full object-contain" priority />
             </div>
             <span className="text-xl text-gray-900">VisionClass</span>
           </div>

@@ -2,11 +2,13 @@
 
 import { Navbar } from "@/app/components/Navbar";
 import { Footer } from "@/app/components/Footer";
+import { useRouter } from "next/navigation";
 
 export default function SeguridadPage() {
+  const router = useRouter();
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      <Navbar onNavigateToLogin={() => (window.location.href = "/login")} />
+      <Navbar onNavigateToLogin={() => router.push("/login")} />
 
       <section className="pt-28 pb-14 px-4 lg:px-2">
         <div className="max-w-5xl mx-auto">

@@ -25,6 +25,11 @@ services:
       - pg_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vision_user -d vision_system"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
   backend:
     build: ./backend
     command: python manage.py runserver 0.0.0.0:8000
@@ -37,8 +42,10 @@ services:
     environment:
       - PILOT_RELEASE=False
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - default
       - state

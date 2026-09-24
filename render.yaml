@@ -91,14 +91,8 @@ services:
     envVars:
       - key: NEXT_PUBLIC_BACKEND_URL
         value: https://visionclass-backend.onrender.com
-      - key: NEXT_PUBLIC_ML_URL
-        value: https://visionclass-ml.onrender.com
-      - key: ML_SERVICE_URL
-        value: https://visionclass-ml.onrender.com
       - key: BACKEND_URL
         value: https://visionclass-backend.onrender.com
-      - key: ML_BFF_SERVICE_TOKEN
-        sync: false
       - key: NEXT_PUBLIC_GOOGLE_CLIENT_ID
         sync: false
       - key: NEXT_PUBLIC_GOOGLE_REDIRECT_URI

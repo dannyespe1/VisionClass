@@ -18,39 +18,7 @@ import {
 } from "recharts";
 import { apiFetch } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext";
-
-type Course = {
-  id: number;
-  title: string;
-};
-
-type Enrollment = {
-  id: number;
-  course: { id: number; title: string };
-  user: { id: number; username: string; first_name: string; last_name: string };
-  enrollment_data: {
-    attention_avg: number;
-    attention_last: number;
-    progress: number;
-    last_attention_at: string;
-    attention_updated_at?: string;
-    last_update_at?: string;
-  };
-};
-
-type Session = {
-  id: number;
-  created_at: string;
-  mean_attention: number;
-  last_score: number;
-  attention_score: number;
-};
-
-type QuizAttempt = {
-  id: number;
-  score: number;
-  session: { course: { id: number } };
-};
+import type { CourseApi, EnrollmentApi, QuizAttemptApi, SessionApi } from "../../lib/api-types";
 
 const COLORS = ["#10b981", "#3b82f6", "#f59e0b", "#ef4444"];
 
@@ -60,7 +28,7 @@ const avg = (values: number[]) => {
   return Math.round(sum / values.length);
 };
 
-const normalizeNumber = (value: number) => {
+const normalizeNumber = (value: number | null | undefined) => {
   if (typeof value !== "number" || Number.isNaN(value)) return 0;
   return value;
 };
@@ -72,10 +40,10 @@ const formatWeek = (date: Date) => {
 
 export function EstadisticasProfesor() {
   const { token } = useAuth();
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
-  const [sessions, setSessions] = useState<Session[]>([]);
-  const [quizAttempts, setQuizAttempts] = useState<QuizAttempt[]>([]);
+  const [courses, setCourses] = useState<CourseApi[]>([]);
+  const [enrollments, setEnrollments] = useState<EnrollmentApi[]>([]);
+  const [sessions, setSessions] = useState<SessionApi[]>([]);
+  const [quizAttempts, setQuizAttempts] = useState<QuizAttemptApi[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -86,10 +54,10 @@ export function EstadisticasProfesor() {
       setError(null);
       try {
         const [courseData, enrollmentData, sessionData, quizData] = await Promise.all([
-          apiFetch<any[]>("/api/courses/", {}, token),
-          apiFetch<any[]>("/api/enrollments/", {}, token),
-          apiFetch<any[]>("/api/sessions/", {}, token),
-          apiFetch<any[]>("/api/quiz-attempts/", {}, token),
+          apiFetch<CourseApi[]>("/api/courses/", {}, token),
+          apiFetch<EnrollmentApi[]>("/api/enrollments/", {}, token),
+          apiFetch<SessionApi[]>("/api/sessions/", {}, token),
+          apiFetch<QuizAttemptApi[]>("/api/quiz-attempts/", {}, token),
         ]);
         setCourses(courseData || []);
         setEnrollments(enrollmentData || []);
@@ -119,7 +87,7 @@ export function EstadisticasProfesor() {
       );
       const courseQuizScores = quizAttempts
         .filter((attempt) => attempt.session.course.id === course.id)
-        .map((attempt) => normalizeNumber(attempt.score));
+        .map((attempt) => normalizeNumber(attempt.score ?? 0));
       return {
         course: course.title,
         students: courseEnrollments.length,
@@ -140,7 +108,7 @@ export function EstadisticasProfesor() {
     const completionValues = enrollments.map((enroll) =>
       normalizeNumber(enroll.enrollment_data.progress)
     );
-    const gradeValues = quizAttempts.map((attempt) => normalizeNumber(attempt.score));
+    const gradeValues = quizAttempts.map((attempt) => normalizeNumber(attempt.score ?? 0));
     return {
       students: enrollments.length,
       avgAttention: avg(attentionValues),

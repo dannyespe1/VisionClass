@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
   AlertCircle,
@@ -27,6 +27,7 @@ import { useAuth } from "../../../context/AuthContext";
 import { Button } from "../../../ui/button";
 import { CameraPermissionModal, PermissionSettings } from "../../CameraPermissionModal";
 import { DemographicResearchCard } from "../../DemographicResearchCard";
+import { PdfCanvasViewer } from "../../PdfCanvasViewer";
 import { getConsentStatus, recordConsent, revokeCaptureConsent, type ConsentStatus } from "../../../lib/consent";
 import { BoundedCaptureQueue } from "../../../lib/bounded-capture-queue.mjs";
 import {
@@ -69,6 +70,16 @@ import {
   shouldReportEdgeShadow,
 } from "../../../lib/edge-shadow-report.mjs";
 import { CONSERVATIVE_INTERVENTIONS_ENABLED } from "../../../lib/features";
+import type {
+  CourseApi,
+  CourseLessonApi,
+  CourseMaterialApi,
+  CourseModuleApi,
+  EnrollmentApi,
+  EnrollmentDataApi,
+  MaterialMetadata,
+  SessionApi,
+} from "../../../lib/api-types";
 import {
   Dialog,
   DialogContent,
@@ -105,7 +116,7 @@ type CourseMaterial = {
   description: string;
   materialType: "pdf" | "video" | "test";
   url: string;
-  metadata: Record<string, any>;
+  metadata: MaterialMetadata;
   lessonId: number;
 };
 
@@ -206,7 +217,6 @@ export default function CoursePage() {
     lessonId: null,
     completed: -1,
   });
-  const initialLessonSetRef = useRef(false);
   const contentViewRef = useRef<{
     id: number | null;
     startedAt: number;
@@ -224,11 +234,13 @@ export default function CoursePage() {
   const [userId, setUserId] = useState<number | null>(null);
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [enrollmentId, setEnrollmentId] = useState<number | null>(null);
-  const [enrollmentData, setEnrollmentData] = useState<Record<string, any>>({});
+  const [enrollmentData, setEnrollmentData] = useState<EnrollmentDataApi>({});
   const [enrollmentLoaded, setEnrollmentLoaded] = useState(false);
   const [lessonInitialized, setLessonInitialized] = useState(false);
 
-  const [permissionOpen, setPermissionOpen] = useState(true);
+  // Camera processing is optional: keep course content visible on entry and
+  // let the student open the consent flow explicitly from the camera control.
+  const [permissionOpen, setPermissionOpen] = useState(false);
   const [consentStatus, setConsentStatus] = useState<ConsentStatus | null>(null);
   const [permissionSettings, setPermissionSettings] = useState<PermissionSettings>({
     enableCamera: false,
@@ -242,11 +254,13 @@ export default function CoursePage() {
 
   const [attentionScore] = useState(85);
   const [readingTime, setReadingTime] = useState(0);
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfData, setPdfData] = useState<Uint8Array | null>(null);
   const [quizAnswers, setQuizAnswers] = useState<Record<number, string>>({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizScore, setQuizScore] = useState<number | null>(null);
+  const [quizCorrectCount, setQuizCorrectCount] = useState<number | null>(null);
   const [quizError, setQuizError] = useState<string | null>(null);
+  const [quizNotice, setQuizNotice] = useState<string | null>(null);
   const [courseCompletedOpen, setCourseCompletedOpen] = useState(false);
   const [attentionStatus, setAttentionStatus] = useState<"ok" | "no_face" | "pending" | "error">("pending");
   const [mlServiceStatus, setMlServiceStatus] = useState<"checking" | "available" | "unavailable" | null>(null);
@@ -301,10 +315,10 @@ export default function CoursePage() {
         const me = await apiFetch<{ id: number }>("/api/me/", {}, token);
         const resolvedUserId = me.id || null;
         setUserId(resolvedUserId);
-        const enrollments = await apiFetch<any[]>("/api/enrollments/", {}, token);
+        const enrollments = await apiFetch<EnrollmentApi[]>("/api/enrollments/", {}, token);
         let enrollment = (enrollments || []).find((e) => e.course && e.course.id === courseId);
         if (!enrollment) {
-          enrollment = await apiFetch<any>(
+          enrollment = await apiFetch<EnrollmentApi>(
             "/api/enrollments/",
             {
               method: "POST",
@@ -313,17 +327,21 @@ export default function CoursePage() {
             token
           );
         }
-        const session = await apiFetch<any>(
-          "/api/sessions/",
-          {
-            method: "POST",
-            body: JSON.stringify({ course_id: courseId }),
-          },
-          token
-        );
-        if (session.id) {
-          sessionRef.current = session.id;
-          setSessionId(session.id);
+        // Completed enrollments remain available for review, but the backend
+        // correctly rejects new observation sessions for inactive enrollments.
+        if (enrollment.status === "active") {
+          const session = await apiFetch<SessionApi>(
+            "/api/sessions/",
+            {
+              method: "POST",
+              body: JSON.stringify({ course_id: courseId }),
+            },
+            token
+          );
+          if (session.id) {
+            sessionRef.current = session.id;
+            setSessionId(session.id);
+          }
         }
         if (enrollment.id) {
           setEnrollmentId(enrollment.id);
@@ -373,7 +391,7 @@ export default function CoursePage() {
     }
     
     setLessonInitialized(true);
-  }, [enrollmentLoaded, lessons, lessonInitialized, courseId]);
+  }, [enrollmentLoaded, lessons, lessonInitialized, courseId, enrollmentData.last_lesson_id]);
 
   useEffect(() => {
     const load = async () => {
@@ -382,10 +400,10 @@ export default function CoursePage() {
       setError(null);
       try {
         const [course, modulesData, lessonsData, materialsData] = await Promise.all([
-          apiFetch<any>(`/api/courses/${courseId}/`, {}, token),
-          apiFetch<any[]>("/api/course-modules/", {}, token),
-          apiFetch<any[]>("/api/course-lessons/", {}, token),
-          apiFetch<any[]>("/api/course-materials/", {}, token),
+          apiFetch<CourseApi>(`/api/courses/${courseId}/`, {}, token),
+          apiFetch<CourseModuleApi[]>("/api/course-modules/", {}, token),
+          apiFetch<CourseLessonApi[]>("/api/course-lessons/", {}, token),
+          apiFetch<CourseMaterialApi[]>("/api/course-materials/", {}, token),
         ]);
         setCourseTitle(course.title || "Curso");
         const mappedModules = (modulesData || [])
@@ -485,11 +503,13 @@ export default function CoursePage() {
 
   useEffect(() => {
     setReadingTime(0);
-    setPdfUrl(null);
+    setPdfData(null);
     setQuizAnswers({});
     setQuizSubmitted(false);
     setQuizScore(null);
+    setQuizCorrectCount(null);
     setQuizError(null);
+    setQuizNotice(null);
   }, [selectedLessonId]);
 
   useEffect(() => {
@@ -512,16 +532,15 @@ export default function CoursePage() {
     if (!currentMaterial || currentMaterial.materialType !== "pdf") return;
     if (!token) return;
 
-    let objectUrl: string | null = null;
+    let cancelled = false;
     const loadPdf = async () => {
       try {
         const res = await fetch(`${BACKEND_URL}/api/course-materials/${currentMaterial.id}/download/`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) return;
-        const blob = await res.blob();
-        objectUrl = window.URL.createObjectURL(blob);
-        setPdfUrl(objectUrl);
+        const data = new Uint8Array(await res.arrayBuffer());
+        if (!cancelled) setPdfData(data);
       } catch (err) {
         console.error(err);
       }
@@ -529,7 +548,7 @@ export default function CoursePage() {
     loadPdf();
 
     return () => {
-      if (objectUrl) window.URL.revokeObjectURL(objectUrl);
+      cancelled = true;
     };
   }, [currentMaterial, token]);
 
@@ -542,7 +561,8 @@ export default function CoursePage() {
     }
   }, [currentMaterial]);
 
-  const persistContentView = async (reason: "switch" | "exit" | "complete") => {
+  const persistContentView = useCallback(async (reason: "switch" | "exit" | "complete") => {
+    void reason;
     if (!token || !contentViewRef.current?.id) return;
     const durationSeconds = Math.max(1, Math.round((Date.now() - contentViewRef.current.startedAt) / 1000));
     const payload = {
@@ -564,9 +584,9 @@ export default function CoursePage() {
     } finally {
       contentViewRef.current = null;
     }
-  };
+  }, [token]);
 
-  const startContentView = async () => {
+  const startContentView = useCallback(async () => {
     if (!token || !sessionId || !userId || !currentMaterial) return;
     const contentType =
       currentMaterial.materialType === "test" ? "quiz" : currentMaterial.materialType;
@@ -593,7 +613,7 @@ export default function CoursePage() {
     } catch (err) {
       console.error(err);
     }
-  };
+  }, [currentMaterial, sessionId, token, userId]);
 
   useEffect(() => {
     if (permissionOpen) return;
@@ -606,7 +626,7 @@ export default function CoursePage() {
         persistContentView("switch").catch((err) => console.error(err));
       }
     };
-  }, [currentMaterial?.id, permissionOpen]);
+  }, [currentMaterial, permissionOpen, persistContentView, startContentView]);
 
   useEffect(() => {
     return () => {
@@ -614,7 +634,7 @@ export default function CoursePage() {
         persistContentView("exit").catch((err) => console.error(err));
       }
     };
-  }, []);
+  }, [persistContentView]);
 
   useEffect(() => {
     if (
@@ -918,7 +938,6 @@ export default function CoursePage() {
     setOcularEdgeStatus(null);
     const generation = ++cameraGenerationRef.current;
     try {
-      console.log("[startCamera] Iniciando cámara...");
       edgeProfileControllerRef.current ||= new EdgeProfileController({ remoteSelection: false });
       const batteryLevel = await readBatteryLevel();
       batteryLevelRef.current = batteryLevel;
@@ -976,7 +995,6 @@ export default function CoursePage() {
         timeoutMs: CAPTURE_DEADLINE_MS,
         onState: (state) => setCaptureTransportStatus(state),
       });
-      console.log("[startCamera] Cámara iniciada correctamente");
       
       startFrameTimer(profile.sampleIntervalMs);
     } catch (err) {
@@ -995,6 +1013,10 @@ export default function CoursePage() {
     }
     stopCamera();
     return undefined;
+  // Camera lifecycle is intentionally keyed only by permissions, session and device.
+  // startCamera uses refs for the rapidly changing inference state; including its
+  // function identity here would restart an active camera on every inference render.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [permissionSettings.enableCamera, sessionId, userId, selectedCameraId]);
 
   useEffect(() => {
@@ -1022,6 +1044,9 @@ export default function CoursePage() {
       document.removeEventListener("visibilitychange", handleVisibility);
       stopCamera();
     };
+  // The handlers must remain stable for the lifetime of this subscription. Both
+  // operations read current refs/state at event time and must not resubscribe per frame.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [permissionSettings.enableCamera, sessionId, userId, selectedCameraId]);
 
   const requestCamera = async (settings: PermissionSettings) => {
@@ -1044,7 +1069,6 @@ export default function CoursePage() {
         setCaptureTransportStatus("stopped");
         return;
       }
-      console.log("[requestCamera] Verificando permisos de cámara...");
       const permissionStream = await navigator.mediaDevices.getUserMedia(constraintsForProfile(edgeProfile, selectedCameraId || undefined));
       permissionStream.getTracks().forEach((track) => track.stop());
       const devices = await navigator.mediaDevices.enumerateDevices();
@@ -1054,7 +1078,6 @@ export default function CoursePage() {
       setAvailableCameras(cameras);
       if (!selectedCameraId && cameras[0]) setSelectedCameraId(cameras[0].deviceId);
       setPermissionSettings(settings);
-      console.log("[requestCamera] Permisos de cámara otorgados");
     } catch (err) {
       console.error("[requestCamera] No se habilitó la cámara:", err instanceof Error ? err.message : err);
       stopCamera();
@@ -1123,13 +1146,8 @@ export default function CoursePage() {
   };
 
   const handleSubmitQuiz = async () => {
-    if (!currentMaterial.metadata.questions.length) return;
-    if (!token || !sessionId || !userId) return;
-    const questions = currentMaterial.metadata.questions as Array<{
-      question: string;
-      answer: string;
-      options: string[];
-    }>;
+    const questions = currentMaterial?.metadata.questions;
+    if (!questions?.length) return;
     const total = questions.length;
     let correct = 0;
     questions.forEach((q, index) => {
@@ -1143,8 +1161,18 @@ export default function CoursePage() {
     });
     const score = total ? Math.round((correct / total) * 100) : 0;
     setQuizScore(score);
+    setQuizCorrectCount(correct);
     setQuizSubmitted(true);
     setQuizError(null);
+    setQuizNotice(null);
+
+    if (!token || !sessionId || !userId) {
+      setQuizNotice(
+        "Resultado calculado localmente. Este repaso no crea un nuevo intento porque el curso no tiene una sesión activa.",
+      );
+      return;
+    }
+
     try {
       await apiFetch(
         "/api/quiz-attempts/",
@@ -1161,7 +1189,7 @@ export default function CoursePage() {
       );
       if (enrollmentId) {
         const finalExam = Boolean(selectedLesson && isFinalExamLesson(selectedLesson.title));
-        const nextData: Record<string, any> = {
+        const nextData: EnrollmentDataApi = {
           ...enrollmentData,
           last_quiz_score: score,
           last_quiz_at: new Date().toISOString(),
@@ -1268,7 +1296,7 @@ export default function CoursePage() {
       }
     };
     syncProgress();
-  }, [selectedLessonId, currentLessonIndex, token, enrollmentId, sortedLessons.length, courseId]);
+  }, [selectedLessonId, currentLessonIndex, token, enrollmentId, sortedLessons.length, courseId, enrollmentData]);
   const activeOcularSummary = ocularValidationSummary?.phases[ocularValidationPhase] || null;
   const ocularCalibration = ocularValidationSummary?.calibration || null;
   const selectOcularValidationPhase = (phase: OcularValidationPhase) => {
@@ -1668,12 +1696,8 @@ export default function CoursePage() {
                 </div>
 
                 <div className="bg-white" style={{ minHeight: "600px" }}>
-                  {pdfUrl ? (
-                    <object data={pdfUrl} type="application/pdf" className="w-full h-[640px]">
-                      <p className="p-6 text-sm text-slate-600">
-                        No se pudo cargar el PDF. Usa el botón de descarga.
-                      </p>
-                    </object>
+                  {pdfData ? (
+                    <PdfCanvasViewer data={pdfData} title={currentMaterial.title || "Documento PDF"} />
                   ) : (
                     <div className="p-6 text-sm text-slate-500">Cargando PDF...</div>
                   )}
@@ -1795,7 +1819,7 @@ export default function CoursePage() {
                 </div>
                 {currentMaterial.metadata?.questions?.length ? (
                   <div className="space-y-6">
-                    {currentMaterial.metadata.questions.map((q: any, index: number) => (
+                    {currentMaterial.metadata.questions.map((q, index: number) => (
                       <div key={q.id || index} className="border-b border-slate-100 pb-5">
                         <div className="text-sm text-slate-500">Pregunta {index + 1}</div>
                         <p className="text-base text-slate-900 mt-1">{q.question}</p>
@@ -1827,10 +1851,18 @@ export default function CoursePage() {
                         Volver al inicio
                       </Button>
                       {quizScore !== null && (
-                        <span className="text-sm text-emerald-600">
-                          Calificación: {quizScore}%
-                        </span>
+                        <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm">
+                          <div className={quizScore >= Number(currentMaterial.metadata?.passing_score ?? 70) ? "font-semibold text-emerald-700" : "font-semibold text-amber-700"}>
+                            Calificación: {quizScore}% · {quizCorrectCount ?? 0} de {currentMaterial.metadata.questions.length} correctas
+                          </div>
+                          <div className="mt-1 text-xs text-slate-600">
+                            {quizScore >= Number(currentMaterial.metadata?.passing_score ?? 70)
+                              ? "Resultado aprobado"
+                              : `Se requiere ${Number(currentMaterial.metadata?.passing_score ?? 70)}% para aprobar`}
+                          </div>
+                        </div>
                       )}
+                      {quizNotice && <span className="text-sm text-slate-600">{quizNotice}</span>}
                       {quizError && <span className="text-sm text-red-600">{quizError}</span>}
                     </div>
                   </div>

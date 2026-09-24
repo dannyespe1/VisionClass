@@ -105,6 +105,15 @@ ${colorConfig
 
 const ChartTooltip = RechartsPrimitive.Tooltip;
 
+type ChartTooltipValue = number | string | Array<number | string>;
+type ChartTooltipPayloadItem = {
+  dataKey?: string | number;
+  name?: string | number;
+  value?: ChartTooltipValue;
+  color?: string;
+  payload: Record<string, unknown> & { fill?: string };
+};
+
 const ChartTooltipContent = ({
   active,
   payload,
@@ -121,16 +130,16 @@ const ChartTooltipContent = ({
   labelKey,
 }: React.ComponentProps<"div"> & {
   active?: boolean;
-  payload?: any[];
+  payload?: ChartTooltipPayloadItem[];
   label?: unknown;
-  labelFormatter?: (value: unknown, payload: any[]) => React.ReactNode;
+  labelFormatter?: (value: unknown, payload: ChartTooltipPayloadItem[]) => React.ReactNode;
   labelClassName?: string;
   formatter?: (
     value: unknown,
     name: string,
-    item: any,
+    item: ChartTooltipPayloadItem,
     index: number,
-    payload: any
+    payload: ChartTooltipPayloadItem[]
   ) => React.ReactNode;
   color?: string;
   hideLabel?: boolean;
@@ -140,7 +149,7 @@ const ChartTooltipContent = ({
   labelKey?: string;
 }) => {
   const { config } = useChart();
-  const payloadList = payload ?? [];
+  const payloadList = React.useMemo(() => payload ?? [], [payload]);
 
   const tooltipLabel = React.useMemo(() => {
     if (hideLabel || !payloadList.length) {
@@ -207,7 +216,7 @@ const ChartTooltipContent = ({
               )}
             >
               {formatter && item.value !== undefined && item.name ? (
-                formatter(item.value, item.name, item, index, item.payload)
+                formatter(item.value, String(item.name), item, index, payloadList)
               ) : (
                 <>
                   {itemConfig?.icon ? (
@@ -271,7 +280,7 @@ const ChartLegendContent = ({
   verticalAlign = "bottom",
   nameKey,
 }: React.ComponentProps<"div"> & {
-  payload?: any[];
+  payload?: ReadonlyArray<RechartsPrimitive.LegendPayload>;
   verticalAlign?: "top" | "bottom" | "middle";
   hideIcon?: boolean;
   nameKey?: string;

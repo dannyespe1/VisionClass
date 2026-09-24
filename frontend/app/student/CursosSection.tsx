@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Search, Star, Clock, Users, BookOpen, CheckCircle } from "lucide-react";
+import { Search, Clock, BookOpen, CheckCircle } from "lucide-react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
@@ -9,6 +9,13 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
 import { parseCourseMeta } from "../lib/courseMeta";
+import type {
+  CourseApi,
+  CourseLessonApi,
+  CourseMaterialApi,
+  CourseModuleApi,
+  EnrollmentApi,
+} from "../lib/api-types";
 
 interface CursosSectionProps {
   onCourseSelect: (courseId: number) => void;
@@ -18,8 +25,6 @@ type CourseCard = {
   id: number;
   title: string;
   instructor: string;
-  rating: number;
-  students: number;
   duration: string;
   level: string;
   price: string;
@@ -81,12 +86,12 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
       setError(null);
       try {
         const [data, enrollments, meData, modulesData, lessonsData, materialsData] = await Promise.all([
-          apiFetch<any[]>("/api/courses/", {}, token),
-          apiFetch<any[]>("/api/enrollments/", {}, token),
+          apiFetch<CourseApi[]>("/api/courses/", {}, token),
+          apiFetch<EnrollmentApi[]>("/api/enrollments/", {}, token),
           apiFetch<{ first_name: string; last_name: string; email: string }>("/api/me/", {}, token),
-          apiFetch<any[]>("/api/course-modules/", {}, token),
-          apiFetch<any[]>("/api/course-lessons/", {}, token),
-          apiFetch<any[]>("/api/course-materials/", {}, token),
+          apiFetch<CourseModuleApi[]>("/api/course-modules/", {}, token),
+          apiFetch<CourseLessonApi[]>("/api/course-lessons/", {}, token),
+          apiFetch<CourseMaterialApi[]>("/api/course-materials/", {}, token),
         ]);
         setMe(meData || null);
         const filtered = data;
@@ -127,8 +132,6 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
               id: c.id,
               title: c.title,
               instructor: c.owner.username || "Profesor",
-              rating: 4.7,
-              students: Math.floor(Math.random() * 8000) + 200,
               duration,
               level: meta.level || "Intermedio",
               price: "Gratis",
@@ -253,20 +256,12 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
 
               <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
                 <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  <span>{course.rating}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Users className="w-4 h-4" />
-                  <span>{course.students.toLocaleString()}</span>
-                </div>
-                <div className="flex items-center gap-1">
                   <Clock className="w-4 h-4" />
                   <span>{course.duration}</span>
                 </div>
               </div>
               <div className="flex items-center gap-3 text-xs text-slate-500 mb-4">
-                <span>{course.modulesCount} modulos</span>
+                <span>{course.modulesCount} módulos</span>
                 <span>{course.lessonsCount} lecciones</span>
                 <span>{course.materialsCount} materiales</span>
               </div>

@@ -16,9 +16,6 @@ export default function StudentPage() {
   const router = useRouter();
   const { token } = useAuth();
   const [activeTab, setActiveTab] = useState<"inicio" | "cursos" | "estadisticas" | "alertas">("inicio");
-  const [sessionId, setSessionId] = useState("");
-  const [contentId, setContentId] = useState("");
-  const [selectedCourse, setSelectedCourse] = useState("");
 
   useEffect(() => {
     if (!token) {
@@ -44,9 +41,6 @@ export default function StudentPage() {
           <section className="space-y-3">
             <InicioSection
               onCourseSelect={(courseId) => {
-                setContentId(String(courseId));
-                setSelectedCourse(String(courseId));
-                if (!sessionId) setSessionId("1");
                 router.push(`/student/course/${courseId}`);
               }}
             />
@@ -57,9 +51,6 @@ export default function StudentPage() {
           <section className="space-y-4">
             <CursosSection
               onCourseSelect={(courseId) => {
-                setContentId(String(courseId));
-                setSelectedCourse(String(courseId));
-                if (!sessionId) setSessionId("1");
                 router.push(`/student/course/${courseId}`);
               }}
             />

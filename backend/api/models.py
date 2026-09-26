@@ -809,6 +809,16 @@ class ObserverAnnotation(models.Model):
         (CATEGORY_NO_OBSERVABLE, "No observable"),
         (CATEGORY_UNCERTAIN, "Uncertain"),
     ]
+    NO_OBSERVABLE_REASON_CHOICES = (
+        "sin_rostro",
+        "oclusion",
+        "iluminacion",
+        "multiples_personas",
+        "fallo_dispositivo",
+        "material_fuera_de_pantalla",
+        "retiro_consentimiento",
+        "otro_especificado",
+    )
 
     assignment = models.OneToOneField(ObserverAssignment, on_delete=models.PROTECT, related_name="annotation")
     category = models.CharField(max_length=32, choices=CATEGORY_CHOICES)
@@ -822,8 +832,40 @@ class ObserverAnnotation(models.Model):
             models.CheckConstraint(
                 condition=models.Q(confidence__gte=0.0) & models.Q(confidence__lte=1.0),
                 name="observer_annotation_confidence_range",
-            )
+            ),
+            models.CheckConstraint(
+                condition=(
+                    models.Q(
+                        category="no_observable",
+                        notes_code__in=(
+                            "sin_rostro",
+                            "oclusion",
+                            "iluminacion",
+                            "multiples_personas",
+                            "fallo_dispositivo",
+                            "material_fuera_de_pantalla",
+                            "retiro_consentimiento",
+                            "otro_especificado",
+                        ),
+                    )
+                    | ~models.Q(category="no_observable")
+                ),
+                name="observer_annotation_no_observable_reason",
+            ),
         ]
+
+    def clean(self):
+        super().clean()
+        if self.category == self.CATEGORY_NO_OBSERVABLE and self.notes_code not in self.NO_OBSERVABLE_REASON_CHOICES:
+            raise ValidationError({"notes_code": "No observable requiere un motivo protocolizado."})
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            raise ValidationError("Las anotaciones originales son inmutables.")
+        return super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValidationError("Las anotaciones originales son inmutables.")
 
 
 class ResearchPseudonymMap(models.Model):

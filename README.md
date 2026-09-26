@@ -181,13 +181,28 @@ docker compose exec backend python manage.py migrate
 - Si la captura de una sesión de curso no inicia: revisar consentimiento, permiso de cámara y disponibilidad del procesamiento local.
 - Si faltan politicas de privacidad: el endpoint de analytics crea defaults si no existen.
 
-## Entrenamiento de modelo (opcional)
+## Entrenamiento de modelo (solo con protocolo aprobado)
 
-1. Activar captura de frames:
-   - `SAVE_FRAMES=1` y `FRAMES_DIR=/app/data/frames`
-2. Preparar un dataset aprobado y pseudonimizado de acuerdo con el protocolo vigente.
-3. Entrenar en ML:
-   - `python train_model.py` (genera ONNX en `MODEL_PATH`)
+1. Mantener el procesamiento visual en el dispositivo. No habilitar persistencia de
+   frames, imágenes, video o audio para construir el dataset central.
+2. Preparar únicamente características derivadas autorizadas, etiquetas humanas
+   independientes y resultados académicos separados, todos enlazados mediante el
+   pseudónimo de investigación.
+3. Ejecutar el piloto con 15–20 participantes, separados de cualquier desarrollo o
+   evaluación posterior, conforme a
+   `docs/P0.3/ENMIENDA_v0.3_MUESTRA_Y_ANOTACION.md`.
+4. Antes de crear ventanas o inspeccionar outcomes, congelar una sola partición de
+   los 100 participantes posteriores: 60/40 o 70/30 por participante. La utilidad
+   `ml.study_cohort_plan.create_cohort_plan` valida el plan y genera hashes de
+   auditoría sin publicar pseudónimos.
+5. Utilizar exclusivamente la partición de desarrollo para entrenamiento,
+   validación interna, calibración y selección del threshold. Abrir el holdout
+   confirmatorio una sola vez después de congelar el modelo y el análisis.
+6. Exportar el candidato aprobado a ONNX y volver a validar métricas, calibración,
+   equidad, cobertura y rendimiento EDGE antes de cualquier promoción.
+
+El entrenamiento con datos reales no se ejecuta en los servicios de producción de
+Render y requiere el gate, consentimiento y aprobaciones aplicables.
 
 ## Despliegue en Render
 

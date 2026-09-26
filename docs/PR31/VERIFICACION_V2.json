@@ -1,0 +1,42 @@
+{
+  "pr": "PR31-v2",
+  "status": "TECHNICAL_AND_ISOLATED_MANUAL_PASS_FEATURE_DISABLED_HUMAN_PILOT_PENDING",
+  "feature_flags": {
+    "OBSERVER_ANNOTATION": false,
+    "NEXT_PUBLIC_OBSERVER_ANNOTATION": false,
+    "PILOT_RELEASE": false
+  },
+  "checks": {
+    "backend_targeted_tests": "PASS_14_OF_14",
+    "ml_cohort_and_validity_tests": "PASS_15_OF_15",
+    "frontend_protocol_tests": "PASS_2_OF_2",
+    "frontend_typecheck": "PASS",
+    "migration_drift": "PASS_NO_CHANGES",
+    "django_system_check": "PASS",
+    "isolated_docker_stack": "PASS_BACKEND_8100_FRONTEND_3100",
+    "manual_api_two_role_workflow": "PASS",
+    "manual_browser_two_role_workflow": "PASS",
+    "live_camera_edge_transport": "PASS_SYNTHETIC_LOCAL_ONLY",
+    "single_operator_paired_annotation": "PASS_OPERATIONAL_NOT_SCIENTIFIC",
+    "diff_check": "PASS"
+  },
+  "privacy_controls": [
+    "server_authorization_for_course_and_assignment",
+    "current_capture_and_research_consent_required",
+    "reviewer_ethics_grant_scoped_to_course",
+    "opaque_target_code_for_observers",
+    "no_raw_media_or_model_output_in_assignment_response",
+    "peer_label_hidden",
+    "no_observable_reason_required",
+    "original_annotations_immutable"
+  ],
+  "real_data_used": false,
+  "manual_test_data": "SYNTHETIC_LOCAL_ONLY",
+  "pilot_activated": false,
+  "human_checks_pending": [
+    "independent_protocol_ratification",
+    "observer_training_and_comprehension",
+    "physical_two_observer_rehearsal",
+    "pilot_authorization"
+  ]
+}

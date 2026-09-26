@@ -41,6 +41,7 @@ services:
       - ./backend/.env
     environment:
       - PILOT_RELEASE=False
+      - OBSERVER_ANNOTATION=False
     depends_on:
       db:
         condition: service_healthy
@@ -59,6 +60,7 @@ services:
     environment:
       - ML_BFF_SERVICE_TOKEN=${ML_BFF_SERVICE_TOKEN:-}
       - NEXT_PUBLIC_PILOT_RELEASE=false
+      - NEXT_PUBLIC_OBSERVER_ANNOTATION=false
     depends_on:
       - backend
   ml:

@@ -1,0 +1,9 @@
+opencv-python-headless==4.8.1.78
+mediapipe==0.10.31
+numpy==1.26.4
+fastapi==0.141.1
+uvicorn==0.52.0
+joblib==1.5.3
+httpx==0.28.1
+python-multipart==0.0.32
+onnxruntime==1.28.0

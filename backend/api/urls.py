@@ -4,6 +4,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 from . import views
 from .service_views import MLServiceEventView, MLTemporalInferenceView
+from .observer_annotation import ObserverAssignmentView, ObserverScheduleView
 
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet, basename='user')
@@ -38,6 +39,8 @@ urlpatterns = [
     path('observations/', views.ObservationIngestView.as_view(), name='observation-ingest'),
     path('edge-shadow-inferences/', views.EdgeShadowInferenceView.as_view(), name='edge-shadow-inference'),
     path('device-budget-telemetry/', views.DeviceBudgetTelemetryView.as_view(), name='device-budget-telemetry'),
+    path('observer-schedules/', ObserverScheduleView.as_view(), name='observer-schedules'),
+    path('observer-assignments/', ObserverAssignmentView.as_view(), name='observer-assignments'),
     path('', include(router.urls)),
     path('me/', views.MeView.as_view(), name='me'),
     path('student-metrics/', views.StudentMetricsView.as_view(), name='student_metrics'),

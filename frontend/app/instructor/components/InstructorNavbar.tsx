@@ -6,10 +6,10 @@ import { LogOut, Menu, User } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { apiFetch } from "../../lib/api";
 import type { UserProfileApi } from "../../lib/api-types";
-import { TEACHER_GROUP_DASHBOARD_ENABLED } from "../../lib/features";
+import { OBSERVER_ANNOTATION_ENABLED, TEACHER_GROUP_DASHBOARD_ENABLED } from "../../lib/features";
 import Image from "next/image";
 
-type TabId = "inicio" | "materiales" | "estadisticas";
+type TabId = "inicio" | "materiales" | "estadisticas" | "observacion";
 
 type Props = {
   activeTab: TabId;
@@ -40,6 +40,7 @@ export function InstructorNavbar({ activeTab, onTabChange }: Props) {
     { id: "inicio", label: "Inicio" },
     { id: "materiales", label: "Materiales" },
     { id: "estadisticas", label: TEACHER_GROUP_DASHBOARD_ENABLED ? "Evidencia grupal" : "Estadisticas" },
+    ...(OBSERVER_ANNOTATION_ENABLED ? [{ id: "observacion" as const, label: "Observación" }] : []),
   ];
 
   const handleLogout = () => {

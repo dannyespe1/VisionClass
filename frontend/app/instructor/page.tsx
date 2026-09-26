@@ -9,8 +9,10 @@ import { MaterialesSection } from "./components/MaterialesSection";
 import { EstadisticasProfesor } from "./components/EstadisticasProfesor";
 import { TeacherGroupDashboardSection } from "./components/TeacherGroupDashboardSection";
 import { TEACHER_GROUP_DASHBOARD_ENABLED } from "../lib/features";
+import { OBSERVER_ANNOTATION_ENABLED } from "../lib/features";
+import { ObserverPanel } from "../components/ObserverPanel";
 
-type TabId = "inicio" | "materiales" | "estadisticas";
+type TabId = "inicio" | "materiales" | "estadisticas" | "observacion";
 
 export default function InstructorPage() {
   const router = useRouter();
@@ -27,7 +29,7 @@ export default function InstructorPage() {
     if (typeof window === "undefined") return;
     const syncFromHash = () => {
       const hash = window.location.hash.replace("#", "");
-      if (hash === "inicio" || hash === "materiales" || hash === "estadisticas") {
+      if (hash === "inicio" || hash === "materiales" || hash === "estadisticas" || (hash === "observacion" && OBSERVER_ANNOTATION_ENABLED)) {
         setActiveTab(hash);
       }
     };
@@ -78,6 +80,8 @@ export default function InstructorPage() {
             )}
           </div>
         )}
+
+        {activeTab === "observacion" && OBSERVER_ANNOTATION_ENABLED && <ObserverPanel allowScheduling />}
       </div>
     </main>
   );

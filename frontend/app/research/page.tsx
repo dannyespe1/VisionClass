@@ -4,7 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch, BACKEND_URL } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
-import { RESEARCH_DASHBOARD_ENABLED } from "../lib/features";
+import { OBSERVER_ANNOTATION_ENABLED, RESEARCH_DASHBOARD_ENABLED } from "../lib/features";
+import { ObserverPanel } from "../components/ObserverPanel";
 
 type Evidence = { status: string; report_reference: string | null };
 type Cell = {
@@ -82,10 +83,11 @@ export default function ResearchPage() {
     finally { setBusy(false); }
   };
 
-  if (!RESEARCH_DASHBOARD_ENABLED) return <main className="min-h-screen p-8"><h1 className="text-2xl font-semibold">Panel de investigación no disponible</h1><p>La función permanece desactivada hasta completar la revisión independiente.</p></main>;
+  if (!RESEARCH_DASHBOARD_ENABLED && !OBSERVER_ANNOTATION_ENABLED) return <main className="min-h-screen p-8"><h1 className="text-2xl font-semibold">Panel de investigación no disponible</h1><p>La función permanece desactivada hasta completar la revisión independiente.</p></main>;
 
   return <main className="min-h-screen bg-slate-50 p-6 text-slate-900"><div className="mx-auto max-w-6xl space-y-6">
     <header className="flex flex-wrap items-center justify-between gap-3"><div><h1 className="text-3xl font-semibold">Panel de investigación</h1><p className="text-sm text-slate-600">Evidencia observable agregada; no mide estados mentales ni habilita decisiones individuales.</p></div><button className="rounded border px-4 py-2" onClick={() => { logout(); router.push("/login"); }}>Cerrar sesión</button></header>
+    {OBSERVER_ANNOTATION_ENABLED && <ObserverPanel />}
     {dashboard && <section className="rounded-xl border bg-white p-4"><h2 className="font-semibold">Permiso y propósito</h2><p>{dashboard.grant.project}: {dashboard.grant.purpose}</p><p className="text-sm text-slate-600">Caduca: {new Date(dashboard.grant.expires_at).toLocaleString()}</p></section>}
     {dashboard && <section className="grid gap-3 rounded-xl border bg-white p-4 md:grid-cols-5" aria-label="Filtros de investigación">
       <Filter label="Periodo" value={filters.period} options={dashboard.filter_options.periods} onChange={(period) => setFilters({ ...filters, period })} />

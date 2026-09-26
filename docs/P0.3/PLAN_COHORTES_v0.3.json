@@ -1,0 +1,63 @@
+{
+  "schema_version": "visionclass-cohort-plan-v1",
+  "protocol_version": "P0.3-v0.3-candidate",
+  "status": "PROSPECTIVE_CANDIDATE_PENDING_INDEPENDENT_RATIFICATION",
+  "pilot": {
+    "minimum_participants": 15,
+    "maximum_participants": 20,
+    "purposes": [
+      "technical_and_consent_workflow",
+      "observer_training_and_agreement",
+      "timing_coverage_and_workload"
+    ],
+    "reusable_for_model_development": false,
+    "reusable_for_confirmatory_evaluation": false
+  },
+  "study": {
+    "participants": 100,
+    "unit_of_split": "participant",
+    "split_before_windowing": true,
+    "allowed_splits": [
+      {"development": 60, "confirmatory": 40},
+      {"development": 70, "confirmatory": 30}
+    ],
+    "selection_deadline": "before_outcome_or_model_score_review",
+    "development_uses": [
+      "training",
+      "participant_grouped_internal_validation",
+      "architecture_selection",
+      "calibration",
+      "threshold_selection"
+    ],
+    "confirmatory_uses": ["single_locked_final_evaluation"],
+    "confirmatory_access_before_model_freeze": false
+  },
+  "annotation": {
+    "manual_version": "observer-manual-v2-candidate",
+    "human_observation_seconds": 5,
+    "candidate_rotation_group_maximum": 10,
+    "candidate_repeat_interval_minutes": 3,
+    "same_server_controlled_window_for_both_observers": true,
+    "asynchronous_plus_minus_15_seconds_matching": false,
+    "labels": [
+      "orientado_a_tarea",
+      "orientado_fuera_de_tarea",
+      "no_observable",
+      "incierto"
+    ],
+    "independent_blinded_observers": 2,
+    "original_labels_immutable": true,
+    "adjudication_stored_separately": true
+  },
+  "pilot_exit": {
+    "cohen_kappa_minimum": 0.8,
+    "participant_bootstrap_ci95_lower_minimum": 0.67,
+    "privacy_negative_tests_required": true,
+    "independent_reproduction_required": true
+  },
+  "interpretation": {
+    "target": "observable_task_orientation",
+    "prohibited_claim": "direct_measurement_of_internal_attention",
+    "intervention_effect_requires_separate_study": true
+  }
+}

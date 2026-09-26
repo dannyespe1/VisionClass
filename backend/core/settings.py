@@ -35,6 +35,13 @@ EVENT_CONTRACT_V2 = os.environ.get('EVENT_CONTRACT_V2', 'False').strip().lower()
 MOMENTARY_SELF_REPORT = os.environ.get('MOMENTARY_SELF_REPORT', 'False').strip().lower() == 'true'
 LEARNING_INTERACTION_EVENTS = os.environ.get('LEARNING_INTERACTION_EVENTS', 'False').strip().lower() == 'true'
 OBSERVER_ANNOTATION = os.environ.get('OBSERVER_ANNOTATION', 'False').strip().lower() == 'true'
+OBSERVER_ANNOTATION_WINDOW_SECONDS = 5
+OBSERVER_ANNOTATION_SCHEDULE_LEAD_SECONDS = max(
+    3, int(os.environ.get('OBSERVER_ANNOTATION_SCHEDULE_LEAD_SECONDS', '5'))
+)
+OBSERVER_ANNOTATION_SUBMISSION_GRACE_SECONDS = min(
+    600, max(30, int(os.environ.get('OBSERVER_ANNOTATION_SUBMISSION_GRACE_SECONDS', '180')))
+)
 REDIS_ENABLED = os.environ.get('REDIS_ENABLED', 'False').strip().lower() == 'true'
 REDIS_URL = os.environ.get('REDIS_URL', 'redis://redis:6379/0').strip()
 REDIS_NAMESPACE = os.environ.get('REDIS_NAMESPACE', 'visionclass:v1').strip()

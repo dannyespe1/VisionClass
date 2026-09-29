@@ -150,6 +150,25 @@ const toYoutubeEmbed = (url: string) => {
 };
 
 type CameraOption = { deviceId: string; label: string };
+
+function cameraFailureMessage(error: unknown) {
+  if (!(error instanceof DOMException)) {
+    return "No fue posible iniciar la cámara. Intenta nuevamente.";
+  }
+  switch (error.name) {
+    case "NotAllowedError":
+    case "SecurityError":
+      return "El navegador bloqueó el acceso a la cámara. Revisa el permiso del sitio y vuelve a intentarlo.";
+    case "NotFoundError":
+      return "No se detectó una cámara disponible en este navegador.";
+    case "NotReadableError":
+      return "La cámara está siendo usada por otra aplicación o pestaña.";
+    case "OverconstrainedError":
+      return "La cámara no admite la configuración solicitada. Selecciona otro dispositivo e inténtalo otra vez.";
+    default:
+      return "La cámara no pudo iniciarse. Verifica que el dispositivo esté disponible e inténtalo nuevamente.";
+  }
+}
 type BatteryManagerLike = { level: number };
 type InterventionSuggestion = {
   message: string;
@@ -279,6 +298,7 @@ export default function CoursePage() {
   const [ocularValidationSummary, setOcularValidationSummary] = useState<OcularValidationSummary | null>(null);
   const [availableCameras, setAvailableCameras] = useState<CameraOption[]>([]);
   const [selectedCameraId, setSelectedCameraId] = useState("");
+  const [cameraError, setCameraError] = useState<string | null>(null);
   const [interventionSuggestion, setInterventionSuggestion] = useState<InterventionSuggestion | null>(null);
 
   useEffect(() => {
@@ -929,6 +949,7 @@ export default function CoursePage() {
       setAttentionStatus("pending");
       return;
     }
+    setCameraError(null);
     setAttentionStatus("pending");
     ocularValidationRef.current ||= new OcularLocalValidationSession();
     ocularValidationRef.current.reset();
@@ -965,6 +986,7 @@ export default function CoursePage() {
           if (generation === cameraGenerationRef.current) {
             stopCamera();
             setAttentionStatus("error");
+            setCameraError("La cámara se desconectó o fue detenida por el navegador.");
           }
         }, { once: true });
       });
@@ -1002,6 +1024,7 @@ export default function CoursePage() {
       if (generation === cameraGenerationRef.current) {
         stopCamera();
         setAttentionStatus("error");
+        setCameraError(cameraFailureMessage(err));
       }
     }
   };
@@ -1056,6 +1079,7 @@ export default function CoursePage() {
       setPermissionOpen(false);
       return;
     }
+    setCameraError(null);
     try {
       const consent = await recordConsent(token, {
         local_processing: settings.enableCamera && settings.enableAttentionTracking,
@@ -1082,6 +1106,7 @@ export default function CoursePage() {
       console.error("[requestCamera] No se habilitó la cámara:", err instanceof Error ? err.message : err);
       stopCamera();
       setPermissionSettings((current) => ({ ...current, enableCamera: false }));
+      setCameraError(cameraFailureMessage(err));
     } finally {
       setPermissionOpen(false);
     }
@@ -1371,6 +1396,11 @@ export default function CoursePage() {
             </button>
           </div>
           <div className="space-y-4">
+            {cameraError && (
+              <p role="alert" className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+                {cameraError}
+              </p>
+            )}
             {permissionSettings.enableCamera && availableCameras.length > 0 && (
               <label className="block p-3 bg-slate-50 rounded-lg">
                 <span className="block text-sm mb-2">Cámara seleccionada</span>
@@ -1966,6 +1996,12 @@ export default function CoursePage() {
 
       {permissionOpen && (
         <CameraPermissionModal
+          key={[
+            consentStatus?.current_version || "pending",
+            consentStatus?.purposes?.local_processing?.granted ? "local" : "no-local",
+            consentStatus?.purposes?.derived_persistence?.granted ? "derived" : "no-derived",
+            consentStatus?.purposes?.research?.granted ? "research" : "no-research",
+          ].join(":")}
           consentStatus={consentStatus}
           onAllow={(settings) => requestCamera(settings)}
           onDeny={async () => {

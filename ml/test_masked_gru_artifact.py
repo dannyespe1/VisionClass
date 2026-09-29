@@ -28,6 +28,9 @@ class MaskedGRUArtifactTests(unittest.TestCase):
         self.assertFalse(self.artifact["lifecycle"]["allow_intervention"])
         self.assertFalse(self.artifact["lifecycle"]["requires_raw_media"])
 
+    def test_artifact_bytes_use_lf_for_cross_platform_hashes(self):
+        self.assertNotIn(b"\r\n", self.path.read_bytes())
+
     def test_runtime_predicts_observable_and_no_observable_windows(self):
         runtime = MaskedGRUInferenceRuntime.load(self.path)
         windows = synthetic_records(participants=1)[:7]

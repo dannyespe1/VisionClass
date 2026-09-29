@@ -8,6 +8,12 @@ export type ConsentStatus = {
   capture_allowed: boolean;
   teacher_access: false;
   images_stored: false;
+  purposes?: Partial<Record<ConsentPurpose, {
+    granted: boolean;
+    latest_action: "grant" | "decline" | "revoke" | null;
+    version: string | null;
+    expires_at: string | null;
+  }>>;
 };
 
 export async function getConsentStatus(token: string) {

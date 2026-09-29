@@ -19,9 +19,11 @@ export interface PermissionSettings {
 }
 
 export function CameraPermissionModal({ onAllow, onDeny, consentStatus }: CameraPermissionModalProps) {
-  const [localProcessing, setLocalProcessing] = useState(false);
-  const [derivedPersistence, setDerivedPersistence] = useState(false);
-  const [researchUse, setResearchUse] = useState(false);
+  const currentChoice = (purpose: "local_processing" | "derived_persistence" | "research") =>
+    Boolean(consentStatus?.purposes?.[purpose]?.granted);
+  const [localProcessing, setLocalProcessing] = useState(() => currentChoice("local_processing"));
+  const [derivedPersistence, setDerivedPersistence] = useState(() => currentChoice("derived_persistence"));
+  const [researchUse, setResearchUse] = useState(() => currentChoice("research"));
   const consentTextApproved = Boolean(consentStatus?.enabled && consentStatus.text_approved);
 
   return (

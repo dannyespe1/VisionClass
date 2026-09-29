@@ -106,8 +106,8 @@ def build_artifact(comparison: dict[str, Any]) -> dict[str, Any]:
 def write_artifact(comparison_path: Path, output_path: Path) -> dict[str, Any]:
     artifact = build_artifact(json.loads(comparison_path.read_text(encoding="utf-8")))
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(
-        json.dumps(artifact, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    output_path.write_bytes(
+        (json.dumps(artifact, indent=2, sort_keys=True) + "\n").encode("utf-8")
     )
     return artifact
 

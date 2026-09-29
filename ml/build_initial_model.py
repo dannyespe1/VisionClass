@@ -46,8 +46,8 @@ def main() -> None:
         "deployment_eligibility": "shadow_only",
         "signature_status": "not_signed_synthetic_engineering_only",
     }
-    arguments.web_manifest_output.write_text(
-        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    arguments.web_manifest_output.write_bytes(
+        (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode("utf-8")
     )
     print(f"artifact={arguments.output}")
     print(f"web_artifact={arguments.web_output}")

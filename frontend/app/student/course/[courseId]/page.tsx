@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
-  AlertCircle,
   ArrowLeft,
   BookOpen,
   Camera,
@@ -11,14 +10,12 @@ import {
   ClipboardCheck,
   Clock,
   Download,
-  Eye,
   FileText,
   ChevronDown,
   ChevronUp,
   Maximize,
   Play,
   Settings as SettingsIcon,
-  TrendingUp,
   Video,
   Volume2,
 } from "lucide-react";
@@ -28,6 +25,7 @@ import { Button } from "../../../ui/button";
 import { CameraPermissionModal, PermissionSettings } from "../../CameraPermissionModal";
 import { DemographicResearchCard } from "../../DemographicResearchCard";
 import { PdfCanvasViewer } from "../../PdfCanvasViewer";
+import { OcularCalibrationModal } from "./OcularCalibrationModal";
 import { getConsentStatus, recordConsent, revokeCaptureConsent, type ConsentStatus } from "../../../lib/consent";
 import { BoundedCaptureQueue } from "../../../lib/bounded-capture-queue.mjs";
 import {
@@ -51,8 +49,6 @@ import type { EdgeProfileName } from "../../../lib/edge-profiles.mjs";
 import { DeviceBudgetCollector } from "../../../lib/device-budget-telemetry.mjs";
 import { AdaptiveScheduler } from "../../../lib/adaptive-scheduler.mjs";
 import {
-  OCULAR_MIN_VALID_SAMPLES,
-  OCULAR_VALIDATION_PHASES,
   OcularLocalValidationSession,
   type OcularValidationPhase,
   type OcularValidationSummary,
@@ -175,17 +171,6 @@ type InterventionSuggestion = {
   explanation: string;
 };
 
-type OcularEdgeStatus = {
-  observable: boolean;
-  selectedLane: "main" | "worker" | null;
-  mainP95: number | null;
-  workerP95: number | null;
-  mainThreadP95: number | null;
-  workerMainThreadP95: number | null;
-};
-
-const EXPLORATORY_SHADOW_THRESHOLD = 0.70;
-
 const browserFamilyFromUserAgent = (userAgent: string) => {
   if (/firefox/i.test(userAgent)) return "firefox";
   if (/edg/i.test(userAgent)) return "edge";
@@ -257,9 +242,9 @@ export default function CoursePage() {
   const [enrollmentLoaded, setEnrollmentLoaded] = useState(false);
   const [lessonInitialized, setLessonInitialized] = useState(false);
 
-  // Camera processing is optional: keep course content visible on entry and
-  // let the student open the consent flow explicitly from the camera control.
-  const [permissionOpen, setPermissionOpen] = useState(false);
+  const [permissionOpen, setPermissionOpen] = useState(true);
+  const [ocularCalibrationOpen, setOcularCalibrationOpen] = useState(false);
+  const [courseReady, setCourseReady] = useState(false);
   const [consentStatus, setConsentStatus] = useState<ConsentStatus | null>(null);
   const [permissionSettings, setPermissionSettings] = useState<PermissionSettings>({
     enableCamera: false,
@@ -271,7 +256,6 @@ export default function CoursePage() {
   const [showCameraSettings, setShowCameraSettings] = useState(false);
   const [openModules, setOpenModules] = useState<Record<number, boolean>>({});
 
-  const [attentionScore] = useState(85);
   const [readingTime, setReadingTime] = useState(0);
   const [pdfData, setPdfData] = useState<Uint8Array | null>(null);
   const [quizAnswers, setQuizAnswers] = useState<Record<number, string>>({});
@@ -281,19 +265,16 @@ export default function CoursePage() {
   const [quizError, setQuizError] = useState<string | null>(null);
   const [quizNotice, setQuizNotice] = useState<string | null>(null);
   const [courseCompletedOpen, setCourseCompletedOpen] = useState(false);
-  const [attentionStatus, setAttentionStatus] = useState<"ok" | "no_face" | "pending" | "error">("pending");
-  const [mlServiceStatus, setMlServiceStatus] = useState<"checking" | "available" | "unavailable" | null>(null);
-  const [captureTransportStatus, setCaptureTransportStatus] = useState<
+  const [, setAttentionStatus] = useState<"ok" | "no_face" | "pending" | "error">("pending");
+  const [, setCaptureTransportStatus] = useState<
     "idle" | "queued" | "sending" | "degraded" | "stopped"
   >("stopped");
-  const [qualityMessage, setQualityMessage] = useState<string | null>(null);
-  const [maskedGRUShadowStatus, setMaskedGRUShadowStatus] = useState<"disabled" | "loading" | "ready" | "fallback">(
+  const [, setMaskedGRUShadowStatus] = useState<"disabled" | "loading" | "ready" | "fallback">(
     MASKED_GRU_SHADOW_ENABLED ? "loading" : "disabled",
   );
-  const [maskedGRUShadowResult, setMaskedGRUShadowResult] = useState<MaskedGRUShadowResult | null>(null);
-  const [edgeShadowReportStatus, setEdgeShadowReportStatus] = useState<"idle" | "sending" | "sent" | "degraded">("idle");
+  const [, setMaskedGRUShadowResult] = useState<MaskedGRUShadowResult | null>(null);
+  const [, setEdgeShadowReportStatus] = useState<"idle" | "sending" | "sent" | "degraded">("idle");
   const [edgeProfile, setEdgeProfile] = useState<EdgeProfileName>("low");
-  const [ocularEdgeStatus, setOcularEdgeStatus] = useState<OcularEdgeStatus | null>(null);
   const [ocularValidationPhase, setOcularValidationPhase] = useState<OcularValidationPhase>("frontal");
   const [ocularValidationSummary, setOcularValidationSummary] = useState<OcularValidationSummary | null>(null);
   const [availableCameras, setAvailableCameras] = useState<CameraOption[]>([]);
@@ -306,8 +287,6 @@ export default function CoursePage() {
       router.push("/login");
     }
     
-    // PR15 procesa en el navegador. No se consulta ni se usa el servicio de frames.
-    setMlServiceStatus(BROWSER_EXTRACTOR_ENABLED ? "available" : null);
   }, [token, router]);
 
   useEffect(() => {
@@ -573,13 +552,13 @@ export default function CoursePage() {
   }, [currentMaterial, token]);
 
   useEffect(() => {
-    if (currentMaterial?.materialType === "pdf") {
+    if (courseReady && currentMaterial?.materialType === "pdf") {
       const interval = setInterval(() => {
         setReadingTime((prev) => prev + 1);
       }, 1000);
       return () => clearInterval(interval);
     }
-  }, [currentMaterial]);
+  }, [courseReady, currentMaterial]);
 
   const persistContentView = useCallback(async (reason: "switch" | "exit" | "complete") => {
     void reason;
@@ -636,7 +615,7 @@ export default function CoursePage() {
   }, [currentMaterial, sessionId, token, userId]);
 
   useEffect(() => {
-    if (permissionOpen) return;
+    if (!courseReady || permissionOpen || ocularCalibrationOpen) return;
     if (!currentMaterial) return;
 
     startContentView().catch((err) => console.error(err));
@@ -646,7 +625,7 @@ export default function CoursePage() {
         persistContentView("switch").catch((err) => console.error(err));
       }
     };
-  }, [currentMaterial, permissionOpen, persistContentView, startContentView]);
+  }, [courseReady, currentMaterial, ocularCalibrationOpen, permissionOpen, persistContentView, startContentView]);
 
   useEffect(() => {
     return () => {
@@ -739,7 +718,6 @@ export default function CoursePage() {
     setMaskedGRUShadowResult(null);
     batteryLevelRef.current = null;
     qualityWindowRef.current = [];
-    setQualityMessage(null);
     setCaptureTransportStatus("stopped");
     setAttentionStatus("pending");
   };
@@ -833,15 +811,6 @@ export default function CoursePage() {
       }
       if (outcome.status === "confirmed") {
         let sample = outcome.value;
-        const benchmark = sample.performance;
-        setOcularEdgeStatus({
-          observable: sample.quality?.ocular_observable === true,
-          selectedLane: benchmark?.selected_lane || null,
-          mainP95: benchmark?.lanes?.main?.total_ms_p95 ?? null,
-          workerP95: benchmark?.lanes?.worker?.total_ms_p95 ?? null,
-          mainThreadP95: benchmark?.lanes?.main?.main_thread_ms_p95 ?? null,
-          workerMainThreadP95: benchmark?.lanes?.worker?.main_thread_ms_p95 ?? null,
-        });
         ocularValidationRef.current ||= new OcularLocalValidationSession();
         setOcularValidationSummary(ocularValidationRef.current.record(sample.features));
         if (QUALITY_GATE_V1_ENABLED) {
@@ -851,7 +820,6 @@ export default function CoursePage() {
           qualityWindowRef.current = [...qualityWindowRef.current, sample].filter((item) => Date.parse(item.captured_at) >= cutoff);
           const windowQuality = evaluateWindow(qualityWindowRef.current);
           sample = { ...sample, quality: { ...sample.quality, observable: windowQuality.observable, confidence: windowQuality.confidence, reason: windowQuality.reason } };
-          setQualityMessage(windowQuality.message);
         }
         if (NORMALIZED_FEATURES_V1_ENABLED && QUALITY_GATE_V1_ENABLED && sessionId && consentVersionRef.current) {
           const event = buildNormalizedEvent(sample, {
@@ -951,12 +919,12 @@ export default function CoursePage() {
     }
     setCameraError(null);
     setAttentionStatus("pending");
-    ocularValidationRef.current ||= new OcularLocalValidationSession();
-    ocularValidationRef.current.reset();
-    ocularValidationRef.current.selectPhase("frontal");
-    setOcularValidationPhase("frontal");
-    setOcularValidationSummary(ocularValidationRef.current.snapshot());
-    setOcularEdgeStatus(null);
+    if (!ocularValidationRef.current) {
+      ocularValidationRef.current = new OcularLocalValidationSession();
+      ocularValidationRef.current.selectPhase("frontal");
+      setOcularValidationPhase("frontal");
+      setOcularValidationSummary(ocularValidationRef.current.snapshot());
+    }
     const generation = ++cameraGenerationRef.current;
     try {
       edgeProfileControllerRef.current ||= new EdgeProfileController({ remoteSelection: false });
@@ -1077,6 +1045,7 @@ export default function CoursePage() {
     if (!settings.enableCamera) {
       stopCamera();
       setPermissionOpen(false);
+      setCourseReady(true);
       return;
     }
     setCameraError(null);
@@ -1091,6 +1060,7 @@ export default function CoursePage() {
       if (!BROWSER_EXTRACTOR_ENABLED) {
         setPermissionSettings({ ...settings, enableCamera: false, enableAttentionTracking: false });
         setCaptureTransportStatus("stopped");
+        setCameraError("El procesamiento local no está habilitado en este despliegue.");
         return;
       }
       const permissionStream = await navigator.mediaDevices.getUserMedia(constraintsForProfile(edgeProfile, selectedCameraId || undefined));
@@ -1101,14 +1071,19 @@ export default function CoursePage() {
         .map((device, index) => ({ deviceId: device.deviceId, label: device.label || `Cámara ${index + 1}` }));
       setAvailableCameras(cameras);
       if (!selectedCameraId && cameras[0]) setSelectedCameraId(cameras[0].deviceId);
+      stopCamera();
+      ocularValidationRef.current ||= new OcularLocalValidationSession();
+      ocularValidationRef.current.reset();
+      setOcularValidationPhase("frontal");
+      setOcularValidationSummary(ocularValidationRef.current.selectPhase("frontal"));
       setPermissionSettings(settings);
+      setPermissionOpen(false);
+      setOcularCalibrationOpen(true);
     } catch (err) {
       console.error("[requestCamera] No se habilitó la cámara:", err instanceof Error ? err.message : err);
       stopCamera();
       setPermissionSettings((current) => ({ ...current, enableCamera: false }));
       setCameraError(cameraFailureMessage(err));
-    } finally {
-      setPermissionOpen(false);
     }
   };
 
@@ -1322,12 +1297,38 @@ export default function CoursePage() {
     };
     syncProgress();
   }, [selectedLessonId, currentLessonIndex, token, enrollmentId, sortedLessons.length, courseId, enrollmentData]);
-  const activeOcularSummary = ocularValidationSummary?.phases[ocularValidationPhase] || null;
-  const ocularCalibration = ocularValidationSummary?.calibration || null;
   const selectOcularValidationPhase = (phase: OcularValidationPhase) => {
     ocularValidationRef.current ||= new OcularLocalValidationSession();
     setOcularValidationPhase(phase);
     setOcularValidationSummary(ocularValidationRef.current.selectPhase(phase));
+  };
+
+  const resetOcularValidation = () => {
+    ocularValidationRef.current ||= new OcularLocalValidationSession();
+    ocularValidationRef.current.reset();
+    setOcularValidationPhase("frontal");
+    setOcularValidationSummary(ocularValidationRef.current.selectPhase("frontal"));
+  };
+
+  const continueWithoutCamera = () => {
+    stopCamera();
+    if (token) void revokeCaptureConsent(token).catch(() => undefined);
+    consentVersionRef.current = null;
+    setPermissionSettings((current) => ({
+      ...current,
+      enableCamera: false,
+      enableAttentionTracking: false,
+      saveAnalytics: false,
+    }));
+    setOcularCalibrationOpen(false);
+    setPermissionOpen(false);
+    setCourseReady(true);
+  };
+
+  const completeOcularCalibration = () => {
+    if (ocularValidationSummary?.calibration.status !== "ready") return;
+    setOcularCalibrationOpen(false);
+    setCourseReady(true);
   };
 
   return (
@@ -1359,23 +1360,11 @@ export default function CoursePage() {
               </button>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="max-w-xs">
-              <div className="space-y-2">
-                <p className="text-sm">
-                  {permissionSettings.enableCamera
-                    ? "Cámara activa para análisis de atención. Click para ajustar configuración."
-                    : "Cámara inactiva. Click para habilitar análisis de atención."}
-                </p>
-                {permissionSettings.enableAttentionTracking && (
-                  <p className="text-xs text-slate-600">
-                    {QUALITY_GATE_V1_ENABLED
-                      ? (qualityMessage || "Comprobando si la señal es observable.")
-                      : "El seguimiento está preparado, pero sus controles permanecen desactivados."}
-                  </p>
-                )}
-                {EDGE_PROFILES_ENABLED && (
-                  <p className="text-xs text-slate-600">Perfil Edge: {edgeProfile}</p>
-                )}
-              </div>
+              <p className="text-sm">
+                {permissionSettings.enableCamera
+                  ? "Cámara activa. Haz clic para revisar su configuración."
+                  : "Cámara inactiva. Haz clic para revisar las decisiones de privacidad."}
+              </p>
             </TooltipContent>
           </Tooltip>
         </div>
@@ -1416,10 +1405,9 @@ export default function CoursePage() {
               </label>
             )}
             {[
-              { label: "Habilitar Cámara", value: permissionSettings.enableCamera },
-              { label: "Seguimiento de Atención", value: permissionSettings.enableAttentionTracking },
-              { label: "Guardar Análisis", value: permissionSettings.saveAnalytics },
-              { label: "Compartir con Instructor", value: permissionSettings.shareWithInstructor },
+              { label: "Cámara", value: permissionSettings.enableCamera },
+              { label: "Procesamiento local", value: permissionSettings.enableAttentionTracking },
+              { label: "Datos derivados", value: permissionSettings.saveAnalytics },
             ].map((item) => (
               <div key={item.label} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                 <div className="flex-1">
@@ -1429,104 +1417,13 @@ export default function CoursePage() {
                 <div className={`w-3 h-3 rounded-full ${item.value ? "bg-emerald-500" : "bg-slate-400"}`} />
               </div>
             ))}
-            {permissionSettings.enableAttentionTracking && (
-              <div className="rounded-lg border border-violet-200 bg-violet-50 p-3" data-testid="ocular-local-validation">
-                <div className="text-sm font-medium text-violet-950">Validación ocular local</div>
-                <p className="mt-1 text-xs text-violet-700">
-                  Selecciona una fase y mantenla 10 segundos. Los valores son agregados en memoria y se conservan al apagar la cámara.
-                </p>
-                <div className="mt-2 grid grid-cols-2 gap-2">
-                  {OCULAR_VALIDATION_PHASES.map((phase) => (
-                    <button
-                      key={phase.id}
-                      type="button"
-                      onClick={() => selectOcularValidationPhase(phase.id)}
-                      className={`rounded-md border px-2 py-1 text-xs ${
-                        ocularValidationPhase === phase.id
-                          ? "border-violet-500 bg-violet-100 text-violet-950"
-                          : "border-violet-200 bg-white text-violet-700"
-                      }`}
-                    >
-                      {phase.label}
-                    </button>
-                  ))}
-                </div>
-                <div className="mt-3 text-xs text-violet-900">
-                  {activeOcularSummary?.sample_count
-                    ? (
-                      <>
-                        <div>Muestras: {activeOcularSummary.sample_count}</div>
-                        <div>
-                          Mirada X robusta {Math.round((activeOcularSummary.binocular_gaze_x.robust_mean ?? activeOcularSummary.binocular_gaze_x.mean ?? 0) * 100)}%
-                          {` · rango ${Math.round((activeOcularSummary.binocular_gaze_x.min || 0) * 100)}–${Math.round((activeOcularSummary.binocular_gaze_x.max || 0) * 100)}%`}
-                        </div>
-                        <div>
-                          Mirada Y media {Math.round((activeOcularSummary.binocular_gaze_y.mean || 0) * 100)}%
-                          {` · apertura ${Math.round((activeOcularSummary.eye_openness.mean || 0) * 100)}%`}
-                          {` · concordancia ${Math.round((activeOcularSummary.iris_agreement.mean || 0) * 100)}%`}
-                        </div>
-                      </>
-                    )
-                    : "Aún no hay muestras válidas para esta fase."}
-                </div>
-                {ocularCalibration && (
-                  <div className="mt-2 rounded-md border border-violet-200 bg-white/70 p-2 text-xs text-violet-900" data-testid="ocular-session-calibration">
-                    {ocularCalibration.status === "collecting" && (
-                      <>
-                        <div className="font-medium">Calibración: recopilando</div>
-                        <div className="mt-1 grid grid-cols-2 gap-x-2">
-                          {OCULAR_VALIDATION_PHASES.map((phase) => (
-                            <span key={phase.id}>
-                              {phase.label}: {Math.min(ocularCalibration.counts[phase.id] || 0, OCULAR_MIN_VALID_SAMPLES)}/{OCULAR_MIN_VALID_SAMPLES}
-                            </span>
-                          ))}
-                        </div>
-                      </>
-                    )}
-                    {ocularCalibration.status === "ready" && (
-                      <>
-                        <div className="font-medium text-emerald-700">Calibración local lista</div>
-                        <div>
-                          Centro {Math.round((ocularCalibration.center || 0) * 100)}%
-                          {` · límite izquierda ${Math.round((ocularCalibration.left_threshold || 0) * 100)}%`}
-                          {` · límite derecha ${Math.round((ocularCalibration.right_threshold || 0) * 100)}%`}
-                        </div>
-                        <div>
-                          Separación {Math.round((ocularCalibration.directional_separation || 0) * 100)} puntos
-                          {` · deriva ${Math.round((ocularCalibration.center_drift || 0) * 100)} puntos`}
-                        </div>
-                      </>
-                    )}
-                    {ocularCalibration.status === "insufficient" && (
-                      <>
-                        <div className="font-medium text-amber-700">Calibración insuficiente</div>
-                        <div>
-                          {ocularCalibration.reason === "directional_separation_too_small" && "La separación entre izquierda y derecha es menor a 10 puntos."}
-                          {ocularCalibration.reason === "center_drift_too_large" && "La deriva entre frontal y regreso supera 8 puntos."}
-                          {ocularCalibration.reason === "center_not_between_directions" && "El centro no quedó entre ambas direcciones."}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
-                {ocularEdgeStatus && (
-                  <div className="mt-2 border-t border-violet-200 pt-2 text-xs text-violet-700">
-                    Carril: {ocularEdgeStatus.selectedLane
-                      ? (ocularEdgeStatus.selectedLane === "worker" ? "Web Worker" : "hilo principal")
-                      : "comparación pendiente"}.
-                    {ocularEdgeStatus.mainP95 !== null && ocularEdgeStatus.workerP95 !== null
-                      ? ` p95 principal ${Math.round(ocularEdgeStatus.mainP95)} ms · worker ${Math.round(ocularEdgeStatus.workerP95)} ms.`
-                      : ""}
-                  </div>
-                )}
-                <p className="mt-2 text-[11px] text-violet-600">
-                  No se guardan imágenes, landmarks ni muestras individuales. Total local: {ocularValidationSummary?.total_samples || 0}.
-                </p>
-              </div>
-            )}
           </div>
           <div className="mt-6 pt-4 border-t">
-            <Button variant="outline" size="sm" className="w-full" onClick={() => setPermissionOpen(true)}>
+            <Button variant="outline" size="sm" className="w-full" onClick={() => {
+              setCourseReady(false);
+              setPermissionOpen(true);
+              setShowCameraSettings(false);
+            }}>
               Cambiar configuración
             </Button>
           </div>
@@ -1560,104 +1457,6 @@ export default function CoursePage() {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              {permissionSettings.enableAttentionTracking && (
-                <>
-                  <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-lg">
-                    <Eye className="w-4 h-4 text-blue-600" />
-                    {attentionStatus === "no_face" ? (
-                      <span className="text-sm">Sin rostro</span>
-                    ) : attentionStatus === "pending" ? (
-                      <span className="text-sm">Esperando cámara</span>
-                    ) : (
-                      <span className="text-sm">Atención: {Math.round(attentionScore)}%</span>
-                    )}
-                    <div
-                      className={`w-2 h-2 rounded-full ${
-                        attentionStatus === "no_face"
-                          ? "bg-slate-400"
-                          : attentionStatus === "pending"
-                            ? "bg-amber-400"
-                            : attentionScore > 80
-                              ? "bg-emerald-500"
-                              : attentionScore > 60
-                                ? "bg-amber-500"
-                                : "bg-red-500"
-                      }`}
-                    />
-                  </div>
-                  {mlServiceStatus && mlServiceStatus !== "available" && (
-                    <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 rounded-lg border border-amber-200">
-                      <AlertCircle className="w-4 h-4 text-amber-600" />
-                      <span className="text-xs text-amber-700">
-                        {mlServiceStatus === "unavailable" ? "ML Service no disponible" : "Verificando servicio..."}
-                      </span>
-                    </div>
-                  )}
-                  <p className="text-xs text-slate-500" aria-live="polite">
-                    Transporte de captura: {captureTransportStatus === "sending"
-                      ? "enviando"
-                      : captureTransportStatus === "queued"
-                        ? "red lenta; se conserva solo la ventana más reciente"
-                        : captureTransportStatus === "degraded"
-                          ? "sin confirmación; no se actualizó la medición"
-                          : captureTransportStatus === "idle"
-                            ? "listo"
-                            : "detenido"}
-                  </p>
-                  {MASKED_GRU_SHADOW_ENABLED && (
-                    <div
-                      className="rounded-lg border border-violet-200 bg-violet-50 px-3 py-2 text-xs text-violet-900"
-                      data-testid="masked-gru-shadow-status"
-                      role="status"
-                    >
-                      <strong>Modelo GRU en prueba (shadow): </strong>
-                      {!permissionSettings.enableCamera
-                        ? "en espera; cámara inactiva"
-                        : maskedGRUShadowStatus === "loading"
-                        ? "cargando"
-                        : maskedGRUShadowStatus === "fallback"
-                          ? "no disponible; salida oficial sin cambios"
-                          : maskedGRUShadowResult?.evidence_state === "no_observable"
-                            ? "señal no observable"
-                            : maskedGRUShadowResult
-                              ? `${maskedGRUShadowResult.evidence_state === "task_oriented_evidence" ? "orientación observable" : "fuera de orientación observable"} (${Math.round((maskedGRUShadowResult.probability || 0) * 100)}%)`
-                              : "esperando una ventana válida"}
-                      <span className="mt-1 block text-violet-700">No afecta la medición oficial ni activa intervenciones.</span>
-                      {ocularEdgeStatus && (
-                        <span className="mt-1 block text-violet-700" data-testid="ocular-edge-status">
-                          Iris local: {ocularEdgeStatus.observable ? "observable" : "no observable"}. Ejecución: {ocularEdgeStatus.selectedLane
-                            ? `${ocularEdgeStatus.selectedLane === "worker" ? "Web Worker" : "hilo principal"} seleccionado por medición`
-                            : "comparando hilo principal y Web Worker"}.
-                          {ocularEdgeStatus.mainP95 !== null && ocularEdgeStatus.workerP95 !== null
-                            ? ` Latencia p95: principal ${Math.round(ocularEdgeStatus.mainP95)} ms, worker ${Math.round(ocularEdgeStatus.workerP95)} ms.`
-                            : ""}
-                          {ocularEdgeStatus.mainThreadP95 !== null && ocularEdgeStatus.workerMainThreadP95 !== null
-                            ? ` Bloqueo p95: principal ${Math.round(ocularEdgeStatus.mainThreadP95)} ms, worker ${Math.round(ocularEdgeStatus.workerMainThreadP95)} ms.`
-                            : ""}
-                        </span>
-                      )}
-                      {maskedGRUShadowResult?.probability !== null && maskedGRUShadowResult?.probability !== undefined && (
-                        <span className="mt-1 block text-violet-700" data-testid="exploratory-threshold-status">
-                          Umbral exploratorio 70%: {maskedGRUShadowResult.probability >= EXPLORATORY_SHADOW_THRESHOLD
-                            ? "orientación observable"
-                            : "fuera de orientación observable"}. El umbral canónico permanece sin cambios hasta validación.
-                        </span>
-                      )}
-                      {EDGE_SHADOW_REPORTING_ENABLED && permissionSettings.researchUse && (
-                        <span className="mt-1 block text-violet-700">
-                          Resumen Edge para investigación: {edgeShadowReportStatus === "sending"
-                            ? "enviando"
-                            : edgeShadowReportStatus === "sent"
-                              ? "confirmado"
-                              : edgeShadowReportStatus === "degraded"
-                                ? "sin confirmación; el modelo local continúa"
-                                : "esperando intervalo"}.
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </>
-              )}
               <div className="text-sm text-slate-600">
                 Lección {currentLessonIndex + 1} de {sortedLessons.length || 1}
               </div>
@@ -1745,12 +1544,6 @@ export default function CoursePage() {
                         <span>Tiempo: {Math.floor(readingTime / 60)}:{String(readingTime % 60).padStart(2, "0")}</span>
                       </div>
                     </div>
-                    {permissionSettings.enableAttentionTracking && !QUALITY_GATE_V1_ENABLED && (
-                      <div className="flex items-center gap-2">
-                        <Eye className="w-4 h-4 text-blue-600" />
-                        <span>Concentración promedio: {Math.round(attentionScore)}%</span>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
@@ -1773,24 +1566,6 @@ export default function CoursePage() {
                     </div>
                   )}
 
-                  {permissionSettings.enableAttentionTracking && !QUALITY_GATE_V1_ENABLED && (
-                    <div className="absolute top-4 right-4 bg-black/70 rounded-lg px-4 py-2 flex items-center gap-2">
-                      <Eye className="w-4 h-4 text-white" />
-                      <span className="text-white text-sm">{Math.round(attentionScore)}%</span>
-                      <div
-                        className={`w-2 h-2 rounded-full ${
-                          attentionScore > 80 ? "bg-emerald-500" : attentionScore > 60 ? "bg-amber-500" : "bg-red-500"
-                        }`}
-                      />
-                    </div>
-                  )}
-
-                  {permissionSettings.enableAttentionTracking && !QUALITY_GATE_V1_ENABLED && attentionScore < 65 && (
-                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-amber-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2">
-                      <AlertCircle className="w-5 h-5" />
-                      <span>Tu atención ha disminuido. Considera una pausa.</span>
-                    </div>
-                  )}
                 </div>
 
                 <div className="bg-slate-900 text-white px-4 py-3 text-sm flex items-center justify-between">
@@ -1804,35 +1579,6 @@ export default function CoursePage() {
                   </div>
                 </div>
 
-                {permissionSettings.enableAttentionTracking && QUALITY_GATE_V1_ENABLED && (
-                  <div className="p-4 border-t bg-slate-50 text-sm text-slate-700" role="status">
-                    <strong>{attentionStatus === "ok" ? "Señal observable" : "No observable"}.</strong>{" "}
-                    {qualityMessage || "Se necesitan más muestras antes de interpretar esta ventana."}
-                  </div>
-                )}
-
-                {permissionSettings.enableAttentionTracking && !QUALITY_GATE_V1_ENABLED && (
-                  <div className="p-6 border-t">
-                    <h3 className="mb-4 flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5 text-blue-600" />
-                      Análisis de Atención en Tiempo Real
-                    </h3>
-                    <div className="grid md:grid-cols-3 gap-4">
-                      <div className="bg-blue-50 rounded-lg p-4">
-                        <div className="text-2xl text-blue-600 mb-1">{Math.round(attentionScore)}%</div>
-                        <div className="text-sm text-slate-600">Atención Actual</div>
-                      </div>
-                      <div className="bg-emerald-50 rounded-lg p-4">
-                        <div className="text-2xl text-emerald-600 mb-1">87%</div>
-                        <div className="text-sm text-slate-600">Promedio Sesión</div>
-                      </div>
-                      <div className="bg-violet-50 rounded-lg p-4">
-                        <div className="text-2xl text-violet-600 mb-1">2</div>
-                        <div className="text-sm text-slate-600">Pausas Sugeridas</div>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
             )}
 
@@ -1994,6 +1740,17 @@ export default function CoursePage() {
 
       <video ref={videoRef} style={{ display: "none" }} />
 
+      <OcularCalibrationModal
+        open={ocularCalibrationOpen}
+        phase={ocularValidationPhase}
+        summary={ocularValidationSummary}
+        cameraError={cameraError}
+        onSelectPhase={selectOcularValidationPhase}
+        onReset={resetOcularValidation}
+        onComplete={completeOcularCalibration}
+        onContinueWithoutCamera={continueWithoutCamera}
+      />
+
       {permissionOpen && (
         <CameraPermissionModal
           key={[
@@ -2010,6 +1767,7 @@ export default function CoursePage() {
             consentVersionRef.current = null;
             setPermissionSettings((current) => ({ ...current, enableCamera: false }));
             setPermissionOpen(false);
+            setCourseReady(true);
           }}
         />
       )}

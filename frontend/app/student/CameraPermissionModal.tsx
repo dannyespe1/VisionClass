@@ -56,7 +56,7 @@ export function CameraPermissionModal({ onAllow, onDeny, consentStatus }: Camera
         <div className="flex gap-3 border-t bg-gray-50 p-8">
           <Button variant="outline" className="flex-1" onClick={onDeny}>Continuar sin cámara</Button>
           <Button className="flex-1" disabled={!consentTextApproved || !localProcessing || !derivedPersistence} onClick={() => onAllow({ enableCamera: true, enableAttentionTracking: true, saveAnalytics: true, shareWithInstructor: false, researchUse })}>
-            Registrar decisiones y continuar
+            Registrar y continuar a calibración
           </Button>
         </div>
       </div>

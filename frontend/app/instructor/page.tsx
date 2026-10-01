@@ -8,6 +8,7 @@ import { InicioProfesor } from "./components/InicioProfesor";
 import { MaterialesSection } from "./components/MaterialesSection";
 import { EstadisticasProfesor } from "./components/EstadisticasProfesor";
 import { TeacherGroupDashboardSection } from "./components/TeacherGroupDashboardSection";
+import { GradeReportSection } from "./components/GradeReportSection";
 import { TEACHER_GROUP_DASHBOARD_ENABLED } from "../lib/features";
 import { OBSERVER_ANNOTATION_ENABLED } from "../lib/features";
 import { ObserverPanel } from "../components/ObserverPanel";
@@ -71,6 +72,7 @@ export default function InstructorPage() {
 
         {activeTab === "estadisticas" && (
           <div className="space-y-8">
+            <GradeReportSection />
             {TEACHER_GROUP_DASHBOARD_ENABLED ? (
               <TeacherGroupDashboardSection />
             ) : (

@@ -211,6 +211,13 @@ class QuizAttempt(models.Model):
 
     session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='quiz_attempts')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='quiz_attempts')
+    material = models.ForeignKey(
+        CourseMaterial,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='quiz_attempts',
+    )
     difficulty = models.CharField(max_length=20, choices=DIFF_CHOICES, default=DIFF_NORMAL)
     score = models.FloatField(null=True, blank=True)
     reason = models.CharField(max_length=255, blank=True)

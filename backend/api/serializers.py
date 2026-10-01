@@ -376,14 +376,22 @@ class QuizAttemptSerializer(serializers.ModelSerializer):
     session_id = serializers.PrimaryKeyRelatedField(queryset=Session.objects.all(), source='session', write_only=True)
     user = UserSerializer(read_only=True)
     user_id = serializers.IntegerField(write_only=True, required=False)
+    material = CourseMaterialSerializer(read_only=True)
+    material_id = serializers.PrimaryKeyRelatedField(
+        queryset=CourseMaterial.objects.all(),
+        source='material',
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
 
     class Meta:
         model = QuizAttempt
         fields = [
-            'id', 'session', 'session_id', 'user', 'user_id',
+            'id', 'session', 'session_id', 'user', 'user_id', 'material', 'material_id',
             'difficulty', 'score', 'reason', 'created_at'
         ]
-        read_only_fields = ['id', 'session', 'user', 'created_at']
+        read_only_fields = ['id', 'session', 'user', 'material', 'created_at']
 
 
 class StudentReportSerializer(serializers.ModelSerializer):

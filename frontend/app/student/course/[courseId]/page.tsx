@@ -211,6 +211,8 @@ export default function CoursePage() {
   const deviceBudgetCollectorRef = useRef<DeviceBudgetCollector | null>(null);
   const adaptiveSchedulerRef = useRef<AdaptiveScheduler | null>(null);
   const ocularValidationRef = useRef<OcularLocalValidationSession | null>(null);
+  const calibratedContextRef = useRef<{ courseId: number; cameraId: string } | null>(null);
+  const calibrationCameraIdRef = useRef("");
   const maskedGRUShadowRef = useRef<MaskedGRUShadowEngine | SafeMaskedGRUShadowFallback | null>(null);
   const maskedGRUShadowLoadRef = useRef<ReturnType<typeof loadMaskedGRUShadow> | null>(null);
   const maskedGRUShadowQueueRef = useRef<Promise<void>>(Promise.resolve());
@@ -952,6 +954,7 @@ export default function CoursePage() {
       media.getVideoTracks().forEach((track) => {
         track.addEventListener("ended", () => {
           if (generation === cameraGenerationRef.current) {
+            calibratedContextRef.current = null;
             stopCamera();
             setAttentionStatus("error");
             setCameraError("La cámara se desconectó o fue detenida por el navegador.");
@@ -1070,18 +1073,28 @@ export default function CoursePage() {
         .filter((device) => device.kind === "videoinput")
         .map((device, index) => ({ deviceId: device.deviceId, label: device.label || `Cámara ${index + 1}` }));
       setAvailableCameras(cameras);
-      if (!selectedCameraId && cameras[0]) setSelectedCameraId(cameras[0].deviceId);
+      const resolvedCameraId = selectedCameraId || cameras[0]?.deviceId || "";
+      if (!selectedCameraId && resolvedCameraId) setSelectedCameraId(resolvedCameraId);
       stopCamera();
-      ocularValidationRef.current ||= new OcularLocalValidationSession();
-      ocularValidationRef.current.reset();
-      setOcularValidationPhase("frontal");
-      setOcularValidationSummary(ocularValidationRef.current.selectPhase("frontal"));
       setPermissionSettings(settings);
       setPermissionOpen(false);
-      setOcularCalibrationOpen(true);
+      const calibrationStillValid =
+        ocularValidationSummary?.calibration.status === "ready" &&
+        calibratedContextRef.current?.courseId === courseId &&
+        calibratedContextRef.current?.cameraId === resolvedCameraId;
+      if (calibrationStillValid) {
+        setOcularCalibrationOpen(false);
+        setCourseReady(true);
+      } else {
+        resetOcularValidation();
+        calibrationCameraIdRef.current = resolvedCameraId;
+        setCourseReady(false);
+        setOcularCalibrationOpen(true);
+      }
     } catch (err) {
       console.error("[requestCamera] No se habilitó la cámara:", err instanceof Error ? err.message : err);
       stopCamera();
+      calibratedContextRef.current = null;
       setPermissionSettings((current) => ({ ...current, enableCamera: false }));
       setCameraError(cameraFailureMessage(err));
     }
@@ -1182,6 +1195,7 @@ export default function CoursePage() {
             session_id: sessionId,
             difficulty: currentMaterial.metadata.difficulty === "alta" ? "hard" : "normal",
             score,
+            material_id: currentMaterial.id,
             reason: currentMaterial.title || "Evaluación",
           }),
         },
@@ -1304,6 +1318,8 @@ export default function CoursePage() {
   };
 
   const resetOcularValidation = () => {
+    calibratedContextRef.current = null;
+    calibrationCameraIdRef.current = selectedCameraId;
     ocularValidationRef.current ||= new OcularLocalValidationSession();
     ocularValidationRef.current.reset();
     setOcularValidationPhase("frontal");
@@ -1312,6 +1328,7 @@ export default function CoursePage() {
 
   const continueWithoutCamera = () => {
     stopCamera();
+    calibratedContextRef.current = null;
     if (token) void revokeCaptureConsent(token).catch(() => undefined);
     consentVersionRef.current = null;
     setPermissionSettings((current) => ({
@@ -1327,6 +1344,10 @@ export default function CoursePage() {
 
   const completeOcularCalibration = () => {
     if (ocularValidationSummary?.calibration.status !== "ready") return;
+    calibratedContextRef.current = {
+      courseId,
+      cameraId: calibrationCameraIdRef.current || selectedCameraId,
+    };
     setOcularCalibrationOpen(false);
     setCourseReady(true);
   };
@@ -1395,7 +1416,17 @@ export default function CoursePage() {
                 <span className="block text-sm mb-2">Cámara seleccionada</span>
                 <select
                   value={selectedCameraId}
-                  onChange={(event) => setSelectedCameraId(event.target.value)}
+                  onChange={(event) => {
+                    if (event.target.value === selectedCameraId) return;
+                    stopCamera();
+                    calibratedContextRef.current = null;
+                    resetOcularValidation();
+                    calibrationCameraIdRef.current = event.target.value;
+                    setCourseReady(false);
+                    setOcularCalibrationOpen(true);
+                    setShowCameraSettings(false);
+                    setSelectedCameraId(event.target.value);
+                  }}
                   className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
                 >
                   {availableCameras.map((camera) => (
@@ -1765,6 +1796,7 @@ export default function CoursePage() {
             stopCamera();
             if (token) await revokeCaptureConsent(token).catch(() => undefined);
             consentVersionRef.current = null;
+            calibratedContextRef.current = null;
             setPermissionSettings((current) => ({ ...current, enableCamera: false }));
             setPermissionOpen(false);
             setCourseReady(true);

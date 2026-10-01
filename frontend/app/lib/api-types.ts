@@ -100,6 +100,7 @@ export type QuizAttemptApi = {
   reason?: string;
   created_at?: string;
   user?: UserProfileApi;
+  material?: CourseMaterialApi | null;
   session: SessionApi & { course: Pick<CourseApi, "id" | "title"> };
 };
 

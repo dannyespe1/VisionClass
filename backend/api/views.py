@@ -1082,17 +1082,28 @@ class QuizAttemptViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        queryset = QuizAttempt.objects.select_related(
+            'session__course__owner',
+            'user',
+            'material__lesson__module__course',
+        )
         if user.role == User.ROLE_ADMIN:
-            return QuizAttempt.objects.all()
+            return queryset
         if user.role == User.ROLE_TEACHER:
-            return QuizAttempt.objects.filter(session__course__owner=user)
-        return QuizAttempt.objects.filter(user=user)
+            return queryset.filter(session__course__owner=user)
+        return queryset.filter(user=user)
 
     def perform_create(self, serializer):
         claimed_user_id = _pop_claimed_user(serializer)
         session = serializer.validated_data.get('session')
+        material = serializer.validated_data.get('material')
         _validate_claimed_user(self.request, claimed_user_id, "quiz_attempt_create", "session", session.id)
         _validate_course_session(self.request, session, "quiz_attempt_create")
+        if material is not None:
+            if material.material_type != CourseMaterial.TYPE_TEST:
+                raise serializers.ValidationError({'material_id': 'El material debe ser una evaluación.'})
+            if material.lesson.module.course_id != session.course_id:
+                raise serializers.ValidationError({'material_id': 'La evaluación no pertenece al curso de la sesión.'})
         serializer.save(user=self.request.user)
 
 

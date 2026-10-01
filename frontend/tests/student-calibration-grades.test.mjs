@@ -27,10 +27,23 @@ test("calibration communicates local processing and avoids raw visual persistenc
   assert.match(calibrationModal, /disabled={!ready}/);
 });
 
-test("teacher statistics expose an academic grade report per authorized student", () => {
+test("calibration is reused only for the same course and camera", () => {
+  assert.match(coursePage, /calibratedContextRef\.current\?\.courseId === courseId/);
+  assert.match(coursePage, /calibratedContextRef\.current\?\.cameraId === resolvedCameraId/);
+  assert.match(coursePage, /calibrationStillValid/);
+  assert.match(coursePage, /calibrationCameraIdRef\.current \|\| selectedCameraId/);
+});
+
+test("quiz attempts preserve the material needed to group grades by module", () => {
+  assert.match(coursePage, /material_id: currentMaterial\.id/);
+});
+
+test("teacher statistics expose grades grouped by module and evaluation", () => {
   assert.match(instructorPage, /<GradeReportSection \/>/);
-  for (const heading of ["Estudiante", "Curso", "Evaluación", "Calificación", "Fecha"]) {
+  for (const heading of ["Estudiante", "Promedio", "Evaluaciones anteriores", "intento más reciente"]) {
     assert.match(gradeReport, new RegExp(heading));
   }
   assert.match(gradeReport, /\/api\/quiz-attempts\//);
+  assert.match(gradeReport, /attempt\.material\?\.lesson\.module/);
+  assert.match(gradeReport, /cell\.attempts > 1/);
 });

@@ -97,7 +97,9 @@ export type SessionApi = {
 export type QuizAttemptApi = {
   id: number;
   score: number | null;
+  reason?: string;
   created_at?: string;
+  user?: UserProfileApi;
   session: SessionApi & { course: Pick<CourseApi, "id" | "title"> };
 };
 

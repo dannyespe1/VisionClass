@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import hashlib
 import math
+import secrets
+from datetime import timedelta
 
 from django.conf import settings
 from django.utils import timezone
@@ -55,6 +58,11 @@ class ResearchCalibrationSerializer(serializers.Serializer):
         return attrs
 
 
+class ResearchCalibrationReuseSerializer(serializers.Serializer):
+    session_id = serializers.IntegerField(min_value=1)
+    reuse_token = serializers.RegexField(r"^[A-Za-z0-9_-]{40,96}$", trim_whitespace=False)
+
+
 def calibration_is_ready(session: Session) -> bool:
     if not settings.RESEARCH_SESSION_CALIBRATION_REQUIRED:
         return True
@@ -91,6 +99,15 @@ def _owned_active_session(request, session_id):
     return session
 
 
+def _research_consent_is_valid(user):
+    consent = consent_status(user)
+    return consent["capture_allowed"] and consent["purposes"]["research"]["granted"]
+
+
+def _token_hash(token):
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
 class ResearchCalibrationView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -115,13 +132,20 @@ class ResearchCalibrationView(APIView):
         payload.is_valid(raise_exception=True)
         data = payload.validated_data
         session = _owned_active_session(request, data["session_id"])
-        consent = consent_status(request.user)
-        if not (
-            consent["capture_allowed"]
-            and consent["purposes"]["research"]["granted"]
-        ):
+        if not _research_consent_is_valid(request.user):
             _audit(request.user, "denied", "research_consent_required", session.id)
             return Response({"detail": "Se requiere consentimiento de investigación vigente."}, status=409)
+        reuse_token = secrets.token_urlsafe(32) if settings.OCULAR_CALIBRATION_REUSE_ENABLED else None
+        valid_until = (
+            timezone.now() + timedelta(hours=settings.OCULAR_CALIBRATION_REUSE_HOURS)
+            if reuse_token
+            else None
+        )
+        if reuse_token:
+            ResearchCalibration.objects.filter(participant=request.user).update(
+                reuse_token_hash="",
+                valid_until=None,
+            )
         calibration, created = ResearchCalibration.objects.update_or_create(
             session=session,
             defaults={
@@ -133,6 +157,8 @@ class ResearchCalibrationView(APIView):
                 "quality": data["quality"],
                 "duration_ms": data["duration_ms"],
                 "completed_at": timezone.now(),
+                "reuse_token_hash": _token_hash(reuse_token) if reuse_token else "",
+                "valid_until": valid_until,
             },
         )
         _audit(request.user, "allowed", "created" if created else "refreshed", session.id)
@@ -142,6 +168,72 @@ class ResearchCalibrationView(APIView):
                 "ready": True,
                 "calibration_version": calibration.calibration_version,
                 "minimum_samples": settings.OCULAR_CALIBRATION_MIN_SAMPLES,
+                "reuse_token": reuse_token,
+                "valid_until": valid_until,
+            },
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
+
+
+class ResearchCalibrationReuseView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        if not settings.OCULAR_CALIBRATION_REUSE_ENABLED:
+            return Response(
+                {"detail": "La reutilización de calibración no está habilitada."},
+                status=status.HTTP_409_CONFLICT,
+            )
+        payload = ResearchCalibrationReuseSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        data = payload.validated_data
+        session = _owned_active_session(request, data["session_id"])
+        if not _research_consent_is_valid(request.user):
+            _audit(request.user, "denied", "research_consent_required", session.id)
+            return Response({"detail": "Se requiere consentimiento de investigación vigente."}, status=409)
+
+        now = timezone.now()
+        source = (
+            ResearchCalibration.objects.filter(
+                participant=request.user,
+                status=ResearchCalibration.STATUS_READY,
+                calibration_version=CALIBRATION_VERSION,
+                reuse_token_hash=_token_hash(data["reuse_token"]),
+                valid_until__gt=now,
+            )
+            .order_by("-completed_at")
+            .first()
+        )
+        if source is None:
+            _audit(request.user, "denied", "reuse_proof_invalid_or_expired", session.id)
+            return Response(
+                {"detail": "La calibración guardada no es válida para esta sesión."},
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        calibration, created = ResearchCalibration.objects.update_or_create(
+            session=session,
+            defaults={
+                "participant": request.user,
+                "status": ResearchCalibration.STATUS_READY,
+                "calibration_version": source.calibration_version,
+                "execution_profile": source.execution_profile,
+                "sample_counts": source.sample_counts,
+                "quality": source.quality,
+                "duration_ms": source.duration_ms,
+                "completed_at": source.completed_at,
+                "reuse_token_hash": source.reuse_token_hash,
+                "valid_until": source.valid_until,
+            },
+        )
+        _audit(request.user, "allowed", "reused" if created else "reuse_refreshed", session.id)
+        return Response(
+            {
+                "required": settings.RESEARCH_SESSION_CALIBRATION_REQUIRED,
+                "ready": True,
+                "calibration_version": calibration.calibration_version,
+                "minimum_samples": settings.OCULAR_CALIBRATION_MIN_SAMPLES,
+                "valid_until": calibration.valid_until,
             },
             status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
         )

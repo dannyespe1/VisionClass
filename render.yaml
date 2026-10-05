@@ -59,6 +59,10 @@ services:
         value: "False"
       - key: OCULAR_CALIBRATION_MIN_SAMPLES
         value: "20"
+      - key: OCULAR_CALIBRATION_REUSE_ENABLED
+        value: "True"
+      - key: OCULAR_CALIBRATION_REUSE_HOURS
+        value: "12"
       - key: GOOGLE_OAUTH_CLIENT_ID
         sync: false
       - key: GOOGLE_OAUTH_CLIENT_SECRET

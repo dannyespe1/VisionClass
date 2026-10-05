@@ -5,7 +5,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from . import views
 from .service_views import MLServiceEventView, MLTemporalInferenceView
 from .observer_annotation import ObserverAssignmentView, ObserverScheduleView
-from .research_calibration import ResearchCalibrationView
+from .research_calibration import ResearchCalibrationReuseView, ResearchCalibrationView
 
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet, basename='user')
@@ -43,6 +43,11 @@ urlpatterns = [
     path('observer-schedules/', ObserverScheduleView.as_view(), name='observer-schedules'),
     path('observer-assignments/', ObserverAssignmentView.as_view(), name='observer-assignments'),
     path('research-calibrations/', ResearchCalibrationView.as_view(), name='research-calibrations'),
+    path(
+        'research-calibrations/reuse/',
+        ResearchCalibrationReuseView.as_view(),
+        name='research-calibrations-reuse',
+    ),
     path('', include(router.urls)),
     path('me/', views.MeView.as_view(), name='me'),
     path('student-metrics/', views.StudentMetricsView.as_view(), name='student_metrics'),

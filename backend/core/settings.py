@@ -48,6 +48,12 @@ RESEARCH_SESSION_CALIBRATION_REQUIRED = (
 OCULAR_CALIBRATION_MIN_SAMPLES = min(
     40, max(15, int(os.environ.get('OCULAR_CALIBRATION_MIN_SAMPLES', '20')))
 )
+OCULAR_CALIBRATION_REUSE_ENABLED = (
+    os.environ.get('OCULAR_CALIBRATION_REUSE_ENABLED', 'False').strip().lower() == 'true'
+)
+OCULAR_CALIBRATION_REUSE_HOURS = min(
+    24, max(1, int(os.environ.get('OCULAR_CALIBRATION_REUSE_HOURS', '12')))
+)
 REDIS_ENABLED = os.environ.get('REDIS_ENABLED', 'False').strip().lower() == 'true'
 REDIS_URL = os.environ.get('REDIS_URL', 'redis://redis:6379/0').strip()
 REDIS_NAMESPACE = os.environ.get('REDIS_NAMESPACE', 'visionclass:v1').strip()

@@ -174,6 +174,8 @@ class ResearchCalibration(models.Model):
     quality = models.JSONField(default=dict)
     duration_ms = models.PositiveIntegerField()
     completed_at = models.DateTimeField()
+    reuse_token_hash = models.CharField(max_length=64, blank=True, default="")
+    valid_until = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -181,7 +183,11 @@ class ResearchCalibration(models.Model):
             models.Index(
                 fields=["participant", "completed_at"],
                 name="api_rescal_partici_664a62_idx",
-            )
+            ),
+            models.Index(
+                fields=["participant", "reuse_token_hash", "valid_until"],
+                name="api_rescal_reuse_5019a4_idx",
+            ),
         ]
 
     def clean(self):

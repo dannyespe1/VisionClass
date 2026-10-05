@@ -23,3 +23,10 @@ test("teacher and administrator routes depend only on role", () => {
     "/admin",
   );
 });
+
+test("independent observers are isolated from teacher and research dashboards", () => {
+  assert.equal(
+    roleRoute({ role: "observer", is_staff: false, is_superuser: false }),
+    "/observer",
+  );
+});

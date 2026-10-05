@@ -1,4 +1,5 @@
 from django.urls import reverse
+from django.utils import timezone
 from rest_framework.test import APITestCase
 
 from .models import Course, CourseLesson, CourseMaterial, CourseModule, Enrollment, QuizAttempt, Session, User
@@ -30,6 +31,7 @@ class QuizAttemptMaterialTests(APITestCase):
             course=self.course,
             student=self.student,
             created_by=self.student,
+            started_at=timezone.now(),
         )
         self.client.force_authenticate(self.student)
 
@@ -107,6 +109,7 @@ class QuizAttemptMaterialTests(APITestCase):
             course=other_course,
             student=other_student,
             created_by=other_student,
+            started_at=timezone.now(),
         )
         QuizAttempt.objects.create(session=other_session, user=other_student, score=100)
 

@@ -117,6 +117,7 @@ from .serializers import (
 from .utils import send_mailgun_email
 from .permissions import IsAdminUserRole
 from .consent import consent_status, has_capture_consent
+from .research_calibration import calibration_is_ready
 from .demographic_vault import (
     APPROVED_AGE_BAND,
     APPROVED_GENDER_VALUES,
@@ -182,6 +183,8 @@ def _validate_course_session(request, session, action):
     max_age = timedelta(minutes=settings.EVENT_SESSION_MAX_AGE_MINUTES)
     if not session.started_at or session.started_at > now or session.started_at < now - max_age or session.ended_at:
         _deny_identity(request, action, "session_expired", "session", session.id)
+    if not calibration_is_ready(session):
+        _deny_identity(request, action, "research_calibration_required", "session", session.id)
 
 
 def _validate_claimed_user(request, claimed_user_id, action, resource_type, resource_id):

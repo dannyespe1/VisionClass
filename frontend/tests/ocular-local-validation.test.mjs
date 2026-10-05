@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { OcularLocalValidationSession } from "../app/lib/ocular-local-validation.mjs";
+import { OCULAR_MIN_VALID_SAMPLES, OcularLocalValidationSession } from "../app/lib/ocular-local-validation.mjs";
 
 const sample = (gazeX, gazeY = 0.5) => ({
   iris_available: 1,
@@ -47,7 +47,7 @@ test("computes a robust local calibration without retaining individual samples",
   const session = new OcularLocalValidationSession();
   const recordPhase = (phase, value) => {
     session.selectPhase(phase);
-    for (let index = 0; index < 40; index += 1) session.record(sample(value));
+    for (let index = 0; index < OCULAR_MIN_VALID_SAMPLES; index += 1) session.record(sample(value));
   };
   recordPhase("frontal", 0.44);
   recordPhase("eyes_left", 0.55);
@@ -72,9 +72,9 @@ test("uses a histogram-trimmed mean to reduce isolated ocular outliers", () => {
 
 test("freezes each phase after the required valid sample count", () => {
   const session = new OcularLocalValidationSession();
-  for (let index = 0; index < 40; index += 1) session.record(sample(0.5));
+  for (let index = 0; index < OCULAR_MIN_VALID_SAMPLES; index += 1) session.record(sample(0.5));
   for (let index = 0; index < 20; index += 1) session.record(sample(1));
   const result = session.snapshot();
-  assert.equal(result.phases.frontal.sample_count, 40);
+  assert.equal(result.phases.frontal.sample_count, OCULAR_MIN_VALID_SAMPLES);
   assert.ok(Math.abs(result.phases.frontal.binocular_gaze_x.robust_mean - 0.5) < 0.001);
 });

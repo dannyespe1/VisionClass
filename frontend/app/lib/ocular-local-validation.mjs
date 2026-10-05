@@ -12,7 +12,8 @@ const METRICS = Object.freeze([
   "iris_agreement",
 ]);
 
-export const OCULAR_MIN_VALID_SAMPLES = 40;
+export const OCULAR_CALIBRATION_VERSION = "ocular-local-v2";
+export const OCULAR_MIN_VALID_SAMPLES = 20;
 const HISTOGRAM_BINS = 20;
 const TRIM_FRACTION = 0.10;
 
@@ -102,6 +103,7 @@ const calibrationSnapshot = (phases) => {
     center,
     center_drift: centerDrift,
     directional_separation: separation,
+    center_is_between_directions: centerIsBetweenDirections,
     left_threshold: center + leftOffset * 0.60,
     right_threshold: center + rightOffset * 0.60,
     polarity: left > right ? "increasing_x_is_left" : "decreasing_x_is_left",

@@ -49,6 +49,7 @@ import type { EdgeProfileName } from "../../../lib/edge-profiles.mjs";
 import { DeviceBudgetCollector } from "../../../lib/device-budget-telemetry.mjs";
 import { AdaptiveScheduler } from "../../../lib/adaptive-scheduler.mjs";
 import {
+  OCULAR_CALIBRATION_VERSION,
   OcularLocalValidationSession,
   type OcularValidationPhase,
   type OcularValidationSummary,
@@ -65,7 +66,10 @@ import {
   shouldPersistNormalizedObservation,
   shouldReportEdgeShadow,
 } from "../../../lib/edge-shadow-report.mjs";
-import { CONSERVATIVE_INTERVENTIONS_ENABLED } from "../../../lib/features";
+import {
+  CONSERVATIVE_INTERVENTIONS_ENABLED,
+  RESEARCH_SESSION_CALIBRATION_REQUIRED,
+} from "../../../lib/features";
 import type {
   CourseApi,
   CourseLessonApi,
@@ -125,6 +129,7 @@ type LessonSummary = {
 };
 
 const isFinalExamLesson = (title: string) => (title || "").toLowerCase().includes("examen final");
+const OCULAR_CALIBRATION_INTERVAL_MS = 250;
 
 const toYoutubeEmbed = (url: string) => {
   if (!url) return "";
@@ -213,6 +218,8 @@ export default function CoursePage() {
   const ocularValidationRef = useRef<OcularLocalValidationSession | null>(null);
   const calibratedContextRef = useRef<{ courseId: number; cameraId: string } | null>(null);
   const calibrationCameraIdRef = useRef("");
+  const calibrationActiveRef = useRef(false);
+  const calibrationStartedAtRef = useRef(0);
   const maskedGRUShadowRef = useRef<MaskedGRUShadowEngine | SafeMaskedGRUShadowFallback | null>(null);
   const maskedGRUShadowLoadRef = useRef<ReturnType<typeof loadMaskedGRUShadow> | null>(null);
   const maskedGRUShadowQueueRef = useRef<Promise<void>>(Promise.resolve());
@@ -279,6 +286,8 @@ export default function CoursePage() {
   const [edgeProfile, setEdgeProfile] = useState<EdgeProfileName>("low");
   const [ocularValidationPhase, setOcularValidationPhase] = useState<OcularValidationPhase>("frontal");
   const [ocularValidationSummary, setOcularValidationSummary] = useState<OcularValidationSummary | null>(null);
+  const [calibrationSubmitting, setCalibrationSubmitting] = useState(false);
+  const [calibrationSubmitError, setCalibrationSubmitError] = useState<string | null>(null);
   const [availableCameras, setAvailableCameras] = useState<CameraOption[]>([]);
   const [selectedCameraId, setSelectedCameraId] = useState("");
   const [cameraError, setCameraError] = useState<string | null>(null);
@@ -786,7 +795,7 @@ export default function CoursePage() {
             consentGranted: Boolean(consentVersionRef.current && permissionSettings.enableAttentionTracking),
             privacyAllowed: true,
           });
-          if (decision.enabled && decision.changed && decision.sampleIntervalMs) {
+          if (!calibrationActiveRef.current && decision.enabled && decision.changed && decision.sampleIntervalMs) {
             const selection = edgeProfileControllerRef.current?.select(decision.profile, {
               source: "local",
               reason: `adaptive_${decision.reason}`,
@@ -806,15 +815,20 @@ export default function CoursePage() {
             }
           }
         }
-        if (payload && token && DEVICE_BUDGET_TELEMETRY_ENABLED && permissionSettings.saveAnalytics) {
+        if (!calibrationActiveRef.current && payload && token && DEVICE_BUDGET_TELEMETRY_ENABLED && permissionSettings.saveAnalytics) {
           void apiFetch("/api/device-budget-telemetry/", { method: "POST", body: JSON.stringify(payload) }, token)
             .catch(() => undefined);
         }
       }
       if (outcome.status === "confirmed") {
         let sample = outcome.value;
-        ocularValidationRef.current ||= new OcularLocalValidationSession();
-        setOcularValidationSummary(ocularValidationRef.current.record(sample.features));
+        if (calibrationActiveRef.current) {
+          ocularValidationRef.current ||= new OcularLocalValidationSession();
+          const calibrationSummary = ocularValidationRef.current.record(sample.features);
+          setOcularValidationSummary(calibrationSummary);
+          setAttentionStatus(sample.features?.iris_available === 1 ? "ok" : "no_face");
+          return;
+        }
         if (QUALITY_GATE_V1_ENABLED) {
           const frameQuality = evaluateFrame(sample);
           sample = { ...sample, quality: { ...sample.quality, observable: frameQuality.observable, confidence: frameQuality.confidence, reason: frameQuality.reason } };
@@ -989,7 +1003,7 @@ export default function CoursePage() {
         onState: (state) => setCaptureTransportStatus(state),
       });
       
-      startFrameTimer(profile.sampleIntervalMs);
+      startFrameTimer(calibrationActiveRef.current ? OCULAR_CALIBRATION_INTERVAL_MS : profile.sampleIntervalMs);
     } catch (err) {
       console.error("[startCamera] Error al iniciar cámara:", err instanceof Error ? err.message : err);
       if (generation === cameraGenerationRef.current) {
@@ -1048,7 +1062,7 @@ export default function CoursePage() {
     if (!settings.enableCamera) {
       stopCamera();
       setPermissionOpen(false);
-      setCourseReady(true);
+      setCourseReady(!RESEARCH_SESSION_CALIBRATION_REQUIRED);
       return;
     }
     setCameraError(null);
@@ -1083,6 +1097,7 @@ export default function CoursePage() {
         calibratedContextRef.current?.courseId === courseId &&
         calibratedContextRef.current?.cameraId === resolvedCameraId;
       if (calibrationStillValid) {
+        calibrationActiveRef.current = false;
         setOcularCalibrationOpen(false);
         setCourseReady(true);
       } else {
@@ -1320,6 +1335,9 @@ export default function CoursePage() {
   const resetOcularValidation = () => {
     calibratedContextRef.current = null;
     calibrationCameraIdRef.current = selectedCameraId;
+    calibrationActiveRef.current = true;
+    calibrationStartedAtRef.current = Date.now();
+    setCalibrationSubmitError(null);
     ocularValidationRef.current ||= new OcularLocalValidationSession();
     ocularValidationRef.current.reset();
     setOcularValidationPhase("frontal");
@@ -1329,6 +1347,7 @@ export default function CoursePage() {
   const continueWithoutCamera = () => {
     stopCamera();
     calibratedContextRef.current = null;
+    calibrationActiveRef.current = false;
     if (token) void revokeCaptureConsent(token).catch(() => undefined);
     consentVersionRef.current = null;
     setPermissionSettings((current) => ({
@@ -1339,17 +1358,53 @@ export default function CoursePage() {
     }));
     setOcularCalibrationOpen(false);
     setPermissionOpen(false);
-    setCourseReady(true);
+    setCourseReady(!RESEARCH_SESSION_CALIBRATION_REQUIRED);
+    if (RESEARCH_SESSION_CALIBRATION_REQUIRED) router.push("/student");
   };
 
-  const completeOcularCalibration = () => {
+  const completeOcularCalibration = async () => {
     if (ocularValidationSummary?.calibration.status !== "ready") return;
-    calibratedContextRef.current = {
-      courseId,
-      cameraId: calibrationCameraIdRef.current || selectedCameraId,
-    };
-    setOcularCalibrationOpen(false);
-    setCourseReady(true);
+    setCalibrationSubmitting(true);
+    setCalibrationSubmitError(null);
+    try {
+      if (RESEARCH_SESSION_CALIBRATION_REQUIRED) {
+        if (!token || !sessionId) throw new Error("No existe una sesión activa para registrar la calibración.");
+        const calibration = ocularValidationSummary.calibration;
+        await apiFetch(
+          "/api/research-calibrations/",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              session_id: sessionId,
+              calibration_version: OCULAR_CALIBRATION_VERSION,
+              execution_profile: edgeProfileControllerRef.current?.current || edgeProfile,
+              sample_counts: calibration.counts,
+              quality: {
+                status: calibration.status,
+                directional_separation: calibration.directional_separation,
+                center_drift: calibration.center_drift,
+                center_is_between_directions: calibration.center_is_between_directions,
+              },
+              duration_ms: Math.max(1000, Date.now() - calibrationStartedAtRef.current),
+            }),
+          },
+          token,
+        );
+      }
+      calibratedContextRef.current = {
+        courseId,
+        cameraId: calibrationCameraIdRef.current || selectedCameraId,
+      };
+      calibrationActiveRef.current = false;
+      startFrameTimer((EDGE_PROFILES[edgeProfileControllerRef.current?.current || edgeProfile] || EDGE_PROFILES.low).sampleIntervalMs);
+      setOcularCalibrationOpen(false);
+      setCourseReady(true);
+    } catch (error) {
+      setCalibrationSubmitError(error instanceof Error ? error.message : "No se pudo validar la calibración.");
+      setCourseReady(false);
+    } finally {
+      setCalibrationSubmitting(false);
+    }
   };
 
   return (
@@ -1776,6 +1831,9 @@ export default function CoursePage() {
         phase={ocularValidationPhase}
         summary={ocularValidationSummary}
         cameraError={cameraError}
+        submitError={calibrationSubmitError}
+        submitting={calibrationSubmitting}
+        researchSessionRequired={RESEARCH_SESSION_CALIBRATION_REQUIRED}
         onSelectPhase={selectOcularValidationPhase}
         onReset={resetOcularValidation}
         onComplete={completeOcularCalibration}
@@ -1791,15 +1849,19 @@ export default function CoursePage() {
             consentStatus?.purposes?.research?.granted ? "research" : "no-research",
           ].join(":")}
           consentStatus={consentStatus}
+          researchSessionRequired={RESEARCH_SESSION_CALIBRATION_REQUIRED}
+          cameraError={cameraError}
           onAllow={(settings) => requestCamera(settings)}
           onDeny={async () => {
             stopCamera();
             if (token) await revokeCaptureConsent(token).catch(() => undefined);
             consentVersionRef.current = null;
             calibratedContextRef.current = null;
+            calibrationActiveRef.current = false;
             setPermissionSettings((current) => ({ ...current, enableCamera: false }));
             setPermissionOpen(false);
-            setCourseReady(true);
+            setCourseReady(!RESEARCH_SESSION_CALIBRATION_REQUIRED);
+            if (RESEARCH_SESSION_CALIBRATION_REQUIRED) router.push("/student");
           }}
         />
       )}

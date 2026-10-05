@@ -42,6 +42,8 @@ services:
     environment:
       - PILOT_RELEASE=False
       - OBSERVER_ANNOTATION=False
+      - RESEARCH_SESSION_CALIBRATION_REQUIRED=False
+      - OCULAR_CALIBRATION_MIN_SAMPLES=20
     depends_on:
       db:
         condition: service_healthy
@@ -61,6 +63,7 @@ services:
       - ML_BFF_SERVICE_TOKEN=${ML_BFF_SERVICE_TOKEN:-}
       - NEXT_PUBLIC_PILOT_RELEASE=false
       - NEXT_PUBLIC_OBSERVER_ANNOTATION=false
+      - NEXT_PUBLIC_RESEARCH_SESSION_CALIBRATION_REQUIRED=false
     depends_on:
       - backend
   ml:

@@ -8,6 +8,8 @@ interface CameraPermissionModalProps {
   onAllow: (settings: PermissionSettings) => void | Promise<void>;
   onDeny: () => void | Promise<void>;
   consentStatus: ConsentStatus | null;
+  researchSessionRequired?: boolean;
+  cameraError?: string | null;
 }
 
 export interface PermissionSettings {
@@ -18,7 +20,7 @@ export interface PermissionSettings {
   researchUse: boolean;
 }
 
-export function CameraPermissionModal({ onAllow, onDeny, consentStatus }: CameraPermissionModalProps) {
+export function CameraPermissionModal({ onAllow, onDeny, consentStatus, researchSessionRequired = false, cameraError = null }: CameraPermissionModalProps) {
   const currentChoice = (purpose: "local_processing" | "derived_persistence" | "research") =>
     Boolean(consentStatus?.purposes?.[purpose]?.granted);
   const [localProcessing, setLocalProcessing] = useState(() => currentChoice("local_processing"));
@@ -40,7 +42,9 @@ export function CameraPermissionModal({ onAllow, onDeny, consentStatus }: Camera
                 ? `TEXTO DE CONSENTIMIENTO APROBADO — VERSIÓN ${consentStatus?.current_version}`
                 : "CONSENTIMIENTO NO DISPONIBLE — NO SE HABILITARÁ LA CÁMARA"}
             </p>
-            <p>La cámara es opcional. Puedes cursar y realizar las actividades sin activarla.</p>
+            <p>{researchSessionRequired
+              ? "Esta sesión de investigación requiere cámara y calibración. Puedes retirarte sin continuar la sesión."
+              : "La cámara es opcional. Puedes cursar y realizar las actividades sin activarla."}</p>
           </div>
         </div>
         <div className="space-y-4 p-8">
@@ -52,10 +56,18 @@ export function CameraPermissionModal({ onAllow, onDeny, consentStatus }: Camera
             <p>Imágenes almacenadas: no. Acceso individual del docente: no. Puedes revocar y la captura debe detenerse.</p>
           </div>
           {localProcessing !== derivedPersistence && <div className="flex items-start gap-2 text-sm text-amber-700"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /><p>La captura requiere ambas finalidades.</p></div>}
+          {cameraError && (
+            <div role="alert" className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              <p>{cameraError} Revisa el permiso del navegador y vuelve a intentarlo.</p>
+            </div>
+          )}
         </div>
         <div className="flex gap-3 border-t bg-gray-50 p-8">
-          <Button variant="outline" className="flex-1" onClick={onDeny}>Continuar sin cámara</Button>
-          <Button className="flex-1" disabled={!consentTextApproved || !localProcessing || !derivedPersistence} onClick={() => onAllow({ enableCamera: true, enableAttentionTracking: true, saveAnalytics: true, shareWithInstructor: false, researchUse })}>
+          <Button variant="outline" className="flex-1" onClick={onDeny}>
+            {researchSessionRequired ? "Salir de la sesión" : "Continuar sin cámara"}
+          </Button>
+          <Button className="flex-1" disabled={!consentTextApproved || !localProcessing || !derivedPersistence || (researchSessionRequired && !researchUse)} onClick={() => onAllow({ enableCamera: true, enableAttentionTracking: true, saveAnalytics: true, shareWithInstructor: false, researchUse })}>
             Registrar y continuar a calibración
           </Button>
         </div>

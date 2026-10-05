@@ -55,6 +55,11 @@ import {
   type OcularValidationSummary,
 } from "../../../lib/ocular-local-validation.mjs";
 import {
+  clearOcularCalibrationReuse,
+  readOcularCalibrationReuse,
+  writeOcularCalibrationReuse,
+} from "../../../lib/ocular-calibration-reuse.mjs";
+import {
   MASKED_GRU_SHADOW_ENABLED,
   loadMaskedGRUShadow,
   type MaskedGRUShadowEngine,
@@ -1092,6 +1097,37 @@ export default function CoursePage() {
       stopCamera();
       setPermissionSettings(settings);
       setPermissionOpen(false);
+      if (RESEARCH_SESSION_CALIBRATION_REQUIRED && !sessionId) {
+        throw new Error("Espera a que la sesión del curso termine de iniciar e inténtalo nuevamente.");
+      }
+      if (RESEARCH_SESSION_CALIBRATION_REQUIRED && sessionId) {
+        const saved = userId === null || typeof window === "undefined"
+          ? null
+          : readOcularCalibrationReuse(window.localStorage, {
+              participantId: userId,
+              cameraId: resolvedCameraId,
+              calibrationVersion: OCULAR_CALIBRATION_VERSION,
+            });
+        if (saved) {
+          try {
+            await apiFetch(
+              "/api/research-calibrations/reuse/",
+              {
+                method: "POST",
+                body: JSON.stringify({ session_id: sessionId, reuse_token: saved.reuse_token }),
+              },
+              token,
+            );
+            calibratedContextRef.current = { courseId, cameraId: resolvedCameraId };
+            calibrationActiveRef.current = false;
+            setOcularCalibrationOpen(false);
+            setCourseReady(true);
+            return;
+          } catch {
+            clearOcularCalibrationReuse(window.localStorage);
+          }
+        }
+      }
       const calibrationStillValid =
         ocularValidationSummary?.calibration.status === "ready" &&
         calibratedContextRef.current?.courseId === courseId &&
@@ -1348,6 +1384,7 @@ export default function CoursePage() {
     stopCamera();
     calibratedContextRef.current = null;
     calibrationActiveRef.current = false;
+    if (typeof window !== "undefined") clearOcularCalibrationReuse(window.localStorage);
     if (token) void revokeCaptureConsent(token).catch(() => undefined);
     consentVersionRef.current = null;
     setPermissionSettings((current) => ({
@@ -1370,7 +1407,11 @@ export default function CoursePage() {
       if (RESEARCH_SESSION_CALIBRATION_REQUIRED) {
         if (!token || !sessionId) throw new Error("No existe una sesión activa para registrar la calibración.");
         const calibration = ocularValidationSummary.calibration;
-        await apiFetch(
+        const accepted = await apiFetch<{
+          reuse_token: string | null;
+          valid_until: string | null;
+          calibration_version: string;
+        }>(
           "/api/research-calibrations/",
           {
             method: "POST",
@@ -1390,6 +1431,20 @@ export default function CoursePage() {
           },
           token,
         );
+        if (
+          userId !== null &&
+          typeof window !== "undefined" &&
+          accepted.reuse_token &&
+          accepted.valid_until
+        ) {
+          writeOcularCalibrationReuse(window.localStorage, {
+            participant_id: userId,
+            camera_id: calibrationCameraIdRef.current || selectedCameraId,
+            calibration_version: accepted.calibration_version,
+            reuse_token: accepted.reuse_token,
+            valid_until: accepted.valid_until,
+          });
+        }
       }
       calibratedContextRef.current = {
         courseId,
@@ -1858,6 +1913,7 @@ export default function CoursePage() {
             consentVersionRef.current = null;
             calibratedContextRef.current = null;
             calibrationActiveRef.current = false;
+            if (typeof window !== "undefined") clearOcularCalibrationReuse(window.localStorage);
             setPermissionSettings((current) => ({ ...current, enableCamera: false }));
             setPermissionOpen(false);
             setCourseReady(!RESEARCH_SESSION_CALIBRATION_REQUIRED);

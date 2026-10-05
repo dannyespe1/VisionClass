@@ -31,11 +31,15 @@ test("calibration communicates local processing and avoids raw visual persistenc
   assert.match(calibrationModal, /disabled={!ready \|\| submitting}/);
 });
 
-test("calibration is reused only for the same course and camera", () => {
+test("calibration is reused only for the same context and a server-accepted proof", () => {
   assert.match(coursePage, /calibratedContextRef\.current\?\.courseId === courseId/);
   assert.match(coursePage, /calibratedContextRef\.current\?\.cameraId === resolvedCameraId/);
   assert.match(coursePage, /calibrationStillValid/);
   assert.match(coursePage, /calibrationCameraIdRef\.current \|\| selectedCameraId/);
+  assert.match(coursePage, /readOcularCalibrationReuse/);
+  assert.match(coursePage, /\/api\/research-calibrations\/reuse\//);
+  assert.match(coursePage, /writeOcularCalibrationReuse/);
+  assert.match(coursePage, /clearOcularCalibrationReuse/);
 });
 
 test("quiz attempts preserve the material needed to group grades by module", () => {

@@ -11,6 +11,8 @@ from .models import ConsentEvent, ContentView, Course, Enrollment, ResearchCalib
 @override_settings(
     RESEARCH_SESSION_CALIBRATION_REQUIRED=True,
     OCULAR_CALIBRATION_MIN_SAMPLES=20,
+    OCULAR_CALIBRATION_REUSE_ENABLED=True,
+    OCULAR_CALIBRATION_REUSE_HOURS=12,
     CONSENT_V2_ENABLED=True,
     CONSENT_TEXT_APPROVED=True,
     CONSENT_CURRENT_VERSION="calibration-test-v1",
@@ -131,3 +133,131 @@ class ResearchCalibrationAPITests(TestCase):
         response = self.client.post(reverse("research-calibrations"), payload, format="json")
         self.assertEqual(response.status_code, 403)
         self.assertFalse(ResearchCalibration.objects.exists())
+
+    def test_valid_proof_reuses_aggregate_calibration_in_another_course_session(self):
+        accepted = self.client.post(reverse("research-calibrations"), self.payload(), format="json")
+        self.assertEqual(accepted.status_code, 201)
+        reuse_token = accepted.data["reuse_token"]
+        source = ResearchCalibration.objects.get(session=self.session)
+        self.assertNotEqual(source.reuse_token_hash, reuse_token)
+        self.assertNotIn(reuse_token, str(source.quality))
+
+        second_course = Course.objects.create(title="Second course", owner=self.course.owner)
+        Enrollment.objects.create(user=self.student, course=second_course, status=Enrollment.STATUS_ACTIVE)
+        second_session = Session.objects.create(
+            course=second_course,
+            student=self.student,
+            created_by=self.student,
+            started_at=timezone.now(),
+        )
+        reused = self.client.post(
+            reverse("research-calibrations-reuse"),
+            {"session_id": second_session.id, "reuse_token": reuse_token},
+            format="json",
+        )
+        self.assertEqual(reused.status_code, 201)
+        copied = ResearchCalibration.objects.get(session=second_session)
+        self.assertEqual(copied.participant, self.student)
+        self.assertEqual(copied.sample_counts, source.sample_counts)
+        self.assertEqual(copied.quality, source.quality)
+        self.assertEqual(copied.valid_until, source.valid_until)
+
+    def test_reuse_fails_closed_for_wrong_participant_expiry_and_revoked_consent(self):
+        accepted = self.client.post(reverse("research-calibrations"), self.payload(), format="json")
+        reuse_token = accepted.data["reuse_token"]
+
+        other = User.objects.create_user(username="reuse-other", role=User.ROLE_STUDENT)
+        Enrollment.objects.create(user=other, course=self.course, status=Enrollment.STATUS_ACTIVE)
+        other_session = Session.objects.create(
+            course=self.course,
+            student=other,
+            created_by=other,
+            started_at=timezone.now(),
+        )
+        for purpose, _ in ConsentEvent.PURPOSE_CHOICES:
+            ConsentEvent.objects.create(
+                participant=other,
+                version="calibration-test-v1",
+                purpose=purpose,
+                action=ConsentEvent.ACTION_GRANT,
+                expires_at=timezone.now() + timedelta(days=1),
+                source="test",
+            )
+        self.client.force_authenticate(other)
+        denied = self.client.post(
+            reverse("research-calibrations-reuse"),
+            {"session_id": other_session.id, "reuse_token": reuse_token},
+            format="json",
+        )
+        self.assertEqual(denied.status_code, 409)
+
+        self.client.force_authenticate(self.student)
+        source = ResearchCalibration.objects.get(session=self.session)
+        source.valid_until = timezone.now() - timedelta(seconds=1)
+        source.save(update_fields=["valid_until"])
+        expired = self.client.post(
+            reverse("research-calibrations-reuse"),
+            {"session_id": self.session.id, "reuse_token": reuse_token},
+            format="json",
+        )
+        self.assertEqual(expired.status_code, 409)
+
+        source.valid_until = timezone.now() + timedelta(hours=1)
+        source.save(update_fields=["valid_until"])
+        ConsentEvent.objects.create(
+            participant=self.student,
+            version="calibration-test-v1",
+            purpose=ConsentEvent.PURPOSE_RESEARCH,
+            action=ConsentEvent.ACTION_REVOKE,
+            source="test",
+        )
+        revoked = self.client.post(
+            reverse("research-calibrations-reuse"),
+            {"session_id": self.session.id, "reuse_token": reuse_token},
+            format="json",
+        )
+        self.assertEqual(revoked.status_code, 409)
+
+    @override_settings(OCULAR_CALIBRATION_REUSE_ENABLED=False)
+    def test_reuse_flag_disables_token_issuance_and_endpoint(self):
+        accepted = self.client.post(reverse("research-calibrations"), self.payload(), format="json")
+        self.assertEqual(accepted.status_code, 201)
+        self.assertIsNone(accepted.data["reuse_token"])
+        calibration = ResearchCalibration.objects.get(session=self.session)
+        self.assertEqual(calibration.reuse_token_hash, "")
+        self.assertIsNone(calibration.valid_until)
+
+        denied = self.client.post(
+            reverse("research-calibrations-reuse"),
+            {"session_id": self.session.id, "reuse_token": "a" * 43},
+            format="json",
+        )
+        self.assertEqual(denied.status_code, 409)
+
+    def test_new_calibration_invalidates_previous_reuse_token(self):
+        first = self.client.post(reverse("research-calibrations"), self.payload(), format="json")
+        old_token = first.data["reuse_token"]
+        second_session = Session.objects.create(
+            course=self.course,
+            student=self.student,
+            created_by=self.student,
+            started_at=timezone.now(),
+        )
+        second_payload = self.payload()
+        second_payload["session_id"] = second_session.id
+        second = self.client.post(reverse("research-calibrations"), second_payload, format="json")
+        self.assertEqual(second.status_code, 201)
+        self.assertNotEqual(second.data["reuse_token"], old_token)
+
+        third_session = Session.objects.create(
+            course=self.course,
+            student=self.student,
+            created_by=self.student,
+            started_at=timezone.now(),
+        )
+        denied = self.client.post(
+            reverse("research-calibrations-reuse"),
+            {"session_id": third_session.id, "reuse_token": old_token},
+            format="json",
+        )
+        self.assertEqual(denied.status_code, 409)

@@ -1,0 +1,24 @@
+{
+  "decision": "PILOT_ACTIVATION",
+  "status": "APPROVED_WITH_CONDITIONS",
+  "approval_date": "2026-10-02",
+  "document_code": "PROTO-TSIS-PILOTO-001-2026",
+  "approver_role": "institutional_authority",
+  "decision_source": "owner_supplied_approval_record",
+  "document_custody": "external_project_custodian",
+  "document_stored_in_repository": false,
+  "personal_signer_identity_stored": false,
+  "file_fingerprint_stored": false,
+  "authorized_scope": {
+    "pilot_with_real_students": true,
+    "mandatory_prior_local_calibration": true,
+    "local_camera_processing": true,
+    "mandatory_dual_observation": true
+  },
+  "privacy_constraints": {
+    "biometric_identification": false,
+    "raw_image_or_video_transmission": false,
+    "raw_image_or_video_storage": false
+  },
+  "activation_requires_technical_preflight": true
+}

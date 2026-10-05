@@ -31,3 +31,12 @@ test("requires a protocol reason before submitting no_observable", () => {
     assert.match(source, new RegExp(`value="${reason}"`));
   }
 });
+
+test("gives every observable state a distinct accessible visual treatment", () => {
+  assert.match(source, /bg-emerald-600 text-white/);
+  assert.match(source, /bg-rose-700 text-white/);
+  assert.match(source, /bg-amber-300 text-amber-950/);
+  assert.match(source, /bg-slate-700 text-white/);
+  assert.match(source, /focus-visible:ring-2/);
+  assert.match(source, /Cada opción se registra inmediatamente/);
+});

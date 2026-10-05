@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-05",
+  "status": "AUTOMATED_PASS_MANUAL_PENDING",
+  "approval_document_code": "PROTO-TSIS-PILOTO-001-2026",
+  "isolated_compose_project": "visionclass-pilot-preflight",
+  "checks": {
+    "compose_default_flags_fail_closed": "PASS",
+    "compose_explicit_pilot_flags": "PASS",
+    "postgres": "HEALTHY",
+    "redis": "HEALTHY",
+    "backend_live": "PASS",
+    "backend_ready": "PASS",
+    "ml_health": "PASS",
+    "frontend_routes": "PASS",
+    "local_login_connectivity": "PASS",
+    "unauthenticated_calibration_denied": "PASS_401",
+    "unauthenticated_observer_denied": "PASS_401",
+    "django_check": "PASS",
+    "migration_drift": "PASS_NO_CHANGES",
+    "pilot_specific_tests": "PASS_18_OF_18",
+    "backend_regression_tests": "PASS_167_OF_167"
+  },
+  "manual_camera_and_dual_observer_journey": "PENDING"
+}

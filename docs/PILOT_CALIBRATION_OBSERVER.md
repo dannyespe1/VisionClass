@@ -2,7 +2,9 @@
 
 ## Estado de aprobación
 
-El código queda preparado con controles cerrados por defecto. El equipo informó una aprobación verbal del protocolo; la evidencia documental continúa pendiente y debe registrarse antes de activar las banderas productivas. Este documento no sustituye esa aprobación.
+La aprobación institucional del piloto quedó registrada con estado `APPROVED_WITH_CONDITIONS`, fecha `2026-10-02` y código documental `PROTO-TSIS-PILOTO-001-2026`. El documento fuente permanece bajo custodia externa y no se copia al repositorio. La decisión y su alcance minimizado constan en `docs/PILOT_APPROVAL/`.
+
+La aprobación habilita preparar la activación con estudiantes reales bajo las condiciones registradas. No sustituye el preflight técnico, el consentimiento individual ni los controles de privacidad.
 
 ## Calibración local
 
@@ -32,7 +34,7 @@ El análisis previsto incluye acuerdo de Cohen con intervalo por participante, c
 
 ## Activación
 
-Después de registrar la aprobación documental:
+Para activar el piloto después de completar el preflight técnico:
 
 ```text
 Backend:

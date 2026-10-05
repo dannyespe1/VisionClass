@@ -10,11 +10,13 @@ class User(AbstractUser):
     ROLE_TEACHER = 'teacher'
     ROLE_ADMIN = 'admin'
     ROLE_RESEARCHER = 'researcher'
+    ROLE_OBSERVER = 'observer'
     ROLE_CHOICES = [
         (ROLE_STUDENT, 'Estudiante'),
         (ROLE_TEACHER, 'Profesor'),
         (ROLE_ADMIN, 'Administrador'),
         (ROLE_RESEARCHER, 'Investigador'),
+        (ROLE_OBSERVER, 'Observador'),
     ]
 
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=ROLE_STUDENT)
@@ -155,6 +157,41 @@ class Session(models.Model):
 
     def __str__(self):
         return f"Sesion {self.id} - {self.course} - {self.student}"
+
+
+class ResearchCalibration(models.Model):
+    """Minimal proof that a local calibration completed for one course session."""
+
+    STATUS_READY = "ready"
+    STATUS_CHOICES = [(STATUS_READY, "Ready")]
+
+    session = models.OneToOneField(Session, on_delete=models.CASCADE, related_name="research_calibration")
+    participant = models.ForeignKey(User, on_delete=models.PROTECT, related_name="research_calibrations")
+    status = models.CharField(max_length=16, choices=STATUS_CHOICES, default=STATUS_READY)
+    calibration_version = models.CharField(max_length=64)
+    execution_profile = models.CharField(max_length=16)
+    sample_counts = models.JSONField(default=dict)
+    quality = models.JSONField(default=dict)
+    duration_ms = models.PositiveIntegerField()
+    completed_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=["participant", "completed_at"],
+                name="api_rescal_partici_664a62_idx",
+            )
+        ]
+
+    def clean(self):
+        super().clean()
+        if self.session_id and self.participant_id and self.session.student_id != self.participant_id:
+            raise ValidationError("La calibración no corresponde al participante de la sesión.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
 
 
 class AttentionEvent(models.Model):

@@ -15,7 +15,6 @@ from .models import (
     ObservationWindow,
     ObserverAnnotation,
     ObserverAssignment,
-    ResearchAccessRequest,
     Session,
     TemporalSession,
     User,
@@ -106,11 +105,11 @@ class ObserverWorkflowAPITests(TestCase):
         self.teacher = User.objects.create_user(
             username="teacher", password="test-only", role=User.ROLE_TEACHER
         )
-        self.reviewer = User.objects.create_user(
-            username="reviewer", password="test-only", role=User.ROLE_RESEARCHER
+        self.observer = User.objects.create_user(
+            username="observer", password="test-only", role=User.ROLE_OBSERVER
         )
         self.outsider = User.objects.create_user(
-            username="outsider", password="test-only", role=User.ROLE_RESEARCHER
+            username="outsider", password="test-only", role=User.ROLE_OBSERVER
         )
         self.participant = User.objects.create_user(
             username="participant-live", password="test-only", role=User.ROLE_STUDENT
@@ -138,17 +137,6 @@ class ObserverWorkflowAPITests(TestCase):
                 expires_at=expires,
                 source="test",
             )
-        ResearchAccessRequest.objects.create(
-            researcher="Reviewer",
-            institution="Test",
-            project="Blind annotation",
-            status=ResearchAccessRequest.STATUS_APPROVED,
-            ethics_approval=True,
-            principal=self.reviewer,
-            purpose="Independent observable-orientation annotation",
-            expires_at=expires,
-            cohort_scope=[f"course:{self.course.id}"],
-        )
         self.client = APIClient()
 
     def schedule(self, request_id=None):
@@ -158,7 +146,8 @@ class ObserverWorkflowAPITests(TestCase):
             {
                 "course_id": self.course.id,
                 "participant_id": self.participant.id,
-                "reviewer_id": self.reviewer.id,
+                "observer_id": self.observer.id,
+                "location_code": "F2-P4",
                 "request_id": str(request_id or uuid.uuid4()),
             },
             format="json",
@@ -183,12 +172,13 @@ class ObserverWorkflowAPITests(TestCase):
         exposed = str(created.data).lower()
         for forbidden in ("email", "username", "participant_id", "prediction", "score", "features"):
             self.assertNotIn(forbidden, exposed)
+        self.assertEqual(created.data["location_code"], "F2-P4")
 
     def test_each_observer_only_lists_and_submits_their_assignment(self):
         self.schedule()
         self.make_window_submittable()
         teacher_assignment = ObserverAssignment.objects.get(observer=self.teacher)
-        reviewer_assignment = ObserverAssignment.objects.get(observer=self.reviewer)
+        observer_assignment = ObserverAssignment.objects.get(observer=self.observer)
 
         self.client.force_authenticate(self.teacher)
         teacher_list = self.client.get(reverse("observer-assignments"))
@@ -204,10 +194,10 @@ class ObserverWorkflowAPITests(TestCase):
         self.assertEqual(first.status_code, 201)
         self.assertEqual(first.data["pair_status"], "waiting_for_peer")
 
-        self.client.force_authenticate(self.reviewer)
+        self.client.force_authenticate(self.observer)
         second = self.client.post(
             reverse("observer-assignments"),
-            {"assignment_id": str(reviewer_assignment.assignment_id), "category": "distracted", "confidence": 0.75},
+            {"assignment_id": str(observer_assignment.assignment_id), "category": "distracted", "confidence": 0.75},
             format="json",
         )
         self.assertEqual(second.status_code, 201)
@@ -270,11 +260,22 @@ class ObserverWorkflowAPITests(TestCase):
         )
         self.assertEqual(response.status_code, 409)
 
-    def test_reviewer_grant_must_cover_the_course(self):
-        grant = ResearchAccessRequest.objects.get(principal=self.reviewer)
-        grant.cohort_scope = ["course:999999"]
-        grant.save(update_fields=["cohort_scope"])
-        response = self.schedule()
+    def test_researcher_cannot_replace_the_independent_observer_role(self):
+        researcher = User.objects.create_user(
+            username="researcher", password="test-only", role=User.ROLE_RESEARCHER
+        )
+        self.client.force_authenticate(self.teacher)
+        response = self.client.post(
+            reverse("observer-schedules"),
+            {
+                "course_id": self.course.id,
+                "participant_id": self.participant.id,
+                "observer_id": researcher.id,
+                "location_code": "F2-P4",
+                "request_id": str(uuid.uuid4()),
+            },
+            format="json",
+        )
         self.assertEqual(response.status_code, 403)
         self.assertFalse(ObservationWindow.objects.filter(aggregation_version="observer-slot-v2").exists())
 

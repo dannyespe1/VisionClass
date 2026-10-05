@@ -19,6 +19,7 @@ export type OcularValidationSummary = {
     center?: number;
     center_drift?: number;
     directional_separation?: number;
+    center_is_between_directions?: boolean;
     left_threshold?: number;
     right_threshold?: number;
     polarity?: "increasing_x_is_left" | "decreasing_x_is_left";
@@ -28,6 +29,7 @@ export type OcularValidationSummary = {
   raw_landmarks_retained: false;
 };
 export const OCULAR_MIN_VALID_SAMPLES: number;
+export const OCULAR_CALIBRATION_VERSION: "ocular-local-v2";
 export const OCULAR_VALIDATION_PHASES: readonly Readonly<{ id: OcularValidationPhase; label: string }>[];
 export class OcularLocalValidationSession {
   constructor();

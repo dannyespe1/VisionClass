@@ -55,6 +55,10 @@ services:
         value: "False"
       - key: OBSERVER_ANNOTATION
         value: "False"
+      - key: RESEARCH_SESSION_CALIBRATION_REQUIRED
+        value: "False"
+      - key: OCULAR_CALIBRATION_MIN_SAMPLES
+        value: "20"
       - key: GOOGLE_OAUTH_CLIENT_ID
         sync: false
       - key: GOOGLE_OAUTH_CLIENT_SECRET
@@ -151,6 +155,8 @@ services:
       - key: NEXT_PUBLIC_CONSERVATIVE_INTERVENTIONS
         value: "false"
       - key: NEXT_PUBLIC_OBSERVER_ANNOTATION
+        value: "false"
+      - key: NEXT_PUBLIC_RESEARCH_SESSION_CALIBRATION_REQUIRED
         value: "false"
       - key: NEXT_PUBLIC_MASKED_GRU_SHADOW
         value: "true"

@@ -14,6 +14,10 @@ test("course waits for the separate calibration flow before recording content", 
   assert.match(calibrationModal, /Paso previo al curso/);
   assert.match(calibrationModal, /Iniciar curso/);
   assert.match(calibrationModal, /Continuar sin cámara/);
+  assert.match(calibrationModal, /Cada posición avanzará automáticamente/);
+  assert.match(calibrationModal, /Objetivo visual/);
+  assert.match(coursePage, /RESEARCH_SESSION_CALIBRATION_REQUIRED/);
+  assert.match(coursePage, /\/api\/research-calibrations\//);
 });
 
 test("student course does not expose live attention or model diagnostics", () => {
@@ -24,7 +28,7 @@ test("student course does not expose live attention or model diagnostics", () =>
 
 test("calibration communicates local processing and avoids raw visual persistence", () => {
   assert.match(calibrationModal, /No se guardan ni transmiten imágenes, video, landmarks o muestras individuales/);
-  assert.match(calibrationModal, /disabled={!ready}/);
+  assert.match(calibrationModal, /disabled={!ready \|\| submitting}/);
 });
 
 test("calibration is reused only for the same course and camera", () => {

@@ -470,6 +470,7 @@ class AdminUserSerializer(serializers.ModelSerializer):
             User.ROLE_TEACHER: "profesor",
             User.ROLE_ADMIN: "admin",
             User.ROLE_RESEARCHER: "investigador",
+            User.ROLE_OBSERVER: "observador",
         }
         return mapping.get(role_value, role_value)
 
@@ -479,6 +480,7 @@ class AdminUserSerializer(serializers.ModelSerializer):
             "profesor": User.ROLE_TEACHER,
             "admin": User.ROLE_ADMIN,
             "investigador": User.ROLE_RESEARCHER,
+            "observador": User.ROLE_OBSERVER,
         }
         return mapping.get(label, label)
 

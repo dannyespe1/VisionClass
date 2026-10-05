@@ -23,7 +23,6 @@ from .models import (
     ObservationWindow,
     ObserverAnnotation,
     ObserverAssignment,
-    ResearchAccessRequest,
     ResearchPseudonymMap,
     SecurityAuditEvent,
     TemporalSession,
@@ -39,7 +38,8 @@ AGGREGATION_VERSION = "observer-slot-v2"
 class ScheduleSerializer(serializers.Serializer):
     course_id = serializers.IntegerField(min_value=1)
     participant_id = serializers.IntegerField(min_value=1)
-    reviewer_id = serializers.IntegerField(min_value=1)
+    observer_id = serializers.IntegerField(min_value=1)
+    location_code = serializers.RegexField(r"^[A-Z0-9-]{2,16}$")
     request_id = serializers.UUIDField()
 
 
@@ -76,31 +76,8 @@ def _audit(actor, action, outcome, reason_code, resource_id=""):
     )
 
 
-def _active_reviewer_grant(reviewer, course=None):
-    grants = ResearchAccessRequest.objects.filter(
-        principal=reviewer,
-        status=ResearchAccessRequest.STATUS_APPROVED,
-        ethics_approval=True,
-        expires_at__gt=timezone.now(),
-    ).exclude(purpose="").order_by("-requested_at", "-id")
-    if course is None:
-        return grants.first()
-    allowed_markers = {str(course.id), f"course:{course.id}"}
-    return next(
-        (
-            grant
-            for grant in grants
-            if isinstance(grant.cohort_scope, list)
-            and allowed_markers.intersection(str(value) for value in grant.cohort_scope)
-        ),
-        None,
-    )
-
-
 def _require_observer(user):
-    if user.role == User.ROLE_TEACHER:
-        return
-    if user.role == User.ROLE_RESEARCHER and _active_reviewer_grant(user) is not None:
+    if user.role in {User.ROLE_TEACHER, User.ROLE_OBSERVER}:
         return
     raise PermissionDenied("No autorizado para anotación independiente.")
 
@@ -149,6 +126,7 @@ def _public_assignment(assignment, now):
         "starts_at": assignment.window.started_at,
         "ends_at": assignment.window.ended_at,
         "manual_version": assignment.manual_version,
+        "location_code": assignment.window.provenance.get("location_code", ""),
         "status": _assignment_status(assignment, now),
     }
 
@@ -173,7 +151,7 @@ class ObserverScheduleView(APIView):
             user__role=User.ROLE_STUDENT,
             user__is_active=True,
         ).select_related("user").order_by("user__last_name", "user__first_name", "user_id")
-        reviewers = User.objects.filter(role=User.ROLE_RESEARCHER, is_active=True).order_by("last_name", "first_name", "id")
+        observers = User.objects.filter(role=User.ROLE_OBSERVER, is_active=True).order_by("last_name", "first_name", "id")
         return Response(
             {
                 "participants": [
@@ -189,13 +167,12 @@ class ObserverScheduleView(APIView):
                     }
                     for item in enrollments
                 ],
-                "reviewers": [
+                "observers": [
                     {
-                        "id": reviewer.id,
-                        "display_name": reviewer.get_full_name() or f"Revisor {reviewer.id}",
+                        "id": observer.id,
+                        "display_name": observer.get_full_name() or f"Observador {observer.id}",
                     }
-                    for reviewer in reviewers
-                    if _active_reviewer_grant(reviewer, course) is not None
+                    for observer in observers
                 ],
                 "window_seconds": settings.OBSERVER_ANNOTATION_WINDOW_SECONDS,
             }
@@ -224,11 +201,10 @@ class ObserverScheduleView(APIView):
             if not _research_consent_is_valid(participant):
                 _audit(request.user, "observer_schedule", "denied", "consent_unavailable")
                 return Response({"detail": "Consentimiento no disponible."}, status=status.HTTP_409_CONFLICT)
-            reviewer = User.objects.filter(pk=data["reviewer_id"], role=User.ROLE_RESEARCHER, is_active=True).first()
-            reviewer_grant = _active_reviewer_grant(reviewer, course) if reviewer is not None else None
-            if reviewer is None or reviewer_grant is None:
-                _audit(request.user, "observer_schedule", "denied", "reviewer_grant_required")
-                raise PermissionDenied("Segundo observador no autorizado.")
+            observer = User.objects.filter(pk=data["observer_id"], role=User.ROLE_OBSERVER, is_active=True).first()
+            if observer is None:
+                _audit(request.user, "observer_schedule", "denied", "observer_role_required")
+                raise PermissionDenied("Observador independiente no autorizado.")
             temporal = TemporalSession.objects.select_for_update().filter(
                 participant=participant,
                 course_session__course=course,
@@ -270,15 +246,15 @@ class ObserverScheduleView(APIView):
                     "protocol_version": "P0.3-v0.3-candidate",
                     "manual_version": MANUAL_VERSION,
                     "raw_media_stored": False,
-                    "reviewer_grant_id": reviewer_grant.id,
+                    "location_code": data["location_code"],
                 },
             )
             assignments = []
-            for observer in (request.user, reviewer):
+            for observer_user in (request.user, observer):
                 assignment = ObserverAssignment(
                     assignment_id=uuid.uuid4(),
                     window=window,
-                    observer=observer,
+                    observer=observer_user,
                     manual_version=MANUAL_VERSION,
                     sample_stratum=SAMPLE_STRATUM,
                 )
@@ -299,7 +275,7 @@ class ObserverAssignmentView(APIView):
             observer=request.user,
             window__ended_at__gte=horizon,
         ).select_related("window__temporal_session__participant").order_by("window__started_at", "id")[:30]
-        return Response({"assignments": [_public_assignment(item, now) for item in assignments]})
+        return Response({"server_now": now, "assignments": [_public_assignment(item, now) for item in assignments]})
 
     def post(self, request):
         _enabled()
@@ -318,13 +294,6 @@ class ObserverAssignmentView(APIView):
                 if not _research_consent_is_valid(assignment.window.temporal_session.participant):
                     _audit(request.user, "observer_annotation", "denied", "consent_unavailable", assignment.assignment_id)
                     return Response({"detail": "Consentimiento no disponible."}, status=status.HTTP_409_CONFLICT)
-                if request.user.role == User.ROLE_RESEARCHER:
-                    course = assignment.window.temporal_session.course_session.course
-                    grant = _active_reviewer_grant(request.user, course)
-                    expected_grant_id = assignment.window.provenance.get("reviewer_grant_id")
-                    if grant is None or grant.id != expected_grant_id:
-                        _audit(request.user, "observer_annotation", "denied", "scoped_grant_required", assignment.assignment_id)
-                        raise PermissionDenied("El permiso de revisión ya no cubre esta cohorte.")
                 if now < assignment.window.ended_at:
                     return Response(
                         {"detail": "La ventana de observación todavía no finaliza."},

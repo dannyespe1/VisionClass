@@ -42,6 +42,12 @@ OBSERVER_ANNOTATION_SCHEDULE_LEAD_SECONDS = max(
 OBSERVER_ANNOTATION_SUBMISSION_GRACE_SECONDS = min(
     600, max(30, int(os.environ.get('OBSERVER_ANNOTATION_SUBMISSION_GRACE_SECONDS', '180')))
 )
+RESEARCH_SESSION_CALIBRATION_REQUIRED = (
+    os.environ.get('RESEARCH_SESSION_CALIBRATION_REQUIRED', 'False').strip().lower() == 'true'
+)
+OCULAR_CALIBRATION_MIN_SAMPLES = min(
+    40, max(15, int(os.environ.get('OCULAR_CALIBRATION_MIN_SAMPLES', '20')))
+)
 REDIS_ENABLED = os.environ.get('REDIS_ENABLED', 'False').strip().lower() == 'true'
 REDIS_URL = os.environ.get('REDIS_URL', 'redis://redis:6379/0').strip()
 REDIS_NAMESPACE = os.environ.get('REDIS_NAMESPACE', 'visionclass:v1').strip()

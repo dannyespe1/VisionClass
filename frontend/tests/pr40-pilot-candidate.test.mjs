@@ -16,7 +16,19 @@ test("candidate remains prepared and not activated", () => {
 });
 
 test("all pending product modules require the global pilot gate", () => {
-  assert.equal((features.match(/PILOT_RELEASE_ENABLED &&/g) ?? []).length, 4);
+  for (const flag of [
+    "NEXT_PUBLIC_STUDENT_ATTENTION_DASHBOARD",
+    "NEXT_PUBLIC_TEACHER_GROUP_DASHBOARD",
+    "NEXT_PUBLIC_RESEARCH_DASHBOARD",
+    "NEXT_PUBLIC_CONSERVATIVE_INTERVENTIONS",
+    "NEXT_PUBLIC_OBSERVER_ANNOTATION",
+    "NEXT_PUBLIC_RESEARCH_SESSION_CALIBRATION_REQUIRED",
+  ]) {
+    assert.match(
+      features,
+      new RegExp(`PILOT_RELEASE_ENABLED &&\\s+process\\.env\\.${flag}`),
+    );
+  }
   for (const flag of [
     "STUDENT_ATTENTION_DASHBOARD",
     "TEACHER_GROUP_DASHBOARD",

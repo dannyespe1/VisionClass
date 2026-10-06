@@ -4,7 +4,7 @@ Fecha: 2026-10-05
 
 Responsable operativo: desarrollador del repositorio
 
-Estado: `AUTOMATED_PASS_MANUAL_PENDING`
+Estado: `AUTOMATED_AND_MANUAL_PASS`
 
 ## Alcance
 
@@ -32,9 +32,10 @@ Este preflight verifica el candidato aprobado para calibración local obligatori
 - Pruebas específicas con funciones del piloto activadas: 18/18.
 - Suite general con los valores seguros de línea base: 167/167.
 
-## Verificación manual pendiente
+## Verificación manual completada
 
-Antes de incorporar participantes se debe completar desde un navegador compatible:
+El 2026-10-05 el propietario confirmó el recorrido completo en el despliegue Render desde un
+navegador compatible:
 
 1. Ingreso de un estudiante de prueba y consentimiento vigente.
 2. Permiso de cámara y confirmación de que no salen imágenes o video por la red.
@@ -44,6 +45,11 @@ Antes de incorporar participantes se debe completar desde un navegador compatibl
 6. Coincidencia de código seudónimo, puesto físico y temporizador en ambos paneles.
 7. Registro de dos anotaciones independientes sin revelar la respuesta contraria.
 8. Detención de cámara, workers y temporizadores al salir o revocar consentimiento.
+
+La verificación posterior en PostgreSQL reportó 35 ventanas, 27 inferencias EDGE derivadas y 8
+anotaciones humanas. Estos conteos agregados confirman persistencia de los contratos separados;
+no demuestran validez científica, no contienen identidad del participante y no promueven el
+artefacto sintético fuera de `shadow_only`.
 
 ## Rollback
 

@@ -25,7 +25,7 @@ import { Button } from "../../../ui/button";
 import { CameraPermissionModal, PermissionSettings } from "../../CameraPermissionModal";
 import { DemographicResearchCard } from "../../DemographicResearchCard";
 import { PdfCanvasViewer } from "../../PdfCanvasViewer";
-import { OcularCalibrationModal } from "./OcularCalibrationModal";
+import { OcularCalibrationScreen } from "./OcularCalibrationScreen";
 import { getConsentStatus, recordConsent, revokeCaptureConsent, type ConsentStatus } from "../../../lib/consent";
 import { BoundedCaptureQueue } from "../../../lib/bounded-capture-queue.mjs";
 import {
@@ -1881,7 +1881,7 @@ export default function CoursePage() {
 
       <video ref={videoRef} style={{ display: "none" }} />
 
-      <OcularCalibrationModal
+      <OcularCalibrationScreen
         open={ocularCalibrationOpen}
         phase={ocularValidationPhase}
         summary={ocularValidationSummary}

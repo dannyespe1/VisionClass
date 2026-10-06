@@ -14,7 +14,7 @@ services:
     rootDir: backend
     autoDeployTrigger: checksPass
     buildCommand: pip install -r requirements.txt
-    preDeployCommand: python manage.py migrate && python manage.py collectstatic --noinput
+    preDeployCommand: python manage.py migrate && python manage.py register_edge_model_v1 && python manage.py collectstatic --noinput
     startCommand: gunicorn core.wsgi:application --bind 0.0.0.0:$PORT
     healthCheckPath: /api/health/ready/
     envVars:
@@ -51,12 +51,20 @@ services:
         value: "True"
       - key: PRODUCTION_OBSERVABILITY
         value: "True"
+      - key: TEMPORAL_SCHEMA_V2
+        value: "True"
+      - key: MODEL_REGISTRY
+        value: "True"
+      - key: NORMALIZED_FEATURES_V1
+        value: "True"
+      - key: QUALITY_GATE_V1
+        value: "True"
       - key: EDGE_SHADOW_REPORTING
-        value: "False"
+        value: "True"
       - key: OBSERVER_ANNOTATION
-        value: "False"
+        value: "True"
       - key: RESEARCH_SESSION_CALIBRATION_REQUIRED
-        value: "False"
+        value: "True"
       - key: OCULAR_CALIBRATION_MIN_SAMPLES
         value: "20"
       - key: OCULAR_CALIBRATION_REUSE_ENABLED
@@ -78,13 +86,13 @@ services:
       - key: CONSENT_CURRENT_VERSION
         value: visionclass-local-v1
       - key: PILOT_RELEASE
-        value: "False"
+        value: "True"
       - key: STUDENT_ATTENTION_DASHBOARD
         value: "False"
       - key: TEACHER_GROUP_DASHBOARD
         value: "False"
       - key: RESEARCH_DASHBOARD
-        value: "False"
+        value: "True"
       - key: CONSERVATIVE_INTERVENTIONS
         value: "False"
       - key: ML_SERVICE_IDENTITY
@@ -148,21 +156,29 @@ services:
         sync: false
       - key: NEXT_PUBLIC_GOOGLE_REDIRECT_URI
         sync: false
+      - key: NEXT_PUBLIC_BROWSER_EXTRACTOR
+        value: "true"
+      - key: NEXT_PUBLIC_NORMALIZED_FEATURES_V1
+        value: "true"
+      - key: NEXT_PUBLIC_QUALITY_GATE_V1
+        value: "true"
+      - key: NEXT_PUBLIC_EDGE_PROFILES
+        value: "true"
       - key: NEXT_PUBLIC_PILOT_RELEASE
-        value: "false"
+        value: "true"
       - key: NEXT_PUBLIC_STUDENT_ATTENTION_DASHBOARD
         value: "false"
       - key: NEXT_PUBLIC_TEACHER_GROUP_DASHBOARD
         value: "false"
       - key: NEXT_PUBLIC_RESEARCH_DASHBOARD
-        value: "false"
+        value: "true"
       - key: NEXT_PUBLIC_CONSERVATIVE_INTERVENTIONS
         value: "false"
       - key: NEXT_PUBLIC_OBSERVER_ANNOTATION
-        value: "false"
+        value: "true"
       - key: NEXT_PUBLIC_RESEARCH_SESSION_CALIBRATION_REQUIRED
-        value: "false"
+        value: "true"
       - key: NEXT_PUBLIC_MASKED_GRU_SHADOW
         value: "true"
       - key: NEXT_PUBLIC_EDGE_SHADOW_REPORTING
-        value: "false"
+        value: "true"

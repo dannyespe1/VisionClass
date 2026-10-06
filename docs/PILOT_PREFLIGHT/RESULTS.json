@@ -1,6 +1,6 @@
 {
   "date": "2026-10-05",
-  "status": "AUTOMATED_PASS_MANUAL_PENDING",
+  "status": "AUTOMATED_AND_MANUAL_PASS",
   "approval_document_code": "PROTO-TSIS-PILOTO-001-2026",
   "isolated_compose_project": "visionclass-pilot-preflight",
   "checks": {
@@ -20,5 +20,12 @@
     "pilot_specific_tests": "PASS_18_OF_18",
     "backend_regression_tests": "PASS_167_OF_167"
   },
-  "manual_camera_and_dual_observer_journey": "PENDING"
+  "manual_camera_and_dual_observer_journey": "PASS",
+  "render_pilot_evidence": {
+    "source": "owner_reported_database_counts",
+    "observation_windows": 35,
+    "edge_inferences": 27,
+    "observer_annotations": 8,
+    "raw_media_transmission_authorized": false
+  }
 }

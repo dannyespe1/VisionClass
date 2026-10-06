@@ -3,19 +3,18 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const coursePage = await readFile(new URL("../app/student/course/[courseId]/page.tsx", import.meta.url), "utf8");
-const calibrationModal = await readFile(new URL("../app/student/course/[courseId]/OcularCalibrationModal.tsx", import.meta.url), "utf8");
+const calibrationScreen = await readFile(new URL("../app/student/course/[courseId]/OcularCalibrationScreen.tsx", import.meta.url), "utf8");
 const instructorPage = await readFile(new URL("../app/instructor/page.tsx", import.meta.url), "utf8");
 const gradeReport = await readFile(new URL("../app/instructor/components/GradeReportSection.tsx", import.meta.url), "utf8");
 
 test("course waits for the separate calibration flow before recording content", () => {
   assert.match(coursePage, /const \[permissionOpen, setPermissionOpen\] = useState\(true\)/);
   assert.match(coursePage, /!courseReady \|\| permissionOpen \|\| ocularCalibrationOpen/);
-  assert.match(coursePage, /<OcularCalibrationModal/);
-  assert.match(calibrationModal, /Paso previo al curso/);
-  assert.match(calibrationModal, /Iniciar curso/);
-  assert.match(calibrationModal, /Continuar sin cámara/);
-  assert.match(calibrationModal, /Cada posición avanzará automáticamente/);
-  assert.match(calibrationModal, /Objetivo visual/);
+  assert.match(coursePage, /<OcularCalibrationScreen/);
+  assert.match(calibrationScreen, /Paso previo al curso/);
+  assert.match(calibrationScreen, /Iniciar curso/);
+  assert.match(calibrationScreen, /Continuar sin cámara/);
+  assert.match(calibrationScreen, /Objetivo visual/);
   assert.match(coursePage, /RESEARCH_SESSION_CALIBRATION_REQUIRED/);
   assert.match(coursePage, /\/api\/research-calibrations\//);
 });
@@ -27,8 +26,16 @@ test("student course does not expose live attention or model diagnostics", () =>
 });
 
 test("calibration communicates local processing and avoids raw visual persistence", () => {
-  assert.match(calibrationModal, /No se guardan ni transmiten imágenes, video, landmarks o muestras individuales/);
-  assert.match(calibrationModal, /disabled={!ready \|\| submitting}/);
+  assert.match(calibrationScreen, /no se guardan ni transmiten imágenes, video, landmarks o muestras individuales/i);
+  assert.match(calibrationScreen, /disabled={!ready \|\| submitting}/);
+});
+
+test("calibration uses an immersive viewport with widely separated automatic targets", () => {
+  assert.match(calibrationScreen, /h-\[100dvh\]/);
+  assert.match(calibrationScreen, /left-\[12vw\]/);
+  assert.match(calibrationScreen, /left-\[88vw\]/);
+  assert.match(calibrationScreen, /document\.body\.style\.overflow = "hidden"/);
+  assert.equal(calibrationScreen.includes("onClick={() => onSelectPhase(item.id)}"), false);
 });
 
 test("calibration is reused only for the same context and a server-accepted proof", () => {

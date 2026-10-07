@@ -22,11 +22,6 @@ class QuizAttemptMaterialTests(APITestCase):
             material_type=CourseMaterial.TYPE_TEST,
             title="Prueba 1",
         )
-        self.pdf = CourseMaterial.objects.create(
-            lesson=self.lesson,
-            material_type=CourseMaterial.TYPE_PDF,
-            title="Lectura",
-        )
         self.session = Session.objects.create(
             course=self.course,
             student=self.student,
@@ -35,61 +30,19 @@ class QuizAttemptMaterialTests(APITestCase):
         )
         self.client.force_authenticate(self.student)
 
-    def test_attempt_returns_material_module_context(self):
+    def test_direct_attempt_creation_is_disabled(self):
         response = self.client.post(
             reverse("quiz-attempt-list"),
             {
                 "session_id": self.session.id,
                 "material_id": self.quiz.id,
-                "difficulty": "normal",
-                "score": 85,
-                "reason": self.quiz.title,
+                "score": 100,
             },
             format="json",
         )
 
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.data["material"]["id"], self.quiz.id)
-        self.assertEqual(response.data["material"]["lesson"]["module"]["id"], self.module.id)
-
-    def test_attempt_rejects_non_quiz_material(self):
-        response = self.client.post(
-            reverse("quiz-attempt-list"),
-            {"session_id": self.session.id, "material_id": self.pdf.id, "score": 80},
-            format="json",
-        )
-
-        self.assertEqual(response.status_code, 400)
-        self.assertIn("material_id", response.data)
-
-    def test_attempt_rejects_quiz_from_another_course(self):
-        other_course = Course.objects.create(title="Otro curso", owner=self.teacher)
-        other_module = CourseModule.objects.create(course=other_course, title="Otro módulo", order=1)
-        other_lesson = CourseLesson.objects.create(module=other_module, title="Otra lección", order=1)
-        other_quiz = CourseMaterial.objects.create(
-            lesson=other_lesson,
-            material_type=CourseMaterial.TYPE_TEST,
-            title="Quiz ajeno",
-        )
-
-        response = self.client.post(
-            reverse("quiz-attempt-list"),
-            {"session_id": self.session.id, "material_id": other_quiz.id, "score": 80},
-            format="json",
-        )
-
-        self.assertEqual(response.status_code, 400)
-        self.assertIn("material_id", response.data)
-
-    def test_legacy_attempt_without_material_remains_compatible(self):
-        response = self.client.post(
-            reverse("quiz-attempt-list"),
-            {"session_id": self.session.id, "score": 75, "reason": "Evaluación anterior"},
-            format="json",
-        )
-
-        self.assertEqual(response.status_code, 201)
-        self.assertIsNone(response.data["material"])
+        self.assertEqual(response.status_code, 405)
+        self.assertEqual(QuizAttempt.objects.count(), 0)
 
     def test_teacher_only_lists_attempts_from_owned_courses(self):
         QuizAttempt.objects.create(

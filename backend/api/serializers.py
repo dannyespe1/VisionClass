@@ -16,6 +16,7 @@ from datetime import timedelta
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.utils import timezone
 from .event_contract import validate_attention_event_v2
+from .quiz_contract import QuizContractError, normalize_quiz_metadata, public_quiz_metadata
 
 from .models import (
     Course,
@@ -278,6 +279,57 @@ class CourseMaterialSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'lesson', 'created_at']
 
+    def validate(self, attrs):
+        request = self.context.get('request')
+        user = getattr(request, 'user', None)
+        lesson = attrs.get('lesson') or getattr(self.instance, 'lesson', None)
+        material_type = attrs.get('material_type') or getattr(self.instance, 'material_type', None)
+
+        if lesson is not None and user is not None:
+            if user.role == User.ROLE_TEACHER and lesson.module.course.owner_id != user.id:
+                raise serializers.ValidationError(
+                    {'lesson_id': 'La lección no pertenece al docente autenticado.'}
+                )
+            if user.role not in [User.ROLE_TEACHER, User.ROLE_ADMIN]:
+                raise serializers.ValidationError(
+                    {'lesson_id': 'Solo docentes o administradores pueden gestionar materiales.'}
+                )
+
+        if material_type == CourseMaterial.TYPE_TEST:
+            metadata = attrs.get('metadata')
+            if metadata is None and self.instance is not None:
+                metadata = self.instance.metadata
+            try:
+                attrs['metadata'] = normalize_quiz_metadata(metadata)
+            except QuizContractError as exc:
+                raise serializers.ValidationError({'metadata': str(exc)}) from exc
+            attrs['url'] = ''
+            attrs['file_name'] = ''
+            attrs['file_content_type'] = ''
+            attrs['file_size'] = 0
+
+        return attrs
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if instance.material_type != CourseMaterial.TYPE_TEST:
+            return data
+
+        request = self.context.get('request')
+        user = getattr(request, 'user', None)
+        if user is not None and user.role in [User.ROLE_TEACHER, User.ROLE_ADMIN]:
+            return data
+        try:
+            data['metadata'] = public_quiz_metadata(instance.metadata)
+        except QuizContractError:
+            # Falla cerrada: nunca se exponen claves de respuesta de un test malformado.
+            data['metadata'] = {
+                'schema_version': '1.0',
+                'questions': [],
+                'invalid': True,
+            }
+        return data
+
     def _apply_file_payload(self, instance, validated_data):
         import base64
 
@@ -294,6 +346,10 @@ class CourseMaterialSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         file_base64 = validated_data.pop('file_base64', None)
         instance = super().create(validated_data)
+        if instance.material_type == CourseMaterial.TYPE_TEST:
+            instance.file_bytes = None
+            instance.save(update_fields=['file_bytes'])
+            return instance
         if file_base64:
             self._apply_file_payload(instance, {'file_base64': file_base64})
         if instance.file_bytes is not None:
@@ -303,6 +359,10 @@ class CourseMaterialSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         file_base64 = validated_data.pop('file_base64', None)
         instance = super().update(instance, validated_data)
+        if instance.material_type == CourseMaterial.TYPE_TEST:
+            instance.file_bytes = None
+            instance.save(update_fields=['file_bytes'])
+            return instance
         if file_base64 is not None:
             self._apply_file_payload(instance, {'file_base64': file_base64})
             instance.save(update_fields=['file_bytes', 'file_size'])

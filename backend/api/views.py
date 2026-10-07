@@ -32,6 +32,7 @@ from google import genai
 from google.genai import types
 from django.db import connection
 from .redis_client import redis_health
+from .quiz_contract import QuizContractError, grade_quiz
 
 from .models import (
     Course,
@@ -878,10 +879,78 @@ class CourseMaterialViewSet(viewsets.ModelViewSet):
             lesson__module__course__is_active=True,
         ).distinct()
 
+    def _ensure_material_manager(self):
+        if self.request.user.role not in [User.ROLE_TEACHER, User.ROLE_ADMIN]:
+            raise PermissionDenied("Solo docentes o administradores pueden gestionar materiales.")
+
+    def create(self, request, *args, **kwargs):
+        self._ensure_material_manager()
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        self._ensure_material_manager()
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        self._ensure_material_manager()
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        self._ensure_material_manager()
+        return super().destroy(request, *args, **kwargs)
+
     def perform_create(self, serializer):
         if self.request.user.role not in [User.ROLE_TEACHER, User.ROLE_ADMIN]:
             raise PermissionDenied("Solo docentes o administradores pueden crear materiales.")
         serializer.save()
+
+    @action(detail=True, methods=['post'])
+    def submit(self, request, pk=None):
+        if request.user.role != User.ROLE_STUDENT:
+            raise PermissionDenied("Solo estudiantes pueden enviar evaluaciones.")
+
+        material = self.get_object()
+        if material.material_type != CourseMaterial.TYPE_TEST:
+            raise serializers.ValidationError({'detail': 'El material no es una evaluación.'})
+
+        session_id = request.data.get('session_id')
+        if not session_id:
+            raise serializers.ValidationError({'session_id': 'Este campo es obligatorio.'})
+        session = Session.objects.select_related('course', 'student').filter(id=session_id).first()
+        if session is None:
+            return Response({'detail': 'Sesión no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+
+        _validate_course_session(request, session, "quiz_submit")
+        if material.lesson.module.course_id != session.course_id:
+            raise serializers.ValidationError(
+                {'session_id': 'La evaluación no pertenece al curso de la sesión.'}
+            )
+
+        try:
+            result = grade_quiz(material.metadata, request.data.get('answers'))
+        except QuizContractError as exc:
+            raise serializers.ValidationError({'answers': str(exc)}) from exc
+
+        difficulty = (
+            QuizAttempt.DIFF_HARD
+            if str((material.metadata or {}).get('difficulty', '')).lower() == 'alta'
+            else QuizAttempt.DIFF_NORMAL
+        )
+        attempt = QuizAttempt.objects.create(
+            session=session,
+            user=request.user,
+            material=material,
+            difficulty=difficulty,
+            score=result['score'],
+            reason=material.title,
+        )
+        return Response(
+            {
+                'attempt_id': attempt.id,
+                **result,
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
     @action(detail=True, methods=['get'])
     def download(self, request, pk=None):
@@ -1079,7 +1148,7 @@ class ContentViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-class QuizAttemptViewSet(viewsets.ModelViewSet):
+class QuizAttemptViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = QuizAttemptSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -1095,20 +1164,6 @@ class QuizAttemptViewSet(viewsets.ModelViewSet):
         if user.role == User.ROLE_TEACHER:
             return queryset.filter(session__course__owner=user)
         return queryset.filter(user=user)
-
-    def perform_create(self, serializer):
-        claimed_user_id = _pop_claimed_user(serializer)
-        session = serializer.validated_data.get('session')
-        material = serializer.validated_data.get('material')
-        _validate_claimed_user(self.request, claimed_user_id, "quiz_attempt_create", "session", session.id)
-        _validate_course_session(self.request, session, "quiz_attempt_create")
-        if material is not None:
-            if material.material_type != CourseMaterial.TYPE_TEST:
-                raise serializers.ValidationError({'material_id': 'El material debe ser una evaluación.'})
-            if material.lesson.module.course_id != session.course_id:
-                raise serializers.ValidationError({'material_id': 'La evaluación no pertenece al curso de la sesión.'})
-        serializer.save(user=self.request.user)
-
 
 class StudentReportViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = StudentReportSerializer
@@ -1894,7 +1949,7 @@ class GenerateTestView(APIView):
                         f"Opcion C ({d})",
                         f"Opcion D ({d})",
                     ],
-                    "answer": "Opcion A",
+                    "answer": f"Opcion A ({d})",
                     "difficulty": d,
                 }
             )

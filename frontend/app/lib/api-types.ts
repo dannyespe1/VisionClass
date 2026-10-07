@@ -37,15 +37,19 @@ export type QuizQuestion = {
   options: string[];
   answer?: string;
   correct_answer?: string;
+  answer_index?: number;
   explanation?: string;
+  source_ref?: string;
   difficulty?: string;
 };
 
 export type MaterialMetadata = {
+  schema_version?: string;
   file_name?: string;
   file_size?: number;
   file_type?: string;
   questions?: QuizQuestion[];
+  difficulty?: string;
   passing_score?: number | string;
   [key: string]: unknown;
 };

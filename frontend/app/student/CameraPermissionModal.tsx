@@ -10,6 +10,10 @@ interface CameraPermissionModalProps {
   consentStatus: ConsentStatus | null;
   researchSessionRequired?: boolean;
   cameraError?: string | null;
+  sessionError?: string | null;
+  sessionReady?: boolean;
+  sessionPreparing?: boolean;
+  submitting?: boolean;
 }
 
 export interface PermissionSettings {
@@ -20,7 +24,17 @@ export interface PermissionSettings {
   researchUse: boolean;
 }
 
-export function CameraPermissionModal({ onAllow, onDeny, consentStatus, researchSessionRequired = false, cameraError = null }: CameraPermissionModalProps) {
+export function CameraPermissionModal({
+  onAllow,
+  onDeny,
+  consentStatus,
+  researchSessionRequired = false,
+  cameraError = null,
+  sessionError = null,
+  sessionReady = true,
+  sessionPreparing = false,
+  submitting = false,
+}: CameraPermissionModalProps) {
   const currentChoice = (purpose: "local_processing" | "derived_persistence" | "research") =>
     Boolean(consentStatus?.purposes?.[purpose]?.granted);
   const [localProcessing, setLocalProcessing] = useState(() => currentChoice("local_processing"));
@@ -62,13 +76,21 @@ export function CameraPermissionModal({ onAllow, onDeny, consentStatus, research
               <p>{cameraError} Revisa el permiso del navegador y vuelve a intentarlo.</p>
             </div>
           )}
+          {researchSessionRequired && !sessionReady && (
+            <div role={sessionError ? "alert" : "status"} className={`flex items-start gap-2 rounded-xl border p-4 text-sm ${sessionError ? "border-red-200 bg-red-50 text-red-800" : "border-blue-200 bg-blue-50 text-blue-900"}`}>
+              <Shield className="mt-0.5 h-4 w-4 shrink-0" />
+              <p>{sessionError || (sessionPreparing
+                ? "Preparando la sesión segura. La calibración se habilitará cuando el servidor confirme la sesión."
+                : "No existe una sesión segura activa. Sal de la sesión y vuelve a ingresar para reintentarlo.")}</p>
+            </div>
+          )}
         </div>
         <div className="flex gap-3 border-t bg-gray-50 p-8">
-          <Button variant="outline" className="flex-1" onClick={onDeny}>
+          <Button variant="outline" className="flex-1" onClick={onDeny} disabled={submitting}>
             {researchSessionRequired ? "Salir de la sesión" : "Continuar sin cámara"}
           </Button>
-          <Button className="flex-1" disabled={!consentTextApproved || !localProcessing || !derivedPersistence || (researchSessionRequired && !researchUse)} onClick={() => onAllow({ enableCamera: true, enableAttentionTracking: true, saveAnalytics: true, shareWithInstructor: false, researchUse })}>
-            Registrar y continuar a calibración
+          <Button className="flex-1" disabled={submitting || !consentTextApproved || !localProcessing || !derivedPersistence || (researchSessionRequired && (!researchUse || !sessionReady))} onClick={() => onAllow({ enableCamera: true, enableAttentionTracking: true, saveAnalytics: true, shareWithInstructor: false, researchUse })}>
+            {submitting ? "Validando…" : researchSessionRequired && !sessionReady ? "Preparando sesión…" : "Registrar y continuar a calibración"}
           </Button>
         </div>
       </div>

@@ -4,6 +4,7 @@ import test from "node:test";
 
 const coursePage = await readFile(new URL("../app/student/course/[courseId]/page.tsx", import.meta.url), "utf8");
 const calibrationScreen = await readFile(new URL("../app/student/course/[courseId]/OcularCalibrationScreen.tsx", import.meta.url), "utf8");
+const permissionModal = await readFile(new URL("../app/student/CameraPermissionModal.tsx", import.meta.url), "utf8");
 const instructorPage = await readFile(new URL("../app/instructor/page.tsx", import.meta.url), "utf8");
 const gradeReport = await readFile(new URL("../app/instructor/components/GradeReportSection.tsx", import.meta.url), "utf8");
 
@@ -17,6 +18,22 @@ test("course waits for the separate calibration flow before recording content", 
   assert.match(calibrationScreen, /Objetivo visual/);
   assert.match(coursePage, /RESEARCH_SESSION_CALIBRATION_REQUIRED/);
   assert.match(coursePage, /\/api\/research-calibrations\//);
+  assert.match(coursePage, /const courseAccessReady = !RESEARCH_SESSION_CALIBRATION_REQUIRED \|\| courseReady/);
+  assert.match(coursePage, /data-testid="course-access-gate"/);
+  assert.match(coursePage, /\{courseAccessReady \? \(/);
+});
+
+test("slow or missing session cannot close permissions or expose the course", () => {
+  const sessionGuard = coursePage.indexOf("RESEARCH_SESSION_CALIBRATION_REQUIRED && !sessionId");
+  const firstPermissionCloseAfterRequest = coursePage.indexOf("setPermissionOpen(false)", coursePage.indexOf("const requestCamera"));
+  assert.notEqual(sessionGuard, -1);
+  assert.notEqual(firstPermissionCloseAfterRequest, -1);
+  assert.ok(sessionGuard < firstPermissionCloseAfterRequest, "the secure-session guard must run before closing permissions");
+  assert.match(coursePage, /setPermissionOpen\(true\);\s+setCameraError\(sessionPreparing/);
+  assert.match(coursePage, /setCourseReady\(false\);\s+setOcularCalibrationOpen\(false\);\s+setPermissionOpen\(true\)/);
+  assert.match(coursePage, /sessionReady=\{sessionId !== null\}/);
+  assert.match(permissionModal, /researchSessionRequired && \(!researchUse \|\| !sessionReady\)/);
+  assert.match(permissionModal, /Preparando sesión…/);
 });
 
 test("student course does not expose live attention or model diagnostics", () => {
@@ -47,10 +64,15 @@ test("calibration is reused only for the same context and a server-accepted proo
   assert.match(coursePage, /\/api\/research-calibrations\/reuse\//);
   assert.match(coursePage, /writeOcularCalibrationReuse/);
   assert.match(coursePage, /clearOcularCalibrationReuse/);
+  assert.match(coursePage, /reused\.ready/);
+  assert.match(coursePage, /confirmed\.ready/);
+  assert.match(coursePage, /calibration_version !== OCULAR_CALIBRATION_VERSION/);
+  assert.match(coursePage, /Calibración anterior verificada por el servidor y reutilizada/);
+  assert.match(coursePage, /setCourseReady\(false\);\s+setOcularCalibrationOpen\(false\);\s+setPermissionOpen\(true\)/);
 });
 
 test("quiz attempts preserve the material needed to group grades by module", () => {
-  assert.match(coursePage, /material_id: currentMaterial\.id/);
+  assert.match(coursePage, /\/api\/course-materials\/\$\{currentMaterial\.id\}\/submit\//);
 });
 
 test("teacher statistics expose grades grouped by module and evaluation", () => {

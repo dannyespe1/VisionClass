@@ -16,6 +16,7 @@ import {
   Maximize,
   Play,
   Settings as SettingsIcon,
+  Shield,
   Video,
   Volume2,
 } from "lucide-react";
@@ -259,6 +260,10 @@ export default function CoursePage() {
   const [permissionOpen, setPermissionOpen] = useState(true);
   const [ocularCalibrationOpen, setOcularCalibrationOpen] = useState(false);
   const [courseReady, setCourseReady] = useState(false);
+  const [sessionPreparing, setSessionPreparing] = useState(true);
+  const [sessionPreparationError, setSessionPreparationError] = useState<string | null>(null);
+  const [cameraRequestBusy, setCameraRequestBusy] = useState(false);
+  const [calibrationReuseNotice, setCalibrationReuseNotice] = useState<string | null>(null);
   const [consentStatus, setConsentStatus] = useState<ConsentStatus | null>(null);
   const [permissionSettings, setPermissionSettings] = useState<PermissionSettings>({
     enableCamera: false,
@@ -326,6 +331,8 @@ export default function CoursePage() {
   useEffect(() => {
     const init = async () => {
       if (!token || !courseId || sessionRef.current) return;
+      setSessionPreparing(true);
+      setSessionPreparationError(null);
       try {
         const me = await apiFetch<{ id: number }>("/api/me/", {}, token);
         const resolvedUserId = me.id || null;
@@ -356,7 +363,11 @@ export default function CoursePage() {
           if (session.id) {
             sessionRef.current = session.id;
             setSessionId(session.id);
+          } else {
+            throw new Error("El servidor no confirmó una sesión activa.");
           }
+        } else {
+          throw new Error("La matrícula no está activa para iniciar una sesión de investigación.");
         }
         if (enrollment.id) {
           setEnrollmentId(enrollment.id);
@@ -365,7 +376,10 @@ export default function CoursePage() {
         }
       } catch (err) {
         console.error(err);
+        setSessionPreparationError(err instanceof Error ? err.message : "No se pudo preparar la sesión segura.");
         setEnrollmentLoaded(true);
+      } finally {
+        setSessionPreparing(false);
       }
     };
     init();
@@ -1064,6 +1078,14 @@ export default function CoursePage() {
 
   const requestCamera = async (settings: PermissionSettings) => {
     if (!token) return;
+    if (RESEARCH_SESSION_CALIBRATION_REQUIRED && !sessionId) {
+      setCourseReady(false);
+      setPermissionOpen(true);
+      setCameraError(sessionPreparing
+        ? "La sesión segura todavía se está preparando. Espera unos segundos e inténtalo nuevamente."
+        : sessionPreparationError || "No existe una sesión segura activa para iniciar la calibración.");
+      return;
+    }
     if (!settings.enableCamera) {
       stopCamera();
       setPermissionOpen(false);
@@ -1071,6 +1093,8 @@ export default function CoursePage() {
       return;
     }
     setCameraError(null);
+    setCalibrationReuseNotice(null);
+    setCameraRequestBusy(true);
     try {
       const consent = await recordConsent(token, {
         local_processing: settings.enableCamera && settings.enableAttentionTracking,
@@ -1096,10 +1120,6 @@ export default function CoursePage() {
       if (!selectedCameraId && resolvedCameraId) setSelectedCameraId(resolvedCameraId);
       stopCamera();
       setPermissionSettings(settings);
-      setPermissionOpen(false);
-      if (RESEARCH_SESSION_CALIBRATION_REQUIRED && !sessionId) {
-        throw new Error("Espera a que la sesión del curso termine de iniciar e inténtalo nuevamente.");
-      }
       if (RESEARCH_SESSION_CALIBRATION_REQUIRED && sessionId) {
         const saved = userId === null || typeof window === "undefined"
           ? null
@@ -1110,7 +1130,7 @@ export default function CoursePage() {
             });
         if (saved) {
           try {
-            await apiFetch(
+            const reused = await apiFetch<{ ready: boolean; valid_until: string | null }>(
               "/api/research-calibrations/reuse/",
               {
                 method: "POST",
@@ -1118,10 +1138,22 @@ export default function CoursePage() {
               },
               token,
             );
+            const confirmed = await apiFetch<{ ready: boolean; calibration_version: string }>(
+              `/api/research-calibrations/?session_id=${sessionId}`,
+              {},
+              token,
+            );
+            if (!reused.ready || !confirmed.ready || confirmed.calibration_version !== OCULAR_CALIBRATION_VERSION) {
+              throw new Error("El servidor no confirmó la calibración reutilizada.");
+            }
             calibratedContextRef.current = { courseId, cameraId: resolvedCameraId };
             calibrationActiveRef.current = false;
             setOcularCalibrationOpen(false);
+            setPermissionOpen(false);
             setCourseReady(true);
+            setCalibrationReuseNotice(reused.valid_until
+              ? `Calibración anterior verificada por el servidor y reutilizada hasta ${new Date(reused.valid_until).toLocaleString()}.`
+              : "Calibración anterior verificada por el servidor y reutilizada para esta sesión.");
             return;
           } catch {
             clearOcularCalibrationReuse(window.localStorage);
@@ -1133,13 +1165,25 @@ export default function CoursePage() {
         calibratedContextRef.current?.courseId === courseId &&
         calibratedContextRef.current?.cameraId === resolvedCameraId;
       if (calibrationStillValid) {
+        if (RESEARCH_SESSION_CALIBRATION_REQUIRED && sessionId) {
+          const confirmed = await apiFetch<{ ready: boolean; calibration_version: string }>(
+            `/api/research-calibrations/?session_id=${sessionId}`,
+            {},
+            token,
+          );
+          if (!confirmed.ready || confirmed.calibration_version !== OCULAR_CALIBRATION_VERSION) {
+            throw new Error("El servidor no confirmó una calibración vigente para esta sesión.");
+          }
+        }
         calibrationActiveRef.current = false;
         setOcularCalibrationOpen(false);
+        setPermissionOpen(false);
         setCourseReady(true);
       } else {
         resetOcularValidation();
         calibrationCameraIdRef.current = resolvedCameraId;
         setCourseReady(false);
+        setPermissionOpen(false);
         setOcularCalibrationOpen(true);
       }
     } catch (err) {
@@ -1147,7 +1191,12 @@ export default function CoursePage() {
       stopCamera();
       calibratedContextRef.current = null;
       setPermissionSettings((current) => ({ ...current, enableCamera: false }));
+      setCourseReady(false);
+      setOcularCalibrationOpen(false);
+      setPermissionOpen(true);
       setCameraError(cameraFailureMessage(err));
+    } finally {
+      setCameraRequestBusy(false);
     }
   };
 
@@ -1402,6 +1451,7 @@ export default function CoursePage() {
         if (!token || !sessionId) throw new Error("No existe una sesión activa para registrar la calibración.");
         const calibration = ocularValidationSummary.calibration;
         const accepted = await apiFetch<{
+          ready: boolean;
           reuse_token: string | null;
           valid_until: string | null;
           calibration_version: string;
@@ -1425,6 +1475,14 @@ export default function CoursePage() {
           },
           token,
         );
+        const confirmed = await apiFetch<{ ready: boolean; calibration_version: string }>(
+          `/api/research-calibrations/?session_id=${sessionId}`,
+          {},
+          token,
+        );
+        if (!accepted.ready || !confirmed.ready || confirmed.calibration_version !== OCULAR_CALIBRATION_VERSION) {
+          throw new Error("El servidor no confirmó la calibración para esta sesión.");
+        }
         if (
           userId !== null &&
           typeof window !== "undefined" &&
@@ -1448,6 +1506,7 @@ export default function CoursePage() {
       startFrameTimer((EDGE_PROFILES[edgeProfileControllerRef.current?.current || edgeProfile] || EDGE_PROFILES.low).sampleIntervalMs);
       setOcularCalibrationOpen(false);
       setCourseReady(true);
+      setCalibrationReuseNotice(null);
     } catch (error) {
       setCalibrationSubmitError(error instanceof Error ? error.message : "No se pudo validar la calibración.");
       setCourseReady(false);
@@ -1456,8 +1515,12 @@ export default function CoursePage() {
     }
   };
 
+  const courseAccessReady = !RESEARCH_SESSION_CALIBRATION_REQUIRED || courseReady;
+
   return (
     <main className="min-h-screen bg-slate-50">
+      {courseAccessReady ? (
+        <>
       <TooltipProvider>
         <div className="fixed top-4 right-4 z-50">
           <Tooltip>
@@ -1872,8 +1935,31 @@ export default function CoursePage() {
           </aside>
         </div>
       </div>
+        </>
+      ) : (
+        <section data-testid="course-access-gate" className="flex min-h-screen items-center justify-center bg-slate-950 px-6 text-white">
+          <div className="max-w-lg rounded-2xl border border-white/15 bg-white/10 p-8 text-center shadow-2xl backdrop-blur">
+            <Shield className="mx-auto mb-4 h-10 w-10 text-blue-300" aria-hidden="true" />
+            <h1 className="text-2xl font-semibold">Preparando acceso seguro al curso</h1>
+            <p className="mt-3 text-sm leading-6 text-slate-200">
+              El contenido permanecerá bloqueado hasta que el servidor confirme la sesión y la calibración ocular requerida para este piloto.
+            </p>
+            {sessionPreparationError && (
+              <p role="alert" className="mt-4 rounded-lg border border-red-300/40 bg-red-950/40 p-3 text-sm text-red-100">
+                {sessionPreparationError}
+              </p>
+            )}
+          </div>
+        </section>
+      )}
 
       <video ref={videoRef} style={{ display: "none" }} />
+
+      {courseAccessReady && calibrationReuseNotice && (
+        <div role="status" className="fixed bottom-4 left-1/2 z-40 w-[min(92vw,44rem)] -translate-x-1/2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 shadow-lg">
+          {calibrationReuseNotice}
+        </div>
+      )}
 
       <OcularCalibrationScreen
         open={ocularCalibrationOpen}
@@ -1900,6 +1986,10 @@ export default function CoursePage() {
           consentStatus={consentStatus}
           researchSessionRequired={RESEARCH_SESSION_CALIBRATION_REQUIRED}
           cameraError={cameraError}
+          sessionError={sessionPreparationError}
+          sessionReady={sessionId !== null}
+          sessionPreparing={sessionPreparing}
+          submitting={cameraRequestBusy}
           onAllow={(settings) => requestCamera(settings)}
           onDeny={async () => {
             stopCamera();

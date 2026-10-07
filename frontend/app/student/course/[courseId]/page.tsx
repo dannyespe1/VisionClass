@@ -272,7 +272,7 @@ export default function CoursePage() {
 
   const [readingTime, setReadingTime] = useState(0);
   const [pdfData, setPdfData] = useState<Uint8Array | null>(null);
-  const [quizAnswers, setQuizAnswers] = useState<Record<number, string>>({});
+  const [quizAnswers, setQuizAnswers] = useState<Record<number, number>>({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizScore, setQuizScore] = useState<number | null>(null);
   const [quizCorrectCount, setQuizCorrectCount] = useState<number | null>(null);
@@ -1212,51 +1212,45 @@ export default function CoursePage() {
   const handleSubmitQuiz = async () => {
     const questions = currentMaterial?.metadata.questions;
     if (!questions?.length) return;
-    const total = questions.length;
-    let correct = 0;
-    questions.forEach((q, index) => {
-      const selected = quizAnswers[index];
-      if (!selected || !q.answer) return;
-      const normalizedSelected = selected.trim().toLowerCase();
-      const normalizedAnswer = String(q.answer).trim().toLowerCase();
-      if (normalizedSelected === normalizedAnswer) {
-        correct += 1;
-      }
-    });
-    const score = total ? Math.round((correct / total) * 100) : 0;
-    setQuizScore(score);
-    setQuizCorrectCount(correct);
-    setQuizSubmitted(true);
     setQuizError(null);
     setQuizNotice(null);
 
-    if (!token || !sessionId || !userId) {
-      setQuizNotice(
-        "Resultado calculado localmente. Este repaso no crea un nuevo intento porque el curso no tiene una sesión activa.",
-      );
+    if (Object.keys(quizAnswers).length !== questions.length) {
+      setQuizError("Responde todas las preguntas antes de enviar la evaluación.");
+      return;
+    }
+    if (!token || !sessionId || !userId || !currentMaterial) {
+      setQuizError("No existe una sesión activa para calificar la evaluación.");
       return;
     }
 
     try {
-      await apiFetch(
-        "/api/quiz-attempts/",
+      const result = await apiFetch<{
+        attempt_id: number;
+        score: number;
+        correct: number;
+        total: number;
+        passing_score: number;
+        passed: boolean;
+      }>(
+        `/api/course-materials/${currentMaterial.id}/submit/`,
         {
           method: "POST",
           body: JSON.stringify({
             session_id: sessionId,
-            difficulty: currentMaterial.metadata.difficulty === "alta" ? "hard" : "normal",
-            score,
-            material_id: currentMaterial.id,
-            reason: currentMaterial.title || "Evaluación",
+            answers: questions.map((_, index) => quizAnswers[index]),
           }),
         },
         token
       );
+      setQuizScore(result.score);
+      setQuizCorrectCount(result.correct);
+      setQuizSubmitted(true);
       if (enrollmentId) {
         const finalExam = Boolean(selectedLesson && isFinalExamLesson(selectedLesson.title));
         const nextData: EnrollmentDataApi = {
           ...enrollmentData,
-          last_quiz_score: score,
+          last_quiz_score: result.score,
           last_quiz_at: new Date().toISOString(),
         };
         if (finalExam) {
@@ -1744,9 +1738,9 @@ export default function CoursePage() {
                           {(q.options || []).map((opt: string, optIndex: number) => (
                             <button
                               key={optIndex}
-                              onClick={() => setQuizAnswers((prev) => ({ ...prev, [index]: opt }))}
+                              onClick={() => setQuizAnswers((prev) => ({ ...prev, [index]: optIndex }))}
                               className={`w-full text-left px-4 py-2 rounded-lg border transition ${
-                                quizAnswers[index] === opt
+                                quizAnswers[index] === optIndex
                                   ? "border-blue-500 bg-blue-50"
                                   : "border-slate-200 hover:border-slate-300 bg-slate-50"
                               }`}
@@ -1760,7 +1754,7 @@ export default function CoursePage() {
                     <div className="flex flex-wrap items-center gap-3">
                       <Button
                         onClick={handleSubmitQuiz}
-                        disabled={quizSubmitted || Object.keys(quizAnswers).length === 0}
+                        disabled={quizSubmitted || Object.keys(quizAnswers).length !== currentMaterial.metadata.questions.length}
                       >
                         Enviar evaluación
                       </Button>

@@ -101,6 +101,11 @@ type CourseMaterial = {
   createdAt: string;
 };
 
+type QuizImportDocument = MaterialMetadata & {
+  title?: string;
+  description?: string;
+};
+
 const isModuleTestLesson = (title: string) => {
   const normalized = (title || "").toLowerCase();
   return normalized.startsWith("prueba ") || normalized.startsWith("test ");
@@ -169,6 +174,9 @@ export function MaterialesSection() {
   const [filePdf, setFilePdf] = useState<File | null>(null);
   const [fileBase64, setFileBase64] = useState<string>("");
   const [editingMaterial, setEditingMaterial] = useState<CourseMaterial | null>(null);
+  const [quizImport, setQuizImport] = useState<QuizImportDocument | null>(null);
+  const [quizImportFileName, setQuizImportFileName] = useState("");
+  const [quizImportError, setQuizImportError] = useState("");
 
   const totalLessons = useMemo(
     () => modulesDraft.reduce((acc, m) => acc + (m.lessons || 0), 0),
@@ -503,6 +511,9 @@ export function MaterialesSection() {
     });
     setFilePdf(null);
     setFileBase64("");
+    setQuizImport(null);
+    setQuizImportFileName("");
+    setQuizImportError("");
     setYoutubePreview("");
     setShowMaterialModal(true);
   };
@@ -520,8 +531,70 @@ export function MaterialesSection() {
     });
     setFilePdf(null);
     setFileBase64("");
+    setQuizImport(material.materialType === "test" ? material.metadata : null);
+    setQuizImportFileName(material.materialType === "test" ? "Prueba guardada" : "");
+    setQuizImportError("");
     setYoutubePreview(material.materialType === "video" && material.url ? material.url.replace("watchv=", "embed/") : "");
     setShowMaterialModal(true);
+  };
+
+  const handleQuizImport = async (file: File | null) => {
+    setQuizImport(null);
+    setQuizImportFileName("");
+    setQuizImportError("");
+    if (!file) return;
+    if (file.size > 256 * 1024) {
+      setQuizImportError("El archivo supera el máximo de 256 KB.");
+      return;
+    }
+    try {
+      const parsed = JSON.parse(await file.text()) as QuizImportDocument;
+      if (!parsed || typeof parsed !== "object" || !Array.isArray(parsed.questions) || !parsed.questions.length) {
+        throw new Error("El JSON debe contener un arreglo questions con al menos una pregunta.");
+      }
+      setQuizImport(parsed);
+      setQuizImportFileName(file.name);
+      setFormData((previous) => ({
+        ...previous,
+        title: typeof parsed.title === "string" && parsed.title.trim() ? parsed.title.trim() : previous.title,
+        description:
+          typeof parsed.description === "string" && parsed.description.trim()
+            ? parsed.description.trim()
+            : previous.description,
+        url: "",
+      }));
+    } catch (error) {
+      setQuizImportError(error instanceof Error ? error.message : "No se pudo leer el archivo JSON.");
+    }
+  };
+
+  const downloadQuizTemplate = () => {
+    const template = {
+      schema_version: "1.0",
+      title: "Prueba 1 — Título del módulo",
+      description: "Evaluación de reforzamiento",
+      difficulty: "media",
+      passing_score: 70,
+      questions: [
+        {
+          id: "m1-q01",
+          question: "Escribe aquí la pregunta.",
+          options: ["Opción A", "Opción B", "Opción C", "Opción D"],
+          answer_index: 0,
+          explanation: "Explicación opcional para revisión docente.",
+          source_ref: "Lectura 1",
+        },
+      ],
+    };
+    const blob = new Blob([JSON.stringify(template, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "plantilla-prueba-visionclass-v1.json";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -531,13 +604,20 @@ export function MaterialesSection() {
       setStatus("Selecciona una leccin");
       return;
     }
-    let finalUrl = formData.url;
-    const metadata: MaterialMetadata = {};
+    let finalUrl = formData.type === "test" ? "" : formData.url;
+    let metadata: MaterialMetadata = {};
     if (formData.type === "pdf" && filePdf) {
       metadata.file_name = filePdf.name;
       metadata.file_size = filePdf.size;
       metadata.file_type = filePdf.type;
       finalUrl = finalUrl || "";
+    }
+    if (formData.type === "test") {
+      if (!quizImport?.questions?.length) {
+        setQuizImportError("Selecciona un JSON con al menos una pregunta válida.");
+        return;
+      }
+      metadata = quizImport;
     }
 
     try {
@@ -1468,7 +1548,7 @@ export function MaterialesSection() {
       </div>
       {showMaterialModal && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/50">
-          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-xl space-y-5 border border-slate-100">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] overflow-y-auto space-y-5 border border-slate-100">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-semibold text-slate-900">
@@ -1508,7 +1588,18 @@ export function MaterialesSection() {
                 </div>
                 <div className="space-y-2">
                   <Label>Tipo</Label>
-                  <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value as MaterialType })}>
+                  <Select
+                    value={formData.type}
+                    onValueChange={(value) => {
+                      const nextType = value as MaterialType;
+                      setFormData({ ...formData, type: nextType, url: nextType === "test" ? "" : formData.url });
+                      setQuizImportError("");
+                      if (nextType !== "test") {
+                        setQuizImport(null);
+                        setQuizImportFileName("");
+                      }
+                    }}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar tipo" />
                     </SelectTrigger>
@@ -1554,19 +1645,21 @@ export function MaterialesSection() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label>URL / recurso</Label>
-                <Input
-                  value={formData.url}
-                  onChange={(e) =>
-                    formData.type === "video"
-                      ? handleYoutubePreview(e.target.value)
-                      : setFormData({ ...formData, url: e.target.value })
-                  }
-                  placeholder={formData.type === "video" ? "https://... (YouTube)" : "https://... (opcional si subes PDF)"}
-                  required={formData.type !== "pdf"}
-                />
-              </div>
+              {formData.type !== "test" && (
+                <div className="space-y-2">
+                  <Label>URL / recurso</Label>
+                  <Input
+                    value={formData.url}
+                    onChange={(e) =>
+                      formData.type === "video"
+                        ? handleYoutubePreview(e.target.value)
+                        : setFormData({ ...formData, url: e.target.value })
+                    }
+                    placeholder={formData.type === "video" ? "https://... (YouTube)" : "https://... (opcional si subes PDF)"}
+                    required={formData.type === "video"}
+                  />
+                </div>
+              )}
 
               {formData.type === "pdf" && (
                 <div className="space-y-2">
@@ -1589,6 +1682,51 @@ export function MaterialesSection() {
                     }}
                   />
                   <p className="text-xs text-slate-500">Si adjuntas un PDF local, la URL es opcional.</p>
+                </div>
+              )}
+
+              {formData.type === "test" && (
+                <div className="space-y-3 rounded-xl border border-violet-200 bg-violet-50 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <Label>Prueba en formato JSON</Label>
+                      <p className="mt-1 text-xs text-slate-600">
+                        Contrato VisionClass 1.0 · máximo 20 preguntas · cuatro opciones por pregunta.
+                      </p>
+                    </div>
+                    <Button type="button" variant="outline" size="sm" onClick={downloadQuizTemplate}>
+                      <Download className="mr-2 h-4 w-4" />
+                      Descargar plantilla
+                    </Button>
+                  </div>
+                  <Input
+                    type="file"
+                    accept="application/json,.json"
+                    onChange={(event) => handleQuizImport(event.target.files?.[0] || null)}
+                  />
+                  {quizImportError && <p className="text-sm text-red-700">{quizImportError}</p>}
+                  {quizImport?.questions?.length ? (
+                    <div className="rounded-lg border border-violet-200 bg-white p-3 text-sm">
+                      <p className="font-semibold text-slate-900">
+                        {quizImportFileName || "Prueba cargada"}: {quizImport.questions.length} preguntas
+                      </p>
+                      <ul className="mt-2 space-y-1 text-slate-600">
+                        {quizImport.questions.slice(0, 3).map((question, index) => (
+                          <li key={String(question.id || index)}>
+                            {index + 1}. {question.question || "Pregunta sin texto"}
+                          </li>
+                        ))}
+                      </ul>
+                      {quizImport.questions.length > 3 && (
+                        <p className="mt-2 text-xs text-slate-500">
+                          Y {quizImport.questions.length - 3} preguntas adicionales.
+                        </p>
+                      )}
+                      <p className="mt-2 text-xs text-slate-500">
+                        El servidor realizará la validación definitiva antes de publicar.
+                      </p>
+                    </div>
+                  ) : null}
                 </div>
               )}
 

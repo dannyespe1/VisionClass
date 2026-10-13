@@ -52,10 +52,16 @@ export function Navbar({ onNavigateToLogin }: NavbarProps) {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => scrollToSection("inicio")}>
-            <div className="w-12 h-12 rounded-lg bg-white p-1 flex items-center justify-center">
-              <Image src="/LOGO1.png" alt="VisionClass" width={48} height={48} className="h-full w-full object-contain" priority />
+            <div className="w-40 h-8 flex items-center">
+              <Image
+                src="/brand/atendynex-logo.svg"
+                alt="AtenDynex"
+                width={160}
+                height={32}
+                className="h-full w-full object-contain"
+                priority
+              />
             </div>
-            <span className="text-xl text-gray-900">VisionClass</span>
           </div>
 
           {/* Desktop Navigation */}

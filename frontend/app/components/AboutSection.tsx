@@ -6,32 +6,32 @@ export function AboutSection() {
     {
       icon: Eye,
       title: "Seguimiento visual",
-      description: "Monitoreo de atención con vision por computadora para mejorar la concentración.",
+      description: "Procesamiento local de características visuales para registrar evidencia observable.",
     },
     {
       icon: Brain,
-      title: "Aprendizaje adaptativo",
-      description: "Contenido que se ajusta a tu ritmo y nivel de comprension.",
+      title: "Contenido estructurado",
+      description: "Contenido organizado por módulos, actividades y evaluaciones.",
     },
     {
       icon: Shield,
-      title: "Privacidad garantizada",
-      description: "Datos protegidos con los estandares más altos de seguridad.",
+      title: "Privacidad por diseño",
+      description: "Controles de minimización, consentimiento y procesamiento local.",
     },
     {
       icon: Zap,
-      title: "Retroalimentacion inmediata",
-      description: "Progreso y areas de mejora en tiempo real.",
+      title: "Actividad registrada",
+      description: "Consulta de actividad y resultados conforme se registran.",
     },
     {
       icon: Users,
-      title: "Comunidad activa",
-      description: "Conecta con estudiantes y profesores de todo el mundo.",
+      title: "Acceso por roles",
+      description: "Acceso diferenciado para estudiantes, docentes, observadores e investigadores.",
     },
     {
       icon: BarChart3,
-      title: "Estadisticas detalladas",
-      description: "Rendimiento con métricas avanzadas y personalizadas.",
+      title: "Resúmenes académicos",
+      description: "Resúmenes de progreso y resultados de evaluaciones.",
     },
   ];
 
@@ -43,11 +43,11 @@ export function AboutSection() {
             Nosotros
           </span>
           <h2 className="text-4xl lg:text-5xl text-slate-900 mb-4 font-semibold">
-            Soluciones innovadoras para la educacion
+            Evidencia observable para contextos educativos
           </h2>
           <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-            VisionClass combina vision por computadora y IA para elevar la atención y el rendimiento en entornos
-            academicos sin friccion ni hardware adicional.
+            AtenDynex combina procesamiento visual local y registros académicos para apoyar el estudio de evidencia
+            observable.
           </p>
         </div>
 
@@ -62,21 +62,21 @@ export function AboutSection() {
           </div>
 
           <div className="space-y-6">
-            <h3 className="text-3xl text-slate-900 font-semibold">Transformando el futuro de la educación</h3>
+            <h3 className="text-3xl text-slate-900 font-semibold">Señales observables e inferencias</h3>
             <p className="text-slate-600 leading-relaxed">
-              Detectamos atención de forma pasiva en tiempo real, preservando la privacidad y ofreciendo
-              recomendaciones adaptativas para estudiantes, docentes y administradores.
+              Derivamos señales observables localmente y generamos inferencias con estados de incertidumbre para
+              revisión autorizada.
             </p>
             <p className="text-slate-600 leading-relaxed">
-              Integración sencilla, alertas tempranas y resultados medibles para mejorar el compromiso y el
-              rendimiento académico sin interrumpir la clase.
+              La plataforma permite contrastar inferencias, anotaciones humanas y resultados académicos dentro del
+              protocolo aprobado.
             </p>
             <div className="pt-4 grid sm:grid-cols-2 gap-3">
               {[
-                "Implementación rápida en cualquier aula",
-                "Soporte dedicado y mejoras continuas",
-                "Resultados accionables para el equipo docente",
-                "Privacidad como principio central",
+                "Despliegue web en equipos compatibles",
+                "Guía de implementación",
+                "Resultados para interpretación humana",
+                "Minimización y procesamiento local",
               ].map((item) => (
                 <div key={item} className="flex items-start gap-3">
                   <div className="w-6 h-6 bg-slate-900 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-white text-xs">

@@ -20,14 +20,13 @@ export function HomePage({ onNavigateToLogin }: HomePageProps) {
           <div className="space-y-6 text-white">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-sm">
               <span className="inline-block h-2 w-2 rounded-full bg-emerald-300" />
-              Monitoreo pasivo de atención en tiempo real
+              Procesamiento local de señales visuales durante la actividad educativa
             </div>
             <h1 className="text-4xl md:text-5xl font-semibold leading-tight">
-              Cursos en linea con seguimiento inteligente de atención
+              Cursos en línea con registro de evidencia observable
             </h1>
             <p className="text-base md:text-lg text-slate-100/90 max-w-2xl">
-              VisionClass combina vision por computadora y aprendizaje adaptativo para personalizar tu experiencia
-              segun tu nivel de atención y progreso.
+              AtenDynex organiza evidencia observable y datos de progreso para apoyar el análisis educativo.
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <button
@@ -42,9 +41,9 @@ export function HomePage({ onNavigateToLogin }: HomePageProps) {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-sm">
               {[
-                { label: "Precision", value: "98%" },
-                { label: "Universidades", value: "50+" },
-                { label: "Soporte", value: "24/7" },
+                { label: "Procesamiento", value: "Local" },
+                { label: "Privacidad", value: "Por diseño" },
+                { label: "Soporte", value: "Documentado" },
               ].map((item) => (
                 <div
                   key={item.label}
@@ -61,8 +60,8 @@ export function HomePage({ onNavigateToLogin }: HomePageProps) {
             <div className="rounded-3xl bg-white shadow-2xl p-6 space-y-4 border border-slate-100">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-slate-500">Análisis activo</p>
-                  <p className="text-xl font-semibold text-slate-900">127 estudiantes</p>
+                  <p className="text-xs text-slate-500">Sesiones</p>
+                  <p className="text-xl font-semibold text-slate-900">Con consentimiento</p>
                 </div>
                 <div className="h-10 w-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
                   ✓
@@ -70,19 +69,19 @@ export function HomePage({ onNavigateToLogin }: HomePageProps) {
               </div>
               <div className="rounded-2xl bg-slate-900 text-white px-4 py-5 flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-300">Seguimiento ocular</p>
-                  <p className="text-xl font-semibold">MediaPipe Iris + FaceMesh</p>
+                  <p className="text-sm text-slate-300">Procesamiento local</p>
+                  <p className="text-xl font-semibold">Características faciales y oculares</p>
                 </div>
                 <div className="text-3xl">👁️</div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                 <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
-                  <p className="text-slate-500">Atención promedio</p>
-                  <p className="text-xl font-semibold text-slate-900">85%</p>
+                  <p className="text-slate-500">Cobertura</p>
+                  <p className="text-xl font-semibold text-slate-900">Señal observable</p>
                 </div>
                 <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
-                  <p className="text-slate-500">Recomendaciones IA</p>
-                  <p className="text-xl font-semibold text-slate-900">Activas</p>
+                  <p className="text-slate-500">Inferencias</p>
+                  <p className="text-xl font-semibold text-slate-900">En evaluación</p>
                 </div>
               </div>
             </div>
@@ -94,11 +93,10 @@ export function HomePage({ onNavigateToLogin }: HomePageProps) {
       <section className="max-w-6xl mx-auto px-4 lg:px-2 py-16 space-y-8">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold text-sky-600">Por que VisionClass</p>
-            <h2 className="text-3xl font-semibold text-slate-900">Soluciones inteligentes para educación</h2>
+            <p className="text-sm font-semibold text-sky-600">Por qué AtenDynex</p>
+            <h2 className="text-3xl font-semibold text-slate-900">Herramientas para evidencia educativa observable</h2>
             <p className="text-slate-600 mt-2 max-w-2xl">
-              Seguimiento pasivo, privacidad como prioridad y recomendaciones en tiempo real para estudiantes,
-              docentes y administradores.
+              Procesamiento local, minimización de datos y resultados sujetos a revisión humana.
             </p>
           </div>
           <button
@@ -112,18 +110,18 @@ export function HomePage({ onNavigateToLogin }: HomePageProps) {
         <div className="grid md:grid-cols-3 gap-6">
           {[
             {
-              title: "Monitoreo en vivo",
-              desc: "Gaze tracking, micromovimientos y señales de atención sin hardware extra.",
+              title: "Procesamiento local",
+              desc: "Características faciales y oculares derivadas localmente con una cámara compatible.",
               icon: "🛰️",
             },
             {
-              title: "Aprendizaje adaptativo",
-              desc: "Rutas personalizadas segun atención en PDFs, video y evaluaciones.",
+              title: "Contenido y progreso",
+              desc: "Contenido, evaluaciones y registros de progreso organizados por curso.",
               icon: "✨",
             },
             {
-              title: "Insights accionables",
-              desc: "Dashboards por rol y alertas tempranas para docentes y administradores.",
+              title: "Revisión por roles",
+              desc: "Paneles por rol para revisar evidencia autorizada y resultados académicos.",
               icon: "📊",
             },
           ].map((card) => (

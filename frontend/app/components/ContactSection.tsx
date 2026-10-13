@@ -19,7 +19,7 @@ export function ContactSection() {
     e.preventDefault();
     setIsSubmitting(true);
     setTimeout(() => {
-      toast.success("Mensaje enviado con exito. Te contactaremos pronto.");
+      toast.success("Mensaje enviado con éxito. Te contactaremos pronto.");
       setFormData({ name: "", email: "", institution: "", message: "" });
       setIsSubmitting(false);
     }, 900);
@@ -36,9 +36,9 @@ export function ContactSection() {
           <span className="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-full text-sm inline-block mb-4 border border-indigo-100">
             Contacto
           </span>
-          <h2 className="text-4xl lg:text-5xl text-slate-900 mb-4 font-semibold">Comienza tu transformación digital</h2>
+          <h2 className="text-4xl lg:text-5xl text-slate-900 mb-4 font-semibold">Evaluación institucional</h2>
           <p className="text-lg text-slate-600 max-w-3xl mx-auto">
-            Listo para implementar VisionClass en tu institucion Conversemos y te guiaremos en la puesta en marcha.
+            Conoce los requisitos técnicos y operativos para evaluar AtenDynex en tu institución.
           </p>
         </div>
 
@@ -58,7 +58,7 @@ export function ContactSection() {
                 <Input
                   id="name"
                   name="name"
-                  placeholder="Dra. Laura Gomez"
+                  placeholder="Dra. Laura Gómez"
                   value={formData.name}
                   onChange={handleChange}
                   required
@@ -67,7 +67,7 @@ export function ContactSection() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Correo electronico</Label>
+                <Label htmlFor="email">Correo electrónico</Label>
                 <Input
                   id="email"
                   name="email"
@@ -81,7 +81,7 @@ export function ContactSection() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="institution">Institucion</Label>
+                <Label htmlFor="institution">Institución</Label>
                 <Input
                   id="institution"
                   name="institution"
@@ -98,7 +98,7 @@ export function ContactSection() {
                 <Textarea
                   id="message"
                   name="message"
-                  placeholder="Cuentanos sobre tu necesidad, tiempos y metas de implementación..."
+                  placeholder="Cuéntanos sobre tu necesidad, tiempos y metas de implementación..."
                   rows={4}
                   value={formData.message}
                   onChange={handleChange}
@@ -117,7 +117,7 @@ export function ContactSection() {
             <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-8">
               <h3 className="text-2xl text-slate-900 mb-4 font-semibold">Información de contacto</h3>
               <p className="text-slate-600 mb-6">
-                Estamos listos para ayudarte a lanzar VisionClass en tu institución y asegurar una adopción rápida.
+                Podemos ayudarte a evaluar requisitos, alcance y condiciones de adopción.
               </p>
 
               <div className="space-y-5">
@@ -127,8 +127,9 @@ export function ContactSection() {
                   </div>
                   <div>
                     <div className="text-sm text-slate-500 mb-1">Email</div>
-                    <a href="mailto:contacto@visionattent.com" className="text-slate-900 hover:text-indigo-600 transition-colors">
-                      contacto@visionattent.com
+                    {/* TODO(pr-branding): confirmar que info@atendynex.com existe antes de publicar */}
+                    <a href="mailto:info@atendynex.com" className="text-slate-900 hover:text-indigo-600 transition-colors">
+                      info@atendynex.com
                     </a>
                   </div>
                 </div>
@@ -138,7 +139,7 @@ export function ContactSection() {
                     <Phone className="w-6 h-6 text-indigo-600" />
                   </div>
                   <div>
-                    <div className="text-sm text-slate-500 mb-1">Telefono</div>
+                    <div className="text-sm text-slate-500 mb-1">Teléfono</div>
                     <a href="tel:+5938001234567" className="text-slate-900 hover:text-indigo-600 transition-colors">
                       +593 800 123 4567
                     </a>
@@ -152,7 +153,7 @@ export function ContactSection() {
                   <div>
                     <div className="text-sm text-slate-500 mb-1">Oficina</div>
                     <p className="text-slate-900">
-                      Av. Innovación Tecnologica 123
+                      Av. Innovación Tecnológica 123
                       <br />
                       Latacunga, Ecuador
                     </p>
@@ -163,14 +164,14 @@ export function ContactSection() {
 
             <div className="bg-gradient-to-br from-indigo-600 to-sky-500 rounded-3xl p-8 text-white shadow-lg">
               <h4 className="text-xl mb-3 font-semibold">Horario de atención</h4>
-              <p className="text-indigo-100 mb-4">Nuestro equipo esta disponible para ayudarte.</p>
+              <p className="text-indigo-100 mb-4">Nuestro equipo está disponible para ayudarte.</p>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-indigo-100">Lunes - Viernes</span>
                   <span>9:00 AM - 6:00 PM</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-indigo-100">Sabado</span>
+                  <span className="text-indigo-100">Sábado</span>
                   <span>10:00 AM - 2:00 PM</span>
                 </div>
                 <div className="flex justify-between">

@@ -39,13 +39,12 @@
     "@radix-ui/react-toast": "^1.2.15",
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@radix-ui/react-tooltip": "^1.2.8",
-    "axios": "1.18.0",
     "class-variance-authority": "^0.7.1",
     "cmdk": "^1.1.1",
     "embla-carousel-react": "^8.6.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.555.0",
-    "next": "16.3.5",
+    "next": "16.4.0",
     "next-themes": "^0.4.6",
     "pdfjs-dist": "^5.4.624",
     "react": "19.2.0",
@@ -67,8 +66,13 @@
     "autoprefixer": "^10.4.22",
     "baseline-browser-mapping": "2.11.25",
     "eslint": "^9",
-    "eslint-config-next": "16.3.5",
+    "eslint-config-next": "16.4.0",
     "postcss": "8.5.28",
     "typescript": "^5"
+  },
+  "overrides": {
+    "eslint-plugin-react-hooks": "7.0.1",
+    "sharp": "0.35.5",
+    "source-map-js": "1.2.2"
   }
 }

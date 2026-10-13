@@ -1,4 +1,5 @@
-import { Eye, Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
+import Image from "next/image";
+import { Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -29,15 +30,17 @@ export function Footer() {
       <div className="max-w-7xl mx-auto space-y-10">
         <div className="grid md:grid-cols-3 gap-10">
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-white text-slate-900 rounded-xl flex items-center justify-center shadow">
-                <Eye className="w-6 h-6" />
-              </div>
-              <span className="text-xl font-semibold">VisionClass</span>
+            <div className="w-40 h-8 flex items-center">
+              <Image
+                src="/brand/atendynex-logo-white.svg"
+                alt="AtenDynex"
+                width={160}
+                height={32}
+                className="h-full w-full object-contain"
+              />
             </div>
             <p className="text-sm text-slate-300 max-w-md">
-              Monitoreo pasivo de atención con visión por computadora e IA para cursos en línea y experiencias
-              adaptativas.
+              Registro de evidencia observable mediante procesamiento visual local para actividades educativas.
             </p>
             <div className="flex gap-3">
               {social.map((item) => (
@@ -82,8 +85,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-slate-400">
-          <p>© {currentYear} VisionClass. Todos los derechos reservados.</p>
-          <p>Hecho con tecnología de vanguardia para la educación del futuro.</p>
+          <p>© {currentYear} AtenDynex. Todos los derechos reservados.</p>
         </div>
       </div>
     </footer>

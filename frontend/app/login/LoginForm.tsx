@@ -26,7 +26,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
     e.preventDefault();
     setError("");
     if (!username || !password) {
-      setError("Completa correo y contrasea");
+      setError("Completa correo y contraseña");
       return;
     }
     setIsLoading(true);

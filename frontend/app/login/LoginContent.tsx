@@ -123,14 +123,18 @@ export function LoginContent() {
 
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-6">
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                <Eye className="w-6 h-6 text-white" />
-              </div>
-              <h1 className="text-2xl">VisionClass</h1>
+              <Image
+                src="/brand/atendynex-logo.svg"
+                alt="AtenDynex"
+                width={160}
+                height={32}
+                className="h-8 w-40 object-contain"
+                priority
+              />
             </div>
 
             <h2 className="text-3xl mb-2">Bienvenido</h2>
-            <p className="text-gray-600">Accede a tu plataforma de aprendizaje inteligente</p>
+            <p className="text-gray-600">Accede a tu plataforma educativa con procesamiento local de señales visuales</p>
           </div>
 
           <LoginForm onSuccess={handleLogin} />
@@ -171,7 +175,7 @@ export function LoginContent() {
 
           <div className="mt-8 pt-8 border-t border-gray-200">
             <p className="text-sm text-gray-500 text-center mb-4">
-              No tienes una cuenta{" "}
+              ¿No tienes una cuenta?{" "}
               <a href="#contacto" onClick={handleBack} className="text-blue-600 hover:underline">
                 Contacta con tu institución
               </a>
@@ -196,9 +200,9 @@ export function LoginContent() {
                 <Eye className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="mb-2">Detección Pasiva</h3>
+                <h3 className="mb-2">Procesamiento local</h3>
                 <p className="text-blue-100">
-                  Monitoreo no invasivo de la atención estudiantil mediante tecnología de visión por computadora.
+                  Procesamiento local de características visuales para registrar evidencia observable autorizada.
                 </p>
               </div>
             </div>
@@ -209,7 +213,9 @@ export function LoginContent() {
               </div>
               <div>
                 <h3 className="mb-2">Inteligencia Artificial</h3>
-                <p className="text-blue-100">Análisis en tiempo real con algoritmos avanzados para medir atención.</p>
+                <p className="text-blue-100">
+                  Inferencias basadas en señales observables, sujetas a incertidumbre y revisión humana.
+                </p>
               </div>
             </div>
 
@@ -218,21 +224,17 @@ export function LoginContent() {
                 <Shield className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="mb-2">Privacidad Garantizada</h3>
-                <p className="text-blue-100">Sin almacenar video, solo métricas de atención.</p>
+                <h3 className="mb-2">Privacidad por diseño</h3>
+                <p className="text-blue-100">
+                  En el modo predeterminado no se transmiten ni persisten imágenes o video; se procesan localmente
+                  características autorizadas.
+                </p>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="relative z-10">
-          <blockquote className="border-l-4 border-white/30 pl-4">
-            <p className="mb-2 italic">
-              La implementación de este sistema ha revolucionado nuestra forma de entender la atención en el aula.
-            </p>
-            <footer className="text-blue-100">Dr. María Rodríguez - Universidad Nacional</footer>
-          </blockquote>
-        </div>
+        {/* TODO(pr-branding): agregar testimonio verificado con autorización escrita */}
       </div>
     </div>
   );

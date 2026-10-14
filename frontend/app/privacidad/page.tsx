@@ -17,8 +17,10 @@ export default function PrivacidadPage() {
             Confidencialidad y protección de datos
           </h1>
           <p className="text-slate-600 mt-4 text-lg">
-            VisionClass cumple con la Ley Orgánica de Protección de Datos Personales (LOPDP) del Ecuador.
-            Tratamos la información con finalidades legítimas, minimización de datos y transparencia.
+            AtenDynex incorpora controles orientados a apoyar el tratamiento de datos conforme a la Ley Orgánica de
+            Protección de Datos Personales (LOPDP) del Ecuador; el cumplimiento depende del responsable, la
+            configuración y el protocolo aplicable. Tratamos la información con finalidades legítimas, minimización
+            de datos y transparencia.
           </p>
         </div>
       </section>
@@ -27,16 +29,20 @@ export default function PrivacidadPage() {
         <div className="max-w-5xl mx-auto grid lg:grid-cols-2 gap-8">
           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 space-y-4">
             <h2 className="text-2xl font-semibold">Principios que aplicamos</h2>
+            {/* TODO(legal/compliance): reescritura de lenguaje sobre recopilación y tratamiento. Ver TECH_DEBT.md */}
             <ul className="space-y-2 text-sm text-slate-600 list-disc list-inside">
               <li>Finalidad y consentimiento informado para el análisis de atención.</li>
               <li>Minimización: recolectamos solo lo necesario para el aprendizaje.</li>
               <li>Transparencia: explicamos qué datos se usan y con qué fin.</li>
               <li>Exactitud y actualización de datos por parte del usuario.</li>
-              <li>Conservación limitada y eliminación segura cuando corresponde.</li>
+              <li>
+                Conservación limitada y eliminación conforme a la política de retención y al procedimiento aplicable.
+              </li>
             </ul>
           </div>
           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 space-y-4">
             <h2 className="text-2xl font-semibold">Datos y finalidad</h2>
+            {/* TODO(legal/compliance): reescritura de lenguaje sobre recopilación y tratamiento. Ver TECH_DEBT.md */}
             <p className="text-sm text-slate-600">
               Procesamos métricas de atención, progreso académico y resultados de evaluaciones para
               generar, de forma agregada, recomendaciones y reportes. No almacenamos video continuo
@@ -44,7 +50,7 @@ export default function PrivacidadPage() {
             </p>
             <ul className="space-y-2 text-sm text-slate-600 list-disc list-inside">
               <li>Perfil: nombre, correo y preferencias.</li>
-              <li>Sesión: tiempo de estudio, avances, atención agregada.</li>
+              <li>Sesión: tiempo de estudio, avances, evidencia observable agregada.</li>
               <li>Evaluaciones: calificaciones y retroalimentación.</li>
             </ul>
           </div>
@@ -59,7 +65,8 @@ export default function PrivacidadPage() {
             También puedes revocar permisos de cámara y analítica desde la configuración.
           </p>
           <p className="text-sm text-slate-200">
-            Para consultas de privacidad escribe a soporte@visionclass.ec.
+            {/* TODO(pr-branding): confirmar que el buzón existe */}
+            Para consultas de privacidad escribe a soporte@atendynex.com.
           </p>
         </div>
       </section>

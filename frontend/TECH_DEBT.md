@@ -39,9 +39,34 @@
 | Formulario de contacto no envía | `app/components/ContactSection.tsx` | `fix/contact-form` (PR separado) |
 | Social links con `href="#"` | `Footer.tsx` | Decisión de negocio |
 | Ver demo sin acción | `HomePage.tsx` | Decisión de negocio |
-| `soporte@visionclass.ec` | `app/privacidad/page.tsx` | PR 4 |
 | `info@atendynex.com` | `app/components/ContactSection.tsx` | Confirmar buzón real antes de publicar |
 | `atendynex.com` | `app/layout.tsx` (`metadataBase`) | Confirmar dominio antes de publicar |
+
+## Seguridad OAuth (P1)
+
+Hallazgos del PR 4 (auditoría de login):
+
+1. OAuth sin parámetro `state` → riesgo de login CSRF.
+2. Sin PKCE (`code_challenge`/`code_verifier`) → riesgo de interceptación de código.
+3. El backend acepta `redirect_uri` del cliente → riesgo de open redirect.
+4. El código OAuth permanece en la URL después del procesamiento.
+
+**Acción:** PR dedicado `fix/oauth-state-pkce` después del rebranding. Requiere coordinación backend + frontend y rollout gradual con feature flag. No modificar durante el rebranding.
+
+## Legal / Compliance (P2)
+
+Reescrituras diferidas del PR 4 (Grupo C):
+
+- `seguridad/page.tsx`: cifrado, backups, monitoreo y protección de endpoints.
+- `privacidad/page.tsx`: recopilación, retención y tratamiento.
+- `terminos/page.tsx`: tratamiento, consentimiento y roles.
+- `documentacion/page.tsx`: compromiso de soporte.
+
+**Acción:** PR dedicado `legal/compliance-review` con DPO/legal.
+
+## Contenido pendiente de verificación
+
+- Testimonio "Dr. María Rodríguez - Universidad Nacional" eliminado. Agregar solo con autorización escrita y evidencia real.
 
 ## Notas
 

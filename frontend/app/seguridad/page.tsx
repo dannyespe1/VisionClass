@@ -14,7 +14,7 @@ export default function SeguridadPage() {
         <div className="max-w-5xl mx-auto">
           <p className="text-sm font-semibold text-sky-600">Seguridad</p>
           <h1 className="text-4xl md:text-5xl font-semibold mt-2">
-            Controles y protección empresarial
+            Controles de seguridad de la plataforma
           </h1>
           <p className="text-slate-600 mt-4 text-lg">
             Nuestra infraestructura prioriza la confidencialidad, integridad y disponibilidad de la
@@ -26,16 +26,18 @@ export default function SeguridadPage() {
       <section className="px-4 lg:px-2 pb-16">
         <div className="max-w-5xl mx-auto grid lg:grid-cols-2 gap-8">
           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 space-y-4">
-            <h2 className="text-2xl font-semibold">Seguridad tecnica</h2>
+            <h2 className="text-2xl font-semibold">Seguridad técnica</h2>
+            {/* TODO(legal/compliance): reescritura de garantías técnicas. Ver TECH_DEBT.md */}
             <ul className="space-y-2 text-sm text-slate-600 list-disc list-inside">
-              <li>Cifrado en transito entre cliente, backend y servicio ML.</li>
+              <li>Cifrado en tránsito entre cliente, backend y servicio ML.</li>
               <li>Autenticación JWT y control de acceso por roles.</li>
               <li>Registro de actividad y trazabilidad de acciones.</li>
               <li>Protección de endpoints críticos y validación de datos.</li>
             </ul>
           </div>
           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 space-y-4">
-            <h2 className="text-2xl font-semibold">Operacion segura</h2>
+            <h2 className="text-2xl font-semibold">Operación segura</h2>
+            {/* TODO(legal/compliance): reescritura de garantías técnicas. Ver TECH_DEBT.md */}
             <ul className="space-y-2 text-sm text-slate-600 list-disc list-inside">
               <li>Retención limitada de datos y borrado seguro.</li>
               <li>Backups controlados y restauración planificada.</li>
@@ -49,6 +51,7 @@ export default function SeguridadPage() {
       <section className="px-4 lg:px-2 pb-20">
         <div className="max-w-5xl mx-auto bg-slate-900 text-white rounded-3xl p-6 sm:p-8 md:p-10 space-y-4">
           <h2 className="text-2xl font-semibold">Compromiso continuo</h2>
+          {/* TODO(legal/compliance): reescritura de garantías técnicas. Ver TECH_DEBT.md */}
           <p className="text-sm text-slate-200">
             Actualizamos controles y políticas para mantener el cumplimiento normativo y
             reducir riesgos operativos. Recomendamos mantener credenciales seguras y

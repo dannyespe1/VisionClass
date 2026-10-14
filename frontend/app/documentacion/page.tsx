@@ -14,11 +14,11 @@ export default function DocumentacionPage() {
         <div className="max-w-5xl mx-auto">
           <p className="text-sm font-semibold text-sky-600">Documentación</p>
           <h1 className="text-4xl md:text-5xl font-semibold mt-2">
-            Recursos técnicos de VisionClass
+            Recursos técnicos de AtenDynex
           </h1>
           <p className="text-slate-600 mt-4 text-lg">
             Accede a la documentación técnica, arquitectura y guías de despliegue para el
-            ecosistema VisionClass.
+            ecosistema AtenDynex.
           </p>
         </div>
       </section>
@@ -54,10 +54,11 @@ export default function DocumentacionPage() {
 
       <section className="px-4 lg:px-2 pb-20">
         <div className="max-w-5xl mx-auto bg-slate-900 text-white rounded-3xl p-6 sm:p-8 md:p-10 space-y-4">
-          <h2 className="text-2xl font-semibold">Soporte tecnico</h2>
+          <h2 className="text-2xl font-semibold">Soporte técnico</h2>
+          {/* TODO(legal/compliance): reformular compromiso de soporte. */}
           <p className="text-sm text-slate-200">
             Si necesitas asistencia adicional, abre un issue en GitHub con el detalle del flujo
-            y capturas de error. Responderemos con recomendaciones tecnicos.
+            y capturas de error. Responderemos con recomendaciones técnicas.
           </p>
         </div>
       </section>

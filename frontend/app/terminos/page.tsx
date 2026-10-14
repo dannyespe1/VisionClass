@@ -17,7 +17,7 @@ export default function TerminosPage() {
             Condiciones de uso del servicio
           </h1>
           <p className="text-slate-600 mt-4 text-lg">
-            Estos términos definen las condiciones para el uso de VisionClass por estudiantes,
+            Estos términos definen las condiciones para el uso de AtenDynex por estudiantes,
             docentes e instituciones educativas.
           </p>
         </div>
@@ -27,23 +27,27 @@ export default function TerminosPage() {
         <div className="max-w-5xl mx-auto grid lg:grid-cols-2 gap-8">
           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-4">
             <h2 className="text-2xl font-semibold">Uso permitido</h2>
+            {/* TODO(legal/compliance): reescritura de lenguaje sobre tratamiento y consentimiento. Ver TECH_DEBT.md */}
             <ul className="space-y-2 text-sm text-slate-600 list-disc list-inside">
               <li>Acceso al contenido educativo y evaluaciones.</li>
               <li>Monitoreo de atención solo con consentimiento expreso.</li>
               <li>Uso interno institucional para mejora académica.</li>
-              <li>Prohibicion de uso malicioso o no autorizado.</li>
+              <li>Prohibición de uso malicioso o no autorizado.</li>
             </ul>
           </div>
           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-4">
             <h2 className="text-2xl font-semibold">Consentimiento y datos</h2>
+            {/* TODO(legal/compliance): reescritura de lenguaje sobre tratamiento y consentimiento. Ver TECH_DEBT.md */}
             <p className="text-sm text-slate-600">
-              Al activar la cámara, el usuario acepta el tratamiento de métricas de atención para
-              fines académicos. La institución es responsable de informar y validar el consentimiento
-              de sus usuarios finales.
+              El tratamiento asociado a la cámara solo se inicia cuando existe consentimiento informado vigente y el
+              usuario activa la captura. El permiso técnico del navegador no sustituye dicho consentimiento. La
+              institución es responsable de informar y validar el consentimiento de sus usuarios finales.
             </p>
             <ul className="space-y-2 text-sm text-slate-600 list-disc list-inside">
               <li>Los datos se usan para personalizar el aprendizaje.</li>
-              <li>Las métricas se comparten por rol (estudiante, docente, admin).</li>
+              <li>
+                Las métricas se comparten por rol (estudiante, docente, administrador, observador e investigador).
+              </li>
               <li>El usuario puede revocar permisos en cualquier momento.</li>
             </ul>
           </div>
@@ -58,16 +62,17 @@ export default function TerminosPage() {
               <p className="font-semibold text-slate-900">Usuario</p>
               <ul className="list-disc list-inside space-y-1">
                 <li>Proteger sus credenciales y accesos.</li>
-                <li>Usar el servicio de forma legitima.</li>
+                <li>Usar el servicio de forma legítima.</li>
                 <li>Actualizar datos personales cuando sea necesario.</li>
               </ul>
             </div>
             <div className="space-y-2">
               <p className="font-semibold text-slate-900">Institución</p>
+              {/* TODO(legal/compliance): reescritura de lenguaje sobre tratamiento y consentimiento. Ver TECH_DEBT.md */}
               <ul className="list-disc list-inside space-y-1">
                 <li>Definir políticas internas de privacidad y uso.</li>
                 <li>Garantizar el consentimiento de sus usuarios.</li>
-                <li>Supervisar el uso de reportes y analitica.</li>
+                <li>Supervisar el uso de reportes y analítica.</li>
               </ul>
             </div>
           </div>

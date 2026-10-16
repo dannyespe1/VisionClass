@@ -55,56 +55,56 @@ export function AlertasSection() {
 
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center">
-            <Bell className="w-5 h-5 text-blue-600" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+            <Bell className="h-5 w-5 text-primary" />
           </div>
           <div>
             <h2 className="text-lg">Alertas y notificaciones</h2>
-            <p className="text-sm text-slate-600">
-              Mensajes de tus docentes sobre tu rendimiento.
+            <p className="text-sm text-muted-foreground">
+              Mensajes de tus docentes sobre tu actividad académica.
             </p>
           </div>
         </div>
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {error}
         </div>
       )}
 
       <div className="space-y-3">
         {items.map((item) => (
-          <div key={item.id} className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+          <div key={item.id} className="rounded-xl border border-border bg-card p-5 shadow-sm">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h3 className="text-base">{item.subject}</h3>
-                <p className="text-sm text-slate-600 mt-1">
+                <p className="mt-1 text-sm text-muted-foreground">
                   {formatSender(item.sender)}  {formatDate(item.sent_at || item.created_at)}
                 </p>
                 {item.course && item.course.title && (
-                  <p className="text-xs text-slate-500 mt-1">Curso: {item.course.title}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Curso: {item.course.title}</p>
                 )}
               </div>
-              <div className="flex items-center gap-2 text-xs text-slate-500">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <MailCheck className="w-4 h-4" />
                 {item.status === "sent" ? "Enviado" : item.status === "failed" ? "Fallido" : "Pendiente"}
               </div>
             </div>
-            <p className="text-sm text-slate-700 mt-3 whitespace-pre-line">{item.message}</p>
+            <p className="mt-3 whitespace-pre-line text-sm text-foreground">{item.message}</p>
           </div>
         ))}
 
         {!items.length && !loading && (
-          <div className="rounded-lg border border-slate-200 bg-white px-4 py-6 text-sm text-slate-600">
+          <div className="rounded-lg border border-border bg-card px-4 py-6 text-sm text-muted-foreground">
             No tienes alertas nuevas por ahora.
           </div>
         )}
         {loading && (
-          <div className="rounded-lg border border-slate-200 bg-white px-4 py-6 text-sm text-slate-600">
-            Cargando alertas...
+          <div className="rounded-lg border border-border bg-card px-4 py-6 text-sm text-muted-foreground">
+            Cargando alertas…
           </div>
         )}
       </div>

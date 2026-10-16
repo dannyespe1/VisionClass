@@ -5,13 +5,15 @@ import test from "node:test";
 const component = readFileSync(new URL("../app/instructor/components/TeacherGroupDashboardSection.tsx", import.meta.url), "utf8");
 const page = readFileSync(new URL("../app/instructor/page.tsx", import.meta.url), "utf8");
 const navbar = readFileSync(new URL("../app/instructor/components/InstructorNavbar.tsx", import.meta.url), "utf8");
+const navConfig = readFileSync(new URL("../app/components/shared/nav-config.ts", import.meta.url), "utf8");
 const features = readFileSync(new URL("../app/lib/features.ts", import.meta.url), "utf8");
 
 test("teacher dashboard remains disabled unless explicitly enabled", () => {
   assert.match(features, /NEXT_PUBLIC_TEACHER_GROUP_DASHBOARD/);
   assert.match(features, /=== "true"/);
   assert.match(page, /TEACHER_GROUP_DASHBOARD_ENABLED \? \(/);
-  assert.match(navbar, /TEACHER_GROUP_DASHBOARD_ENABLED \? "Evidencia grupal"/);
+  assert.match(navbar, /<AppShell role="instructor" activeItem=\{activeTab\} onItemChange=\{onTabChange\} \/>/);
+  assert.match(navConfig, /TEACHER_GROUP_DASHBOARD_ENABLED \? "Evidencia grupal"/);
 });
 
 test("new panel replaces individual legacy analytics when enabled", () => {

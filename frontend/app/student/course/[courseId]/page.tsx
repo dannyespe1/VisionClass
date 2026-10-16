@@ -376,7 +376,7 @@ export default function CoursePage() {
         }
       } catch (err) {
         console.error(err);
-        setSessionPreparationError(err instanceof Error ? err.message : "No se pudo preparar la sesión segura.");
+        setSessionPreparationError(err instanceof Error ? err.message : "No se pudo preparar la sesión de investigación.");
         setEnrollmentLoaded(true);
       } finally {
         setSessionPreparing(false);
@@ -1082,8 +1082,8 @@ export default function CoursePage() {
       setCourseReady(false);
       setPermissionOpen(true);
       setCameraError(sessionPreparing
-        ? "La sesión segura todavía se está preparando. Espera unos segundos e inténtalo nuevamente."
-        : sessionPreparationError || "No existe una sesión segura activa para iniciar la calibración.");
+        ? "La sesión de investigación todavía se está preparando. Espera unos segundos e inténtalo nuevamente."
+        : sessionPreparationError || "No existe una sesión de investigación preparada para iniciar la calibración.");
       return;
     }
     if (!settings.enableCamera) {
@@ -1518,7 +1518,7 @@ export default function CoursePage() {
   const courseAccessReady = !RESEARCH_SESSION_CALIBRATION_REQUIRED || courseReady;
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen bg-muted">
       {courseAccessReady ? (
         <>
       <TooltipProvider>
@@ -1527,24 +1527,24 @@ export default function CoursePage() {
             <TooltipTrigger asChild>
               <button
                 onClick={() => setShowCameraSettings((prev) => !prev)}
-                className="bg-white rounded-lg shadow-lg px-4 py-2 flex items-center gap-2 hover:shadow-xl transition-shadow border border-slate-200"
+                className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 shadow-lg transition-shadow hover:shadow-xl"
               >
                 <div className="relative">
                   <Camera
-                    className={`w-4 h-4 ${permissionSettings.enableCamera ? "text-emerald-600" : "text-slate-400"}`}
+                    className={`h-4 w-4 ${permissionSettings.enableCamera ? "text-success" : "text-muted-foreground"}`}
                   />
                   <div
                     className={`absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full ${
-                      permissionSettings.enableCamera ? "bg-emerald-500" : "bg-slate-400"
+                      permissionSettings.enableCamera ? "bg-success" : "bg-muted-foreground"
                     }`}
                   />
                 </div>
                 <span
-                  className={`text-sm ${permissionSettings.enableCamera ? "text-emerald-600" : "text-slate-600"}`}
+                  className={`text-sm ${permissionSettings.enableCamera ? "text-success" : "text-muted-foreground"}`}
                 >
                   {permissionSettings.enableCamera ? "Activa" : "Inactiva"}
                 </span>
-                <SettingsIcon className="w-3 h-3 text-slate-400" />
+                <SettingsIcon className="h-3 w-3 text-muted-foreground" />
               </button>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="max-w-xs">
@@ -1559,27 +1559,28 @@ export default function CoursePage() {
       </TooltipProvider>
 
       {showCameraSettings && (
-        <div className="fixed top-20 right-4 z-50 bg-white rounded-xl shadow-2xl p-6 w-96 border border-slate-200">
+        <div className="fixed right-4 top-20 z-50 w-96 rounded-xl border border-border bg-card p-6 shadow-2xl">
           <div className="flex items-center justify-between mb-4">
             <h3 className="flex items-center gap-2">
-              <Camera className="w-5 h-5 text-blue-600" />
-              Configuración de Cámara
+              <Camera className="h-5 w-5 text-primary" />
+              Configuración de cámara
             </h3>
             <button
               onClick={() => setShowCameraSettings(false)}
-              className="text-slate-400 hover:text-slate-600"
+              className="text-muted-foreground hover:text-foreground"
+              aria-label="Cerrar configuración"
             >
-              x
+              ×
             </button>
           </div>
           <div className="space-y-4">
             {cameraError && (
-              <p role="alert" className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+              <p role="alert" className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm text-foreground">
                 {cameraError}
               </p>
             )}
             {permissionSettings.enableCamera && availableCameras.length > 0 && (
-              <label className="block p-3 bg-slate-50 rounded-lg">
+              <label className="block rounded-lg bg-muted p-3">
                 <span className="block text-sm mb-2">Cámara seleccionada</span>
                 <select
                   value={selectedCameraId}
@@ -1594,7 +1595,7 @@ export default function CoursePage() {
                     setShowCameraSettings(false);
                     setSelectedCameraId(event.target.value);
                   }}
-                  className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+                  className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm"
                 >
                   {availableCameras.map((camera) => (
                     <option key={camera.deviceId} value={camera.deviceId}>{camera.label}</option>
@@ -1607,12 +1608,12 @@ export default function CoursePage() {
               { label: "Procesamiento local", value: permissionSettings.enableAttentionTracking },
               { label: "Datos derivados", value: permissionSettings.saveAnalytics },
             ].map((item) => (
-              <div key={item.label} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+              <div key={item.label} className="flex items-center justify-between rounded-lg bg-muted p-3">
                 <div className="flex-1">
                   <div className="text-sm mb-1">{item.label}</div>
-                  <p className="text-xs text-slate-600">Estado actual</p>
+                  <p className="text-xs text-muted-foreground">Estado actual</p>
                 </div>
-                <div className={`w-3 h-3 rounded-full ${item.value ? "bg-emerald-500" : "bg-slate-400"}`} />
+                <div className={`h-3 w-3 rounded-full ${item.value ? "bg-success" : "bg-muted-foreground"}`} />
               </div>
             ))}
           </div>
@@ -1633,7 +1634,7 @@ export default function CoursePage() {
         </div>
       )}
 
-      <div className="bg-white border-b sticky top-0 z-10">
+      <div className="sticky top-0 z-10 border-b bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -1651,11 +1652,11 @@ export default function CoursePage() {
               </Button>
               <div>
                 <h1 className="text-xl">{courseTitle}</h1>
-                <p className="text-sm text-slate-600">{selectedLesson?.title || "Seleccióna una lección"}</p>
+                <p className="text-sm text-muted-foreground">{selectedLesson?.title || "Selecciona una lección"}</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <div className="text-sm text-slate-600">
+              <div className="text-sm text-muted-foreground">
                 Lección {currentLessonIndex + 1} de {sortedLessons.length || 1}
               </div>
             </div>
@@ -1666,24 +1667,25 @@ export default function CoursePage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            {loading && <p className="text-sm text-slate-500">Cargando contenidos...</p>}
-            {error && <p className="text-sm text-red-600">{error}</p>}
+            {loading && <p className="text-sm text-muted-foreground">Cargando contenidos…</p>}
+            {error && <p className="text-sm text-destructive">{error}</p>}
 
             {interventionSuggestion && (
               <section
-                className="mb-5 rounded-xl border border-cyan-200 bg-cyan-50 p-5 text-cyan-950"
+                className="mb-5 rounded-xl border border-secondary/30 bg-secondary/10 p-5 text-foreground"
                 role="status"
                 aria-live="polite"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <h2 className="font-semibold">Sugerencia opcional</h2>
+                    <h2 className="font-semibold">Sugerencia opcional basada en señales observables</h2>
                     <p className="mt-1">{interventionSuggestion.message}</p>
-                    <p className="mt-2 text-xs text-cyan-800">{interventionSuggestion.explanation}</p>
+                    <p className="mt-2 text-xs text-muted-foreground">{interventionSuggestion.explanation}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Esta sugerencia no mide directamente un estado cognitivo.</p>
                   </div>
                   <button
                     type="button"
-                    className="rounded border border-cyan-300 bg-white px-3 py-1 text-sm"
+                    className="rounded border border-secondary/30 bg-card px-3 py-1 text-sm"
                     onClick={() => setInterventionSuggestion(null)}
                     aria-label="Ignorar sugerencia"
                   >
@@ -1694,20 +1696,20 @@ export default function CoursePage() {
             )}
 
             {!currentMaterial && !loading && (
-              <div className="bg-white rounded-xl shadow-sm p-8 text-slate-500">
+              <div className="rounded-xl bg-card p-8 text-muted-foreground shadow-sm">
                 No hay contenidos disponibles para esta lección.
               </div>
             )}
 
             {currentMaterial?.materialType === "pdf" && (
-              <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-                <div className="bg-slate-100 border-b p-4 flex items-center justify-between">
+              <div className="overflow-hidden rounded-xl bg-card shadow-sm">
+                <div className="flex items-center justify-between border-b bg-muted p-4">
                   <div className="flex items-center gap-3">
-                    <FileText className="w-5 h-5 text-blue-600" />
+                    <FileText className="h-5 w-5 text-primary" />
                     <span>Documento PDF</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2 text-sm text-slate-600">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Clock className="w-4 h-4" />
                       Tiempo de lectura: {Math.floor(readingTime / 60)}:{String(readingTime % 60).padStart(2, "0")}
                     </div>
@@ -1722,23 +1724,23 @@ export default function CoursePage() {
                   </div>
                 </div>
 
-                <div className="bg-white" style={{ minHeight: "600px" }}>
+                <div className="bg-card" style={{ minHeight: "600px" }}>
                   {pdfData ? (
                     <PdfCanvasViewer data={pdfData} title={currentMaterial.title || "Documento PDF"} />
                   ) : (
-                    <div className="p-6 text-sm text-slate-500">Cargando PDF...</div>
+                    <div className="p-6 text-sm text-muted-foreground">Cargando PDF…</div>
                   )}
                 </div>
 
-                <div className="bg-blue-50 p-4 border-t">
+                <div className="border-t bg-primary/10 p-4">
                   <div className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-2">
-                        <BookOpen className="w-4 h-4 text-blue-600" />
+                        <BookOpen className="h-4 w-4 text-primary" />
                         <span>Lectura en curso</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-blue-600" />
+                        <Clock className="h-4 w-4 text-primary" />
                         <span>Tiempo: {Math.floor(readingTime / 60)}:{String(readingTime % 60).padStart(2, "0")}</span>
                       </div>
                     </div>
@@ -1748,8 +1750,8 @@ export default function CoursePage() {
             )}
 
             {currentMaterial?.materialType === "video" && (
-              <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-                <div className="relative bg-black aspect-video">
+              <div className="overflow-hidden rounded-xl bg-card shadow-sm">
+                <div className="relative aspect-video bg-aten-bg-dark">
                   {currentMaterial.url ? (
                     <iframe
                       src={toYoutubeEmbed(currentMaterial.url)}
@@ -1759,19 +1761,19 @@ export default function CoursePage() {
                       title={currentMaterial.title}
                     />
                   ) : (
-                    <div className="absolute inset-0 flex items-center justify-center text-white">
+                    <div className="absolute inset-0 flex items-center justify-center text-[var(--aten-text-dark)]">
                       <Play className="w-20 h-20 opacity-50" />
                     </div>
                   )}
 
                 </div>
 
-                <div className="bg-slate-900 text-white px-4 py-3 text-sm flex items-center justify-between">
+                <div className="flex items-center justify-between bg-aten-bg-dark px-4 py-3 text-sm text-[var(--aten-text-dark)]">
                   <div className="flex items-center gap-2">
                     <Play className="w-4 h-4" />
                     Video en reproducción (YouTube)
                   </div>
-                  <div className="flex items-center gap-2 text-slate-300">
+                  <div className="flex items-center gap-2 text-[var(--aten-text-muted-dark)]">
                     <Volume2 className="w-4 h-4" />
                     <Maximize className="w-4 h-4" />
                   </div>
@@ -1781,22 +1783,22 @@ export default function CoursePage() {
             )}
 
             {currentMaterial?.materialType === "test" && (
-              <div className="bg-white rounded-xl shadow-sm p-8">
+              <div className="rounded-xl bg-card p-8 shadow-sm">
                 <div className="mb-6 flex items-center gap-3">
-                  <div className="w-12 h-12 bg-violet-100 rounded-lg flex items-center justify-center">
-                    <ClipboardCheck className="w-6 h-6 text-violet-600" />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                    <ClipboardCheck className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <h2 className="text-2xl">Evaluación del Módulo</h2>
-                    <p className="text-slate-600">El docente publicará las preguntas aquí.</p>
+                    <h2 className="text-2xl">Evaluación del módulo</h2>
+                    <p className="text-muted-foreground">El docente publicará las preguntas aquí.</p>
                   </div>
                 </div>
                 {currentMaterial.metadata?.questions?.length ? (
                   <div className="space-y-6">
                     {currentMaterial.metadata.questions.map((q, index: number) => (
-                      <div key={q.id || index} className="border-b border-slate-100 pb-5">
-                        <div className="text-sm text-slate-500">Pregunta {index + 1}</div>
-                        <p className="text-base text-slate-900 mt-1">{q.question}</p>
+                      <div key={q.id || index} className="border-b border-border pb-5">
+                        <div className="text-sm text-muted-foreground">Pregunta {index + 1}</div>
+                        <p className="mt-1 text-base text-foreground">{q.question}</p>
                         <div className="mt-3 space-y-2">
                           {(q.options || []).map((opt: string, optIndex: number) => (
                             <button
@@ -1804,8 +1806,8 @@ export default function CoursePage() {
                               onClick={() => setQuizAnswers((prev) => ({ ...prev, [index]: optIndex }))}
                               className={`w-full text-left px-4 py-2 rounded-lg border transition ${
                                 quizAnswers[index] === optIndex
-                                  ? "border-blue-500 bg-blue-50"
-                                  : "border-slate-200 hover:border-slate-300 bg-slate-50"
+                                  ? "border-primary bg-primary/10"
+                                  : "border-border bg-muted hover:border-primary/40"
                               }`}
                             >
                               {opt}
@@ -1825,23 +1827,23 @@ export default function CoursePage() {
                         Volver al inicio
                       </Button>
                       {quizScore !== null && (
-                        <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm">
-                          <div className={quizScore >= Number(currentMaterial.metadata?.passing_score ?? 70) ? "font-semibold text-emerald-700" : "font-semibold text-amber-700"}>
+                        <div className="rounded-lg border border-border bg-muted px-4 py-3 text-sm">
+                          <div className={quizScore >= Number(currentMaterial.metadata?.passing_score ?? 70) ? "font-semibold text-success" : "font-semibold text-warning"}>
                             Calificación: {quizScore}% · {quizCorrectCount ?? 0} de {currentMaterial.metadata.questions.length} correctas
                           </div>
-                          <div className="mt-1 text-xs text-slate-600">
+                          <div className="mt-1 text-xs text-muted-foreground">
                             {quizScore >= Number(currentMaterial.metadata?.passing_score ?? 70)
                               ? "Resultado aprobado"
                               : `Se requiere ${Number(currentMaterial.metadata?.passing_score ?? 70)}% para aprobar`}
                           </div>
                         </div>
                       )}
-                      {quizNotice && <span className="text-sm text-slate-600">{quizNotice}</span>}
-                      {quizError && <span className="text-sm text-red-600">{quizError}</span>}
+                      {quizNotice && <span className="text-sm text-muted-foreground">{quizNotice}</span>}
+                      {quizError && <span className="text-sm text-destructive">{quizError}</span>}
                     </div>
                   </div>
                 ) : (
-                  <div className="text-sm text-slate-600">
+                  <div className="text-sm text-muted-foreground">
                     No hay preguntas disponibles aún para esta lección.
                   </div>
                 )}
@@ -1850,10 +1852,10 @@ export default function CoursePage() {
           </div>
 
           <aside className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden sticky top-24">
+            <div className="sticky top-24 overflow-hidden rounded-xl bg-card shadow-sm">
               <div className="p-6 border-b">
-                <h3 className="mb-2">Contenido del Curso</h3>
-                <p className="text-sm text-slate-600">
+                <h3 className="mb-2">Contenido del curso</h3>
+                <p className="text-sm text-muted-foreground">
                   {completedLessons} de {sortedLessons.length} completadas
                 </p>
               </div>
@@ -1862,7 +1864,7 @@ export default function CoursePage() {
                 {groupedLessons.map((group) => (
                   <div key={group.id}>
                     <button
-                      className="w-full px-4 py-3 text-xs uppercase tracking-wide text-slate-500 bg-slate-50 flex items-center justify-between"
+                      className="flex w-full items-center justify-between bg-muted px-4 py-3 text-xs uppercase tracking-wide text-muted-foreground"
                       onClick={() =>
                         setOpenModules((prev) => ({
                           ...prev,
@@ -1882,39 +1884,39 @@ export default function CoursePage() {
                         <button
                           key={lesson.id}
                           onClick={() => setSelectedLessonId(lesson.id)}
-                          className={`w-full p-4 text-left hover:bg-slate-50 transition-colors ${
-                            lesson.id === selectedLessonId ? "bg-blue-50" : ""
+                          className={`w-full p-4 text-left transition-colors hover:bg-muted ${
+                            lesson.id === selectedLessonId ? "bg-primary/10" : ""
                           }`}
                         >
                           <div className="flex items-start gap-3">
                             <div
                               className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
                                 lesson.completed
-                                  ? "bg-emerald-100"
+                                  ? "bg-success/10"
                                   : lesson.id === selectedLessonId
-                                    ? "bg-blue-100"
-                                    : "bg-slate-100"
+                                    ? "bg-primary/10"
+                                    : "bg-muted"
                               }`}
                             >
                               {lesson.completed ? (
-                                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                                <CheckCircle2 className="h-4 w-4 text-success" />
                               ) : lesson.materialType === "pdf" ? (
                                 <FileText
-                                  className={`w-4 h-4 ${lesson.id === selectedLessonId ? "text-blue-600" : "text-slate-600"}`}
+                                  className={`h-4 w-4 ${lesson.id === selectedLessonId ? "text-primary" : "text-muted-foreground"}`}
                                 />
                               ) : lesson.materialType === "video" ? (
                                 <Video
-                                  className={`w-4 h-4 ${lesson.id === selectedLessonId ? "text-blue-600" : "text-slate-600"}`}
+                                  className={`h-4 w-4 ${lesson.id === selectedLessonId ? "text-primary" : "text-muted-foreground"}`}
                                 />
                               ) : (
                                 <ClipboardCheck
-                                  className={`w-4 h-4 ${lesson.id === selectedLessonId ? "text-blue-600" : "text-slate-600"}`}
+                                  className={`h-4 w-4 ${lesson.id === selectedLessonId ? "text-primary" : "text-muted-foreground"}`}
                                 />
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="text-sm mb-1 truncate">{lesson.title}</div>
-                              <div className="flex items-center gap-2 text-xs text-slate-600">
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                 <Clock className="w-3 h-3" />
                                 {lesson.duration}
                               </div>
@@ -1926,9 +1928,9 @@ export default function CoursePage() {
                 ))}
               </div>
 
-              <div className="p-6 border-t bg-slate-50">
+              <div className="border-t bg-muted p-6">
                 <Button className="w-full" onClick={goToNextLesson} disabled={!hasNextLesson}>
-                  {hasNextLesson ? "Siguiente Lección" : "Completado"}
+                  {hasNextLesson ? "Siguiente lección" : "Completado"}
                 </Button>
               </div>
             </div>
@@ -1937,15 +1939,15 @@ export default function CoursePage() {
       </div>
         </>
       ) : (
-        <section data-testid="course-access-gate" className="flex min-h-screen items-center justify-center bg-slate-950 px-6 text-white">
-          <div className="max-w-lg rounded-2xl border border-white/15 bg-white/10 p-8 text-center shadow-2xl backdrop-blur">
-            <Shield className="mx-auto mb-4 h-10 w-10 text-blue-300" aria-hidden="true" />
-            <h1 className="text-2xl font-semibold">Preparando acceso seguro al curso</h1>
-            <p className="mt-3 text-sm leading-6 text-slate-200">
+        <section data-testid="course-access-gate" className="flex min-h-screen items-center justify-center bg-aten-bg-dark px-6 text-[var(--aten-text-dark)]">
+          <div className="max-w-lg rounded-2xl border border-border/30 bg-card/10 p-8 text-center shadow-2xl backdrop-blur">
+            <Shield className="mx-auto mb-4 h-10 w-10 text-primary" aria-hidden="true" />
+            <h1 className="text-2xl font-semibold">Preparando el acceso al curso</h1>
+            <p className="mt-3 text-sm leading-6 text-[var(--aten-text-muted-dark)]">
               El contenido permanecerá bloqueado hasta que el servidor confirme la sesión y la calibración ocular requerida para este piloto.
             </p>
             {sessionPreparationError && (
-              <p role="alert" className="mt-4 rounded-lg border border-red-300/40 bg-red-950/40 p-3 text-sm text-red-100">
+              <p role="alert" className="mt-4 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
                 {sessionPreparationError}
               </p>
             )}
@@ -1956,7 +1958,7 @@ export default function CoursePage() {
       <video ref={videoRef} style={{ display: "none" }} />
 
       {courseAccessReady && calibrationReuseNotice && (
-        <div role="status" className="fixed bottom-4 left-1/2 z-40 w-[min(92vw,44rem)] -translate-x-1/2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 shadow-lg">
+        <div role="status" className="fixed bottom-4 left-1/2 z-40 w-[min(92vw,44rem)] -translate-x-1/2 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm text-foreground shadow-lg">
           {calibrationReuseNotice}
         </div>
       )}
@@ -2010,14 +2012,14 @@ export default function CoursePage() {
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+              <CheckCircle2 className="h-5 w-5 text-success" />
               Curso completado
             </DialogTitle>
             <DialogDescription>
               Has finalizado el examen final. Tu curso queda marcado como completado.
             </DialogDescription>
           </DialogHeader>
-          <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          <div className="rounded-lg border border-success/30 bg-success/10 px-4 py-3 text-sm text-foreground">
             {courseTitle}
           </div>
           <DialogFooter className="gap-2 sm:gap-0">

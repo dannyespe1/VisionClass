@@ -70,29 +70,29 @@ export function DemographicResearchCard({ token }: { token: string }) {
   };
 
   return (
-    <section className="rounded-lg border border-violet-200 bg-violet-50 p-3 text-sm">
-      <p className="font-medium text-violet-950">Auditoría demográfica voluntaria</p>
-      <p className="mt-1 text-xs text-violet-800">
-        La edad 18–20 se usa solo como criterio de cohorte. El género se cifra, no entra al modelo y
-        solo se analiza en grupos suficientemente grandes.
+    <section className="rounded-lg border border-primary/20 bg-primary/10 p-3 text-sm">
+      <p className="font-medium text-foreground">Auditoría demográfica voluntaria</p>
+      <p className="mt-1 text-xs text-muted-foreground">
+        La edad 18–20 se usa solo como criterio de cohorte. La respuesta de género se trata separadamente
+        de las entradas del modelo y se informa únicamente cuando se cumplen los mínimos aprobados.
       </p>
       {!profile.research_consent_granted ? (
-        <p className="mt-2 text-xs text-amber-700">Requiere consentimiento vigente para investigación.</p>
+        <p className="mt-2 text-xs text-warning">Requiere consentimiento vigente para investigación.</p>
       ) : profile.registered ? (
         <div className="mt-3 space-y-2">
-          <p className="text-xs text-emerald-700">Respuesta registrada. El sistema no vuelve a mostrar su valor.</p>
+          <p className="text-xs text-success">Respuesta registrada. El sistema no vuelve a mostrar su valor.</p>
           <Button type="button" variant="outline" size="sm" disabled={busy} onClick={withdraw}>
             Retirar respuesta
           </Button>
         </div>
       ) : (
         <div className="mt-3 space-y-3">
-          <label className="block text-xs text-violet-950">
+          <label className="block text-xs text-foreground">
             Género
             <select
               value={gender}
               onChange={(event) => setGender(event.target.value as DemographicGender | "")}
-              className="mt-1 w-full rounded-md border border-violet-200 bg-white px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-md border border-border bg-card px-3 py-2 text-sm"
             >
               <option value="">Prefiero no responder</option>
               {profile.gender_options.map((option) => (
@@ -100,7 +100,7 @@ export function DemographicResearchCard({ token }: { token: string }) {
               ))}
             </select>
           </label>
-          <label className="flex items-start gap-2 text-xs text-violet-900">
+          <label className="flex items-start gap-2 text-xs text-foreground">
             <input
               type="checkbox"
               checked={confirmed}
@@ -114,7 +114,7 @@ export function DemographicResearchCard({ token }: { token: string }) {
           </Button>
         </div>
       )}
-      {message && <p className="mt-2 text-xs text-violet-800" role="status">{message}</p>}
+      {message && <p className="mt-2 text-xs text-muted-foreground" role="status">{message}</p>}
     </section>
   );
 }

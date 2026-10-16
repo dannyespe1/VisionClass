@@ -43,7 +43,7 @@ test("student course does not expose live attention or model diagnostics", () =>
 });
 
 test("calibration communicates local processing and avoids raw visual persistence", () => {
-  assert.match(calibrationScreen, /no se guardan ni transmiten imágenes, video, landmarks o muestras individuales/i);
+  assert.match(calibrationScreen, /En el modo predeterminado no se transmiten ni persisten imágenes ni video; el procesamiento es local\./i);
   assert.match(calibrationScreen, /disabled={!ready \|\| submitting}/);
 });
 

@@ -5,13 +5,15 @@ import test from "node:test";
 const component = readFileSync(new URL("../app/student/EvidenceDashboardSection.tsx", import.meta.url), "utf8");
 const page = readFileSync(new URL("../app/student/page.tsx", import.meta.url), "utf8");
 const navbar = readFileSync(new URL("../app/student/StudentNavbar.tsx", import.meta.url), "utf8");
+const navConfig = readFileSync(new URL("../app/components/shared/nav-config.ts", import.meta.url), "utf8");
 const features = readFileSync(new URL("../app/lib/features.ts", import.meta.url), "utf8");
 
 test("student evidence dashboard remains disabled unless explicitly enabled", () => {
   assert.match(features, /NEXT_PUBLIC_STUDENT_ATTENTION_DASHBOARD/);
   assert.match(features, /=== "true"/);
   assert.match(page, /STUDENT_ATTENTION_DASHBOARD_ENABLED \? <EvidenceDashboardSection \/> : <EstadisticasSection \/>/);
-  assert.match(navbar, /STUDENT_ATTENTION_DASHBOARD_ENABLED \? "Mi evidencia" : "Estadísticas"/);
+  assert.match(navbar, /<AppShell role="student" activeItem=\{activeTab\} onItemChange=\{onTabChange\} \/>/);
+  assert.match(navConfig, /STUDENT_ATTENTION_DASHBOARD_ENABLED \? "Mi evidencia" : "Estadísticas"/);
 });
 
 test("dashboard explains observation, inference, self-report and non-observable states", () => {

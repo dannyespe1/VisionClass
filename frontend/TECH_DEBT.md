@@ -1,6 +1,6 @@
 # Deuda técnica conocida — AtenDynex frontend
 
-Última actualización: 2026-10-13
+Última actualización: 2026-10-16
 
 ## Estado de seguridad
 
@@ -75,6 +75,16 @@ Detectado en PR 5: en 390px el menú mobile abierto produce desbordamiento horiz
 **Fix sugerido:** ajustar ancho del panel mobile o aplicar `overflow-x: hidden` en el contenedor.
 
 **PR sugerido:** PR 10 (limpieza) o PR dedicado de responsive.
+
+## Panel estudiante — Deudas detectadas en PR 6
+
+- `app/student/course/[courseId]/page.tsx` tiene 2033 líneas y requiere división en sub-PRs. No se refactorizó durante el rebranding visual.
+- La lógica de completado depende del literal `examen final` en `app/student/course/[courseId]/page.tsx`. No se debe renombrar el texto visible sin una migración coordinada.
+- Los filtros de categorías usan IDs literales como `programacion` y `diseno`. No se deben renombrar esos IDs sin migración de datos.
+- Los feature flags `BROWSER_EXTRACTOR`, `BOUNDED_CAPTURE_QUEUE` y `EDGE_PROFILES` afectan la captura EDGE sin mostrar siempre una explicación específica al estudiante.
+- `app/student/CursosSection.tsx` usa una URL fija de Unsplash como imagen de respaldo. Debe reemplazarse por un asset aprobado en PR 10.
+- `app/student/InicioSection.tsx` muestra `--` en “Tiempo de estudio”. Debe definirse el comportamiento y la fuente del valor antes de reemplazarlo.
+- `app/student/page.module.css` no tiene importaciones conocidas. Evaluar y, si corresponde, eliminarlo en PR 10.
 
 ## Notas
 

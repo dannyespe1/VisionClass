@@ -43,10 +43,10 @@ export function EstadisticasSection() {
   }, [token]);
 
   if (error) {
-    return <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">{error}</div>;
+    return <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-destructive">{error}</div>;
   }
   if (!metrics) {
-    return <div className="p-6 text-sm text-slate-500">Cargando estadísticas...</div>;
+    return <div className="p-6 text-sm text-muted-foreground">Cargando estadísticas…</div>;
   }
 
   const academic = metrics.academic_metrics;
@@ -60,46 +60,46 @@ export function EstadisticasSection() {
   return (
     <section className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold text-slate-900">Estadísticas de aprendizaje</h2>
-        <p className="text-sm text-slate-500">Resumen académico y señales derivadas de las sesiones de curso.</p>
+        <h2 className="text-2xl font-semibold text-foreground">Resumen académico y de sesiones</h2>
+        <p className="text-sm text-muted-foreground">Resumen académico y señales derivadas de las sesiones de curso.</p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map(({ label, value, icon: Icon }) => (
-          <div key={label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <Icon className="mb-3 h-5 w-5 text-blue-600" />
-            <div className="text-2xl font-semibold text-slate-900">{value}</div>
-            <div className="text-sm text-slate-500">{label}</div>
+          <div key={label} className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+            <Icon className="mb-3 h-5 w-5 text-primary" />
+            <div className="text-2xl font-semibold text-foreground">{value}</div>
+            <div className="text-sm text-muted-foreground">{label}</div>
           </div>
         ))}
       </div>
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h3 className="mb-4 font-semibold text-slate-900">Progreso por curso</h3>
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+        <h3 className="mb-4 font-semibold text-foreground">Progreso por curso</h3>
         <div className="space-y-4">
           {metrics.course_breakdown.length ? metrics.course_breakdown.map((course) => (
-            <div key={course.id ?? course.name} className="rounded-xl bg-slate-50 p-4">
+            <div key={course.id ?? course.name} className="rounded-xl bg-muted p-4">
               <div className="mb-2 flex items-center justify-between gap-4">
-                <span className="font-medium text-slate-800">{course.name}</span>
-                <span className="text-sm text-slate-500">{course.progress}%</span>
+                <span className="font-medium text-foreground">{course.name}</span>
+                <span className="text-sm text-muted-foreground">{course.progress}%</span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-slate-200">
-                <div className="h-full rounded-full bg-blue-600" style={{ width: `${Math.max(0, Math.min(100, course.progress))}%` }} />
+              <div className="h-2 overflow-hidden rounded-full bg-border">
+                <div className="h-full rounded-full bg-primary" style={{ width: `${Math.max(0, Math.min(100, course.progress))}%` }} />
               </div>
-              <div className="mt-2 flex gap-4 text-xs text-slate-500">
-                <span>Atención {course.attention_avg}%</span>
+              <div className="mt-2 flex gap-4 text-xs text-muted-foreground">
+                <span>Cobertura de señal {course.attention_avg}%</span>
                 <span>Calificación {course.grade}</span>
                 <span>{course.study_hours} h</span>
               </div>
             </div>
-          )) : <p className="text-sm text-slate-500">Aún no hay sesiones suficientes.</p>}
+          )) : <p className="text-sm text-muted-foreground">Aún no hay sesiones suficientes.</p>}
         </div>
       </div>
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h3 className="mb-3 font-semibold text-slate-900">Recomendaciones</h3>
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+        <h3 className="mb-3 font-semibold text-foreground">Sugerencias académicas</h3>
         <div className="space-y-3">
           {metrics.recommendations.map((item) => (
-            <div key={`${item.priority}-${item.title}`} className="rounded-xl border border-slate-100 p-4">
-              <div className="font-medium text-slate-800">{item.title}</div>
-              <p className="text-sm text-slate-500">{item.description}</p>
+            <div key={`${item.priority}-${item.title}`} className="rounded-xl border border-border p-4">
+              <div className="font-medium text-foreground">{item.title}</div>
+              <p className="text-sm text-muted-foreground">{item.description}</p>
             </div>
           ))}
         </div>

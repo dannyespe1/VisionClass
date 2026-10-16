@@ -76,7 +76,7 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
             const moduleOrder = modules.find((m) => m.id === l.module.id)?.order || 0;
             return {
               id: l.id,
-              title: l.title || "Leccion",
+              title: l.title || "Lección",
               order: l.order || 0,
               moduleId: l.module.id,
               courseId: l.module.course.id,
@@ -109,7 +109,7 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
           return {
             id: course.id,
             title: course.title || "Curso",
-            instructor: course.owner.username || "Profesor",
+            instructor: course.owner.username || "Docente",
             progress,
             totalLessons,
             completedLessons,
@@ -155,14 +155,14 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
       <header className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-semibold text-slate-900">Bienvenido de nuevo</h2>
-            <p className="text-sm text-slate-500">Continúa con tu aprendizaje donde lo dejaste.</p>
+            <h2 className="text-2xl font-semibold text-foreground">Bienvenido de nuevo</h2>
+            <p className="text-sm text-muted-foreground">Continúa con tu aprendizaje donde lo dejaste.</p>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setViewMode("grid")}
               className={`p-2 rounded-lg transition-colors ${
-                viewMode === "grid" ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                viewMode === "grid" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground hover:bg-border"
               }`}
             >
               <Grid className="w-5 h-5" />
@@ -170,7 +170,7 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
             <button
               onClick={() => setViewMode("list")}
               className={`p-2 rounded-lg transition-colors ${
-                viewMode === "list" ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                viewMode === "list" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground hover:bg-border"
               }`}
             >
               <List className="w-5 h-5" />
@@ -179,46 +179,46 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
         </div>
 
         <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm px-4 py-4 flex items-center justify-between transition transform hover:-translate-y-1 hover:shadow-lg">
+          <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-4 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
             <div>
-              <p className="text-xs text-slate-500">Cursos activos</p>
-              <p className="mt-1 text-xl font-semibold text-slate-900">{totalCourses}</p>
+              <p className="text-xs text-muted-foreground">Cursos activos</p>
+              <p className="mt-1 text-xl font-semibold text-foreground">{totalCourses}</p>
             </div>
-            <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <BookOpen className="h-5 w-5" />
             </div>
           </div>
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm px-4 py-4 flex items-center justify-between transition transform hover:-translate-y-1 hover:shadow-lg">
+          <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-4 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
             <div>
-              <p className="text-xs text-slate-500">Lecciones completadas</p>
-              <p className="mt-1 text-xl font-semibold text-slate-900">{totalCompleted}</p>
-              <p className="text-[11px] text-slate-400">{progressPercent}% del total</p>
+              <p className="text-xs text-muted-foreground">Lecciones completadas</p>
+              <p className="mt-1 text-xl font-semibold text-foreground">{totalCompleted}</p>
+              <p className="text-[11px] text-muted-foreground">{progressPercent}% del total</p>
             </div>
-            <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/10 text-success">
               <CheckCircle2 className="h-5 w-5" />
             </div>
           </div>
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm px-4 py-4 flex items-center justify-between transition transform hover:-translate-y-1 hover:shadow-lg">
+          <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-4 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
             <div>
-              <p className="text-xs text-slate-500">Tiempo de estudio</p>
-              <p className="mt-1 text-xl font-semibold text-slate-900">--</p>
-              <p className="text-[11px] text-slate-400">Esta semana</p>
+              <p className="text-xs text-muted-foreground">Tiempo de estudio</p>
+              <p className="mt-1 text-xl font-semibold text-foreground">--</p>
+              <p className="text-[11px] text-muted-foreground">Esta semana</p>
             </div>
-            <div className="h-10 w-10 rounded-xl bg-violet-50 flex items-center justify-center text-violet-600">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <span className="text-sm font-semibold">h</span>
             </div>
           </div>
         </section>
       </header>
 
-      {loading && <p className="text-sm text-slate-500">Cargando cursos...</p>}
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {loading && <p className="text-sm text-muted-foreground">Cargando cursos…</p>}
+      {error && <p className="text-sm text-destructive">{error}</p>}
 
       {!hasCourses && !loading && (
-        <div className="text-center py-12 bg-white rounded-2xl border border-slate-100">
-          <BookOpen className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <h3 className="text-lg font-semibold text-slate-900">Aun no tienes cursos inscritos</h3>
-          <p className="text-sm text-slate-500">Explora la pestana de cursos para inscribirte.</p>
+        <div className="rounded-2xl border border-border bg-card py-12 text-center">
+          <BookOpen className="mx-auto mb-3 h-12 w-12 text-muted-foreground" />
+          <h3 className="text-lg font-semibold text-foreground">Aún no tienes cursos inscritos</h3>
+          <p className="text-sm text-muted-foreground">Explora la pestaña de cursos para inscribirte.</p>
         </div>
       )}
 
@@ -227,39 +227,39 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
           {coursesView.map((course) => (
             <div
               key={course.id}
-              className="bg-white rounded-xl overflow-hidden shadow-sm transition transform hover:-translate-y-1 hover:shadow-xl"
+              className="overflow-hidden rounded-xl bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="relative h-48">
                 <ImageWithFallback src={course.image} alt={course.title} className="w-full h-full object-cover" />
                 <div className="absolute top-3 right-3">
-                  <span className="px-3 py-1 bg-white/95 backdrop-blur-sm rounded-full text-sm">{course.category}</span>
+                  <span className="rounded-full bg-card/95 px-3 py-1 text-sm backdrop-blur-sm">{course.category}</span>
                 </div>
               </div>
               <div className="p-6">
                 <h3 className="text-xl mb-2">{course.title}</h3>
-                <p className="text-sm text-gray-600 mb-4">{course.instructor}</p>
+                <p className="mb-4 text-sm text-muted-foreground">{course.instructor}</p>
 
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-2 text-sm">
-                    <span className="text-gray-600">Progreso</span>
-                    <span className="text-blue-600">{course.progress}%</span>
+                    <span className="text-muted-foreground">Progreso</span>
+                    <span className="text-primary">{course.progress}%</span>
                   </div>
                   <Progress value={course.progress} />
                 </div>
 
-                <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-                  <div className="text-sm text-gray-600 mb-1">Siguiente leccion:</div>
+                <div className="mb-4 rounded-lg bg-muted p-3">
+                  <div className="mb-1 text-sm text-muted-foreground">Siguiente lección:</div>
                   <div className="text-sm">{course.nextLesson}</div>
                 </div>
 
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <CheckCircle2 className="w-4 h-4" />
                     {course.completedLessons}/{course.totalLessons} lecciones
                   </div>
                   <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 bg-green-500 rounded-full" />
-                    <span className="text-sm text-gray-600">Progreso: {course.progress}%</span>
+                    <div className="h-2 w-2 rounded-full bg-success" />
+                    <span className="text-sm text-muted-foreground">Progreso: {course.progress}%</span>
                   </div>
                 </div>
 
@@ -287,7 +287,7 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
           {coursesView.map((course) => (
             <div
               key={course.id}
-              className="bg-white rounded-xl p-6 shadow-sm transition transform hover:-translate-y-1 hover:shadow-xl"
+              className="rounded-xl bg-card p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="flex gap-6">
                 <div className="flex-shrink-0 w-48 h-32 rounded-lg overflow-hidden">
@@ -297,34 +297,34 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <h3 className="text-xl mb-1">{course.title}</h3>
-                      <p className="text-sm text-gray-600">{course.instructor}</p>
+                      <p className="text-sm text-muted-foreground">{course.instructor}</p>
                     </div>
-                    <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">{course.category}</span>
+                    <span className="rounded-full bg-muted px-3 py-1 text-sm">{course.category}</span>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-4 mb-4">
                     <div>
                       <div className="flex items-center justify-between mb-2 text-sm">
-                        <span className="text-gray-600">Progreso</span>
-                        <span className="text-blue-600">{course.progress}%</span>
+                        <span className="text-muted-foreground">Progreso</span>
+                        <span className="text-primary">{course.progress}%</span>
                       </div>
                       <Progress value={course.progress} />
                     </div>
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <CheckCircle2 className="w-4 h-4" />
                         {course.completedLessons}/{course.totalLessons} lecciones
                       </div>
                       <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 bg-green-500 rounded-full" />
-                        <span className="text-sm text-gray-600">Progreso: {course.progress}%</span>
+                        <div className="h-2 w-2 rounded-full bg-success" />
+                        <span className="text-sm text-muted-foreground">Progreso: {course.progress}%</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-600">
-                      Siguiente: <span className="text-gray-900">{course.nextLesson}</span>
+                    <div className="text-sm text-muted-foreground">
+                      Siguiente: <span className="text-foreground">{course.nextLesson}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Button onClick={() => onCourseSelect(course.id)}>Continuar</Button>
@@ -354,17 +354,17 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
           </DialogHeader>
           <div className="space-y-4 max-h-[60vh] overflow-auto pr-2">
             {syllabusModules.length === 0 && (
-              <p className="text-sm text-slate-500">Este curso aun no tiene temario cargado.</p>
+              <p className="text-sm text-muted-foreground">Este curso aún no tiene temario cargado.</p>
             )}
             {syllabusModules.map((module) => (
-              <div key={module.id} className="border border-slate-200 rounded-lg p-3 bg-slate-50">
-                <div className="font-semibold text-slate-900">{module.title}</div>
-                <div className="mt-2 space-y-1 text-sm text-slate-700">
-                  {module.lessons.length === 0 && <p className="text-xs text-slate-500">Sin lecciones.</p>}
+              <div key={module.id} className="rounded-lg border border-border bg-muted p-3">
+                <div className="font-semibold text-foreground">{module.title}</div>
+                <div className="mt-2 space-y-1 text-sm text-muted-foreground">
+                  {module.lessons.length === 0 && <p className="text-xs text-muted-foreground">Sin lecciones.</p>}
                   {module.lessons.map((lesson) => (
                     <div key={lesson.id} className="flex items-center justify-between">
                       <span>{lesson.title}</span>
-                      <span className="text-xs text-slate-500">Leccion {lesson.order}</span>
+                      <span className="text-xs text-muted-foreground">Lección {lesson.order}</span>
                     </div>
                   ))}
                 </div>

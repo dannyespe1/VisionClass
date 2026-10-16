@@ -43,7 +43,7 @@ export function PdfCanvasViewer({ data, title }: PdfCanvasViewerProps) {
 
           canvas.width = Math.ceil(viewport.width);
           canvas.height = Math.ceil(viewport.height);
-          canvas.className = "mx-auto block h-auto w-full max-w-4xl bg-white shadow-sm";
+          canvas.className = "mx-auto block h-auto w-full max-w-4xl bg-card shadow-sm";
           canvas.setAttribute("aria-label", `${title}, página ${pageNumber}`);
           container.appendChild(canvas);
 
@@ -66,12 +66,12 @@ export function PdfCanvasViewer({ data, title }: PdfCanvasViewerProps) {
   }, [data, title]);
 
   return (
-    <div className="min-h-[600px] bg-slate-100 p-3 sm:p-5">
+    <div className="min-h-[600px] bg-muted p-3 sm:p-5">
       {status === "loading" && (
-        <p className="py-8 text-center text-sm text-slate-500">Preparando lectura…</p>
+        <p className="py-8 text-center text-sm text-muted-foreground">Preparando lectura…</p>
       )}
       {status === "error" && (
-        <p className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+        <p className="rounded-lg border border-warning/30 bg-warning/10 p-4 text-sm text-foreground">
           No se pudo mostrar la lectura. Puedes abrirla con el botón Descargar.
         </p>
       )}

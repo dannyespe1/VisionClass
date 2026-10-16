@@ -33,7 +33,7 @@ export default function StudentPage() {
   }, [token, router]);
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
+    <main className="min-h-screen bg-gradient-to-b from-muted via-background to-muted">
       <StudentNavbar activeTab={activeTab} onTabChange={(tab) => setActiveTab(tab)} />
 
       <div className="max-w-6xl mx-auto px-4 lg:px-2 py-6 space-y-6">

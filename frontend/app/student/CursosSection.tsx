@@ -72,9 +72,9 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
 
   const categories = [
     { id: "todos", label: "Todos los cursos" },
-    { id: "programacion", label: "Programacion" },
+    { id: "programacion", label: "Programación" },
     { id: "ia", label: "Inteligencia Artificial" },
-    { id: "diseno", label: "Diseno" },
+    { id: "diseno", label: "Diseño" },
     { id: "negocios", label: "Negocios" },
     { id: "ciencias", label: "Ciencias" },
   ];
@@ -131,13 +131,13 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
             return {
               id: c.id,
               title: c.title,
-              instructor: c.owner.username || "Profesor",
+              instructor: c.owner.username || "Docente",
               duration,
               level: meta.level || "Intermedio",
               price: "Gratis",
               image: meta.thumbnail || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
               category: meta.field || "programacion",
-              description: cleanDescription || "Curso generado por el profesor.",
+              description: cleanDescription || "Curso generado por el docente.",
               lessonsCount,
               modulesCount,
               materialsCount,
@@ -185,18 +185,18 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-semibold text-slate-900 mb-2">Explorar Cursos</h1>
-        <p className="text-gray-600">Descubre cursos disenados con tecnología de vision por computadora</p>
-        {loading && <p className="text-sm text-slate-500 mt-2">Cargando cursos...</p>}
-        {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
+        <h1 className="mb-2 text-3xl font-semibold text-foreground">Explorar cursos</h1>
+        <p className="text-muted-foreground">Explora los cursos y actividades disponibles en la plataforma.</p>
+        {loading && <p className="mt-2 text-sm text-muted-foreground">Cargando cursos…</p>}
+        {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
       </div>
 
       <div className="mb-8">
         <div className="relative max-w-2xl">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Buscar cursos, instructores..."
+            placeholder="Buscar cursos, docentes…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-12 h-12"
@@ -212,8 +212,8 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
               onClick={() => setSelectedCategory(category.id)}
               className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
                 selectedCategory === category.id
-                  ? "bg-blue-600 text-white"
-                  : "bg-white text-gray-700 hover:bg-gray-50"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-card text-muted-foreground hover:bg-muted"
               }`}
             >
               {category.label}
@@ -223,7 +223,7 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
       </div>
 
       <div className="mb-6">
-        <p className="text-gray-600">
+        <p className="text-muted-foreground">
           {filteredCourses.length} curso{filteredCourses.length !== 1 ? "s" : ""}{" "}
           {selectedCategory !== "todos" &&
             `en ${categories.find((c) => c.id === selectedCategory)?.label || ""}`}
@@ -234,7 +234,7 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
         {filteredCourses.map((course) => (
           <div
             key={course.id}
-            className="bg-white rounded-xl overflow-hidden shadow-lg border border-slate-100 transition transform hover:-translate-y-1 hover:shadow-xl group"
+            className="group overflow-hidden rounded-xl border border-border bg-card shadow-lg transition hover:-translate-y-1 hover:shadow-xl"
           >
             <div className="relative h-48 overflow-hidden">
               <ImageWithFallback
@@ -243,7 +243,7 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
               <div className="absolute top-3 right-3">
-                <span className="px-3 py-1 bg-white/95 backdrop-blur-sm rounded-full text-sm">
+                <span className="rounded-full bg-card/95 px-3 py-1 text-sm backdrop-blur-sm">
                   {course.level}
                 </span>
               </div>
@@ -251,23 +251,23 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
 
             <div className="p-6">
               <h3 className="text-xl mb-2 line-clamp-2">{course.title}</h3>
-              <p className="text-sm text-gray-600 mb-3">{course.instructor}</p>
-              <p className="text-sm text-gray-600 mb-4 line-clamp-2">{course.description}</p>
+              <p className="mb-3 text-sm text-muted-foreground">{course.instructor}</p>
+              <p className="mb-4 line-clamp-2 text-sm text-muted-foreground">{course.description}</p>
 
-              <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
+              <div className="mb-4 flex items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <Clock className="w-4 h-4" />
                   <span>{course.duration}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-3 text-xs text-slate-500 mb-4">
+              <div className="mb-4 flex items-center gap-3 text-xs text-muted-foreground">
                 <span>{course.modulesCount} módulos</span>
                 <span>{course.lessonsCount} lecciones</span>
                 <span>{course.materialsCount} materiales</span>
               </div>
 
-              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                <div className="text-xl text-blue-600">{course.price}</div>
+              <div className="flex items-center justify-between border-t border-border pt-4">
+                <div className="text-xl text-primary">{course.price}</div>
                 <Button size="sm" onClick={() => openEnroll(course)}>
                   {enrolledIds.has(course.id) ? "Continuar" : "Inscribirse"}
                 </Button>
@@ -279,9 +279,9 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
 
       {filteredCourses.length === 0 && (
         <div className="text-center py-16">
-          <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <BookOpen className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
           <h3 className="text-xl mb-2">No se encontraron cursos</h3>
-          <p className="text-gray-600 mb-6">Intenta con otros terminos de busqueda o categorias</p>
+          <p className="mb-6 text-muted-foreground">Intenta con otros términos de búsqueda o categorías</p>
           <Button
             variant="outline"
             onClick={() => {
@@ -297,7 +297,7 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
       <Dialog open={enrollOpen} onOpenChange={setEnrollOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Confirmar inscripcion</DialogTitle>
+            <DialogTitle>Confirmar inscripción</DialogTitle>
             <DialogDescription>
               Completa los datos para matricularte en {enrollCourse?.title || "el curso"}.
             </DialogDescription>
@@ -322,7 +322,7 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label>Codigo de estudiante</Label>
+              <Label>Código de estudiante</Label>
               <Input
                 value={enrollForm.studentCode}
                 onChange={(e) => setEnrollForm((prev) => ({ ...prev, studentCode: e.target.value }))}
@@ -334,7 +334,7 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
               <Input
                 value={enrollForm.career}
                 onChange={(e) => setEnrollForm((prev) => ({ ...prev, career: e.target.value }))}
-                placeholder="Ingenieria en Sistemas"
+                placeholder="Ingeniería en Sistemas"
               />
             </div>
             <div className="space-y-2">
@@ -346,7 +346,7 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label>Telefono</Label>
+              <Label>Teléfono</Label>
               <Input
                 value={enrollForm.phone}
                 onChange={(e) => setEnrollForm((prev) => ({ ...prev, phone: e.target.value }))}
@@ -406,7 +406,7 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
                 }
               }}
             >
-              {enrollSubmitting ? "Inscribiendo..." : "Confirmar inscripcion"}
+              {enrollSubmitting ? "Inscribiendo…" : "Confirmar inscripción"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -416,14 +416,14 @@ export function CursosSection({ onCourseSelect }: CursosSectionProps) {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <CheckCircle className="w-5 h-5 text-emerald-600" />
+              <CheckCircle className="h-5 w-5 text-success" />
               Inscripción exitosa
             </DialogTitle>
             <DialogDescription>
               Tu inscripción se registró correctamente.
             </DialogDescription>
           </DialogHeader>
-          <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-700">
+          <div className="rounded-lg border border-success/30 bg-success/10 p-4 text-sm text-foreground">
             {successCourse ? `Curso: ${successCourse.title}` : "Curso disponible en tu panel."}
           </div>
           <DialogFooter className="gap-2 sm:gap-0">

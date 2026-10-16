@@ -246,56 +246,56 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-        <div className="bg-white rounded-xl p-6 shadow-sm">
+        <div className="bg-card rounded-xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <BookOpen className="w-6 h-6 text-blue-600" />
+            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+              <BookOpen className="w-6 h-6 text-primary" />
             </div>
-            <TrendingUp className="w-5 h-5 text-green-600" />
+            <TrendingUp className="w-5 h-5 text-success" />
           </div>
           <div className="text-2xl mb-1">{courses.length}</div>
-          <div className="text-sm text-gray-600">Cursos Totales</div>
+          <div className="text-sm text-muted-foreground">Cursos totales</div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm">
+        <div className="bg-card rounded-xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <Power className="w-6 h-6 text-green-600" />
+            <div className="w-12 h-12 bg-success/10 rounded-lg flex items-center justify-center">
+              <Power className="w-6 h-6 text-success" />
             </div>
-            <TrendingUp className="w-5 h-5 text-green-600" />
+            <TrendingUp className="w-5 h-5 text-success" />
           </div>
           <div className="text-2xl mb-1">{activeCourses}</div>
-          <div className="text-sm text-gray-600">Cursos Activos</div>
+          <div className="text-sm text-muted-foreground">Cursos activos</div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm">
+        <div className="bg-card rounded-xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <Users className="w-6 h-6 text-purple-600" />
+            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+              <Users className="w-6 h-6 text-primary" />
             </div>
-            <TrendingUp className="w-5 h-5 text-green-600" />
+            <TrendingUp className="w-5 h-5 text-success" />
           </div>
           <div className="text-2xl mb-1">{totalStudents}</div>
-          <div className="text-sm text-gray-600">Estudiantes Totales</div>
+          <div className="text-sm text-muted-foreground">Estudiantes totales</div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm">
+        <div className="bg-card rounded-xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-              <Eye className="w-6 h-6 text-yellow-600" />
+            <div className="w-12 h-12 bg-warning/10 rounded-lg flex items-center justify-center">
+              <Eye className="w-6 h-6 text-warning" />
             </div>
-            <span className="text-sm text-gray-600">Promedio</span>
+            <span className="text-sm text-muted-foreground">Promedio</span>
           </div>
           <div className="text-2xl mb-1">{avgAttention === null ? "—" : `${avgAttention}%`}</div>
-          <div className="text-sm text-gray-600">Atención General</div>
+          <div className="text-sm text-muted-foreground">Atención General</div>
         </div>
       </div>
 
       <div>
         <h2 className="text-2xl mb-4">Mis Cursos</h2>
-        {error && <p role="alert" className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+        {error && <p role="alert" className="mb-4 rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</p>}
         {courses.length === 0 && !loading && (
-          <div className="bg-white rounded-xl p-6 shadow-sm border text-sm text-slate-600">
+          <div className="bg-card rounded-xl p-6 shadow-sm border text-sm text-muted-foreground">
             Aún no tienes cursos. Crea uno desde la sección Materiales.
           </div>
         )}
@@ -303,8 +303,8 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
           {courses.map((course) => (
             <div
               key={course.id}
-              className={`bg-white rounded-xl p-6 shadow-sm transition-all ${
-                course.is_active ? "border-l-4 border-green-500" : "opacity-75"
+              className={`bg-card rounded-xl p-6 shadow-sm transition-all ${
+                course.is_active ? "border-l-4 border-success" : "opacity-75"
               }`}
             >
               <div className="flex gap-6">
@@ -323,16 +323,16 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
                         <h3 className="text-xl">{course.title}</h3>
                         <span
                           className={`px-3 py-1 rounded-full text-sm ${
-                            course.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"
+                            course.is_active ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
                           }`}
                         >
                           {course.is_active ? "Activo" : "Inactivo"}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-600">{course.category || "Curso"}</p>
+                      <p className="text-sm text-muted-foreground">{course.category || "Curso"}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-muted-foreground">
                         {course.is_active ? "Desactivar" : "Activar"}
                       </span>
                       <Switch
@@ -344,44 +344,44 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                     <div className="flex items-center gap-2">
-                      <Users className="w-5 h-5 text-gray-400" />
+                      <Users className="w-5 h-5 text-muted-foreground" />
                       <div>
-                        <div className="text-sm text-gray-600">Estudiantes</div>
-                        <div>{course.students ?? "--"}</div>
+                        <div className="text-sm text-muted-foreground">Estudiantes</div>
+                        <div>{course.students ?? "—"}</div>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <Eye className="w-5 h-5 text-gray-400" />
+                      <Eye className="w-5 h-5 text-muted-foreground" />
                       <div>
-                        <div className="text-sm text-gray-600">Atención Prom.</div>
+                        <div className="text-sm text-muted-foreground">Atención Prom.</div>
                         <div>{course.avgAttention === null ? "—" : `${course.avgAttention}%`}</div>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <BookOpen className="w-5 h-5 text-gray-400" />
+                      <BookOpen className="w-5 h-5 text-muted-foreground" />
                       <div>
-                        <div className="text-sm text-gray-600">Progreso</div>
-                        <div>{course.lessonsCompleted ?? "--"}</div>
+                        <div className="text-sm text-muted-foreground">Progreso</div>
+                        <div>{course.lessonsCompleted ?? "—"}</div>
                       </div>
                     </div>
 
                     <div>
-                      <div className="text-sm text-gray-600">Última actualización</div>
+                      <div className="text-sm text-muted-foreground">Última actualización</div>
                       <div className="text-sm">{course.lastUpdated || "Reciente"}</div>
                     </div>
                   </div>
 
                   <div className="flex gap-2">
                     <button
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                      className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm"
                       onClick={() => setSelectedDetails(course)}
                     >
                       Ver Detalles
                     </button>
                     <button
-                      className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+                      className="px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors text-sm"
                       onClick={() => {
                         if (typeof window !== "undefined") {
                           window.localStorage.setItem("instructor_material_course_id", String(course.id));
@@ -393,7 +393,7 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
                       Subir Material
                     </button>
                     <button
-                      className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+                      className="px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors text-sm"
                       onClick={() => {
                         setSelectedDetails(course);
                         goToTab("estadisticas");
@@ -410,16 +410,16 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
       </div>
 
       {selectedDetails && (
-        <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200">
+        <div className="bg-card rounded-xl p-6 shadow-lg border border-border">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-xl font-semibold text-slate-900">{selectedDetails.title}</h3>
-              <p className="text-sm text-slate-600">
-                Estado: {selectedDetails.is_active ? "Activo" : "Inactivo"} | Estudiantes: {selectedDetails.students ?? "--"}
+              <h3 className="text-xl font-semibold text-foreground">{selectedDetails.title}</h3>
+              <p className="text-sm text-muted-foreground">
+                Estado: {selectedDetails.is_active ? "Activo" : "Inactivo"} | Estudiantes: {selectedDetails.students ?? "—"}
               </p>
             </div>
             <button
-              className="text-sm text-slate-500 hover:text-slate-700"
+              className="text-sm text-muted-foreground hover:text-foreground"
               onClick={() => setSelectedDetails(null)}
             >
               Cerrar
@@ -428,10 +428,10 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <div className="md:col-span-2 space-y-4">
-              <p className="text-sm text-slate-700 whitespace-pre-line">
+              <p className="text-sm text-foreground whitespace-pre-line">
                 {selectedDetails.description || "Sin descripción"}
               </p>
-              <div className="flex gap-4 text-sm text-slate-600">
+              <div className="flex gap-4 text-sm text-muted-foreground">
                 <span>
                   Atención prom.: {selectedDetails.avgAttention === null ? "—" : `${selectedDetails.avgAttention}%`}
                 </span>
@@ -439,31 +439,31 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
               </div>
 
               <div className="space-y-3">
-                <h4 className="text-sm font-semibold text-slate-900">Estructura del curso</h4>
+                <h4 className="text-sm font-semibold text-foreground">Estructura del curso</h4>
                 {buildStructure(selectedDetails.id).length === 0 && (
-                  <p className="text-xs text-slate-500">Este curso aún no tiene módulos creados.</p>
+                  <p className="text-xs text-muted-foreground">Este curso aún no tiene módulos creados.</p>
                 )}
                 {buildStructure(selectedDetails.id).map((module) => (
-                  <div key={module.id} className="border border-slate-200 rounded-lg p-3 bg-slate-50">
+                  <div key={module.id} className="border border-border rounded-lg p-3 bg-muted">
                     <div className="flex items-center justify-between">
-                      <div className="font-semibold text-slate-900">{module.title}</div>
-                      <div className="text-xs text-slate-500">
+                      <div className="font-semibold text-foreground">{module.title}</div>
+                      <div className="text-xs text-muted-foreground">
                         Duración: {Math.max(1, Math.round(module.durationHours * 60))} min
                       </div>
                     </div>
                     <div className="mt-2 space-y-2">
                       {module.lessons.length === 0 && (
-                        <p className="text-xs text-slate-500">Sin lecciones en este módulo.</p>
+                        <p className="text-xs text-muted-foreground">Sin lecciones en este módulo.</p>
                       )}
                       {module.lessons.map((lesson) => (
-                        <div key={lesson.id} className="border border-slate-200 rounded-md px-3 py-2 bg-white">
+                        <div key={lesson.id} className="border border-border rounded-md px-3 py-2 bg-card">
                           <div className="text-sm font-medium">{lesson.title}</div>
-                          <div className="text-xs text-slate-500">
+                          <div className="text-xs text-muted-foreground">
                             Materiales: {lesson.materials.length}
                           </div>
-                          <div className="mt-1 flex flex-wrap gap-2 text-xs text-slate-600">
+                          <div className="mt-1 flex flex-wrap gap-2 text-xs text-muted-foreground">
                             {lesson.materials.map((mat) => (
-                              <span key={mat.id} className="px-2 py-1 rounded-full bg-slate-100">
+                              <span key={mat.id} className="px-2 py-1 rounded-full bg-muted">
                                 {mat.title} ({mat.materialType})
                               </span>
                             ))}
@@ -477,20 +477,20 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
             </div>
 
             <div className="space-y-3">
-              <div className="rounded-lg overflow-hidden border border-slate-200">
+              <div className="rounded-lg overflow-hidden border border-border">
                 <ImageWithFallback
                   src={selectedDetails.image || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800"}
                   alt={selectedDetails.title}
                   className="w-full h-40 object-cover"
                 />
               </div>
-              <div className="text-sm text-slate-600">
-              <p>Progreso: {selectedDetails.lessonsCompleted ?? "--"}</p>
+              <div className="text-sm text-muted-foreground">
+              <p>Progreso: {selectedDetails.lessonsCompleted ?? "—"}</p>
                 <p>Categoría: {selectedDetails.category || "Curso"}</p>
               </div>
               <div className="flex gap-2">
                 <Button
-                  className="bg-sky-600 text-white hover:bg-sky-700"
+                  className="bg-secondary text-secondary-foreground hover:bg-secondary/90"
                   onClick={() => {
                     if (typeof window !== "undefined") {
                       window.localStorage.setItem("instructor_material_course_id", String(selectedDetails.id));
@@ -510,32 +510,32 @@ export function InicioProfesor({ onTabChange }: InicioProfesorProps) {
         </div>
       )}
 
-      <div className="bg-blue-50 rounded-xl p-6">
+      <div className="bg-primary/10 rounded-xl p-6">
         <h3 className="mb-4">Acciones Rápidas</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <button
-            className="bg-white p-4 rounded-lg hover:shadow-md transition-shadow text-left"
+            className="bg-card p-4 rounded-lg hover:shadow-md transition-shadow text-left"
             onClick={() => goToTab("materiales")}
           >
-            <BookOpen className="w-8 h-8 text-blue-600 mb-2" />
+            <BookOpen className="w-8 h-8 text-primary mb-2" />
             <div className="mb-1">Crear Nuevo Curso</div>
-            <p className="text-sm text-gray-600">Configura un nuevo curso</p>
+            <p className="text-sm text-muted-foreground">Configura un nuevo curso</p>
           </button>
           <button
-            className="bg-white p-4 rounded-lg hover:shadow-md transition-shadow text-left"
+            className="bg-card p-4 rounded-lg hover:shadow-md transition-shadow text-left"
             onClick={() => goToTab("estadisticas")}
           >
-            <Users className="w-8 h-8 text-green-600 mb-2" />
+            <Users className="w-8 h-8 text-success mb-2" />
             <div className="mb-1">Ver Estudiantes</div>
-            <p className="text-sm text-gray-600">Lista de todos los estudiantes</p>
+            <p className="text-sm text-muted-foreground">Lista de todos los estudiantes</p>
           </button>
           <button
-            className="bg-white p-4 rounded-lg hover:shadow-md transition-shadow text-left"
+            className="bg-card p-4 rounded-lg hover:shadow-md transition-shadow text-left"
             onClick={() => goToTab("estadisticas")}
           >
-            <Eye className="w-8 h-8 text-purple-600 mb-2" />
+            <Eye className="w-8 h-8 text-primary mb-2" />
             <div className="mb-1">Reportes de Atención</div>
-            <p className="text-sm text-gray-600">Análisis detallados</p>
+            <p className="text-sm text-muted-foreground">Análisis detallados</p>
           </button>
         </div>
       </div>

@@ -48,15 +48,15 @@ export default function InstructorPage() {
   }, [activeTab]);
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
+    <main className="min-h-screen bg-gradient-to-b from-muted via-background to-muted">
       <InstructorNavbar activeTab={activeTab} onTabChange={setActiveTab} />
 
       <div className="max-w-6xl mx-auto px-4 lg:px-2 py-6 space-y-6">
         {activeTab === "inicio" && (
           <div className="space-y-6">
             <div className="flex flex-col gap-2">
-              <h1 className="text-2xl font-semibold text-slate-900">Bienvenido, profesor</h1>
-              <p className="text-sm text-slate-500">
+              <h1 className="text-2xl font-semibold text-foreground">Bienvenido, docente</h1>
+              <p className="text-sm text-muted-foreground">
                 Gestiona tus cursos, revisa la atención de tus estudiantes y ajusta el contenido en segundos.
               </p>
             </div>

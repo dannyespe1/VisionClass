@@ -86,6 +86,15 @@ Detectado en PR 5: en 390px el menú mobile abierto produce desbordamiento horiz
 - `app/student/InicioSection.tsx` muestra `--` en “Tiempo de estudio”. Debe definirse el comportamiento y la fuente del valor antes de reemplazarlo.
 - `app/student/page.module.css` no tiene importaciones conocidas. Evaluar y, si corresponde, eliminarlo en PR 10.
 
+## Panel docente — Deudas detectadas en PR 7
+
+- **H2 BLOQUEANTE:** existen 11 claims de “atención” en `app/instructor/page.tsx`, `app/instructor/components/EstadisticasProfesor.tsx` y `app/instructor/components/InicioProfesor.tsx`. Requieren una decisión de producto sobre qué representa `attention_score`; no deben reformularse hasta resolver H2.
+- `app/instructor/components/MaterialesSection.tsx` tiene 1760 líneas. Su rebranding se divide en PR 7B (CRUD) y PR 7C (IA e importación/exportación JSON).
+- `app/instructor/components/InstructorNavbar.tsx` es un wrapper de `AppShell`. Los textos compartidos de `nav-config` (“Profesor”, “Abrir menu” y “Estadisticas”) son deuda del PR 5 y quedan fuera del alcance de PR 7.
+- `app/instructor/components/MaterialesSection.tsx` usa `"#"` como fallback de URL. Es una deuda funcional para PR 7B.
+- `Recharts` recibe variables CSS como colores en `EstadisticasProfesor.tsx`; se debe verificar visualmente su compatibilidad en los navegadores admitidos.
+- El panel heredado `EstadisticasProfesor` se activa cuando `TEACHER_GROUP_DASHBOARD_ENABLED=false`.
+
 ## Notas
 
 - El PR 0.5 fue evaluado y cerrado como "no requerido": las correcciones de `sharp` y `source-map-js` ya estaban en el commit `0ee2197` del PR 0.

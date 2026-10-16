@@ -68,6 +68,14 @@ Reescrituras diferidas del PR 4 (Grupo C):
 
 - Testimonio "Dr. María Rodríguez - Universidad Nacional" eliminado. Agregar solo con autorización escrita y evidencia real.
 
+## Responsive mobile — Overflow horizontal del menú
+
+Detectado en PR 5: en 390px el menú mobile abierto produce desbordamiento horizontal. Es un comportamiento heredado de los navbars originales (Student/Instructor/Admin), no una regresión del refactor AppShell.
+
+**Fix sugerido:** ajustar ancho del panel mobile o aplicar `overflow-x: hidden` en el contenedor.
+
+**PR sugerido:** PR 10 (limpieza) o PR dedicado de responsive.
+
 ## Notas
 
 - El PR 0.5 fue evaluado y cerrado como "no requerido": las correcciones de `sharp` y `source-map-js` ya estaban en el commit `0ee2197` del PR 0.

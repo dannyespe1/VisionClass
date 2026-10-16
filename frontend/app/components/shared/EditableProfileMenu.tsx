@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { LogOut, User } from "lucide-react";
 
 import { useAuth } from "../../context/AuthContext";
@@ -11,7 +10,6 @@ import type { UserProfileApi } from "../../lib/api-types";
 
 export function EditableProfileMenu({ role }: { role: "student" | "instructor" }) {
   const { token, logout } = useAuth();
-  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [profileForm, setProfileForm] = useState({
@@ -30,7 +28,7 @@ export function EditableProfileMenu({ role }: { role: "student" | "instructor" }
 
   const handleLogout = () => {
     logout();
-    router.push("/");
+    window.location.replace("/");
   };
 
   useEffect(() => {

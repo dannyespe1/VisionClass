@@ -169,7 +169,7 @@ export default function AdminPage() {
 
   const deleteCourse = (id: number) => {
     if (!token) return;
-    if (!confirm("Estas seguro de que quieres eliminar este curso")) return;
+    if (!confirm("¿Estás seguro de que quieres eliminar este curso?")) return;
     apiFetch(`/api/admin/courses/${id}/`, { method: "DELETE" }, token)
       .then(() => setCourses((prev) => prev.filter((c) => c.id !== id)))
       .then(() => loadOverview(token))
@@ -241,7 +241,7 @@ export default function AdminPage() {
   const handleCreateSubmit = async () => {
     if (!token) return;
     if (!createForm.name.trim() || !createForm.email.trim() || !createForm.password.trim()) {
-      setFormError("Nombre, email y contrasea son obligatorios.");
+      setFormError("Nombre, email y contraseña son obligatorios.");
       return;
     }
     try {
@@ -303,9 +303,9 @@ export default function AdminPage() {
 
   const handleCreateCourse = async () => {
     if (!token) return;
-    const title = prompt("Titulo del curso:");
+    const title = prompt("Título del curso:");
     if (!title) return;
-    const category = prompt("Categoria del curso:", "General") || "General";
+    const category = prompt("Categoría del curso:", "General") || "General";
     const instructorEmail = prompt("Email del instructor (opcional):", "");
     try {
       const created = await apiFetch<AdminCourse>(
@@ -365,7 +365,7 @@ export default function AdminPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
+    <main className="min-h-screen bg-background">
       <AdminNavbar currentView={currentView} onViewChange={setCurrentView} />
 
       <div className="max-w-6xl mx-auto px-4 lg:px-2 py-6 space-y-8">
@@ -476,16 +476,16 @@ export default function AdminPage() {
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="create-password">Contrasea</Label>
+              <Label htmlFor="create-password">Contraseña</Label>
               <Input
                 id="create-password"
                 type="password"
                 value={createForm.password}
                 onChange={(e) => setCreateForm((prev) => ({ ...prev, password: e.target.value }))}
-                placeholder="Minimo 8 caracteres"
+                placeholder="Mínimo 8 caracteres"
               />
             </div>
-            {formError && <p className="text-sm text-red-600">{formError}</p>}
+            {formError && <p className="text-sm text-destructive">{formError}</p>}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCreateOpen(false)}>
@@ -500,7 +500,7 @@ export default function AdminPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Editar usuario</DialogTitle>
-            <DialogDescription>Actualiza los datos, rol o contrasea del usuario.</DialogDescription>
+            <DialogDescription>Actualiza los datos, rol o contraseña del usuario.</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4">
             <div className="grid gap-2">
@@ -558,7 +558,7 @@ export default function AdminPage() {
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="edit-password">Nueva contrasea (opcional)</Label>
+              <Label htmlFor="edit-password">Nueva contraseña (opcional)</Label>
               <Input
                 id="edit-password"
                 type="password"
@@ -567,7 +567,7 @@ export default function AdminPage() {
                 placeholder="Dejar en blanco para conservar"
               />
             </div>
-            {formError && <p className="text-sm text-red-600">{formError}</p>}
+            {formError && <p className="text-sm text-destructive">{formError}</p>}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditOpen(false)}>
@@ -583,7 +583,7 @@ export default function AdminPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Eliminar usuario</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta accion eliminara al usuario {activeUser?.name || activeUser?.email || "seleccionado"}. No se puede deshacer.
+              Esta acción eliminará al usuario {activeUser?.name || activeUser?.email || "seleccionado"}. No se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

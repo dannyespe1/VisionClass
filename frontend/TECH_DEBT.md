@@ -95,6 +95,16 @@ Detectado en PR 5: en 390px el menú mobile abierto produce desbordamiento horiz
 - `Recharts` recibe variables CSS como colores en `EstadisticasProfesor.tsx`; se debe verificar visualmente su compatibilidad en los navegadores admitidos.
 - El panel heredado `EstadisticasProfesor` se activa cuando `TEACHER_GROUP_DASHBOARD_ENABLED=false`.
 
+### MaterialesSection.tsx — Deudas detectadas en PR 7B
+
+- La URL de YouTube se convierte incorrectamente en las líneas heredadas 537 y 702-706: se inserta el delimitador capturado en lugar del identificador del video. Es un bug funcional y queda fuera del alcance visual de PR 7B.
+- La eliminación individual de un material no solicita confirmación antes de ejecutar la operación.
+- Los archivos PDF se convierten completamente a Base64 en memoria; esto puede elevar el consumo de memoria con archivos grandes.
+- La creación de un curso y su estructura no es transaccional. Un fallo intermedio puede dejar un curso creado parcialmente.
+- No existe edición integral de un curso; la interfaz solo permite crearlo o eliminarlo y administrar sus módulos y lecciones.
+- Los botones de reordenamiento carecían de nombres accesibles. PR 7B añade `aria-label` sin modificar sus handlers.
+- PR 7C queda pendiente para generación con IA e importación/exportación JSON. Los bloques reservados son 104-107, 124-147, 177-179, 285-345, 541-598, 615-621, 1258-1508 y 1688-1731 de `MaterialesSection.tsx` en la base de PR 7B.
+
 ## Notas
 
 - El PR 0.5 fue evaluado y cerrado como "no requerido": las correcciones de `sharp` y `source-map-js` ya estaban en el commit `0ee2197` del PR 0.

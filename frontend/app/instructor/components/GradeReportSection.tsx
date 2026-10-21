@@ -166,37 +166,37 @@ export function GradeReportSection() {
   const reports = useMemo(() => buildReports(attempts), [attempts]);
 
   return (
-    <section aria-labelledby="grade-report-title" className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <div className="border-b border-slate-200 p-6">
+    <section aria-labelledby="grade-report-title" className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+      <div className="border-b border-border p-6">
         <div className="flex items-center gap-3">
-          <span className="rounded-lg bg-blue-50 p-2 text-blue-700"><ClipboardCheck className="h-5 w-5" /></span>
+          <span className="rounded-lg bg-primary/10 p-2 text-primary"><ClipboardCheck className="h-5 w-5" /></span>
           <div>
-            <h2 id="grade-report-title" className="text-xl font-semibold text-slate-950">Reporte de calificaciones</h2>
-            <p className="mt-1 text-sm text-slate-600">Notas organizadas por curso, módulo y evaluación. Se muestra el intento más reciente.</p>
+            <h2 id="grade-report-title" className="text-xl font-semibold text-foreground">Reporte de calificaciones</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Notas organizadas por curso, módulo y evaluación. Se muestra el intento más reciente.</p>
           </div>
         </div>
       </div>
 
-      {loading && <p role="status" className="p-6 text-sm text-slate-600">Cargando calificaciones…</p>}
-      {error && <p role="alert" className="m-6 rounded-lg bg-red-50 p-4 text-sm text-red-800">{error}</p>}
+      {loading && <p role="status" className="p-6 text-sm text-muted-foreground">Cargando calificaciones…</p>}
+      {error && <p role="alert" className="m-6 rounded-lg bg-destructive/10 p-4 text-sm text-destructive">{error}</p>}
       {!loading && !error && !reports.length && (
-        <p className="p-8 text-center text-sm text-slate-500">Todavía no existen evaluaciones calificadas.</p>
+        <p className="p-8 text-center text-sm text-muted-foreground">Todavía no existen evaluaciones calificadas.</p>
       )}
       {!loading && !error && reports.map((course) => (
-        <article key={course.id} className="border-b border-slate-200 p-6 last:border-b-0">
-          <h3 className="text-lg font-semibold text-slate-950">{course.title}</h3>
+        <article key={course.id} className="border-b border-border p-6 last:border-b-0">
+          <h3 className="text-lg font-semibold text-foreground">{course.title}</h3>
           <div className="mt-4 space-y-6">
             {course.modules.map((moduleReport) => (
               <section key={moduleReport.key} aria-labelledby={`grade-module-${course.id}-${moduleReport.key}`}>
                 <div className="mb-3">
-                  <h4 id={`grade-module-${course.id}-${moduleReport.key}`} className="font-semibold text-slate-900">{moduleReport.title}</h4>
+                  <h4 id={`grade-module-${course.id}-${moduleReport.key}`} className="font-semibold text-foreground">{moduleReport.title}</h4>
                   {moduleReport.legacy && (
-                    <p className="mt-1 text-xs text-amber-700">Estas notas se registraron antes de enlazar cada intento con su módulo.</p>
+                    <p className="mt-1 text-xs text-warning">Estas notas se registraron antes de enlazar cada intento con su módulo.</p>
                   )}
                 </div>
-                <div className="overflow-x-auto rounded-xl border border-slate-200">
+                <div className="overflow-x-auto rounded-xl border border-border">
                   <table className="w-full min-w-[680px]">
-                    <thead className="bg-slate-50 text-left text-sm text-slate-600">
+                    <thead className="bg-muted text-left text-sm text-muted-foreground">
                       <tr>
                         <th className="px-4 py-3 font-medium">Estudiante</th>
                         {moduleReport.quizzes.map((quiz) => (
@@ -207,19 +207,19 @@ export function GradeReportSection() {
                     </thead>
                     <tbody>
                       {moduleReport.students.map((student) => (
-                        <tr key={student.key} className="border-t border-slate-100 text-sm text-slate-700">
-                          <td className="px-4 py-4 font-medium text-slate-950">{student.name}</td>
+                        <tr key={student.key} className="border-t border-border text-sm text-foreground">
+                          <td className="px-4 py-4 font-medium text-foreground">{student.name}</td>
                           {moduleReport.quizzes.map((quiz) => {
                             const cell = student.cells.get(quiz.key);
                             const score = cell?.latest?.score;
                             return (
                               <td key={quiz.key} className="px-4 py-4">
                                 {score === null || score === undefined ? (
-                                  <span className="text-slate-400">Sin intento</span>
+                                  <span className="text-muted-foreground">Sin intento</span>
                                 ) : (
                                   <div>
-                                    <span className="rounded-full bg-blue-50 px-3 py-1 font-semibold text-blue-800">{Math.round(score)}%</span>
-                                    <p className="mt-2 text-xs text-slate-500">
+                                    <span className="rounded-full bg-primary/10 px-3 py-1 font-semibold text-primary">{Math.round(score)}%</span>
+                                    <p className="mt-2 text-xs text-muted-foreground">
                                       {formattedDate(cell?.latest?.created_at)}{cell && cell.attempts > 1 ? ` · ${cell.attempts} intentos` : ""}
                                     </p>
                                   </div>
@@ -227,7 +227,7 @@ export function GradeReportSection() {
                               </td>
                             );
                           })}
-                          <td className="px-4 py-4 font-semibold text-slate-950">
+                          <td className="px-4 py-4 font-semibold text-foreground">
                             {student.average === null ? "—" : `${Math.round(student.average)}%`}
                           </td>
                         </tr>

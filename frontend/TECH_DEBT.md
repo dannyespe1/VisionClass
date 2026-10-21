@@ -116,6 +116,17 @@ Detectado en PR 5: en 390px el menú mobile abierto produce desbordamiento horiz
 - **P3 — Límite 256 KB solo en cliente:** archivos mayores se rechazan antes de selección sin feedback claro.
 - **P3 — Exportación directa de borrador:** un borrador generado por IA se crea inmediatamente como material del curso, sin paso intermedio de aprobación explícita.
 
+## Panel admin — Deudas detectadas en PR 8
+
+- **P0 — COMPLIANCE: políticas de privacidad sin aplicación efectiva:** el panel admin guarda políticas de privacidad —retención, anonimización, notificaciones y nivel de detalle—, pero no se encontraron consumidores que las apliquen en captura EDGE, retención de datos, anonimización ni notificaciones de riesgo. Esto significa que el administrador puede creer que configura algo que no se aplica, con riesgo legal y de expectativas.
+  - **Acción:** PR dedicado para verificar y aplicar las políticas en backend. Prioridad alta antes de producción.
+- **H3 BLOQUEANTE — Predicciones de abandono no validadas científicamente:** el backend usa la fórmula heurística determinista `(1 - promedio_atención) × 100 + proporción_baja_atención × 30 + días_inactividad`, pero el frontend afirma que “IA identifica estudiantes en riesgo”. Es técnicamente incorrecto y etiqueta estudiantes individualmente sin validación científica.
+  - **Acción:** PR dedicado posterior al rebranding con el equipo científico —validar o eliminar la heurística—, legal —revisar la individualización— y producto —decidir si se oculta o reformula—. Hay 12 claims bloqueados documentados en la Tabla 4B de PR 8 Fase A.
+- **H4 BLOQUEANTE — 9 acciones admin decorativas sin implementación:** exportar reporte institucional; ver lista completa para los niveles crítico, alto y medio; asignar a tutor; programar reunión; ver perfil completo; solicitar más información; y editar curso.
+  - **Acción:** PR dedicado para implementar u ocultar estas acciones.
+- **P2 — Endpoint analítico con efecto lateral:** la lectura de `/api/admin/analytics/` crea políticas predeterminadas si no existen. Un `GET` no debería tener efectos secundarios.
+- **P2 — Recharts con variables CSS:** `AdminAnalyticsSection` usaba 10 valores hexadecimales. Su migración a `var(--*)` requiere verificación visual en los navegadores admitidos.
+
 ## Notas
 
 - El PR 0.5 fue evaluado y cerrado como "no requerido": las correcciones de `sharp` y `source-map-js` ya estaban en el commit `0ee2197` del PR 0.

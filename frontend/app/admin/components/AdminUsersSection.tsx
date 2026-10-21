@@ -33,8 +33,8 @@ export function AdminUsersSection({
     <section className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl mb-2">Gestion de Usuarios</h1>
-          <p className="text-slate-600">Administra usuarios y roles</p>
+          <h1 className="text-3xl mb-2">Gestión de Usuarios</h1>
+          <p className="text-muted-foreground">Administra usuarios y roles</p>
         </div>
         <Button onClick={onCreateRequest}>
           <Plus className="w-4 h-4 mr-2" />
@@ -44,7 +44,7 @@ export function AdminUsersSection({
 
       <div className="max-w-md">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <Input
             placeholder="Buscar por nombre o email..."
             value={searchQuery}
@@ -54,10 +54,10 @@ export function AdminUsersSection({
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+      <div className="bg-card rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[720px]">
-          <thead className="bg-slate-50 border-b border-slate-200">
+          <thead className="bg-muted border-b border-border">
             <tr>
               <th className="text-left py-4 px-6">Usuario</th>
               <th className="text-left py-4 px-6">Rol</th>
@@ -68,23 +68,25 @@ export function AdminUsersSection({
           </thead>
           <tbody>
             {filteredUsers.map((user) => (
-              <tr key={user.id} className="border-b border-slate-100 hover:bg-slate-50">
+              <tr key={user.id} className="border-b border-border hover:bg-muted/50">
                 <td className="py-4 px-6">
                   <div>
                     <div className="mb-1">{user.name}</div>
-                    <div className="text-sm text-slate-600">{user.email}</div>
+                    <div className="text-sm text-muted-foreground">{user.email}</div>
                   </div>
                 </td>
                 <td className="py-4 px-6">
                   <span
                     className={`px-3 py-1 rounded-full text-sm ${
                       user.role === "admin"
-                        ? "bg-purple-100 text-purple-700"
+                        ? "bg-primary/10 text-primary"
                         : user.role === "profesor"
-                          ? "bg-blue-100 text-blue-700"
+                          ? "bg-primary/10 text-primary"
                           : user.role === "investigador"
-                            ? "bg-cyan-100 text-cyan-700"
-                        : "bg-green-100 text-green-700"
+                            ? "bg-secondary/10 text-secondary"
+                            : user.role === "observador"
+                              ? "bg-warning/10 text-warning"
+                              : "bg-success/10 text-success"
                     }`}
                   >
                     {user.role === "admin"
@@ -93,7 +95,9 @@ export function AdminUsersSection({
                         ? "Profesor"
                         : user.role === "investigador"
                           ? "Investigador"
-                          : "Estudiante"}
+                          : user.role === "observador"
+                            ? "Observador"
+                            : "Estudiante"}
                   </span>
                 </td>
                 <td className="py-4 px-6">{user.courses}</td>
@@ -101,7 +105,7 @@ export function AdminUsersSection({
                   <button
                     onClick={() => onToggleStatus(user.id)}
                     className={`px-3 py-1 rounded-full text-sm ${
-                      user.status === "active" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                      user.status === "active" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
                     }`}
                   >
                     {user.status === "active" ? "Activo" : "Inactivo"}
@@ -111,15 +115,17 @@ export function AdminUsersSection({
                   <div className="flex items-center justify-end gap-2">
                     <button
                       onClick={() => onEditRequest(user)}
-                      className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                      aria-label={`Editar usuario ${user.name || user.email}`}
+                      className="p-2 hover:bg-muted rounded-lg transition-colors"
                     >
-                      <Edit className="w-4 h-4 text-slate-600" />
+                      <Edit className="w-4 h-4 text-muted-foreground" />
                     </button>
                     <button
                       onClick={() => onDeleteRequest(user)}
-                      className="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                      aria-label={`Eliminar usuario ${user.name || user.email}`}
+                      className="p-2 hover:bg-destructive/10 rounded-lg transition-colors"
                     >
-                      <Trash2 className="w-4 h-4 text-red-600" />
+                      <Trash2 className="w-4 h-4 text-destructive" />
                     </button>
                   </div>
                 </td>
@@ -127,7 +133,7 @@ export function AdminUsersSection({
             ))}
             {filteredUsers.length === 0 && (
               <tr>
-                <td colSpan={5} className="py-6 px-6 text-center text-sm text-slate-500">
+                <td colSpan={5} className="py-6 px-6 text-center text-sm text-muted-foreground">
                   No hay usuarios que coincidan con la búsqueda.
                 </td>
               </tr>

@@ -386,11 +386,11 @@ export function MaterialesSection() {
   };
   const createCourse = async () => {
     if (!newCourseTitle.trim()) {
-      setStatus("Agrega un titulo de curso");
+      setStatus("Agrega un título de curso");
       return;
     }
     if (!token) {
-      setStatus("Debes iniciar sesin");
+      setStatus("Debes iniciar sesión");
       return;
     }
     try {
@@ -601,7 +601,7 @@ export function MaterialesSection() {
     e.preventDefault();
     if (!token) return;
     if (!formData.lessonId) {
-      setStatus("Selecciona una leccin");
+      setStatus("Selecciona una lección");
       return;
     }
     let finalUrl = formData.type === "test" ? "" : formData.url;
@@ -724,10 +724,10 @@ export function MaterialesSection() {
           },
           token
         );
-      setStatus("Modulo actualizado");
+      setStatus("Módulo actualizado");
     } catch (err) {
       console.error(err);
-      setStatus("Error actualizando modulo");
+      setStatus("Error actualizando módulo");
     }
   };
 
@@ -780,11 +780,11 @@ export function MaterialesSection() {
         },
         token
       );
-      setStatus("Modulo creado");
+      setStatus("Módulo creado");
       await refreshData();
     } catch (err) {
       console.error(err);
-      setStatus("Error creando modulo");
+      setStatus("Error creando módulo");
     }
   };
 
@@ -805,11 +805,11 @@ export function MaterialesSection() {
         },
         token
       );
-      setStatus("Leccion creada");
+      setStatus("Lección creada");
       await refreshData();
     } catch (err) {
       console.error(err);
-      setStatus("Error creando leccin");
+      setStatus("Error creando lección");
     }
   };
 
@@ -842,7 +842,7 @@ export function MaterialesSection() {
           await apiFetch(`/api/course-lessons/${lesson.id}/`, { method: "DELETE" }, token);
         }
       }
-      setStatus("Pruebas por modulo actualizadas");
+      setStatus("Pruebas por módulo actualizadas");
       await refreshData();
     } catch (err) {
       console.error(err);
@@ -902,10 +902,10 @@ export function MaterialesSection() {
         },
         token
       );
-      setStatus("Leccion actualizada");
+      setStatus("Lección actualizada");
     } catch (err) {
       console.error(err);
-      setStatus("Error actualizando leccion");
+      setStatus("Error actualizando lección");
     }
   };
 
@@ -934,9 +934,9 @@ export function MaterialesSection() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-slate-900">Materiales</h3>
-          <p className="text-sm text-slate-500">Crea cursos, organiza modulos y sube recursos.</p>
-          {status && <p className="text-xs text-slate-500 mt-1">{status}</p>}
+          <h3 className="text-lg font-semibold text-foreground">Materiales</h3>
+          <p className="text-sm text-muted-foreground">Crea cursos, organiza módulos y sube recursos.</p>
+          {status && <p className="text-xs text-muted-foreground mt-1">{status}</p>}
         </div>
         <Button onClick={openNewMaterial}>
           <Plus className="w-4 h-4 mr-2" />
@@ -944,11 +944,11 @@ export function MaterialesSection() {
         </Button>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-4">
+      <div className="bg-card border border-border rounded-xl p-4 shadow-sm space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-semibold text-slate-900">Crear curso</h3>
-            <p className="text-xs text-slate-500">Define nivel, campo, modulos y tiempos estimados.</p>
+            <h3 className="text-sm font-semibold text-foreground">Crear curso</h3>
+            <p className="text-xs text-muted-foreground">Define nivel, campo, módulos y tiempos estimados.</p>
           </div>
           <Button onClick={createCourse} className="text-sm">
             Crear curso
@@ -956,15 +956,15 @@ export function MaterialesSection() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-          <Input placeholder="Titulo del curso" value={newCourseTitle} onChange={(e) => setNewCourseTitle(e.target.value)} />
-          <Input placeholder="Descripcion" value={newCourseDesc} onChange={(e) => setNewCourseDesc(e.target.value)} />
-          <Input placeholder="Campo (Informatica, Economia, etc)" value={newCourseField} onChange={(e) => setNewCourseField(e.target.value)} />
+          <Input placeholder="Título del curso" value={newCourseTitle} onChange={(e) => setNewCourseTitle(e.target.value)} />
+          <Input placeholder="Descripción" value={newCourseDesc} onChange={(e) => setNewCourseDesc(e.target.value)} />
+          <Input placeholder="Campo (Informática, Economía, etc.)" value={newCourseField} onChange={(e) => setNewCourseField(e.target.value)} />
           <Select value={newCourseLevel} onValueChange={(v) => setNewCourseLevel(v)}>
             <SelectTrigger>
               <SelectValue placeholder="Nivel" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Basico">Basico</SelectItem>
+              <SelectItem value="Basico">Básico</SelectItem>
               <SelectItem value="Intermedio">Intermedio</SelectItem>
               <SelectItem value="Avanzado">Avanzado</SelectItem>
             </SelectContent>
@@ -973,51 +973,51 @@ export function MaterialesSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <Input placeholder="URL miniatura (opcional)" value={newCourseThumb} onChange={(e) => setNewCourseThumb(e.target.value)} />
-          <div className="rounded-lg border border-slate-200 p-3 bg-slate-50 text-sm">
-            <p className="text-xs text-slate-500 mb-1">Resumen</p>
-            <p className="font-semibold text-slate-900">{newCourseTitle || "Sin titulo"}</p>
-            <p className="text-xs text-slate-500">Nivel: {newCourseLevel} | Campo: {newCourseField || "Sin campo"}</p>
-            <p className="text-xs text-slate-500 mt-1">
-              Modulos: {modulesDraft.length} | Lecciones: {totalLessons} | Duracion: {totalDuration} min
+          <div className="rounded-lg border border-border p-3 bg-muted text-sm">
+            <p className="text-xs text-muted-foreground mb-1">Resumen</p>
+            <p className="font-semibold text-foreground">{newCourseTitle || "Sin título"}</p>
+            <p className="text-xs text-muted-foreground">Nivel: {newCourseLevel} | Campo: {newCourseField || "Sin campo"}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Módulos: {modulesDraft.length} | Lecciones: {totalLessons} | Duración: {totalDuration} min
             </p>
           </div>
         </div>
 
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h4 className="text-sm font-semibold text-slate-900">Modulos</h4>
+            <h4 className="text-sm font-semibold text-foreground">Módulos</h4>
             <Button variant="outline" size="sm" onClick={addModuleDraft}>
-              <Plus className="w-4 h-4 mr-1" /> Agregar modulo
+              <Plus className="w-4 h-4 mr-1" /> Agregar módulo
             </Button>
           </div>
           <div className="space-y-2">
             {modulesDraft.map((m, idx) => (
               <div
                 key={m.id}
-                className="border border-slate-200 rounded-lg p-3 bg-slate-50 flex flex-col md:flex-row md:items-center gap-3"
+                className="border border-border rounded-lg p-3 bg-muted flex flex-col md:flex-row md:items-center gap-3"
               >
                 <div className="flex-1 space-y-2">
-                  <Input value={m.name} onChange={(e) => updateModuleDraft(m.id, "name", e.target.value)} placeholder={`Modulo ${idx + 1}`} />
+                  <Input value={m.name} onChange={(e) => updateModuleDraft(m.id, "name", e.target.value)} placeholder={`Módulo ${idx + 1}`} />
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
                     <div className="flex items-center gap-2">
-                      <Label className="text-xs text-slate-600">Lecciones</Label>
+                      <Label className="text-xs text-muted-foreground">Lecciones</Label>
                       <Input type="number" min={0} value={m.lessons} onChange={(e) => updateModuleDraft(m.id, "lessons", Number(e.target.value))} />
                     </div>
                     <div className="flex items-center gap-2">
-                      <Label className="text-xs text-slate-600">Pruebas por modulo</Label>
+                      <Label className="text-xs text-muted-foreground">Pruebas por módulo</Label>
                       <Input type="number" min={0} value={m.tests} onChange={(e) => updateModuleDraft(m.id, "tests", Number(e.target.value))} />
                     </div>
                     <div className="flex items-center gap-2">
-                      <Label className="text-xs text-slate-600">Duracion (min)</Label>
+                      <Label className="text-xs text-muted-foreground">Duración (min)</Label>
                       <Input type="number" min={0} value={m.durationMinutes} onChange={(e) => updateModuleDraft(m.id, "durationMinutes", Number(e.target.value))} />
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="icon" onClick={() => moveModuleDraft(m.id, "up")} disabled={idx === 0}>
+                  <Button variant="outline" size="icon" aria-label="Mover módulo arriba" onClick={() => moveModuleDraft(m.id, "up")} disabled={idx === 0}>
                     <ArrowUp className="w-4 h-4" />
                   </Button>
-                  <Button variant="outline" size="icon" onClick={() => moveModuleDraft(m.id, "down")} disabled={idx === modulesDraft.length - 1}>
+                  <Button variant="outline" size="icon" aria-label="Mover módulo abajo" onClick={() => moveModuleDraft(m.id, "down")} disabled={idx === modulesDraft.length - 1}>
                     <ArrowDown className="w-4 h-4" />
                   </Button>
                   <Button variant="ghost" size="icon" onClick={() => removeModuleDraft(m.id)} disabled={modulesDraft.length <= 1}>
@@ -1030,15 +1030,15 @@ export function MaterialesSection() {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-4">
+      <div className="bg-card border border-border rounded-xl p-4 shadow-sm space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-semibold text-slate-900">Gestion de modulos y lecciones</h3>
-            <p className="text-xs text-slate-500">Edita nombres, orden, pruebas por modulo y examen final.</p>
+            <h3 className="text-sm font-semibold text-foreground">Gestión de módulos y lecciones</h3>
+            <p className="text-xs text-muted-foreground">Edita nombres, orden, pruebas por módulo y examen final.</p>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={addModuleToCourse} disabled={!manageCourseId}>
-              + Modulo
+              + Módulo
             </Button>
           </div>
         </div>
@@ -1069,10 +1069,10 @@ export function MaterialesSection() {
           </div>
           <div className="flex items-end gap-2">
             <Button
-              className="bg-red-600 text-white hover:bg-red-700"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => {
                 if (!manageCourseId) return;
-                if (!window.confirm("Seguro que deseas eliminar este curso")) return;
+                if (!window.confirm("¿Seguro que deseas eliminar este curso?")) return;
                 handleDeleteCourse(Number(manageCourseId));
               }}
             >
@@ -1082,10 +1082,10 @@ export function MaterialesSection() {
         </div>
 
         {manageCourseId && (
-          <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+          <div className="flex items-center justify-between rounded-lg border border-border bg-muted px-4 py-3">
             <div>
-              <p className="text-sm font-semibold text-slate-900">Examen final del curso</p>
-              <p className="text-xs text-slate-500">Habilita o elimina el examen final en el ultimo modulo.</p>
+              <p className="text-sm font-semibold text-foreground">Examen final del curso</p>
+              <p className="text-xs text-muted-foreground">Habilita o elimina el examen final en el último módulo.</p>
             </div>
             <Button
               variant="outline"
@@ -1098,7 +1098,7 @@ export function MaterialesSection() {
         )}
 
         {!manageCourseId && (
-          <p className="text-xs text-slate-500">Selecciona un curso para administrar sus modulos.</p>
+          <p className="text-xs text-muted-foreground">Selecciona un curso para administrar sus módulos.</p>
         )}
 
         {manageCourseId &&
@@ -1106,7 +1106,7 @@ export function MaterialesSection() {
             .filter((m) => String(m.courseId) === manageCourseId)
             .sort((a, b) => a.order - b.order)
             .map((module, idx) => (
-              <div key={module.id} className="border border-slate-200 rounded-lg p-3 bg-slate-50 space-y-3">
+              <div key={module.id} className="border border-border rounded-lg p-3 bg-muted space-y-3">
                 <div className="flex flex-col md:flex-row md:items-center gap-3">
                   <div className="flex-1 space-y-2">
                     <Input
@@ -1117,9 +1117,9 @@ export function MaterialesSection() {
                         )
                       }
                     />
-                    <div className="flex flex-wrap gap-3 text-xs text-slate-500">
+                    <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
                       <div className="flex items-center gap-2">
-                      <Label className="text-xs text-slate-600">Duracion (min)</Label>
+                      <Label className="text-xs text-muted-foreground">Duración (min)</Label>
                       <Input
                         type="number"
                         min={0}
@@ -1134,7 +1134,7 @@ export function MaterialesSection() {
                       />
                       </div>
                       <div className="flex items-center gap-2">
-                        <Label className="text-xs text-slate-600">Pruebas del modulo</Label>
+                        <Label className="text-xs text-muted-foreground">Pruebas del módulo</Label>
                         <Input
                           type="number"
                           min={0}
@@ -1157,12 +1157,13 @@ export function MaterialesSection() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon" onClick={() => moveModule(module.id, "up")} disabled={idx === 0}>
+                    <Button variant="outline" size="icon" aria-label="Mover módulo arriba" onClick={() => moveModule(module.id, "up")} disabled={idx === 0}>
                       <ArrowUp className="w-4 h-4" />
                     </Button>
                     <Button
                       variant="outline"
                       size="icon"
+                      aria-label="Mover módulo abajo"
                       onClick={() => moveModule(module.id, "down")}
                       disabled={idx === courseModules.filter((m) => String(m.courseId) === manageCourseId).length - 1}
                     >
@@ -1172,7 +1173,7 @@ export function MaterialesSection() {
                       Guardar
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => addLesson(module.id)}>
-                      + Leccion
+                      + Lección
                     </Button>
                   </div>
                 </div>
@@ -1195,6 +1196,7 @@ export function MaterialesSection() {
                           <Button
                             variant="outline"
                             size="icon"
+                            aria-label="Mover lección arriba"
                             onClick={() => moveLesson(lesson.id, "up")}
                             disabled={lessonIdx === 0}
                           >
@@ -1203,6 +1205,7 @@ export function MaterialesSection() {
                           <Button
                             variant="outline"
                             size="icon"
+                            aria-label="Mover lección abajo"
                             onClick={() => moveLesson(lesson.id, "down")}
                             disabled={
                               lessonIdx ===
@@ -1509,31 +1512,31 @@ export function MaterialesSection() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredMaterials.map((material) => (
-          <div key={material.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col gap-3 transition transform hover:-translate-y-1 hover:shadow-lg">
+          <div key={material.id} className="bg-card rounded-2xl border border-border shadow-sm p-4 flex flex-col gap-3 transition transform hover:-translate-y-1 hover:shadow-lg">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                {material.materialType === "pdf" && <FileText className="w-4 h-4 text-sky-600" />}
-                {material.materialType === "video" && <Video className="w-4 h-4 text-violet-600" />}
-                {material.materialType === "test" && <ClipboardList className="w-4 h-4 text-emerald-600" />}
-                <p className="text-sm font-semibold text-slate-900">{material.title}</p>
+                {material.materialType === "pdf" && <FileText className="w-4 h-4 text-secondary" />}
+                {material.materialType === "video" && <Video className="w-4 h-4 text-primary" />}
+                {material.materialType === "test" && <ClipboardList className="w-4 h-4 text-success" />}
+                <p className="text-sm font-semibold text-foreground">{material.title}</p>
               </div>
               <div className="flex gap-2">
-                <button className="p-1 rounded-full hover:bg-slate-100" title="Descargar / abrir" onClick={() => window.open(material.url || "#", "_blank")}>
-                  <Download className="w-4 h-4 text-slate-500" />
+                <button className="p-1 rounded-full hover:bg-muted" title="Descargar / abrir" onClick={() => window.open(material.url || "#", "_blank")}>
+                  <Download className="w-4 h-4 text-muted-foreground" />
                 </button>
-                <button className="p-1 rounded-full hover:bg-slate-100" title="Eliminar" onClick={() => handleDelete(material.id)}>
-                  <Trash2 className="w-4 h-4 text-slate-500" />
+                <button className="p-1 rounded-full hover:bg-muted" title="Eliminar" onClick={() => handleDelete(material.id)}>
+                  <Trash2 className="w-4 h-4 text-muted-foreground" />
                 </button>
               </div>
             </div>
-            <p className="text-xs text-slate-500">{material.courseTitle}</p>
-            <p className="text-xs text-slate-500">{material.moduleTitle} - {material.lessonTitle}</p>
-            <div className="flex items-center justify-between text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">{material.courseTitle}</p>
+            <p className="text-xs text-muted-foreground">{material.moduleTitle} - {material.lessonTitle}</p>
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>{material.createdAt ? new Date(material.createdAt).toLocaleDateString() : ""}</span>
               <Button variant="outline" size="sm" onClick={() => openEditMaterial(material)}>Editar</Button>
             </div>
             {material.materialType === "video" && material.url && (
-              <div className="rounded-lg overflow-hidden border border-slate-100">
+              <div className="rounded-lg overflow-hidden border border-border">
                 <iframe
                   src={material.url.replace("watchv=", "embed/")}
                   className="w-full h-40"
@@ -1547,27 +1550,27 @@ export function MaterialesSection() {
         ))}
       </div>
       {showMaterialModal && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/50">
-          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] overflow-y-auto space-y-5 border border-slate-100">
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-aten-bg-dark/50">
+          <div className="bg-card rounded-2xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] overflow-y-auto space-y-5 border border-border">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-slate-900">
+                <h3 className="text-lg font-semibold text-foreground">
                   {editingMaterial ? "Editar material" : "Nuevo material"}
                 </h3>
-                <p className="text-sm text-slate-500">Sube un PDF, video de YouTube o un test.</p>
+                <p className="text-sm text-muted-foreground">Sube un PDF, video de YouTube o un test.</p>
               </div>
-              <Button variant="ghost" onClick={() => setShowMaterialModal(false)}>
+              <Button variant="ghost" aria-label="Cerrar modal" onClick={() => setShowMaterialModal(false)}>
                 Cerrar
               </Button>
             </div>
 
             <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="space-y-2">
-                <Label>Titulo</Label>
+                <Label>Título</Label>
                 <Input value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required />
               </div>
               <div className="space-y-2">
-                <Label>Descripcion</Label>
+                <Label>Descripción</Label>
                 <Textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Detalles del material" />
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
@@ -1614,10 +1617,10 @@ export function MaterialesSection() {
 
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Modulo</Label>
+                  <Label>Módulo</Label>
                   <Select value={formData.moduleId} onValueChange={(value) => setFormData({ ...formData, moduleId: value })}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar modulo" />
+                      <SelectValue placeholder="Seleccionar módulo" />
                     </SelectTrigger>
                     <SelectContent>
                       {moduleOptions.map((m) => (
@@ -1629,10 +1632,10 @@ export function MaterialesSection() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Leccion</Label>
+                  <Label>Lección</Label>
                   <Select value={formData.lessonId} onValueChange={(value) => setFormData({ ...formData, lessonId: value })}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar leccion" />
+                      <SelectValue placeholder="Seleccionar lección" />
                     </SelectTrigger>
                     <SelectContent>
                       {lessonOptions.map((l) => (
@@ -1681,7 +1684,7 @@ export function MaterialesSection() {
                       reader.readAsDataURL(file);
                     }}
                   />
-                  <p className="text-xs text-slate-500">Si adjuntas un PDF local, la URL es opcional.</p>
+                  <p className="text-xs text-muted-foreground">Si adjuntas un PDF local, la URL es opcional.</p>
                 </div>
               )}
 
@@ -1731,10 +1734,10 @@ export function MaterialesSection() {
               )}
 
               {youtubePreview && formData.type === "video" && (
-                <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                <div className="rounded-xl overflow-hidden border border-border shadow-sm">
                   <iframe
                     src={youtubePreview}
-                    title="YouTube preview"
+                    title="Vista previa de YouTube"
                     className="w-full h-52"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen

@@ -13,7 +13,7 @@ test("research panel is fail-closed and receives its own least-privilege route",
 });
 
 test("panel exposes scoped filters, provenance, sample and explicit evidence status", () => {
-  for (const term of ["period", "cohort", "model", "profile", "Proveniencia", "Ventanas observables", "Validez", "Equidad", "not_linked"]) assert.match(page, new RegExp(term, "i"));
+  for (const term of ["period", "cohort", "model", "profile", "Procedencia", "Ventanas observables", "Validez", "Equidad", "not_linked"]) assert.match(page, new RegExp(term, "i"));
 });
 
 test("panel adds only aggregate Edge validation indicators", () => {

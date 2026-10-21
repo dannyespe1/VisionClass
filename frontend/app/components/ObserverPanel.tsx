@@ -146,13 +146,13 @@ export function ObserverPanel({ allowScheduling = false }: { allowScheduling?: b
   };
 
   return (
-    <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-5" aria-labelledby="observer-panel-title">
+    <section className="space-y-4 rounded-xl border border-border bg-card p-5" aria-labelledby="observer-panel-title">
       <div>
-        <h2 id="observer-panel-title" className="text-xl font-semibold text-slate-900">Observación ciega sincronizada</h2>
-        <p className="text-sm text-slate-600">Solo conducta visible. No se muestran imágenes, predicciones, resultados académicos ni la respuesta del otro observador.</p>
+        <h2 id="observer-panel-title" className="text-xl font-semibold text-foreground">Observación ciega sincronizada</h2>
+        <p className="text-sm text-muted-foreground">Solo conducta visible. No se muestran imágenes, predicciones, resultados académicos ni la respuesta del otro observador.</p>
       </div>
 
-      {allowScheduling && <div className="grid gap-3 rounded-lg border bg-slate-50 p-4 md:grid-cols-5">
+      {allowScheduling && <div className="grid gap-3 rounded-lg border border-border bg-muted p-4 md:grid-cols-5">
         <label className="text-sm">Curso
           <select className="mt-1 w-full rounded border p-2" value={courseId} onChange={(event) => setCourseId(event.target.value)}>
             <option value="">Selecciona</option>
@@ -182,25 +182,25 @@ export function ObserverPanel({ allowScheduling = false }: { allowScheduling?: b
             onChange={(event) => setLocationCode(event.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, ""))}
           />
         </label>
-        <button type="button" className="self-end rounded bg-slate-900 p-2 text-white disabled:opacity-50" disabled={busy || !participantId || !observerId || !/^[A-Z0-9-]{2,16}$/.test(locationCode)} onClick={() => void schedule()}>
+        <button type="button" className="self-end rounded bg-primary p-2 text-primary-foreground disabled:opacity-50" disabled={busy || !participantId || !observerId || !/^[A-Z0-9-]{2,16}$/.test(locationCode)} onClick={() => void schedule()}>
           Programar 5 segundos
         </button>
       </div>}
 
-      {error && <p role="alert" className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-      {notice && <p role="status" className="rounded border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">{notice}</p>}
+      {error && <p role="alert" className="rounded border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
+      {notice && <p role="status" className="rounded border border-success/30 bg-success/10 p-3 text-sm text-success">{notice}</p>}
 
-      {!active && <p className="rounded border border-dashed p-4 text-sm text-slate-600">No hay una ventana pendiente. Las anotaciones enviadas no pueden editarse.</p>}
-      {active?.status === "scheduled" && <div className="rounded border border-cyan-200 bg-cyan-50 p-4">
+      {!active && <p className="rounded border border-dashed border-border p-4 text-sm text-muted-foreground">No hay una ventana pendiente. Las anotaciones enviadas no pueden editarse.</p>}
+      {active?.status === "scheduled" && <div className="rounded border border-secondary/30 bg-secondary/10 p-4">
         <p className="font-semibold">Objetivo: {active.target_code} · Puesto {active.location_code}</p>
         <p className="text-sm">La ventana inicia en {Math.max(0, Math.ceil(remainingMs / 1000))} segundos. Observe únicamente cuando el contador llegue a cero.</p>
       </div>}
-      {active?.status === "observing" && <div className="rounded border border-cyan-300 bg-cyan-50 p-4" role="timer" aria-live="polite">
+      {active?.status === "observing" && <div className="rounded border border-secondary/40 bg-secondary/10 p-4" role="timer" aria-live="polite">
         <p className="font-semibold">Observe ahora: {active.target_code} · Puesto {active.location_code}</p>
         <p className="text-2xl font-bold tabular-nums">{Math.max(0, Math.ceil((new Date(active.ends_at).getTime() - clock) / 1000))}</p>
         <p className="text-sm">Los controles se habilitarán cuando finalice la ventana.</p>
       </div>}
-      {active?.status === "ready" && <div className="space-y-3 rounded border border-amber-200 bg-amber-50 p-4">
+      {active?.status === "ready" && <div className="space-y-3 rounded border border-warning/30 bg-warning/10 p-4">
         <p className="font-semibold">Objetivo: {active.target_code} · Puesto {active.location_code}</p>
         <p className="text-sm">Ventana asignada: {new Date(active.starts_at).toLocaleTimeString()}–{new Date(active.ends_at).toLocaleTimeString()}.</p>
         <ObserverAnnotationForm assignmentId={active.assignment_id} onSubmit={(value) => void submit(value)} />
@@ -208,7 +208,7 @@ export function ObserverPanel({ allowScheduling = false }: { allowScheduling?: b
 
       <details>
         <summary className="cursor-pointer text-sm font-medium">Estado de asignaciones recientes</summary>
-        <ul className="mt-2 space-y-1 text-sm text-slate-600">
+        <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
           {assignments.map((item) => <li key={item.assignment_id}>{item.target_code} · {item.status} · {item.manual_version}</li>)}
         </ul>
       </details>

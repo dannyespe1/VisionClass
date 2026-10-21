@@ -44,28 +44,28 @@ export function ObserverAnnotationForm({
         </p>
       </div>
       <fieldset className="space-y-2" aria-describedby="observer-category-help">
-        <legend className="font-semibold text-slate-900">Estado observable</legend>
-        <p id="observer-category-help" className="text-sm text-slate-700">
-          Selecciona la descripción que corresponda. Cada opción se registra inmediatamente.
+        <legend className="font-semibold text-foreground">Estado observable</legend>
+        <p id="observer-category-help" className="text-sm text-muted-foreground">
+          Selecciona la descripción que corresponda. Cada opción se envía al seleccionarla; si no puede registrarse, el panel mostrará un error.
         </p>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
-            className={`${categoryButton} border-emerald-700 bg-emerald-600 text-white hover:bg-emerald-700 focus-visible:ring-emerald-600`}
+            className={`${categoryButton} border-success bg-success text-[var(--success-foreground)] hover:bg-success/90 focus-visible:ring-success`}
             onClick={() => submit("attentive", 0.75)}
           >
             Orientación compatible con la tarea
           </button>
           <button
             type="button"
-            className={`${categoryButton} border-rose-800 bg-rose-700 text-white hover:bg-rose-800 focus-visible:ring-rose-700`}
+            className={`${categoryButton} border-destructive bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:ring-destructive`}
             onClick={() => submit("distracted", 0.75)}
           >
             Orientación fuera de la tarea
           </button>
           <button
             type="button"
-            className={`${categoryButton} border-amber-500 bg-amber-300 text-amber-950 hover:bg-amber-400 focus-visible:ring-amber-500`}
+            className={`${categoryButton} border-warning bg-warning text-[var(--warning-foreground)] hover:bg-warning/90 focus-visible:ring-warning`}
             onClick={() => submit("uncertain", 0.5)}
           >
             Evidencia incierta
@@ -73,10 +73,10 @@ export function ObserverAnnotationForm({
         </div>
       </fieldset>
       <div className="flex flex-wrap items-end gap-2">
-        <label className="grid gap-1 text-sm font-medium text-slate-900">
+        <label className="grid gap-1 text-sm font-medium text-foreground">
           Motivo cuando no es observable
           <select
-            className="min-h-11 rounded-lg border border-slate-400 bg-white px-3 py-2 text-slate-950 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-600 focus-visible:ring-offset-2"
+            className="min-h-11 rounded-lg border border-border bg-card px-3 py-2 text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             value={noObservableReason}
             onChange={(event) => setNoObservableReason(event.target.value as NoObservableReason | "")}
           >
@@ -93,7 +93,7 @@ export function ObserverAnnotationForm({
         </label>
         <button
           type="button"
-          className={`${categoryButton} border-slate-800 bg-slate-700 text-white hover:bg-slate-800 focus-visible:ring-slate-700 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-200 disabled:text-slate-500 disabled:shadow-none`}
+          className={`${categoryButton} border-primary bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring disabled:cursor-not-allowed disabled:border-border disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none`}
           disabled={!noObservableReason}
           onClick={() => submit("no_observable", 1, noObservableReason)}
         >

@@ -105,6 +105,17 @@ Detectado en PR 5: en 390px el menú mobile abierto produce desbordamiento horiz
 - Los botones de reordenamiento carecían de nombres accesibles. PR 7B añade `aria-label` sin modificar sus handlers.
 - PR 7C queda pendiente para generación con IA e importación/exportación JSON. Los bloques reservados son 104-107, 124-147, 177-179, 285-345, 541-598, 615-621, 1258-1508 y 1688-1731 de `MaterialesSection.tsx` en la base de PR 7B.
 
+### MaterialesSection.tsx — Deudas detectadas en PR 7C
+
+- **P1 — Fallback IA no identificado:** el backend puede devolver preguntas mock cuando Gemini falla o no está disponible. El frontend ignora el campo `detail` de la respuesta y presenta esas preguntas igual como “generadas por IA”. Un docente podría publicar contenido mock creyendo que es generación real.
+  - **Acción:** en un PR dedicado, leer `detail` de la respuesta, mostrar procedencia (Gemini vs fallback) y siempre exigir revisión docente.
+- **P2 — Título persistido en DB (línea 1439):** “Prueba generada automaticamente” se persiste en la DB como título del material. Cambiarlo sin migración rompería la detección.
+  - **Acción:** PR de migración con script de actualización de títulos existentes. No tocar en rebranding.
+- **P2 — Validación preliminar incompleta en cliente:** el cliente solo verifica `questions`. El servidor valida opciones, respuesta, dificultad, IDs y longitudes. La UI puede mostrar “válido” y el servidor rechazar.
+  - **Acción:** evaluar validación más robusta en cliente en un PR funcional.
+- **P3 — Límite 256 KB solo en cliente:** archivos mayores se rechazan antes de selección sin feedback claro.
+- **P3 — Exportación directa de borrador:** un borrador generado por IA se crea inmediatamente como material del curso, sin paso intermedio de aprobación explícita.
+
 ## Notas
 
 - El PR 0.5 fue evaluado y cerrado como "no requerido": las correcciones de `sharp` y `source-map-js` ya estaban en el commit `0ee2197` del PR 0.

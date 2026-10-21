@@ -128,16 +128,16 @@ export function MaterialesSection() {
   const sourceTypeLabels: Record<string, string> = {
     pdf: "PDF",
     video: "Video",
-    lesson: "Leccion",
+    lesson: "Lección",
     course: "Curso",
-    module: "Modulo",
+    module: "Módulo",
   };
   const sourceTypeIcons: Record<string, React.ReactElement> = {
-    pdf: <FileText className="h-4 w-4 text-sky-600" />,
-    video: <Video className="h-4 w-4 text-violet-600" />,
-    lesson: <BookOpen className="h-4 w-4 text-emerald-600" />,
-    course: <Library className="h-4 w-4 text-amber-600" />,
-    module: <Layers className="h-4 w-4 text-indigo-600" />,
+    pdf: <FileText className="h-4 w-4 text-secondary" />,
+    video: <Video className="h-4 w-4 text-primary" />,
+    lesson: <BookOpen className="h-4 w-4 text-success" />,
+    course: <Library className="h-4 w-4 text-warning" />,
+    module: <Layers className="h-4 w-4 text-primary" />,
   };
   const [aiDifficulty, setAiDifficulty] = useState("media");
   const [aiNumQuestions, setAiNumQuestions] = useState(20);
@@ -590,7 +590,7 @@ export function MaterialesSection() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "plantilla-prueba-visionclass-v1.json";
+    link.download = "plantilla-prueba-atendynex-v1.json";
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -1258,13 +1258,13 @@ export function MaterialesSection() {
           </Select>
         </div>
       </div>
-      <div className="bg-white rounded-2xl shadow-sm p-6 border border-slate-100">
+      <div className="bg-card rounded-2xl shadow-sm p-6 border border-border">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-lg font-semibold text-slate-900">Generar prueba con IA</h3>
-            <p className="text-sm text-slate-500">Genera preguntas y exporta a una prueba del modulo o examen final.</p>
+            <h3 className="text-lg font-semibold text-foreground">Generar prueba con IA</h3>
+            <p className="text-sm text-muted-foreground">Genera un borrador de preguntas para revisión docente y permite guardarlo en una prueba del módulo o examen final.</p>
           </div>
-          <span className="text-xs px-3 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">Borrador</span>
+          <span className="text-xs px-3 py-1 rounded-full bg-muted text-muted-foreground border border-border">Borrador</span>
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">
@@ -1298,7 +1298,7 @@ export function MaterialesSection() {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>Numero de preguntas (max 20)</Label>
+            <Label>Número de preguntas (máx. 20)</Label>
             <Input type="number" min={1} max={20} value={aiNumQuestions} onChange={(e) => setAiNumQuestions(Number(e.target.value))} />
           </div>
           <div className="space-y-2">
@@ -1309,10 +1309,10 @@ export function MaterialesSection() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
           <div className="space-y-2">
-            <Label>Modulo destino</Label>
+            <Label>Módulo destino</Label>
             <Select value={aiTargetModuleId} onValueChange={(v) => setAiTargetModuleId(v)}>
               <SelectTrigger>
-                <SelectValue placeholder="Modulo" />
+                <SelectValue placeholder="Módulo" />
               </SelectTrigger>
               <SelectContent>
                 {aiModuleOptions.map((m) => (
@@ -1373,7 +1373,7 @@ export function MaterialesSection() {
               disabled={aiLoading}
               className="w-full"
             >
-              {aiLoading ? "Generando..." : "Generar prueba IA"}
+              {aiLoading ? "Generando..." : "Generar borrador con IA"}
             </Button>
           </div>
         </div>
@@ -1381,7 +1381,7 @@ export function MaterialesSection() {
         {aiQuestions.length > 0 && (
           <div className="mt-6 space-y-3">
             <div className="flex items-center justify-between">
-              <h4 className="text-sm font-semibold text-slate-900">Preguntas generadas ({aiQuestions.length})</h4>
+              <h4 className="text-sm font-semibold text-foreground">Borrador de preguntas ({aiQuestions.length})</h4>
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
@@ -1389,7 +1389,7 @@ export function MaterialesSection() {
                   onClick={() => setAiSourcesOpen(true)}
                   disabled={!aiSources.length}
                 >
-                  Ver material usado
+                  Ver fuentes consideradas
                 </Button>
               </div>
               <Button
@@ -1447,7 +1447,7 @@ export function MaterialesSection() {
                       },
                       token
                     );
-                    setStatus("Prueba exportada al curso");
+                    setStatus("Borrador guardado en el curso para revisión docente");
                     await refreshData();
                   } catch (err) {
                     console.error(err);
@@ -1460,17 +1460,17 @@ export function MaterialesSection() {
             </div>
             <div className="space-y-2 max-h-80 overflow-auto pr-2">
               {aiQuestions.map((q, idx) => (
-                <div key={idx} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                  <p className="text-sm font-semibold text-slate-900">
+                <div key={idx} className="rounded-xl border border-border bg-muted p-3">
+                  <p className="text-sm font-semibold text-foreground">
                     {idx + 1}. {q.question}
                   </p>
-                  <div className="text-xs text-slate-500 mb-2">Dificultad: {q.difficulty}</div>
-                  <ul className="list-disc list-inside text-sm text-slate-700 space-y-1">
+                  <div className="text-xs text-muted-foreground mb-2">Dificultad: {q.difficulty}</div>
+                  <ul className="list-disc list-inside text-sm text-foreground space-y-1">
                     {q.options.map((opt: string, i: number) => (
                       <li key={i}>{opt}</li>
                     ))}
                   </ul>
-                  <p className="text-xs text-emerald-600 mt-1">Respuesta sugerida: {q.answer}</p>
+                  <p className="text-xs text-success mt-1">Respuesta sugerida: {q.answer}</p>
                 </div>
               ))}
             </div>
@@ -1480,24 +1480,24 @@ export function MaterialesSection() {
         <Dialog open={aiSourcesOpen} onOpenChange={setAiSourcesOpen}>
           <DialogContent className="sm:max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Material usado para generar la prueba</DialogTitle>
+              <DialogTitle>Fuentes consideradas para generar el borrador</DialogTitle>
             </DialogHeader>
             <div className="space-y-3 max-h-[420px] overflow-y-auto">
               {!aiSources.length && (
-                <div className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
+                <div className="rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
                   No hay materiales detectados para este módulo.
                 </div>
               )}
               {aiSources.map((item, idx) => (
-                <div key={`${item.type}-${idx}`} className="rounded-lg border border-slate-200 bg-white px-4 py-3">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                    {sourceTypeIcons[item.type] || <ClipboardList className="h-4 w-4 text-slate-400" />}
+                <div key={`${item.type}-${idx}`} className="rounded-lg border border-border bg-card px-4 py-3">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                    {sourceTypeIcons[item.type] || <ClipboardList className="h-4 w-4 text-muted-foreground" />}
                     <span>{item.title}</span>
                   </div>
-                  <div className="text-xs text-slate-500 mt-1">
+                  <div className="text-xs text-muted-foreground mt-1">
                     Tipo: {sourceTypeLabels[item.type] || item.type}
                   </div>
-                  {item.detail && <div className="text-xs text-slate-600 mt-1">{item.detail}</div>}
+                  {item.detail && <div className="text-xs text-muted-foreground mt-1">{item.detail}</div>}
                 </div>
               ))}
             </div>
@@ -1689,12 +1689,12 @@ export function MaterialesSection() {
               )}
 
               {formData.type === "test" && (
-                <div className="space-y-3 rounded-xl border border-violet-200 bg-violet-50 p-4">
+                <div className="space-y-3 rounded-xl border border-primary/20 bg-primary/5 p-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
                       <Label>Prueba en formato JSON</Label>
-                      <p className="mt-1 text-xs text-slate-600">
-                        Contrato VisionClass 1.0 · máximo 20 preguntas · cuatro opciones por pregunta.
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Formato de prueba AtenDynex 1.0 · hasta 20 preguntas · cuatro opciones por pregunta.
                       </p>
                     </div>
                     <Button type="button" variant="outline" size="sm" onClick={downloadQuizTemplate}>
@@ -1707,13 +1707,13 @@ export function MaterialesSection() {
                     accept="application/json,.json"
                     onChange={(event) => handleQuizImport(event.target.files?.[0] || null)}
                   />
-                  {quizImportError && <p className="text-sm text-red-700">{quizImportError}</p>}
+                  {quizImportError && <p className="text-sm text-destructive">{quizImportError}</p>}
                   {quizImport?.questions?.length ? (
-                    <div className="rounded-lg border border-violet-200 bg-white p-3 text-sm">
-                      <p className="font-semibold text-slate-900">
+                    <div className="rounded-lg border border-primary/20 bg-card p-3 text-sm">
+                      <p className="font-semibold text-foreground">
                         {quizImportFileName || "Prueba cargada"}: {quizImport.questions.length} preguntas
                       </p>
-                      <ul className="mt-2 space-y-1 text-slate-600">
+                      <ul className="mt-2 space-y-1 text-muted-foreground">
                         {quizImport.questions.slice(0, 3).map((question, index) => (
                           <li key={String(question.id || index)}>
                             {index + 1}. {question.question || "Pregunta sin texto"}
@@ -1721,12 +1721,12 @@ export function MaterialesSection() {
                         ))}
                       </ul>
                       {quizImport.questions.length > 3 && (
-                        <p className="mt-2 text-xs text-slate-500">
+                        <p className="mt-2 text-xs text-muted-foreground">
                           Y {quizImport.questions.length - 3} preguntas adicionales.
                         </p>
                       )}
-                      <p className="mt-2 text-xs text-slate-500">
-                        El servidor realizará la validación definitiva antes de publicar.
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        El servidor realizará la validación estructural antes de guardar.
                       </p>
                     </div>
                   ) : null}

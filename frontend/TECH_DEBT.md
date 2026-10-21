@@ -127,6 +127,16 @@ Detectado en PR 5: en 390px el menú mobile abierto produce desbordamiento horiz
 - **P2 — Endpoint analítico con efecto lateral:** la lectura de `/api/admin/analytics/` crea políticas predeterminadas si no existen. Un `GET` no debería tener efectos secundarios.
 - **P2 — Recharts con variables CSS:** `AdminAnalyticsSection` usaba 10 valores hexadecimales. Su migración a `var(--*)` requiere verificación visual en los navegadores admitidos.
 
+## Observer + Research — Deudas detectadas en PR 9
+
+- **P2 — Polling permanente del observer:** el polling ejecuta una solicitud cada 3 segundos y actualiza el reloj cada 250 ms, incluso sin ventana activa. Esto provoca cuatro rerenders por segundo además del polling permanente.
+  - **Acción:** optimizar en un PR dedicado para mantener el polling únicamente cuando exista una ventana activa.
+- **P2 — Estados técnicos visibles sin traducir:** `research/page.tsx` muestra `not_linked` y otros estados; `ObserverPanel.tsx` muestra `scheduled`, `observing`, `ready`, `submitted` y `expired`; `ObserverAnnotationForm.tsx` conserva enums técnicos del contrato.
+  - **Acción:** añadir en un PR de internacionalización un mapa de traducciones exclusivamente visual, sin modificar los valores de la API.
+- **P2 — Grant de investigación parcialmente claro:** el panel muestra proyecto, propósito y vencimiento, pero no presenta explícitamente el alcance de cohorte/modelo/perfil, el aprobador, el estado de aprobación ni la referencia ética. Los filtros reflejan opciones autorizadas sin explicar que proceden del grant.
+  - **Acción:** revisar en un PR dedicado con el equipo de investigación qué información de alcance debe exponerse sin ampliar datos sensibles.
+- **P3 — Tests acoplados a textos visibles:** las pruebas de PR 37 verifican “Procedencia”, “Ventanas observables”, “Validez”, “Equidad”, `not_linked`, “Validación Edge” y claims de privacidad. Cualquier cambio de redacción requiere actualizar las pruebas. PR 9 actualiza el término “Proveniencia” a “Procedencia”.
+
 ## Notas
 
 - El PR 0.5 fue evaluado y cerrado como "no requerido": las correcciones de `sharp` y `source-map-js` ya estaban en el commit `0ee2197` del PR 0.

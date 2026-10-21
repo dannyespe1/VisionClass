@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch, BACKEND_URL } from "../lib/api";
+import { LogoutButton } from "../components/shared/LogoutButton";
 import { useAuth } from "../context/AuthContext";
 import { RESEARCH_DASHBOARD_ENABLED } from "../lib/features";
 
@@ -28,7 +29,7 @@ type Filters = { period: string; cohort: string; model: string; profile: string 
 
 export default function ResearchPage() {
   const router = useRouter();
-  const { token, logout } = useAuth();
+  const { token } = useAuth();
   const [dashboard, setDashboard] = useState<Dashboard | null>(null);
   const [filters, setFilters] = useState<Filters>({ period: "90d", cohort: "", model: "", profile: "" });
   const [error, setError] = useState("");
@@ -76,7 +77,7 @@ export default function ResearchPage() {
       if (!response.ok) throw new Error("download_failed");
       const url = URL.createObjectURL(await response.blob());
       const anchor = document.createElement("a");
-      anchor.href = url; anchor.download = "visionclass-research-export.csv"; anchor.click();
+      anchor.href = url; anchor.download = "atendynex-research-export.csv"; anchor.click();
       URL.revokeObjectURL(url);
     } catch { setError("La muestra protegida no puede exportarse con estos filtros."); }
     finally { setBusy(false); }
@@ -84,30 +85,30 @@ export default function ResearchPage() {
 
   if (!RESEARCH_DASHBOARD_ENABLED) return <main className="min-h-screen p-8"><h1 className="text-2xl font-semibold">Panel de investigación no disponible</h1><p>La función permanece desactivada hasta completar la revisión independiente.</p></main>;
 
-  return <main className="min-h-screen bg-slate-50 p-6 text-slate-900"><div className="mx-auto max-w-6xl space-y-6">
-    <header className="flex flex-wrap items-center justify-between gap-3"><div><h1 className="text-3xl font-semibold">Panel de investigación</h1><p className="text-sm text-slate-600">Evidencia observable agregada; no mide estados mentales ni habilita decisiones individuales.</p></div><button className="rounded border px-4 py-2" onClick={() => { logout(); router.push("/login"); }}>Cerrar sesión</button></header>
-    {dashboard && <section className="rounded-xl border bg-white p-4"><h2 className="font-semibold">Permiso y propósito</h2><p>{dashboard.grant.project}: {dashboard.grant.purpose}</p><p className="text-sm text-slate-600">Caduca: {new Date(dashboard.grant.expires_at).toLocaleString()}</p></section>}
-    {dashboard && <section className="grid gap-3 rounded-xl border bg-white p-4 md:grid-cols-5" aria-label="Filtros de investigación">
-      <Filter label="Periodo" value={filters.period} options={dashboard.filter_options.periods} onChange={(period) => setFilters({ ...filters, period })} />
+  return <main className="min-h-screen bg-background p-6 text-foreground"><div className="mx-auto max-w-6xl space-y-6">
+    <header className="flex flex-wrap items-center justify-between gap-3"><div><h1 className="text-3xl font-semibold">Panel de investigación</h1><p className="text-sm text-muted-foreground">Evidencia observable agregada; no mide estados mentales ni habilita decisiones individuales.</p></div><LogoutButton /></header>
+    {dashboard && <section className="rounded-xl border border-border bg-card p-4"><h2 className="font-semibold">Permiso y propósito</h2><p>{dashboard.grant.project}: {dashboard.grant.purpose}</p><p className="text-sm text-muted-foreground">Caduca: {new Date(dashboard.grant.expires_at).toLocaleString()}</p></section>}
+    {dashboard && <section className="grid gap-3 rounded-xl border border-border bg-card p-4 md:grid-cols-5" aria-label="Filtros de investigación">
+      <Filter label="Período" value={filters.period} options={dashboard.filter_options.periods} onChange={(period) => setFilters({ ...filters, period })} />
       <Filter label="Cohorte" value={filters.cohort} options={dashboard.filter_options.cohorts} onChange={(cohort) => setFilters({ ...filters, cohort })} />
       <Filter label="Modelo" value={filters.model} options={dashboard.filter_options.models} onChange={(model) => setFilters({ ...filters, model })} />
       <Filter label="Perfil" value={filters.profile} options={dashboard.filter_options.profiles} onChange={(profile) => setFilters({ ...filters, profile })} />
-      <button className="self-end rounded bg-slate-900 p-2 text-white disabled:opacity-50" disabled={busy} onClick={() => void load(filters)}>Aplicar filtros</button>
+      <button className="self-end rounded bg-primary p-2 text-primary-foreground disabled:opacity-50" disabled={busy} onClick={() => void load(filters)}>Aplicar filtros</button>
     </section>}
-    {error && <p role="alert" className="rounded border border-red-200 bg-red-50 p-3 text-red-700">{error}</p>}
-    {dashboard?.cells.map((cell) => <article key={`${cell.cohort}-${cell.model}`} className="rounded-xl border bg-white p-5"><h2 className="text-xl font-semibold">{cell.cohort} · {cell.model}</h2>{cell.status === "suppressed" ? <p className="mt-3 rounded bg-amber-50 p-3">Celda suprimida por protección de muestra ({cell.reason_code}). No se muestran conteos parciales.</p> : <div className="mt-4 space-y-4">
+    {error && <p role="alert" className="rounded border border-destructive/30 bg-destructive/10 p-3 text-destructive">{error}</p>}
+    {dashboard?.cells.map((cell) => <article key={`${cell.cohort}-${cell.model}`} className="rounded-xl border border-border bg-card p-5"><h2 className="text-xl font-semibold">{cell.cohort} · {cell.model}</h2>{cell.status === "suppressed" ? <p className="mt-3 rounded bg-warning/10 p-3">Celda suprimida por protección de muestra ({cell.reason_code}). No se muestran conteos parciales.</p> : <div className="mt-4 space-y-4">
       <div className="grid gap-3 sm:grid-cols-3"><p>Muestra: {cell.participant_band} participantes</p><p>Ventanas observables: {cell.sample?.observable_windows}</p><p>Cobertura: {Math.round((cell.quality?.coverage || 0) * 100)}%</p></div>
       <p>Incertidumbre técnica media: {cell.quality?.mean_uncertainty}. Distribución agregada orientada a tarea: {Math.round((cell.observable_distribution?.task_oriented_evidence_ratio || 0) * 100)}%. Intervalo descriptivo: {cell.observable_distribution?.task_oriented_interval_95.lower}–{cell.observable_distribution?.task_oriented_interval_95.upper}.</p>
-      {cell.edge_validation && <section className="rounded border border-cyan-200 bg-cyan-50 p-3" aria-label="Validación Edge">
+      {cell.edge_validation && <section className="rounded border border-secondary/30 bg-secondary/10 p-3" aria-label="Validación Edge">
         <h3 className="font-medium">Validación Edge</h3>
-        <p className="text-sm text-slate-700">Ejecución local: {Math.round(cell.edge_validation.local_execution_ratio * 100)}% · Integridad canónica confirmada: {Math.round(cell.edge_validation.registry_integrity_ratio * 100)}%{cell.edge_validation.mean_task_oriented_probability === null ? "" : ` · Probabilidad media orientada a tarea: ${Math.round(cell.edge_validation.mean_task_oriented_probability * 100)}%`}.</p>
-        <p className="mt-1 text-xs text-slate-600">Sólo resume resultados derivados por ventana; no contiene imágenes, video ni rasgos faciales individuales.</p>
+        <p className="text-sm text-foreground">Ejecución local: {Math.round(cell.edge_validation.local_execution_ratio * 100)}% · Registros con integridad del artefacto verificada: {Math.round(cell.edge_validation.registry_integrity_ratio * 100)}%{cell.edge_validation.mean_task_oriented_probability === null ? "" : ` · Probabilidad media orientada a tarea: ${Math.round(cell.edge_validation.mean_task_oriented_probability * 100)}%`}.</p>
+        <p className="mt-1 text-xs text-muted-foreground">Solo resume resultados derivados por ventana; no contiene imágenes, video ni rasgos faciales individuales.</p>
       </section>}
       <div className="grid gap-3 md:grid-cols-2"><EvidenceCard title="Validez" value={cell.validity_evidence} /><EvidenceCard title="Equidad" value={cell.fairness_evidence} /></div>
-      <details><summary className="cursor-pointer font-medium">Proveniencia, versiones y recursos</summary><pre className="mt-2 overflow-auto rounded bg-slate-950 p-3 text-xs text-white">{JSON.stringify({ provenance: cell.provenance, registry_metrics: cell.registry_metrics, resources: cell.resources, edge_profiles: cell.edge_validation?.profiles }, null, 2)}</pre></details>
+      <details><summary className="cursor-pointer font-medium">Procedencia, versiones y recursos</summary><pre className="mt-2 overflow-auto rounded bg-aten-bg-dark p-3 text-xs text-aten-text-dark">{JSON.stringify({ provenance: cell.provenance, registry_metrics: cell.registry_metrics, resources: cell.resources, edge_profiles: cell.edge_validation?.profiles }, null, 2)}</pre></details>
     </div>}</article>)}
-    {dashboard && <section className="rounded-xl border bg-white p-4"><h2 className="font-semibold">Exportación protegida</h2><p className="text-sm text-slate-600">CSV seudonimizado, de un solo uso, con propósito y caducidad. Exige al menos {dashboard.privacy.minimum_participants} participantes y {dashboard.privacy.minimum_observable_windows} ventanas observables.</p><button className="mt-3 rounded bg-cyan-700 px-4 py-2 text-white disabled:opacity-50" disabled={busy} onClick={() => void exportCsv()}>Exportar selección exacta</button></section>}
-    {dashboard && <ul className="list-disc space-y-1 pl-6 text-sm text-slate-600">{dashboard.limitations.map((item) => <li key={item}>{item}</li>)}</ul>}
+    {dashboard && <section className="rounded-xl border border-border bg-card p-4"><h2 className="font-semibold">Exportación con controles de acceso y caducidad</h2><p className="text-sm text-muted-foreground">El CSV seudonimizado utiliza un token de descarga de un solo uso, vinculado al propósito y con caducidad. Exige al menos {dashboard.privacy.minimum_participants} participantes y {dashboard.privacy.minimum_observable_windows} ventanas observables.</p><button className="mt-3 rounded bg-secondary px-4 py-2 text-secondary-foreground disabled:opacity-50" disabled={busy} onClick={() => void exportCsv()}>Exportar selección exacta</button></section>}
+    {dashboard && <ul className="list-disc space-y-1 pl-6 text-sm text-muted-foreground">{dashboard.limitations.map((item) => <li key={item}>{item}</li>)}</ul>}
   </div></main>;
 }
 
@@ -115,5 +116,5 @@ function Filter({ label, value, options, onChange }: { label: string; value: str
   return <label className="text-sm">{label}<select className="mt-1 w-full rounded border p-2" value={value} onChange={(event) => onChange(event.target.value)}>{options.map((option) => <option key={option}>{option}</option>)}</select></label>;
 }
 function EvidenceCard({ title, value }: { title: string; value?: Evidence }) {
-  return <div className="rounded border p-3"><h3 className="font-medium">{title}</h3><p>Estado: {value?.status || "not_linked"}</p><p className="text-sm text-slate-600">Referencia: {value?.report_reference || "No vinculada; no se presenta ninguna afirmación."}</p></div>;
+  return <div className="rounded border border-border p-3"><h3 className="font-medium">{title}</h3><p>Estado: {value?.status || "not_linked"}</p><p className="text-sm text-muted-foreground">Referencia: {value?.report_reference || "No vinculada; no se presenta ninguna afirmación."}</p></div>;
 }

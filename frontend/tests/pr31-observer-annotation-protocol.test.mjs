@@ -33,10 +33,10 @@ test("requires a protocol reason before submitting no_observable", () => {
 });
 
 test("gives every observable state a distinct accessible visual treatment", () => {
-  assert.match(source, /bg-emerald-600 text-white/);
-  assert.match(source, /bg-rose-700 text-white/);
-  assert.match(source, /bg-amber-300 text-amber-950/);
-  assert.match(source, /bg-slate-700 text-white/);
+  assert.match(source, /bg-success text-\[var\(--success-foreground\)\]/);
+  assert.match(source, /bg-destructive text-destructive-foreground/);
+  assert.match(source, /bg-warning text-\[var\(--warning-foreground\)\]/);
+  assert.match(source, /bg-primary text-primary-foreground/);
   assert.match(source, /focus-visible:ring-2/);
-  assert.match(source, /Cada opción se registra inmediatamente/);
+  assert.match(source, /Cada opción se envía al seleccionarla/);
 });

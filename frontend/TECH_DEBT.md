@@ -20,7 +20,23 @@ Este documento consolida la deuda conocida del frontend por prioridad. Una entra
 | PR 7C | IA e importación/exportación JSON | Integrado | 2026-10-21 |
 | PR 8 | Panel administrativo | Integrado | 2026-10-21 |
 | PR 9 | Paneles Observer y Research | Integrado | 2026-10-21 |
-| PR 10 | Limpieza final, responsive y estados visuales | En verificación; pendiente de commit y revisión | 2026-10-22 |
+| PR 10 | Limpieza final, responsive y estados visuales | Integrado | 2026-10-22 |
+
+## Cierre del rebranding VisionClass → AtenDynex
+
+El rebranding técnico quedó integrado el 2026-10-22 mediante 13 PR funcionales (PR 0-10, contando PR 7A, 7B y 7C por separado) y un PR documental auxiliar. La trazabilidad completa, los hashes de merge y el estado de verificación están en [`../docs/REBRANDING_COMPLETED.md`](../docs/REBRANDING_COMPLETED.md).
+
+El inventario actual contiene 1 entrada P0, 4 frentes P1, 10 entradas P2 y 7 entradas P3, contados por las subsecciones temáticas de este documento. El frente P1 “Hallazgos H1-H5” agrupa cinco hallazgos internos y no equivale a una sola decisión científica.
+
+Próximos PR sugeridos, sujetos al orden y los gates del plan de trabajo:
+
+1. Aplicación efectiva de políticas de privacidad y compliance (P0).
+2. OAuth con `state` y PKCE (P1).
+3. Resolución y referencia versionada de H1-H5 con el equipo científico (P1).
+4. Identificación explícita de la procedencia del fallback de IA (P1).
+5. Incorporación coordinada de las pruebas Node al CI (P2).
+
+Este cierre documenta el rebranding; no aprueba ni resuelve automáticamente estas deudas.
 
 ## P0 — Compliance (URGENTE)
 

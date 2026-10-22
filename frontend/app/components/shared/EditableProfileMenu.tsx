@@ -113,9 +113,9 @@ export function EditableProfileMenu({ role }: { role: "student" | "instructor" }
         <button
           type="button"
           onClick={() => setMenuOpen((prev) => !prev)}
-          className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
+          className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm font-semibold text-foreground shadow-sm hover:bg-muted"
         >
-          <span className="h-8 w-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-semibold overflow-hidden">
+          <span className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-semibold overflow-hidden">
             {avatarUrl ? (
               <Image
                 src={avatarUrl}
@@ -132,9 +132,9 @@ export function EditableProfileMenu({ role }: { role: "student" | "instructor" }
           <span className="hidden sm:inline">{profileForm.first_name || "Perfil"}</span>
         </button>
         {menuOpen && (
-          <div className="absolute right-0 mt-2 w-44 rounded-lg border border-slate-200 bg-white shadow-lg z-20">
+          <div className="absolute right-0 mt-2 w-44 rounded-lg border border-border bg-card shadow-lg z-20">
             <button
-              className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2"
+              className="w-full text-left px-4 py-2 text-sm hover:bg-muted flex items-center gap-2"
               onClick={() => {
                 setProfileError(null);
                 setProfileOpen(true);
@@ -145,7 +145,7 @@ export function EditableProfileMenu({ role }: { role: "student" | "instructor" }
               Mi perfil
             </button>
             <button
-              className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2"
+              className="w-full text-left px-4 py-2 text-sm hover:bg-muted flex items-center gap-2"
               onClick={handleLogout}
             >
               <LogOut className="w-4 h-4" />
@@ -158,16 +158,16 @@ export function EditableProfileMenu({ role }: { role: "student" | "instructor" }
       {profileOpen && (
         <div className="fixed inset-0 z-50 bg-black/40 px-4 py-8">
           <div className="min-h-full w-full grid place-items-center">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 sm:p-7">
+            <div className="bg-card rounded-xl shadow-xl w-full max-w-md p-6 sm:p-7">
               <div className="text-center sm:text-left">
                 <h3 className="text-lg sm:text-xl mb-2">Editar perfil</h3>
-                <p className="text-sm text-slate-500">Actualiza tus datos y seguridad.</p>
+                <p className="text-sm text-muted-foreground">Actualiza tus datos y seguridad.</p>
               </div>
               <div className="space-y-4 mt-5">
                 <div>
-                  <label className="text-sm text-slate-600">Foto de perfil</label>
+                  <label className="text-sm text-muted-foreground">Foto de perfil</label>
                   <div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-3">
-                    <div className="h-16 w-16 rounded-full bg-slate-200 overflow-hidden flex items-center justify-center text-slate-600 text-sm">
+                    <div className="h-16 w-16 rounded-full bg-muted overflow-hidden flex items-center justify-center text-muted-foreground text-sm">
                       {avatarUrl ? (
                         <Image
                           src={avatarUrl}
@@ -182,7 +182,7 @@ export function EditableProfileMenu({ role }: { role: "student" | "instructor" }
                       )}
                     </div>
                     <div className="flex flex-col gap-2 w-full">
-                      <label className="px-3 py-2 rounded-lg border border-slate-200 text-sm cursor-pointer hover:bg-slate-50">
+                      <label className="px-3 py-2 rounded-lg border border-border text-sm cursor-pointer hover:bg-muted">
                         Cambiar imagen
                         <input
                           type="file"
@@ -207,7 +207,7 @@ export function EditableProfileMenu({ role }: { role: "student" | "instructor" }
                       </label>
                       <button
                         type="button"
-                        className="text-xs text-slate-500 hover:text-slate-700"
+                        className="text-xs text-muted-foreground hover:text-foreground"
                         onClick={() =>
                           setProfileForm((prev) => ({ ...prev, profile_image: "" }))
                         }
@@ -219,9 +219,9 @@ export function EditableProfileMenu({ role }: { role: "student" | "instructor" }
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm text-slate-600">Nombre</label>
+                  <label className="text-sm text-muted-foreground">Nombre</label>
                   <input
-                    className="w-full border border-slate-200 rounded-lg px-3 py-2 mt-1"
+                    className="w-full border border-border rounded-lg px-3 py-2 mt-1"
                     value={profileForm.first_name}
                     onChange={(event) =>
                       setProfileForm((prev) => ({ ...prev, first_name: event.target.value }))
@@ -229,9 +229,9 @@ export function EditableProfileMenu({ role }: { role: "student" | "instructor" }
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-slate-600">Apellido</label>
+                  <label className="text-sm text-muted-foreground">Apellido</label>
                   <input
-                    className="w-full border border-slate-200 rounded-lg px-3 py-2 mt-1"
+                    className="w-full border border-border rounded-lg px-3 py-2 mt-1"
                     value={profileForm.last_name}
                     onChange={(event) =>
                       setProfileForm((prev) => ({ ...prev, last_name: event.target.value }))
@@ -239,9 +239,9 @@ export function EditableProfileMenu({ role }: { role: "student" | "instructor" }
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-slate-600">Correo (usuario)</label>
+                  <label className="text-sm text-muted-foreground">Correo (usuario)</label>
                   <input
-                    className="w-full border border-slate-200 rounded-lg px-3 py-2 mt-1"
+                    className="w-full border border-border rounded-lg px-3 py-2 mt-1"
                     value={profileForm.email}
                     onChange={(event) =>
                       setProfileForm((prev) => ({ ...prev, email: event.target.value }))
@@ -249,10 +249,10 @@ export function EditableProfileMenu({ role }: { role: "student" | "instructor" }
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-slate-600">Contraseña actual</label>
+                  <label className="text-sm text-muted-foreground">Contraseña actual</label>
                   <input
                     type="password"
-                    className="w-full border border-slate-200 rounded-lg px-3 py-2 mt-1"
+                    className="w-full border border-border rounded-lg px-3 py-2 mt-1"
                     value={currentPassword}
                     onChange={(event) => setCurrentPassword(event.target.value)}
                     placeholder={
@@ -263,19 +263,19 @@ export function EditableProfileMenu({ role }: { role: "student" | "instructor" }
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-slate-600">Nueva contraseña</label>
+                  <label className="text-sm text-muted-foreground">Nueva contraseña</label>
                   <input
                     type="password"
-                    className="w-full border border-slate-200 rounded-lg px-3 py-2 mt-1"
+                    className="w-full border border-border rounded-lg px-3 py-2 mt-1"
                     value={newPassword}
                     onChange={(event) => setNewPassword(event.target.value)}
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-slate-600">Confirmar nueva contraseña</label>
+                  <label className="text-sm text-muted-foreground">Confirmar nueva contraseña</label>
                   <input
                     type="password"
-                    className="w-full border border-slate-200 rounded-lg px-3 py-2 mt-1"
+                    className="w-full border border-border rounded-lg px-3 py-2 mt-1"
                     value={confirmPassword}
                     onChange={(event) => setConfirmPassword(event.target.value)}
                   />
@@ -284,13 +284,13 @@ export function EditableProfileMenu({ role }: { role: "student" | "instructor" }
               {profileError && <p className="mt-3 text-sm text-red-600">{profileError}</p>}
               <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-6">
                 <button
-                  className="w-full sm:w-auto px-5 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  className="w-full sm:w-auto px-5 py-2 rounded-lg border border-border text-sm font-medium text-foreground hover:bg-muted"
                   onClick={() => setProfileOpen(false)}
                 >
                   Cancelar
                 </button>
                 <button
-                  className="w-full sm:w-auto px-5 py-2 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800"
+                  className="w-full sm:w-auto px-5 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-aten-primary-hover"
                   onClick={handleProfileSave}
                 >
                   Guardar cambios

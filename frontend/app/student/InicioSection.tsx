@@ -201,7 +201,7 @@ export function InicioSection({ onCourseSelect }: InicioSectionProps) {
           <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-4 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
             <div>
               <p className="text-xs text-muted-foreground">Tiempo de estudio</p>
-              <p className="mt-1 text-xl font-semibold text-foreground">--</p>
+              <p className="mt-1 text-xl font-semibold text-foreground">No disponible</p>
               <p className="text-[11px] text-muted-foreground">Esta semana</p>
             </div>
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">

@@ -1,142 +1,186 @@
-# Deuda técnica conocida — AtenDynex frontend
+# TECH_DEBT.md — Estado de AtenDynex
 
-Última actualización: 2026-10-16
+Última actualización: 2026-10-22
 
-## Estado de seguridad
+Este documento consolida la deuda conocida del frontend por prioridad. Una entrada cerrada conserva su historial y no equivale a aprobación científica, legal u operativa.
 
-### Vulnerabilidades productivas
+## Rebranding completado (PRs 0-10)
 
-✅ CERO. Todos los overrides necesarios están activos en `package.json`.
+| PR | Alcance | Estado | Fecha |
+| --- | --- | --- | --- |
+| PR 0 | Saneamiento de seguridad y dependencias productivas | Integrado | 2026-10-13 |
+| PR 1 | Tokens AtenDynex y Plus Jakarta Sans | Integrado | 2026-10-13 |
+| PR 2 | Marca visual provisional, metadata, icono y Open Graph | Integrado | 2026-10-13 |
+| PR 3 | Landing pública | Integrado | 2026-10-13 |
+| PR 4 | Login y páginas legales | Integrado | 2026-10-14 |
+| PR 5 | AppShell y navegación compartida | Integrado | 2026-10-15 |
+| PR 6 | Panel estudiante y tokens de estado | Integrado | 2026-10-16 |
+| PR 7A | Panel docente, inicio y estadísticas | Integrado | 2026-10-21 |
+| PR 7B | Gestión de materiales | Integrado | 2026-10-21 |
+| PR 7C | IA e importación/exportación JSON | Integrado | 2026-10-21 |
+| PR 8 | Panel administrativo | Integrado | 2026-10-21 |
+| PR 9 | Paneles Observer y Research | Integrado | 2026-10-21 |
+| PR 10 | Limpieza final, responsive y estados visuales | En verificación; pendiente de commit y revisión | 2026-10-22 |
 
-### Overrides activos en package.json (frontend)
+## P0 — Compliance (URGENTE)
+
+### Políticas de privacidad sin aplicación efectiva — PR 8
+
+El panel administrativo guarda políticas de retención, anonimización, notificaciones y nivel de detalle, pero no se encontraron consumidores que demuestren su aplicación en captura EDGE, retención, anonimización o notificaciones de riesgo.
+
+**Riesgo:** el administrador puede interpretar que una política configurada ya se aplica cuando no existe evidencia técnica de ello.
+
+**Acción:** PR dedicado de backend y operación, con revisión legal/DPO, pruebas negativas, migración, observabilidad y rollback. No se resuelve dentro del rebranding.
+
+## P1 — Seguridad e integridad científica
+
+### OAuth sin `state` ni PKCE — PR 4
+
+1. OAuth no usa `state`, con riesgo de login CSRF.
+2. No usa PKCE (`code_challenge`/`code_verifier`).
+3. El backend acepta `redirect_uri` aportado por el cliente.
+4. El código OAuth permanece en la URL después del procesamiento.
+
+**Acción:** PR coordinado frontend/backend `fix/oauth-state-pkce`, con rollout gradual y pruebas negativas.
+
+### Fallback IA no identificado — PR 7C
+
+El backend puede devolver preguntas mock cuando Gemini falla o no está disponible. El frontend ignora `detail` y puede presentarlas como generadas por IA.
+
+**Acción:** mostrar procedencia real —Gemini o fallback— y exigir revisión docente antes de publicar.
+
+### Hallazgos H1-H5
+
+Los identificadores H1-H5 pertenecen al registro de hallazgos del ciclo de revisión y no deben confundirse con las hipótesis científicas H1-H3 de `docs/P0.3/`.
+
+- **H1:** falta incorporar al repositorio la referencia versionada de su decisión y alcance.
+- **H2 — Claims de atención en panel docente:** existen 11 claims en `app/instructor/page.tsx`, `EstadisticasProfesor.tsx` e `InicioProfesor.tsx`. Requieren definir qué representa `attention_score` antes de reformularlos.
+- **H3 — Predicciones de abandono no validadas:** el backend usa una fórmula heurística determinista mientras la interfaz afirma que la IA identifica estudiantes en riesgo. Requiere revisión científica, legal y de producto.
+- **H4 — Acciones administrativas decorativas:** nueve acciones visibles no están implementadas, entre ellas exportar reporte, asignar tutor, programar reunión, ver perfil y editar curso. Deben implementarse u ocultarse.
+- **H5:** falta incorporar al repositorio la referencia versionada de su decisión y alcance.
+
+**Acción:** enlazar el documento de hallazgos aprobado antes de cerrar H1-H5. PR 10 no modifica estas superficies.
+
+### Conversión heredada de URLs de YouTube — PR 7B
+
+`MaterialesSection.tsx` inserta el delimitador capturado en lugar del identificador del video en un flujo heredado.
+
+**Acción:** corregir con pruebas unitarias específicas en un PR funcional.
+
+## P2 — Fiabilidad y mantenimiento
+
+### Legal / Compliance — PR 4
+
+Revisión pendiente con DPO/legal de:
+
+- `seguridad/page.tsx`: cifrado, backups, monitoreo y endpoints.
+- `privacidad/page.tsx`: recopilación, retención y tratamiento.
+- `terminos/page.tsx`: consentimiento y responsabilidades.
+- `documentacion/page.tsx`: compromiso de soporte.
+
+### Vulnerabilidades de tooling — PR 0
+
+Las vulnerabilidades productivas quedaron en cero. Permanecen cinco vulnerabilidades altas en dependencias de desarrollo: `eslint-config-next`, `@next/eslint-plugin-next`, `fast-glob`, `micromatch` y `braces`.
+
+La resolución automática propone bajar `eslint-config-next` a `14.2.35`, incompatible con Next `16.4.0`. Esperar corrección upstream o evaluar migración a ESLint flat config.
+
+Overrides activos:
 
 | Paquete | Versión | Motivo |
 | --- | --- | --- |
-| `eslint-plugin-react-hooks` | `7.0.1` | Evita regresión de lint fuera de alcance (23 errores nuevos en versiones 7.1.x) |
-| `sharp` | `0.35.5` | Cierra CVE productiva (era 0.35.4) |
-| `source-map-js` | `1.2.2` | Cierra CVE productiva (era 1.2.1) |
+| `eslint-plugin-react-hooks` | `7.0.1` | Evita una regresión de lint fuera de alcance. |
+| `sharp` | `0.35.5` | Corrige vulnerabilidad productiva. |
+| `source-map-js` | `1.2.2` | Corrige vulnerabilidad productiva. |
 
-### Vulnerabilidades de tooling (no producción)
+### Polling permanente del Observer — PR 9
 
-5 vulnerabilidades altas en dependencias de desarrollo:
+El panel solicita datos cada tres segundos y actualiza el reloj cada 250 ms aun sin ventana activa.
 
-- `eslint-config-next`
-- `@next/eslint-plugin-next`
-- `fast-glob`
-- `micromatch`
-- `braces`
+**Acción:** limitar reloj y polling al periodo con una ventana activa.
 
-**Motivo:** la resolución automática requiere bajar `eslint-config-next` a `14.2.35`, incompatible con Next `16.4.0`.
+### Recharts con variables CSS — PR 7A / PR 8
 
-**Plan:** esperar release upstream o evaluar migración a flat config de ESLint.
+La migración a `var(--*)` se verificó en los PR 7A y PR 8. Sigue pendiente conservar una verificación visual explícita en todos los navegadores admitidos cuando se actualice Recharts.
 
-## Pendientes del rebranding
+### Validación preliminar incompleta del JSON — PR 7C
 
-| Item | Ubicación | PR sugerido |
-| --- | --- | --- |
-| `LOGO.png` residual | `public/LOGO.png` | PR 10 (limpieza) |
-| `DocumentationSection.tsx` huérfano | `app/components/DocumentationSection.tsx` | PR 10 (evaluar) |
-| Formulario de contacto no envía | `app/components/ContactSection.tsx` | `fix/contact-form` (PR separado) |
-| Social links con `href="#"` | `Footer.tsx` | Decisión de negocio |
-| Ver demo sin acción | `HomePage.tsx` | Decisión de negocio |
-| `info@atendynex.com` | `app/components/ContactSection.tsx` | Confirmar buzón real antes de publicar |
-| `atendynex.com` | `app/layout.tsx` (`metadataBase`) | Confirmar dominio antes de publicar |
+El cliente comprueba principalmente `questions`; el servidor valida además opciones, respuesta, dificultad, IDs y longitudes. La interfaz puede considerar válido un archivo que el servidor rechazará.
 
-## Seguridad OAuth (P1)
+### Efecto lateral en `/api/admin/analytics/` — PR 8
 
-Hallazgos del PR 4 (auditoría de login):
+Una lectura `GET` crea políticas predeterminadas cuando no existen. El endpoint analítico debería ser libre de efectos laterales.
 
-1. OAuth sin parámetro `state` → riesgo de login CSRF.
-2. Sin PKCE (`code_challenge`/`code_verifier`) → riesgo de interceptación de código.
-3. El backend acepta `redirect_uri` del cliente → riesgo de open redirect.
-4. El código OAuth permanece en la URL después del procesamiento.
+### CI no ejecuta las pruebas Node — PR 5
 
-**Acción:** PR dedicado `fix/oauth-state-pkce` después del rebranding. Requiere coordinación backend + frontend y rollout gradual con feature flag. No modificar durante el rebranding.
+No se encontró una invocación de `node --test frontend/tests/*.test.mjs` en la configuración de CI versionada. Incorporarla requiere una decisión explícita para no convertir un fallo de línea base en check obligatorio sin coordinación.
 
-## Legal / Compliance (P2)
+### Panel estudiante — PR 6
 
-Reescrituras diferidas del PR 4 (Grupo C):
+- `app/student/course/[courseId]/page.tsx` supera las dos mil líneas y requiere división coordinada.
+- El completado depende del literal persistido `examen final`.
+- Los filtros usan IDs persistidos como `programacion` y `diseno`.
+- Algunos feature flags EDGE no muestran siempre una explicación específica al estudiante.
 
-- `seguridad/page.tsx`: cifrado, backups, monitoreo y protección de endpoints.
-- `privacidad/page.tsx`: recopilación, retención y tratamiento.
-- `terminos/page.tsx`: tratamiento, consentimiento y roles.
-- `documentacion/page.tsx`: compromiso de soporte.
+### Gestión de materiales — PR 7B / PR 7C
 
-**Acción:** PR dedicado `legal/compliance-review` con DPO/legal.
+- La eliminación individual no solicita confirmación.
+- Los PDF se convierten completamente a Base64 en memoria.
+- La creación de curso y estructura no es transaccional.
+- No existe edición integral de un curso.
+- El título `Prueba generada automaticamente` está persistido y requiere migración antes de renombrarlo.
 
-## Contenido pendiente de verificación
+### Grant de investigación — PR 9
 
-- Testimonio "Dr. María Rodríguez - Universidad Nacional" eliminado. Agregar solo con autorización escrita y evidencia real.
+El panel muestra proyecto, propósito y vencimiento, pero no presenta de forma explícita alcance de cohorte/modelo/perfil, aprobador, estado de aprobación y referencia ética.
 
-## Responsive mobile — Overflow horizontal del menú
+## P3 — Contenido y pulido
 
-Detectado en PR 5: en 390px el menú mobile abierto produce desbordamiento horizontal. Es un comportamiento heredado de los navbars originales (Student/Instructor/Admin), no una regresión del refactor AppShell.
+### URLs externas de Unsplash
 
-**Fix sugerido:** ajustar ancho del panel mobile o aplicar `overflow-x: hidden` en el contenedor.
+Permanecen imágenes externas en cinco superficies: About, Login, Inicio del estudiante, Cursos del estudiante e Inicio del docente.
 
-**PR sugerido:** PR 10 (limpieza) o PR dedicado de responsive.
+**Acción:** sustituirlas cuando existan assets de diseño locales aprobados. Diferido fuera de PR 10.
 
-## Panel estudiante — Deudas detectadas en PR 6
+### Contenido y datos de contacto
 
-- `app/student/course/[courseId]/page.tsx` tiene 2033 líneas y requiere división en sub-PRs. No se refactorizó durante el rebranding visual.
-- La lógica de completado depende del literal `examen final` en `app/student/course/[courseId]/page.tsx`. No se debe renombrar el texto visible sin una migración coordinada.
-- Los filtros de categorías usan IDs literales como `programacion` y `diseno`. No se deben renombrar esos IDs sin migración de datos.
-- Los feature flags `BROWSER_EXTRACTOR`, `BOUNDED_CAPTURE_QUEUE` y `EDGE_PROFILES` afectan la captura EDGE sin mostrar siempre una explicación específica al estudiante.
-- `app/student/CursosSection.tsx` usa una URL fija de Unsplash como imagen de respaldo. Debe reemplazarse por un asset aprobado en PR 10.
-- `app/student/InicioSection.tsx` muestra `--` en “Tiempo de estudio”. Debe definirse el comportamiento y la fuente del valor antes de reemplazarlo.
-- `app/student/page.module.css` no tiene importaciones conocidas. Evaluar y, si corresponde, eliminarlo en PR 10.
+- Agregar testimonios únicamente con autorización escrita y evidencia verificable.
+- Confirmar `info@atendynex.com`, el teléfono publicado y el dominio `atendynex.com` antes de producción.
+- El formulario de contacto todavía no envía información.
+- “Ver demo” continúa sin acción asociada.
 
-## Panel docente — Deudas detectadas en PR 7
+### Textos y pruebas acopladas
 
-- **H2 BLOQUEANTE:** existen 11 claims de “atención” en `app/instructor/page.tsx`, `app/instructor/components/EstadisticasProfesor.tsx` y `app/instructor/components/InicioProfesor.tsx`. Requieren una decisión de producto sobre qué representa `attention_score`; no deben reformularse hasta resolver H2.
-- `app/instructor/components/MaterialesSection.tsx` tiene 1760 líneas. Su rebranding se divide en PR 7B (CRUD) y PR 7C (IA e importación/exportación JSON).
-- `app/instructor/components/InstructorNavbar.tsx` es un wrapper de `AppShell`. Los textos compartidos de `nav-config` (“Profesor”, “Abrir menu” y “Estadisticas”) son deuda del PR 5 y quedan fuera del alcance de PR 7.
-- `app/instructor/components/MaterialesSection.tsx` usa `"#"` como fallback de URL. Es una deuda funcional para PR 7B.
-- `Recharts` recibe variables CSS como colores en `EstadisticasProfesor.tsx`; se debe verificar visualmente su compatibilidad en los navegadores admitidos.
-- El panel heredado `EstadisticasProfesor` se activa cuando `TEACHER_GROUP_DASHBOARD_ENABLED=false`.
+Las pruebas verifican textos visibles como “Procedencia”, “Ventanas observables”, “Validez”, “Equidad” y claims de privacidad. Los cambios editoriales deben actualizar las pruebas correspondientes.
 
-### MaterialesSection.tsx — Deudas detectadas en PR 7B
+### Colores directos remanentes
 
-- La URL de YouTube se convierte incorrectamente en las líneas heredadas 537 y 702-706: se inserta el delimitador capturado en lugar del identificador del video. Es un bug funcional y queda fuera del alcance visual de PR 7B.
-- La eliminación individual de un material no solicita confirmación antes de ejecutar la operación.
-- Los archivos PDF se convierten completamente a Base64 en memoria; esto puede elevar el consumo de memoria con archivos grandes.
-- La creación de un curso y su estructura no es transaccional. Un fallo intermedio puede dejar un curso creado parcialmente.
-- No existe edición integral de un curso; la interfaz solo permite crearlo o eliminarlo y administrar sus módulos y lecciones.
-- Los botones de reordenamiento carecían de nombres accesibles. PR 7B añade `aria-label` sin modificar sus handlers.
-- PR 7C queda pendiente para generación con IA e importación/exportación JSON. Los bloques reservados son 104-107, 124-147, 177-179, 285-345, 541-598, 615-621, 1258-1508 y 1688-1731 de `MaterialesSection.tsx` en la base de PR 7B.
+PR 10 migra únicamente `AppShell`, `EditableProfileMenu` y `LogoutButton`. Permanecen 124 apariciones de clases `slate`/`blue` en 14 archivos de páginas públicas, legales y de autenticación. Su migración requiere un PR visual separado para evitar ampliar la limpieza final.
 
-### MaterialesSection.tsx — Deudas detectadas en PR 7C
+### Componentes históricos
 
-- **P1 — Fallback IA no identificado:** el backend puede devolver preguntas mock cuando Gemini falla o no está disponible. El frontend ignora el campo `detail` de la respuesta y presenta esas preguntas igual como “generadas por IA”. Un docente podría publicar contenido mock creyendo que es generación real.
-  - **Acción:** en un PR dedicado, leer `detail` de la respuesta, mostrar procedencia (Gemini vs fallback) y siempre exigir revisión docente.
-- **P2 — Título persistido en DB (línea 1439):** “Prueba generada automaticamente” se persiste en la DB como título del material. Cambiarlo sin migración rompería la detección.
-  - **Acción:** PR de migración con script de actualización de títulos existentes. No tocar en rebranding.
-- **P2 — Validación preliminar incompleta en cliente:** el cliente solo verifica `questions`. El servidor valida opciones, respuesta, dificultad, IDs y longitudes. La UI puede mostrar “válido” y el servidor rechazar.
-  - **Acción:** evaluar validación más robusta en cliente en un PR funcional.
-- **P3 — Límite 256 KB solo en cliente:** archivos mayores se rechazan antes de selección sin feedback claro.
-- **P3 — Exportación directa de borrador:** un borrador generado por IA se crea inmediatamente como material del curso, sin paso intermedio de aprobación explícita.
+`PrivacySection.tsx`, `SecuritySection.tsx` y `TermsSection.tsx` no se importan actualmente, pero se conservan porque aparecen en evidencia histórica. Revisar esa evidencia antes de eliminarlos.
 
-## Panel admin — Deudas detectadas en PR 8
+### Importación y borradores de pruebas — PR 7C
 
-- **P0 — COMPLIANCE: políticas de privacidad sin aplicación efectiva:** el panel admin guarda políticas de privacidad —retención, anonimización, notificaciones y nivel de detalle—, pero no se encontraron consumidores que las apliquen en captura EDGE, retención de datos, anonimización ni notificaciones de riesgo. Esto significa que el administrador puede creer que configura algo que no se aplica, con riesgo legal y de expectativas.
-  - **Acción:** PR dedicado para verificar y aplicar las políticas en backend. Prioridad alta antes de producción.
-- **H3 BLOQUEANTE — Predicciones de abandono no validadas científicamente:** el backend usa la fórmula heurística determinista `(1 - promedio_atención) × 100 + proporción_baja_atención × 30 + días_inactividad`, pero el frontend afirma que “IA identifica estudiantes en riesgo”. Es técnicamente incorrecto y etiqueta estudiantes individualmente sin validación científica.
-  - **Acción:** PR dedicado posterior al rebranding con el equipo científico —validar o eliminar la heurística—, legal —revisar la individualización— y producto —decidir si se oculta o reformula—. Hay 12 claims bloqueados documentados en la Tabla 4B de PR 8 Fase A.
-- **H4 BLOQUEANTE — 9 acciones admin decorativas sin implementación:** exportar reporte institucional; ver lista completa para los niveles crítico, alto y medio; asignar a tutor; programar reunión; ver perfil completo; solicitar más información; y editar curso.
-  - **Acción:** PR dedicado para implementar u ocultar estas acciones.
-- **P2 — Endpoint analítico con efecto lateral:** la lectura de `/api/admin/analytics/` crea políticas predeterminadas si no existen. Un `GET` no debería tener efectos secundarios.
-- **P2 — Recharts con variables CSS:** `AdminAnalyticsSection` usaba 10 valores hexadecimales. Su migración a `var(--*)` requiere verificación visual en los navegadores admitidos.
+- El límite de 256 KB se aplica solo en el cliente y requiere feedback más claro.
+- El borrador generado por IA se crea como material sin una aprobación intermedia explícita.
 
-## Observer + Research — Deudas detectadas en PR 9
+### Manual de usuario — Fase C
 
-- **P2 — Polling permanente del observer:** el polling ejecuta una solicitud cada 3 segundos y actualiza el reloj cada 250 ms, incluso sin ventana activa. Esto provoca cuatro rerenders por segundo además del polling permanente.
-  - **Acción:** optimizar en un PR dedicado para mantener el polling únicamente cuando exista una ventana activa.
-- **P2 — Estados técnicos visibles sin traducir:** `research/page.tsx` muestra `not_linked` y otros estados; `ObserverPanel.tsx` muestra `scheduled`, `observing`, `ready`, `submitted` y `expired`; `ObserverAnnotationForm.tsx` conserva enums técnicos del contrato.
-  - **Acción:** añadir en un PR de internacionalización un mapa de traducciones exclusivamente visual, sin modificar los valores de la API.
-- **P2 — Grant de investigación parcialmente claro:** el panel muestra proyecto, propósito y vencimiento, pero no presenta explícitamente el alcance de cohorte/modelo/perfil, el aprobador, el estado de aprobación ni la referencia ética. Los filtros reflejan opciones autorizadas sin explicar que proceden del grant.
-  - **Acción:** revisar en un PR dedicado con el equipo de investigación qué información de alcance debe exponerse sin ampliar datos sensibles.
-- **P3 — Tests acoplados a textos visibles:** las pruebas de PR 37 verifican “Procedencia”, “Ventanas observables”, “Validez”, “Equidad”, `not_linked`, “Validación Edge” y claims de privacidad. Cualquier cambio de redacción requiere actualizar las pruebas. PR 9 actualiza el término “Proveniencia” a “Procedencia”.
+La redacción del manual permanece diferida hasta integrar PR 10 y resolver los hallazgos bloqueantes definidos por el Product Owner.
+
+## Cerrado por PR 10
+
+- Eliminados 13 residuos: tres CSS Modules sin imports, `DocumentationSection.tsx`, ocho assets públicos sin referencias y `favicon.ico` heredado.
+- `app/icon.svg` queda como favicon AtenDynex activo; la verificación final depende del build y la inspección del navegador.
+- Corregido el overflow horizontal del AppShell en móvil mediante composición vertical fuera del flujo de la fila.
+- Componentes compartidos migrados de `slate`/`blue` a tokens AtenDynex.
+- Estados técnicos de Research y Observer traducidos solo en presentación, sin alterar contratos.
+- Enlaces sociales sin URL oficial ocultos; conservado un TODO para reactivarlos.
+- “Tiempo de estudio” muestra “No disponible” mientras no exista una fuente funcional.
+- README del frontend reemplazado por una descripción mínima de AtenDynex.
 
 ## Notas
 
-- El PR 0.5 fue evaluado y cerrado como "no requerido": las correcciones de `sharp` y `source-map-js` ya estaban en el commit `0ee2197` del PR 0.
+- PR 0.5 fue evaluado como no requerido: `sharp` y `source-map-js` ya estaban corregidos por PR 0.
+- Cerrar una deuda exige evidencia verificable; moverla a esta sección no aprueba gates científicos, legales ni operativos.

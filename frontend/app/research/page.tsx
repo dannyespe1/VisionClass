@@ -27,6 +27,20 @@ type Dashboard = {
 };
 type Filters = { period: string; cohort: string; model: string; profile: string };
 
+const evidenceStatusLabels: Record<string, string> = {
+  not_linked: "No vinculada",
+  synthetic_only: "Solo evidencia sintética",
+  pending_independent_review: "Revisión independiente pendiente",
+  approved_for_scope: "Aprobada para el alcance",
+  blocked: "Bloqueada",
+};
+
+const suppressionReasonLabels: Record<string, string> = {
+  minimum_observable_participants: "Participantes observables insuficientes",
+  minimum_observable_windows: "Ventanas observables insuficientes",
+  missing_uncertainty: "Falta información de incertidumbre",
+};
+
 export default function ResearchPage() {
   const router = useRouter();
   const { token } = useAuth();
@@ -96,7 +110,7 @@ export default function ResearchPage() {
       <button className="self-end rounded bg-primary p-2 text-primary-foreground disabled:opacity-50" disabled={busy} onClick={() => void load(filters)}>Aplicar filtros</button>
     </section>}
     {error && <p role="alert" className="rounded border border-destructive/30 bg-destructive/10 p-3 text-destructive">{error}</p>}
-    {dashboard?.cells.map((cell) => <article key={`${cell.cohort}-${cell.model}`} className="rounded-xl border border-border bg-card p-5"><h2 className="text-xl font-semibold">{cell.cohort} · {cell.model}</h2>{cell.status === "suppressed" ? <p className="mt-3 rounded bg-warning/10 p-3">Celda suprimida por protección de muestra ({cell.reason_code}). No se muestran conteos parciales.</p> : <div className="mt-4 space-y-4">
+    {dashboard?.cells.map((cell) => <article key={`${cell.cohort}-${cell.model}`} className="rounded-xl border border-border bg-card p-5"><h2 className="text-xl font-semibold">{cell.cohort} · {cell.model}</h2>{cell.status === "suppressed" ? <p className="mt-3 rounded bg-warning/10 p-3">Celda suprimida por protección de muestra ({suppressionReasonLabels[cell.reason_code || ""] || "Criterios de publicación no alcanzados"}). No se muestran conteos parciales.</p> : <div className="mt-4 space-y-4">
       <div className="grid gap-3 sm:grid-cols-3"><p>Muestra: {cell.participant_band} participantes</p><p>Ventanas observables: {cell.sample?.observable_windows}</p><p>Cobertura: {Math.round((cell.quality?.coverage || 0) * 100)}%</p></div>
       <p>Incertidumbre técnica media: {cell.quality?.mean_uncertainty}. Distribución agregada orientada a tarea: {Math.round((cell.observable_distribution?.task_oriented_evidence_ratio || 0) * 100)}%. Intervalo descriptivo: {cell.observable_distribution?.task_oriented_interval_95.lower}–{cell.observable_distribution?.task_oriented_interval_95.upper}.</p>
       {cell.edge_validation && <section className="rounded border border-secondary/30 bg-secondary/10 p-3" aria-label="Validación Edge">
@@ -116,5 +130,6 @@ function Filter({ label, value, options, onChange }: { label: string; value: str
   return <label className="text-sm">{label}<select className="mt-1 w-full rounded border p-2" value={value} onChange={(event) => onChange(event.target.value)}>{options.map((option) => <option key={option}>{option}</option>)}</select></label>;
 }
 function EvidenceCard({ title, value }: { title: string; value?: Evidence }) {
-  return <div className="rounded border border-border p-3"><h3 className="font-medium">{title}</h3><p>Estado: {value?.status || "not_linked"}</p><p className="text-sm text-muted-foreground">Referencia: {value?.report_reference || "No vinculada; no se presenta ninguna afirmación."}</p></div>;
+  const status = value?.status || "not_linked";
+  return <div className="rounded border border-border p-3"><h3 className="font-medium">{title}</h3><p>Estado: {evidenceStatusLabels[status] || "Estado no reconocido"}</p><p className="text-sm text-muted-foreground">Referencia: {value?.report_reference || "No vinculada; no se presenta ninguna afirmación."}</p></div>;
 }

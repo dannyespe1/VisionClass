@@ -1,15 +1,7 @@
 import Image from "next/image";
-import { Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
-
-  const social = [
-    { icon: Facebook, href: "#", label: "Facebook" },
-    { icon: Twitter, href: "#", label: "Twitter" },
-    { icon: Linkedin, href: "#", label: "LinkedIn" },
-    { icon: Instagram, href: "#", label: "Instagram" },
-  ];
 
   const links = [
     { label: "Inicio", href: "#inicio" },
@@ -42,18 +34,8 @@ export function Footer() {
             <p className="text-sm text-slate-300 max-w-md">
               Registro de evidencia observable mediante procesamiento visual local para actividades educativas.
             </p>
-            <div className="flex gap-3">
-              {social.map((item) => (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  aria-label={item.label}
-                  className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-100 hover:text-white hover:bg-white/10 transition"
-                >
-                  <item.icon className="w-5 h-5" />
-                </a>
-              ))}
-            </div>
+            {/* TODO(rebranding): reactivar enlaces sociales cuando existan URLs oficiales. */}
+            <div className="flex gap-3" aria-hidden="true" />
           </div>
 
           <div className="grid grid-cols-2 gap-8 md:col-span-2">

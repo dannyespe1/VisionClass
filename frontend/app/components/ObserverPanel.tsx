@@ -16,6 +16,15 @@ type Assignment = {
   status: "scheduled" | "observing" | "ready" | "submitted" | "expired" | "consent_unavailable";
 };
 
+const observerStatusLabels: Record<Assignment["status"], string> = {
+  scheduled: "Programada",
+  observing: "En observación",
+  ready: "Lista para anotar",
+  submitted: "Enviada",
+  expired: "Expirada",
+  consent_unavailable: "Consentimiento no disponible",
+};
+
 type Course = { id: number; title: string };
 type ScheduleOption = { id: number; display_name: string };
 type ParticipantOption = ScheduleOption & { active_session: boolean; consent_ready: boolean };
@@ -209,7 +218,7 @@ export function ObserverPanel({ allowScheduling = false }: { allowScheduling?: b
       <details>
         <summary className="cursor-pointer text-sm font-medium">Estado de asignaciones recientes</summary>
         <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-          {assignments.map((item) => <li key={item.assignment_id}>{item.target_code} · {item.status} · {item.manual_version}</li>)}
+          {assignments.map((item) => <li key={item.assignment_id}>{item.target_code} · {observerStatusLabels[item.status]} · {item.manual_version}</li>)}
         </ul>
       </details>
     </section>

@@ -40,8 +40,8 @@ test("panel handles privacy suppression and combined filters", () => {
 });
 
 test("panel avoids rankings diagnoses and individual surveillance language", () => {
-  assert.match(component, /no genera rankings/i);
-  assert.match(component, /no permite vigilancia individual/i);
+  assert.match(component, /sin identificar estudiantes ni ofrecer rankings/i);
+  assert.match(component, /sin identificar estudiantes ni ofrecer rankings o vistas individuales/i);
   assert.match(component, /no estados mentales/i);
   assert.doesNotMatch(component, /riesgo del estudiante|atención promedio|alerta temprana/i);
 });

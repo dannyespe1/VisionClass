@@ -1,6 +1,14 @@
+import { DocsSection } from "@/app/components/landing/DocsSection";
+import { FinalCTA } from "@/app/components/landing/FinalCTA";
 import { Hero } from "@/app/components/landing/Hero";
+import { HowItWorks } from "@/app/components/landing/HowItWorks";
 import { LandingFooter } from "@/app/components/landing/LandingFooter";
 import { LandingHeader } from "@/app/components/landing/LandingHeader";
+import { PrivacySection } from "@/app/components/landing/PrivacySection";
+import { RequirementsSection } from "@/app/components/landing/RequirementsSection";
+import { RolesSection } from "@/app/components/landing/RolesSection";
+import { UseCasesSection } from "@/app/components/landing/UseCasesSection";
+import { WhatItDoes } from "@/app/components/landing/WhatItDoes";
 
 export default function Page() {
   return (
@@ -14,7 +22,14 @@ export default function Page() {
       <LandingHeader />
       <main id="contenido-principal">
         <Hero />
-        {/* Las secciones informativas de Landing v2 se incorporarán en PR B. */}
+        <WhatItDoes />
+        <HowItWorks />
+        <PrivacySection />
+        <RolesSection />
+        <RequirementsSection />
+        <UseCasesSection />
+        <DocsSection />
+        <FinalCTA />
       </main>
       <LandingFooter />
     </>

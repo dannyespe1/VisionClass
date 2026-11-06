@@ -4,6 +4,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useAuth } from "../context/AuthContext";
 import { apiFetch } from "../lib/api";
+import {
+  MAX_SEAT_COLUMNS,
+  MAX_SEAT_ROWS,
+  buildSeatGrid,
+  isValidSeatLayout,
+} from "../lib/seat-grid.mjs";
 import { ObserverAnnotationForm } from "./ObserverAnnotationForm";
 
 type Assignment = {
@@ -34,6 +40,10 @@ type ScheduleOptions = {
   window_seconds: number;
 };
 
+type SeatLayout = { rows: number; columns: number };
+
+const layoutStorageKey = (courseId: string) => `atendynex.observer-seat-layout.${courseId}`;
+
 export function ObserverPanel({ allowScheduling = false }: { allowScheduling?: boolean }) {
   const { token } = useAuth();
   const [assignments, setAssignments] = useState<Assignment[]>([]);
@@ -43,6 +53,9 @@ export function ObserverPanel({ allowScheduling = false }: { allowScheduling?: b
   const [participantId, setParticipantId] = useState("");
   const [observerId, setObserverId] = useState("");
   const [locationCode, setLocationCode] = useState("");
+  const [rowCount, setRowCount] = useState("");
+  const [columnCount, setColumnCount] = useState("");
+  const [seatLayout, setSeatLayout] = useState<SeatLayout | null>(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
@@ -94,6 +107,42 @@ export function ObserverPanel({ allowScheduling = false }: { allowScheduling?: b
       .catch(() => setError("No fue posible preparar la lista de observación para este curso."));
   }, [allowScheduling, courseId, token]);
 
+  useEffect(() => {
+    if (!allowScheduling || !courseId) {
+      setRowCount("");
+      setColumnCount("");
+      setSeatLayout(null);
+      return;
+    }
+
+    try {
+      const saved = window.localStorage.getItem(layoutStorageKey(courseId));
+      if (!saved) {
+        setRowCount("");
+        setColumnCount("");
+        setSeatLayout(null);
+        return;
+      }
+      const parsed = JSON.parse(saved) as Partial<SeatLayout>;
+      const rows = Number(parsed.rows);
+      const columns = Number(parsed.columns);
+      if (!isValidSeatLayout(rows, columns)) {
+        window.localStorage.removeItem(layoutStorageKey(courseId));
+        setRowCount("");
+        setColumnCount("");
+        setSeatLayout(null);
+        return;
+      }
+      setRowCount(String(rows));
+      setColumnCount(String(columns));
+      setSeatLayout({ rows, columns });
+    } catch {
+      setRowCount("");
+      setColumnCount("");
+      setSeatLayout(null);
+    }
+  }, [allowScheduling, courseId]);
+
   const active = useMemo(
     () => assignments.find((item) => item.status === "ready")
       || assignments.find((item) => item.status === "observing")
@@ -101,6 +150,29 @@ export function ObserverPanel({ allowScheduling = false }: { allowScheduling?: b
     [assignments],
   );
   const remainingMs = active ? new Date(active.starts_at).getTime() - clock : 0;
+  const seats = useMemo(
+    () => seatLayout ? buildSeatGrid(seatLayout.rows, seatLayout.columns) : [],
+    [seatLayout],
+  );
+
+  const createSeatLayout = () => {
+    const rows = Number(rowCount);
+    const columns = Number(columnCount);
+    if (!isValidSeatLayout(rows, columns)) {
+      setError(`Ingresa entre 1 y ${MAX_SEAT_ROWS} filas y entre 1 y ${MAX_SEAT_COLUMNS} columnas.`);
+      return;
+    }
+    const nextLayout = { rows, columns };
+    setError("");
+    setNotice("");
+    setSeatLayout(nextLayout);
+    setLocationCode("");
+    try {
+      window.localStorage.setItem(layoutStorageKey(courseId), JSON.stringify(nextLayout));
+    } catch {
+      // La cuadrícula sigue disponible durante esta sesión aunque el navegador bloquee almacenamiento local.
+    }
+  };
 
   const schedule = async () => {
     if (!token || !courseId || !participantId || !observerId || !/^[A-Z0-9-]{2,16}$/.test(locationCode)) return;
@@ -161,38 +233,99 @@ export function ObserverPanel({ allowScheduling = false }: { allowScheduling?: b
         <p className="text-sm text-muted-foreground">Solo conducta visible. No se muestran imágenes, predicciones, resultados académicos ni la respuesta del otro observador.</p>
       </div>
 
-      {allowScheduling && <div className="grid gap-3 rounded-lg border border-border bg-muted p-4 md:grid-cols-5">
-        <label className="text-sm">Curso
-          <select className="mt-1 w-full rounded border p-2" value={courseId} onChange={(event) => setCourseId(event.target.value)}>
-            <option value="">Selecciona</option>
-            {courses.map((course) => <option key={course.id} value={course.id}>{course.title}</option>)}
-          </select>
-        </label>
-        <label className="text-sm">Estudiante
-          <select className="mt-1 w-full rounded border p-2" value={participantId} onChange={(event) => setParticipantId(event.target.value)} disabled={!options}>
-            <option value="">Selecciona</option>
-            {options?.participants.map((item) => <option key={item.id} value={item.id} disabled={!item.active_session || !item.consent_ready}>
-              {item.display_name}{!item.active_session ? " · sin sesión" : !item.consent_ready ? " · sin consentimiento" : ""}
-            </option>)}
-          </select>
-        </label>
-        <label className="text-sm">Observador independiente
-          <select className="mt-1 w-full rounded border p-2" value={observerId} onChange={(event) => setObserverId(event.target.value)} disabled={!options}>
-            <option value="">Selecciona</option>
-            {options?.observers.map((item) => <option key={item.id} value={item.id}>{item.display_name}</option>)}
-          </select>
-        </label>
-        <label className="text-sm">Código de puesto
-          <input
-            className="mt-1 w-full rounded border p-2 uppercase"
-            value={locationCode}
-            maxLength={16}
-            placeholder="F2-P4"
-            onChange={(event) => setLocationCode(event.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, ""))}
-          />
-        </label>
-        <button type="button" className="self-end rounded bg-primary p-2 text-primary-foreground disabled:opacity-50" disabled={busy || !participantId || !observerId || !/^[A-Z0-9-]{2,16}$/.test(locationCode)} onClick={() => void schedule()}>
-          Programar 5 segundos
+      {allowScheduling && <div className="space-y-4 rounded-lg border border-border bg-muted p-4">
+        <div className="grid gap-3 md:grid-cols-3">
+          <label className="text-sm">Curso
+            <select className="mt-1 w-full rounded border border-border bg-background p-2" value={courseId} onChange={(event) => setCourseId(event.target.value)}>
+              <option value="">Selecciona</option>
+              {courses.map((course) => <option key={course.id} value={course.id}>{course.title}</option>)}
+            </select>
+          </label>
+          <label className="text-sm">Estudiante
+            <select className="mt-1 w-full rounded border border-border bg-background p-2" value={participantId} onChange={(event) => setParticipantId(event.target.value)} disabled={!options}>
+              <option value="">Selecciona</option>
+              {options?.participants.map((item) => <option key={item.id} value={item.id} disabled={!item.active_session || !item.consent_ready}>
+                {item.display_name}{!item.active_session ? " · sin sesión" : !item.consent_ready ? " · sin consentimiento" : ""}
+              </option>)}
+            </select>
+          </label>
+          <label className="text-sm">Observador independiente
+            <select className="mt-1 w-full rounded border border-border bg-background p-2" value={observerId} onChange={(event) => setObserverId(event.target.value)} disabled={!options}>
+              <option value="">Selecciona</option>
+              {options?.observers.map((item) => <option key={item.id} value={item.id}>{item.display_name}</option>)}
+            </select>
+          </label>
+        </div>
+
+        <fieldset className="space-y-3" disabled={!courseId}>
+          <legend className="text-sm font-semibold text-foreground">Distribución del aula</legend>
+          <p className="text-xs text-muted-foreground">Configura la cuadrícula y selecciona el puesto físico del estudiante. La fila A es la más cercana al frente.</p>
+          <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+            <label className="text-sm">Filas
+              <input
+                className="mt-1 w-full rounded border border-border bg-background p-2"
+                type="number"
+                inputMode="numeric"
+                min={1}
+                max={MAX_SEAT_ROWS}
+                value={rowCount}
+                onChange={(event) => setRowCount(event.target.value)}
+              />
+            </label>
+            <label className="text-sm">Columnas
+              <input
+                className="mt-1 w-full rounded border border-border bg-background p-2"
+                type="number"
+                inputMode="numeric"
+                min={1}
+                max={MAX_SEAT_COLUMNS}
+                value={columnCount}
+                onChange={(event) => setColumnCount(event.target.value)}
+              />
+            </label>
+            <button type="button" className="self-end rounded border border-primary px-4 py-2 text-primary hover:bg-primary/10 disabled:opacity-50" onClick={createSeatLayout} disabled={!rowCount || !columnCount}>
+              Crear cuadrícula
+            </button>
+          </div>
+        </fieldset>
+
+        {seatLayout && <div className="space-y-3 rounded-lg border border-border bg-background p-3">
+          <div className="mx-auto max-w-xl rounded-full border-2 border-primary/40 bg-primary/5 px-4 py-2 text-center text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+            Frente / pizarra
+          </div>
+          <div className="overflow-x-auto pb-2">
+            <div
+              className="mx-auto grid gap-2"
+              style={{
+                gridTemplateColumns: `repeat(${seatLayout.columns}, minmax(2.75rem, 1fr))`,
+                minWidth: `${seatLayout.columns * 52}px`,
+                maxWidth: `${seatLayout.columns * 72}px`,
+              }}
+              role="group"
+              aria-label="Puestos del aula"
+            >
+              {seats.map((seat) => {
+                const selected = locationCode === seat.code;
+                return <button
+                  key={seat.code}
+                  type="button"
+                  className={`min-h-11 rounded-lg border px-2 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selected ? "border-primary bg-primary text-primary-foreground shadow-sm" : "border-border bg-card text-foreground hover:border-primary hover:bg-primary/10"}`}
+                  aria-pressed={selected}
+                  aria-label={`Puesto ${seat.code}, fila ${seat.row}, columna ${seat.column}`}
+                  onClick={() => setLocationCode(seat.code)}
+                >
+                  {seat.code}
+                </button>;
+              })}
+            </div>
+          </div>
+          <p className="text-center text-sm" aria-live="polite">
+            {locationCode ? <>Puesto seleccionado: <strong>{locationCode}</strong></> : "Selecciona el puesto del estudiante."}
+          </p>
+        </div>}
+
+        <button type="button" className="w-full rounded bg-primary p-2 text-primary-foreground disabled:opacity-50" disabled={busy || !participantId || !observerId || !/^[A-Z0-9-]{2,16}$/.test(locationCode)} onClick={() => void schedule()}>
+          Programar {options?.window_seconds ?? 5} segundos en {locationCode || "un puesto"}
         </button>
       </div>}
 

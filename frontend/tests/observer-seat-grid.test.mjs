@@ -1,13 +1,21 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import {
   MAX_SEAT_COLUMNS,
   MAX_SEAT_ROWS,
+  addObservedSeatCode,
   buildSeatGrid,
   isValidSeatLayout,
+  sanitizeObservedSeatCodes,
   seatRowLabel,
 } from "../app/lib/seat-grid.mjs";
+
+const observerPanelSource = readFileSync(
+  new URL("../app/components/ObserverPanel.tsx", import.meta.url),
+  "utf8",
+);
 
 test("genera códigos de asiento ordenados por fila", () => {
   assert.deepEqual(buildSeatGrid(2, 3), [
@@ -40,4 +48,19 @@ test("rechaza dimensiones vacías, negativas, decimales o excesivas", () => {
     assert.equal(isValidSeatLayout(rows, columns), false);
     assert.throws(() => buildSeatGrid(rows, columns), RangeError);
   }
+});
+
+test("registra cada puesto observado una sola vez sin aceptar valores ajenos a la cuadrícula", () => {
+  assert.deepEqual(addObservedSeatCode(["A1", "A1"], "B3"), ["A1", "B3"]);
+  assert.deepEqual(addObservedSeatCode(["A1"], "student@example.com"), ["A1"]);
+  assert.deepEqual(sanitizeObservedSeatCodes(["A1", "T20", "U1", "A0", 3, null]), ["A1", "T20"]);
+  assert.deepEqual(sanitizeObservedSeatCodes({ A1: true }), []);
+});
+
+test("marca el progreso local solo en el panel docente y permite iniciar otra ronda", () => {
+  assert.match(observerPanelSource, /if \(allowScheduling && active\?\.location_code\)/);
+  assert.match(observerPanelSource, /Anotación docente registrada/);
+  assert.match(observerPanelSource, /Iniciar nueva ronda/);
+  assert.match(observerPanelSource, /bg-success\/15 text-foreground/);
+  assert.doesNotMatch(observerPanelSource, /peer_category|category.*observedSeat/);
 });

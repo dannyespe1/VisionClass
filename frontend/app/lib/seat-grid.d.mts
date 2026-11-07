@@ -10,3 +10,5 @@ export type SeatPosition = {
 export function isValidSeatLayout(rows: number, columns: number): boolean;
 export function seatRowLabel(rowIndex: number): string;
 export function buildSeatGrid(rows: number, columns: number): SeatPosition[];
+export function sanitizeObservedSeatCodes(value: unknown): string[];
+export function addObservedSeatCode(value: unknown, code: string): string[];

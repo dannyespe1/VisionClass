@@ -1,5 +1,6 @@
 export const MAX_SEAT_ROWS = 20;
 export const MAX_SEAT_COLUMNS = 20;
+const SEAT_CODE_PATTERN = /^[A-T](?:[1-9]|1\d|20)$/;
 
 export function isValidSeatLayout(rows, columns) {
   return Number.isInteger(rows)
@@ -31,4 +32,13 @@ export function buildSeatGrid(rows, columns) {
       column: columnIndex + 1,
     };
   });
+}
+
+export function sanitizeObservedSeatCodes(value) {
+  if (!Array.isArray(value)) return [];
+  return [...new Set(value.filter((code) => typeof code === "string" && SEAT_CODE_PATTERN.test(code)))];
+}
+
+export function addObservedSeatCode(value, code) {
+  return sanitizeObservedSeatCodes([...sanitizeObservedSeatCodes(value), code]);
 }

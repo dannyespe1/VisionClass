@@ -7,8 +7,10 @@ import { apiFetch } from "../lib/api";
 import {
   MAX_SEAT_COLUMNS,
   MAX_SEAT_ROWS,
+  addObservedSeatCode,
   buildSeatGrid,
   isValidSeatLayout,
+  sanitizeObservedSeatCodes,
 } from "../lib/seat-grid.mjs";
 import { ObserverAnnotationForm } from "./ObserverAnnotationForm";
 
@@ -43,6 +45,7 @@ type ScheduleOptions = {
 type SeatLayout = { rows: number; columns: number };
 
 const layoutStorageKey = (courseId: string) => `atendynex.observer-seat-layout.${courseId}`;
+const progressStorageKey = (courseId: string) => `atendynex.observer-seat-progress.${courseId}`;
 
 export function ObserverPanel({ allowScheduling = false }: { allowScheduling?: boolean }) {
   const { token } = useAuth();
@@ -56,6 +59,7 @@ export function ObserverPanel({ allowScheduling = false }: { allowScheduling?: b
   const [rowCount, setRowCount] = useState("");
   const [columnCount, setColumnCount] = useState("");
   const [seatLayout, setSeatLayout] = useState<SeatLayout | null>(null);
+  const [observedSeatCodes, setObservedSeatCodes] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
@@ -143,6 +147,19 @@ export function ObserverPanel({ allowScheduling = false }: { allowScheduling?: b
     }
   }, [allowScheduling, courseId]);
 
+  useEffect(() => {
+    if (!allowScheduling || !courseId) {
+      setObservedSeatCodes([]);
+      return;
+    }
+    try {
+      const saved = window.localStorage.getItem(progressStorageKey(courseId));
+      setObservedSeatCodes(sanitizeObservedSeatCodes(saved ? JSON.parse(saved) : []));
+    } catch {
+      setObservedSeatCodes([]);
+    }
+  }, [allowScheduling, courseId]);
+
   const active = useMemo(
     () => assignments.find((item) => item.status === "ready")
       || assignments.find((item) => item.status === "observing")
@@ -154,6 +171,21 @@ export function ObserverPanel({ allowScheduling = false }: { allowScheduling?: b
     () => seatLayout ? buildSeatGrid(seatLayout.rows, seatLayout.columns) : [],
     [seatLayout],
   );
+  const observedSeats = useMemo(() => new Set(observedSeatCodes), [observedSeatCodes]);
+  const visibleObservedCount = useMemo(
+    () => seats.filter((seat) => observedSeats.has(seat.code)).length,
+    [observedSeats, seats],
+  );
+
+  const persistObservedSeats = (codes: string[]) => {
+    const sanitized = sanitizeObservedSeatCodes(codes);
+    setObservedSeatCodes(sanitized);
+    try {
+      window.localStorage.setItem(progressStorageKey(courseId), JSON.stringify(sanitized));
+    } catch {
+      // El progreso visual continúa disponible durante esta sesión del navegador.
+    }
+  };
 
   const createSeatLayout = () => {
     const rows = Number(rowCount);
@@ -167,11 +199,20 @@ export function ObserverPanel({ allowScheduling = false }: { allowScheduling?: b
     setNotice("");
     setSeatLayout(nextLayout);
     setLocationCode("");
+    const validCodes = new Set(buildSeatGrid(rows, columns).map((seat) => seat.code));
+    persistObservedSeats(observedSeatCodes.filter((code) => validCodes.has(code)));
     try {
       window.localStorage.setItem(layoutStorageKey(courseId), JSON.stringify(nextLayout));
     } catch {
       // La cuadrícula sigue disponible durante esta sesión aunque el navegador bloquee almacenamiento local.
     }
+  };
+
+  const resetObservationRound = () => {
+    setLocationCode("");
+    persistObservedSeats([]);
+    setError("");
+    setNotice("Nueva ronda iniciada. Las anotaciones guardadas no se modificaron; solo se reinició el progreso visual de los puestos.");
   };
 
   const schedule = async () => {
@@ -218,6 +259,10 @@ export function ObserverPanel({ allowScheduling = false }: { allowScheduling?: b
       setNotice(result.pair_status === "complete"
         ? "Anotación registrada. El par está completo; las respuestas continúan ocultas."
         : "Anotación registrada. La respuesta del otro observador continúa oculta.");
+      if (allowScheduling && active?.location_code) {
+        persistObservedSeats(addObservedSeatCode(observedSeatCodes, active.location_code));
+        setLocationCode("");
+      }
       await loadAssignments();
     } catch {
       setError("No se pudo registrar la anotación. La ventana puede no haber iniciado, haber expirado o carecer de consentimiento vigente.");
@@ -293,6 +338,24 @@ export function ObserverPanel({ allowScheduling = false }: { allowScheduling?: b
           <div className="mx-auto max-w-xl rounded-full border-2 border-primary/40 bg-primary/5 px-4 py-2 text-center text-xs font-semibold uppercase tracking-[0.2em] text-primary">
             Frente / pizarra
           </div>
+          <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
+            <div className="flex flex-wrap gap-3" aria-label="Leyenda de puestos">
+              <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded border border-border bg-card" aria-hidden="true" /> Pendiente</span>
+              <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded bg-primary" aria-hidden="true" /> Seleccionado</span>
+              <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded border border-success/40 bg-success/15" aria-hidden="true" /> Anotación docente registrada</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span>{visibleObservedCount} de {seats.length} puestos observados</span>
+              <button
+                type="button"
+                className="rounded border border-border px-3 py-1.5 font-medium text-foreground hover:bg-muted disabled:opacity-50"
+                disabled={visibleObservedCount === 0}
+                onClick={resetObservationRound}
+              >
+                Iniciar nueva ronda
+              </button>
+            </div>
+          </div>
           <div className="overflow-x-auto pb-2">
             <div
               className="mx-auto grid gap-2"
@@ -306,15 +369,16 @@ export function ObserverPanel({ allowScheduling = false }: { allowScheduling?: b
             >
               {seats.map((seat) => {
                 const selected = locationCode === seat.code;
+                const observed = observedSeats.has(seat.code);
                 return <button
                   key={seat.code}
                   type="button"
-                  className={`min-h-11 rounded-lg border px-2 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selected ? "border-primary bg-primary text-primary-foreground shadow-sm" : "border-border bg-card text-foreground hover:border-primary hover:bg-primary/10"}`}
+                  className={`min-h-11 rounded-lg border px-2 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selected ? "border-primary bg-primary text-primary-foreground shadow-sm" : observed ? "border-success/50 bg-success/15 text-foreground hover:bg-success/25" : "border-border bg-card text-foreground hover:border-primary hover:bg-primary/10"}`}
                   aria-pressed={selected}
-                  aria-label={`Puesto ${seat.code}, fila ${seat.row}, columna ${seat.column}`}
+                  aria-label={`Puesto ${seat.code}, fila ${seat.row}, columna ${seat.column}${observed ? ", anotación docente registrada" : ", pendiente"}`}
                   onClick={() => setLocationCode(seat.code)}
                 >
-                  {seat.code}
+                  <span>{seat.code}</span>{observed && !selected && <span className="ml-1" aria-hidden="true">✓</span>}
                 </button>;
               })}
             </div>
